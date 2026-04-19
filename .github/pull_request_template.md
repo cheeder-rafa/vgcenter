@@ -26,7 +26,7 @@ PR template for VGCenter.
 
 - [ ] Branch is up to date with `develop` (`git rebase origin/develop`).
 - [ ] `./mvnw verify` is green locally.
-- [ ] `pnpm lint && pnpm typecheck && pnpm test --run` is green locally (if frontend changed).
+- [ ] `pnpm lint && pnpm typecheck && pnpm test` is green locally (if frontend changed).
 - [ ] No new ArchUnit violations.
 - [ ] JaCoCo coverage on `domain` + `application` is still ≥ 85%.
 - [ ] No Spring / Jackson / HTTP imports inside `domain`.

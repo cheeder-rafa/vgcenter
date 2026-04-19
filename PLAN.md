@@ -287,7 +287,7 @@ Data updates when a new regulation drops: a maintainer updates the JSON under a 
 `.github/workflows/frontend-ci.yml` — on PR + push to `develop`/`main`:
 1. Setup Node 20 + pnpm 9
 2. `pnpm install --frozen-lockfile`
-3. `pnpm lint && pnpm typecheck && pnpm test --run`
+3. `pnpm lint && pnpm typecheck && pnpm test`
 
 `.github/workflows/main-ci-smoke.yml` — only on PRs targeting `main` (added at M10):
 1. `docker compose build && up -d`
@@ -627,7 +627,7 @@ Execute milestone M0 from PLAN.md. Create:
 - frontend/ scaffolded with Vite + React + TS + Tailwind + Zustand + Vitest + Testing Library + Prettier + ESLint,
 - root docker-compose.yml, README.md, .gitignore,
 - .github/workflows/backend-ci.yml and frontend-ci.yml (minimal passing CI).
-Then run `cd backend && ./mvnw verify` and `cd frontend && pnpm test --run` to prove CI-green. Commit.
+Then run `cd backend && ./mvnw verify` and `cd frontend && pnpm test` to prove CI-green. Commit.
 ```
 
 **M1 — Domain core**
@@ -652,7 +652,7 @@ schema validation + DatasetHealthCheck. ArchUnit must stay green. Commit.
 Good hygiene per session:
 
 - **"Show me the diff first"** — ask Codex to print the diff before applying large changes.
-- **"Re-run verification"** — after every non-trivial edit, make it re-run `./mvnw verify` (and `pnpm test --run` on the frontend).
+- **"Re-run verification"** — after every non-trivial edit, make it re-run `./mvnw verify` (and `pnpm test` on the frontend).
 - **"Commit now"** — don't let unrelated changes accumulate; one concern per commit.
 - **"Don't modify X"** — if Codex starts drifting into unrelated files, bound the scope explicitly.
 - **"Cite the plan"** — ask it to quote the exact section of PLAN.md it is implementing. Catches scope creep fast.

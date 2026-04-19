@@ -40,7 +40,7 @@ Write a failing test before every new behavior. Red → green → refactor.
 - One milestone per PR during the v1 build.
 - Always run tests before committing. Never use `--no-verify`.
 - Before committing Java changes: `./mvnw spotless:apply` then `./mvnw verify`.
-- Before committing frontend changes: `pnpm lint && pnpm typecheck && pnpm test --run`.
+- Before committing frontend changes: `pnpm lint && pnpm typecheck && pnpm test`.
 
 ## Git branching & release workflow (gitflow-lite)
 
@@ -111,7 +111,7 @@ Write a failing test before every new behavior. Red → green → refactor.
 3. Write failing tests first.
 4. Implement the minimum to make them pass.
 5. Refactor.
-6. Run `./mvnw verify` (backend) and/or `pnpm test --run` (frontend) until green.
+6. Run `./mvnw verify` (backend) and/or `pnpm test` (frontend) until green.
 7. Run `./mvnw spotless:apply` (backend) / `pnpm format` (frontend) before staging.
 8. Commit with a Conventional Commits subject.
 9. `git push -u origin m{N}-<slug>` and open a PR **targeting `develop`** using the PR template.
