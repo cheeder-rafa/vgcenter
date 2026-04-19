@@ -1,0 +1,23 @@
+[
+  { "id": "overgrow", "name": "Overgrow" },
+  { "id": "protean", "name": "Protean" },
+  { "id": "blaze", "name": "Blaze" },
+  { "id": "unaware", "name": "Unaware" },
+  { "id": "torrent", "name": "Torrent" },
+  { "id": "moxie", "name": "Moxie" },
+  { "id": "inner-focus", "name": "Inner Focus" },
+  { "id": "multiscale", "name": "Multiscale" },
+  { "id": "sand-veil", "name": "Sand Veil" },
+  { "id": "rough-skin", "name": "Rough Skin" },
+  { "id": "good-as-gold", "name": "Good as Gold" },
+  { "id": "purifying-salt", "name": "Purifying Salt" },
+  { "id": "sturdy", "name": "Sturdy" },
+  { "id": "clear-body", "name": "Clear Body" },
+  { "id": "effect-spore", "name": "Effect Spore" },
+  { "id": "regenerator", "name": "Regenerator" },
+  { "id": "sand-stream", "name": "Sand Stream" },
+  { "id": "unnerve", "name": "Unnerve" },
+  { "id": "insomnia", "name": "Insomnia" },
+  { "id": "super-luck", "name": "Super Luck" },
+  { "id": "prankster", "name": "Prankster" }
+]

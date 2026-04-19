@@ -1,0 +1,18 @@
+[
+  {
+    "id": "meowscarada",
+    "name": "Meowscarada",
+    "types": ["GRASS", "DARK"],
+    "baseStats": {
+      "hp": 76,
+      "attack": 110,
+      "defense": 70,
+      "specialAttack": 81,
+      "specialDefense": 70,
+      "speed": 123
+    },
+    "abilities": ["overgrow", "does-not-exist"],
+    "moves": ["flower-trick", "knock-off"],
+    "items": ["focus-sash"]
+  }
+]

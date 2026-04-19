@@ -1,11 +1,17 @@
 package com.vgcenter.damagecalc;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = DamageCalcApplication.class)
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
 class DamageCalcApplicationTests {
 
+    private final ApplicationContextRunner contextRunner =
+            new ApplicationContextRunner().withUserConfiguration(DamageCalcApplication.class);
+
     @Test
-    void contextLoads() {}
+    void contextLoads() {
+        contextRunner.run(context -> assertThat(context).hasNotFailed());
+    }
 }
