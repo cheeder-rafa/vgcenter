@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./mvnw *)",
+      "Bash(cd backend && ./mvnw *)",
+      "Bash(cd frontend && pnpm *)",
+      "Bash(pnpm *)",
+      "Bash(docker compose *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)"
+    ],
+    "ask": [
+      "Bash(git push*)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)"
+    ]
+  }
+}
