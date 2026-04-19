@@ -132,7 +132,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm test --run
+      - run: pnpm test
 ```
 
 `.github/workflows/main-ci-smoke.yml` (added at M10, when Docker is ready) — only on PRs targeting `main`:
