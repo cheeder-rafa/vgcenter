@@ -2,13 +2,17 @@ package com.vgcenter.damagecalc.domain.formula;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.vgcenter.damagecalc.domain.model.Ability;
 import com.vgcenter.damagecalc.domain.model.Combatant;
+import com.vgcenter.damagecalc.domain.model.Item;
 import com.vgcenter.damagecalc.domain.model.Move;
 import com.vgcenter.damagecalc.domain.model.MoveCategory;
 import com.vgcenter.damagecalc.domain.model.Nature;
 import com.vgcenter.damagecalc.domain.model.Sp;
 import com.vgcenter.damagecalc.domain.model.Stats;
+import com.vgcenter.damagecalc.domain.model.StatusCondition;
 import com.vgcenter.damagecalc.domain.model.Type;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,9 +23,31 @@ class DamageFormulaGoldenSetTest {
 
     private static final DamageFormula DAMAGE_FORMULA = new DamageFormula();
 
+    private static final int[] NEUTRAL_PHYSICAL = {39, 40, 40, 41, 41, 42, 42, 43, 43, 44, 44, 45, 45, 46, 46, 47};
+    private static final int[] PHYSICAL_STAB = {58, 60, 60, 61, 61, 63, 63, 64, 64, 66, 66, 67, 67, 69, 69, 70};
+    private static final int[] SPECIAL_STAB = {
+        158, 162, 162, 164, 168, 168, 170, 170, 174, 176, 176, 180, 182, 182, 186, 188
+    };
+    private static final int[] QUAD_EFFECTIVE = {
+        316, 324, 324, 328, 336, 336, 340, 340, 348, 352, 352, 360, 364, 364, 372, 376
+    };
+    private static final int[] DOUBLE_RESISTED = {19, 20, 20, 20, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 23, 23};
+    private static final int[] SPREAD_SINGLE_TARGET = {
+        110, 110, 114, 114, 116, 116, 120, 120, 120, 122, 122, 126, 126, 128, 128, 132
+    };
+    private static final int[] SPREAD_MULTI_TARGET = {84, 84, 84, 86, 86, 86, 90, 90, 90, 92, 92, 92, 96, 96, 96, 98};
+    private static final int[] SUN_BOOSTED_FIRE = {
+        236, 240, 242, 246, 248, 252, 254, 258, 260, 264, 266, 270, 272, 276, 278, 282
+    };
+    private static final int[] WEATHER_WEAKENED = {78, 78, 78, 80, 80, 80, 84, 84, 84, 86, 86, 86, 90, 90, 90, 92};
+    private static final int[] CRITICAL_PHYSICAL_STAB = {
+        88, 90, 90, 91, 93, 94, 94, 96, 97, 97, 99, 100, 100, 102, 103, 105
+    };
+    private static final int[] SAND_SPDEF_BOOST = {72, 72, 74, 74, 74, 78, 78, 78, 78, 80, 80, 80, 84, 84, 84, 86};
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("goldenSet")
-    void calculatesExpectedRollsForTheMinimalModifierChain(
+    void calculatesExpectedRollsForTheFullModifierChain(
             String scenarioName, DamageContext context, int[] expectedRolls) {
         assertThat(DAMAGE_FORMULA.rolls(context)).containsExactly(expectedRolls);
         assertThat(DAMAGE_FORMULA.calculate(context)).isEqualTo(expectedRolls[expectedRolls.length - 1]);
@@ -62,170 +88,372 @@ class DamageFormulaGoldenSetTest {
                 List.of(Type.ROCK), new Stats(90, 70, 110, 70, 120, 60), new Sp(21, 5, 7, 3, 15, 7), Nature.CALM, 50);
         Combatant iceDefender = combatant(
                 List.of(Type.ICE), new Stats(90, 70, 100, 70, 80, 60), new Sp(21, 5, 13, 3, 5, 7), Nature.IMPISH, 50);
+        Combatant fightingDefender = combatant(
+                List.of(Type.FIGHTING), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
+        Combatant wonderRoomDefender = new Combatant(50, new Stats(100, 100, 200, 100, 100, 100), List.of(Type.NORMAL));
+
+        Move physicalNeutral = move(Type.GROUND, MoveCategory.PHYSICAL, 80, false);
+        Move physicalStab = move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false);
+        Move physicalContact = move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false, true);
+        Move specialFire = move(Type.FIRE, MoveCategory.SPECIAL, 90, false);
+        Move electricSpecial = move(Type.ELECTRIC, MoveCategory.SPECIAL, 90, false);
+        Move grassySpecial = move(Type.GRASS, MoveCategory.SPECIAL, 90, false);
+        Move psychicSpecial = move(Type.PSYCHIC, MoveCategory.SPECIAL, 90, false);
 
         return Stream.of(
                 Arguments.of(
                         "neutral physical without stab",
-                        context(
-                                physicalAttacker,
-                                bulkyDefender,
-                                move(Type.GROUND, MoveCategory.PHYSICAL, 80, false),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {39, 40, 40, 41, 41, 42, 42, 43, 43, 44, 44, 45, 45, 46, 46, 47}),
-                Arguments.of(
-                        "physical stab",
-                        context(
-                                physicalAttacker,
-                                bulkyDefender,
-                                move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {58, 60, 60, 61, 61, 63, 63, 64, 64, 66, 66, 67, 67, 69, 69, 70}),
-                Arguments.of(
-                        "special stab",
-                        context(
-                                specialAttacker,
-                                grassDefender,
-                                move(Type.FIRE, MoveCategory.SPECIAL, 90, false),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {158, 162, 162, 164, 168, 168, 170, 170, 174, 176, 176, 180, 182, 182, 186, 188}),
+                        context(physicalAttacker, bulkyDefender, physicalNeutral),
+                        NEUTRAL_PHYSICAL),
+                Arguments.of("physical stab", context(physicalAttacker, bulkyDefender, physicalStab), PHYSICAL_STAB),
+                Arguments.of("special stab", context(specialAttacker, grassDefender, specialFire), SPECIAL_STAB),
                 Arguments.of(
                         "quad effectiveness",
-                        context(
-                                specialAttacker,
-                                grassSteelDefender,
-                                move(Type.FIRE, MoveCategory.SPECIAL, 90, false),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {316, 324, 324, 328, 336, 336, 340, 340, 348, 352, 352, 360, 364, 364, 372, 376}),
+                        context(specialAttacker, grassSteelDefender, specialFire),
+                        QUAD_EFFECTIVE),
                 Arguments.of(
                         "double resistance",
-                        context(
-                                specialAttacker,
-                                waterDragonDefender,
-                                move(Type.FIRE, MoveCategory.SPECIAL, 90, false),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {19, 20, 20, 20, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 23, 23}),
-                Arguments.of(
-                        "type immunity",
-                        context(
-                                physicalAttacker,
-                                ghostDefender,
-                                move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
+                        context(specialAttacker, waterDragonDefender, specialFire),
+                        DOUBLE_RESISTED),
+                Arguments.of("type immunity", context(physicalAttacker, ghostDefender, physicalStab), zeroes()),
                 Arguments.of(
                         "spread move against one target",
                         context(
                                 physicalAttacker.withTypes(List.of(Type.ROCK)),
                                 bugDefender,
-                                move(Type.ROCK, MoveCategory.PHYSICAL, 75, true),
-                                Weather.CLEAR,
-                                false,
-                                1),
-                        new int[] {110, 110, 114, 114, 116, 116, 120, 120, 120, 122, 122, 126, 126, 128, 128, 132}),
+                                move(Type.ROCK, MoveCategory.PHYSICAL, 75, true)),
+                        SPREAD_SINGLE_TARGET),
                 Arguments.of(
                         "spread move against multiple targets",
                         context(
                                 physicalAttacker.withTypes(List.of(Type.ROCK)),
                                 bugDefender,
                                 move(Type.ROCK, MoveCategory.PHYSICAL, 75, true),
-                                Weather.CLEAR,
+                                Field.clear(),
+                                SideConditions.none(),
+                                SideConditions.none(),
                                 false,
                                 2),
-                        new int[] {84, 84, 84, 86, 86, 86, 90, 90, 90, 92, 92, 92, 96, 96, 96, 98}),
+                        SPREAD_MULTI_TARGET),
                 Arguments.of(
                         "sun boosts fire",
                         context(
                                 specialAttacker,
                                 grassDefender,
-                                move(Type.FIRE, MoveCategory.SPECIAL, 90, false),
-                                Weather.SUN,
-                                false,
-                                1),
-                        new int[] {236, 240, 242, 246, 248, 252, 254, 258, 260, 264, 266, 270, 272, 276, 278, 282}),
+                                specialFire,
+                                field(Weather.SUN, Terrain.NONE, Room.NONE)),
+                        SUN_BOOSTED_FIRE),
                 Arguments.of(
                         "sun weakens water",
                         context(
                                 specialAttacker.withTypes(List.of(Type.WATER)),
                                 groundDefender,
                                 move(Type.WATER, MoveCategory.SPECIAL, 90, false),
-                                Weather.SUN,
-                                false,
-                                1),
-                        new int[] {78, 78, 78, 80, 80, 80, 84, 84, 84, 86, 86, 86, 90, 90, 90, 92}),
+                                field(Weather.SUN, Terrain.NONE, Room.NONE)),
+                        WEATHER_WEAKENED),
                 Arguments.of(
                         "rain boosts water",
                         context(
                                 specialAttacker.withTypes(List.of(Type.WATER)),
                                 groundDefender,
                                 move(Type.WATER, MoveCategory.SPECIAL, 90, false),
-                                Weather.RAIN,
-                                false,
-                                1),
-                        new int[] {236, 240, 242, 246, 248, 252, 254, 258, 260, 264, 266, 270, 272, 276, 278, 282}),
+                                field(Weather.RAIN, Terrain.NONE, Room.NONE)),
+                        SUN_BOOSTED_FIRE),
                 Arguments.of(
                         "rain weakens fire",
                         context(
                                 specialAttacker,
                                 grassDefender,
-                                move(Type.FIRE, MoveCategory.SPECIAL, 90, false),
-                                Weather.RAIN,
-                                false,
-                                1),
-                        new int[] {78, 78, 78, 80, 80, 80, 84, 84, 84, 86, 86, 86, 90, 90, 90, 92}),
+                                specialFire,
+                                field(Weather.RAIN, Terrain.NONE, Room.NONE)),
+                        WEATHER_WEAKENED),
                 Arguments.of(
                         "critical hit",
                         context(
                                 physicalAttacker,
                                 bulkyDefender,
-                                move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false),
-                                Weather.CLEAR,
+                                physicalStab,
+                                Field.clear(),
+                                SideConditions.none(),
+                                SideConditions.none(),
                                 true,
                                 1),
-                        new int[] {88, 90, 90, 91, 93, 94, 94, 96, 97, 97, 99, 100, 100, 102, 103, 105}),
+                        CRITICAL_PHYSICAL_STAB),
                 Arguments.of(
                         "sand boosts rock special defense",
                         context(
                                 specialAttacker.withTypes(List.of(Type.WATER)),
                                 rockDefender,
                                 move(Type.WATER, MoveCategory.SPECIAL, 90, false),
-                                Weather.SAND,
-                                false,
-                                1),
-                        new int[] {72, 72, 74, 74, 74, 78, 78, 78, 78, 80, 80, 80, 84, 84, 84, 86}),
+                                field(Weather.SAND, Terrain.NONE, Room.NONE)),
+                        SAND_SPDEF_BOOST),
                 Arguments.of(
                         "snow boosts ice physical defense",
                         context(
                                 physicalAttacker.withTypes(List.of(Type.FIGHTING)),
                                 iceDefender,
                                 move(Type.FIGHTING, MoveCategory.PHYSICAL, 80, false),
-                                Weather.SNOW,
+                                field(Weather.SNOW, Terrain.NONE, Room.NONE)),
+                        SAND_SPDEF_BOOST),
+                Arguments.of(
+                        "burn halves physical damage",
+                        context(physicalAttacker.withStatus(StatusCondition.BURN), bulkyDefender, physicalStab),
+                        scaled(PHYSICAL_STAB, 1, 2)),
+                Arguments.of(
+                        "burn does not affect special damage",
+                        context(specialAttacker.withStatus(StatusCondition.BURN), grassDefender, specialFire),
+                        SPECIAL_STAB),
+                Arguments.of(
+                        "guts overrides burn and boosts physical damage",
+                        context(
+                                physicalAttacker.withAbility(Ability.GUTS).withStatus(StatusCondition.BURN),
+                                bulkyDefender,
+                                physicalStab),
+                        scaled(PHYSICAL_STAB, 3, 2)),
+                Arguments.of(
+                        "adaptability upgrades stab to two times",
+                        context(physicalAttacker.withAbility(Ability.ADAPTABILITY), bulkyDefender, physicalStab),
+                        scaled(NEUTRAL_PHYSICAL, 2, 1)),
+                Arguments.of(
+                        "reflect reduces physical damage",
+                        context(
+                                physicalAttacker,
+                                bulkyDefender,
+                                physicalStab,
+                                Field.clear(),
+                                SideConditions.none(),
+                                new SideConditions(true, false, false, false, false),
                                 false,
                                 1),
-                        new int[] {72, 72, 74, 74, 74, 78, 78, 78, 78, 80, 80, 80, 84, 84, 84, 86}));
+                        scaled(PHYSICAL_STAB, 2, 3)),
+                Arguments.of(
+                        "light screen reduces special damage",
+                        context(
+                                specialAttacker,
+                                grassDefender,
+                                specialFire,
+                                Field.clear(),
+                                SideConditions.none(),
+                                new SideConditions(false, true, false, false, false),
+                                false,
+                                1),
+                        scaled(SPECIAL_STAB, 2, 3)),
+                Arguments.of(
+                        "aurora veil reduces physical damage",
+                        context(
+                                physicalAttacker,
+                                bulkyDefender,
+                                physicalStab,
+                                Field.clear(),
+                                SideConditions.none(),
+                                new SideConditions(false, false, true, false, false),
+                                false,
+                                1),
+                        scaled(PHYSICAL_STAB, 2, 3)),
+                Arguments.of(
+                        "aurora veil reduces special damage",
+                        context(
+                                specialAttacker,
+                                grassDefender,
+                                specialFire,
+                                Field.clear(),
+                                SideConditions.none(),
+                                new SideConditions(false, false, true, false, false),
+                                false,
+                                1),
+                        scaled(SPECIAL_STAB, 2, 3)),
+                Arguments.of(
+                        "helping hand boosts allied damage",
+                        context(
+                                physicalAttacker,
+                                bulkyDefender,
+                                physicalStab,
+                                Field.clear(),
+                                new SideConditions(false, false, false, false, true),
+                                SideConditions.none(),
+                                false,
+                                1),
+                        scaled(PHYSICAL_STAB, 3, 2)),
+                Arguments.of(
+                        "friend guard protects the defender",
+                        context(
+                                physicalAttacker,
+                                bulkyDefender,
+                                physicalStab,
+                                Field.clear(),
+                                SideConditions.none(),
+                                new SideConditions(false, false, false, true, false),
+                                false,
+                                1),
+                        scaled(PHYSICAL_STAB, 3, 4)),
+                Arguments.of(
+                        "life orb boosts damage",
+                        context(physicalAttacker.withItem(Item.LIFE_ORB), bulkyDefender, physicalStab),
+                        scaled(PHYSICAL_STAB, 13, 10)),
+                Arguments.of(
+                        "expert belt boosts super effective hits",
+                        context(specialAttacker.withItem(Item.EXPERT_BELT), grassDefender, specialFire),
+                        scaled(SPECIAL_STAB, 6, 5)),
+                Arguments.of(
+                        "magic room suppresses life orb",
+                        context(
+                                physicalAttacker.withItem(Item.LIFE_ORB),
+                                bulkyDefender,
+                                physicalStab,
+                                field(Weather.CLEAR, Terrain.NONE, Room.MAGIC)),
+                        PHYSICAL_STAB),
+                Arguments.of(
+                        "magic room suppresses expert belt",
+                        context(
+                                specialAttacker.withItem(Item.EXPERT_BELT),
+                                grassDefender,
+                                specialFire,
+                                field(Weather.CLEAR, Terrain.NONE, Room.MAGIC)),
+                        SPECIAL_STAB),
+                Arguments.of(
+                        "tinted lens doubles resisted damage",
+                        context(specialAttacker.withAbility(Ability.TINTED_LENS), waterDragonDefender, specialFire),
+                        scaled(DOUBLE_RESISTED, 2, 1)),
+                Arguments.of(
+                        "filter softens super effective damage",
+                        context(specialAttacker, grassDefender.withAbility(Ability.FILTER), specialFire),
+                        scaled(SPECIAL_STAB, 3, 4)),
+                Arguments.of(
+                        "solid rock softens super effective damage",
+                        context(specialAttacker, grassDefender.withAbility(Ability.SOLID_ROCK), specialFire),
+                        scaled(SPECIAL_STAB, 3, 4)),
+                Arguments.of(
+                        "neuroforce boosts super effective damage",
+                        context(specialAttacker.withAbility(Ability.NEUROFORCE), grassDefender, specialFire),
+                        scaled(SPECIAL_STAB, 5, 4)),
+                Arguments.of(
+                        "multiscale halves damage at full health",
+                        context(specialAttacker, grassDefender.withAbility(Ability.MULTISCALE), specialFire),
+                        scaled(SPECIAL_STAB, 1, 2)),
+                Arguments.of(
+                        "multiscale does not apply below full health",
+                        context(
+                                specialAttacker,
+                                grassDefender.withAbility(Ability.MULTISCALE).withFullHp(false),
+                                specialFire),
+                        SPECIAL_STAB),
+                Arguments.of(
+                        "fluffy halves contact damage",
+                        context(physicalAttacker, bulkyDefender.withAbility(Ability.FLUFFY), physicalContact),
+                        scaled(PHYSICAL_STAB, 1, 2)),
+                Arguments.of(
+                        "fluffy doubles fire damage",
+                        context(specialAttacker, grassDefender.withAbility(Ability.FLUFFY), specialFire),
+                        scaled(SPECIAL_STAB, 2, 1)),
+                Arguments.of(
+                        "sniper strengthens critical hits",
+                        context(
+                                physicalAttacker.withAbility(Ability.SNIPER),
+                                bulkyDefender,
+                                physicalStab,
+                                Field.clear(),
+                                SideConditions.none(),
+                                SideConditions.none(),
+                                true,
+                                1),
+                        scaled(CRITICAL_PHYSICAL_STAB, 3, 2)),
+                Arguments.of(
+                        "electric terrain boosts grounded electric moves",
+                        context(
+                                specialAttacker.withTypes(List.of(Type.ELECTRIC)),
+                                bulkyDefender,
+                                electricSpecial,
+                                field(Weather.CLEAR, Terrain.ELECTRIC, Room.NONE)),
+                        scaled(SPECIAL_STAB, 13, 10)),
+                Arguments.of(
+                        "grassy terrain boosts grounded grass moves",
+                        context(
+                                specialAttacker.withTypes(List.of(Type.GRASS)),
+                                groundDefender,
+                                grassySpecial,
+                                field(Weather.CLEAR, Terrain.GRASSY, Room.NONE)),
+                        scaled(SPECIAL_STAB, 13, 10)),
+                Arguments.of(
+                        "psychic terrain boosts grounded psychic moves",
+                        context(
+                                specialAttacker.withTypes(List.of(Type.PSYCHIC)),
+                                fightingDefender,
+                                psychicSpecial,
+                                field(Weather.CLEAR, Terrain.PSYCHIC, Room.NONE)),
+                        scaled(SPECIAL_STAB, 13, 10)),
+                Arguments.of(
+                        "electric terrain ignores ungrounded attackers",
+                        context(
+                                specialAttacker
+                                        .withTypes(List.of(Type.ELECTRIC))
+                                        .withGrounded(false),
+                                bulkyDefender,
+                                electricSpecial,
+                                field(Weather.CLEAR, Terrain.ELECTRIC, Room.NONE)),
+                        SPECIAL_STAB),
+                Arguments.of(
+                        "wonder room swaps the defensive stat used by physical attacks",
+                        context(
+                                new Combatant(50, new Stats(100, 100, 100, 100, 100, 100), List.of(Type.NORMAL)),
+                                wonderRoomDefender,
+                                move(Type.GROUND, MoveCategory.PHYSICAL, 50, false),
+                                field(Weather.CLEAR, Terrain.NONE, Room.WONDER)),
+                        new int[] {20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 22, 23, 23, 23, 23, 24}),
+                Arguments.of(
+                        "critical hits ignore reflect",
+                        context(
+                                physicalAttacker,
+                                bulkyDefender,
+                                physicalStab,
+                                Field.clear(),
+                                SideConditions.none(),
+                                new SideConditions(true, false, false, false, false),
+                                true,
+                                1),
+                        CRITICAL_PHYSICAL_STAB));
     }
 
     private static Combatant combatant(List<Type> types, Stats baseStats, Sp sp, Nature nature, int level) {
         return Combatant.fromBaseStats(level, types, baseStats, sp, nature);
     }
 
+    private static DamageContext context(Combatant attacker, Combatant defender, Move move) {
+        return context(attacker, defender, move, Field.clear(), SideConditions.none(), SideConditions.none(), false, 1);
+    }
+
+    private static DamageContext context(Combatant attacker, Combatant defender, Move move, Field field) {
+        return context(attacker, defender, move, field, SideConditions.none(), SideConditions.none(), false, 1);
+    }
+
     private static DamageContext context(
-            Combatant attacker, Combatant defender, Move move, Weather weather, boolean criticalHit, int targets) {
-        return new DamageContext(attacker, defender, move, weather, criticalHit, targets);
+            Combatant attacker,
+            Combatant defender,
+            Move move,
+            Field field,
+            SideConditions attackerSide,
+            SideConditions defenderSide,
+            boolean criticalHit,
+            int targets) {
+        return new DamageContext(attacker, defender, move, field, attackerSide, defenderSide, criticalHit, targets);
+    }
+
+    private static Field field(Weather weather, Terrain terrain, Room room) {
+        return new Field(weather, terrain, room);
     }
 
     private static Move move(Type type, MoveCategory category, int basePower, boolean spread) {
         return new Move(type, category, basePower, spread);
+    }
+
+    private static Move move(Type type, MoveCategory category, int basePower, boolean spread, boolean contact) {
+        return new Move(type, category, basePower, spread, contact, false, false);
+    }
+
+    private static int[] scaled(int[] rolls, int numerator, int denominator) {
+        return Arrays.stream(rolls).map(roll -> roll * numerator / denominator).toArray();
+    }
+
+    private static int[] zeroes() {
+        return new int[16];
     }
 }
