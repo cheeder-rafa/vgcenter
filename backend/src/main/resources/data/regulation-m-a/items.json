@@ -1,0 +1,15 @@
+[
+  { "id": "focus-sash", "name": "Focus Sash" },
+  { "id": "choice-band", "name": "Choice Band" },
+  { "id": "life-orb", "name": "Life Orb" },
+  { "id": "throat-spray", "name": "Throat Spray" },
+  { "id": "clear-amulet", "name": "Clear Amulet" },
+  { "id": "lum-berry", "name": "Lum Berry" },
+  { "id": "choice-specs", "name": "Choice Specs" },
+  { "id": "leftovers", "name": "Leftovers" },
+  { "id": "covert-cloak", "name": "Covert Cloak" },
+  { "id": "sitrus-berry", "name": "Sitrus Berry" },
+  { "id": "rocky-helmet", "name": "Rocky Helmet" },
+  { "id": "assault-vest", "name": "Assault Vest" },
+  { "id": "eviolite", "name": "Eviolite" }
+]

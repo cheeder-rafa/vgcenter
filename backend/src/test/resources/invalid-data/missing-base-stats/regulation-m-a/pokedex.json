@@ -1,0 +1,10 @@
+[
+  {
+    "id": "skeledirge",
+    "name": "Skeledirge",
+    "types": ["FIRE", "GHOST"],
+    "abilities": ["blaze", "unaware"],
+    "moves": ["torch-song", "shadow-ball"],
+    "items": ["life-orb"]
+  }
+]
