@@ -2,13 +2,10 @@ package com.vgcenter.damagecalc.domain.formula;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.vgcenter.damagecalc.domain.mega.MegaForm;
+import com.vgcenter.damagecalc.domain.model.Ability;
 import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Move;
 import com.vgcenter.damagecalc.domain.model.MoveCategory;
-import com.vgcenter.damagecalc.domain.model.Nature;
-import com.vgcenter.damagecalc.domain.model.PokemonSpecies;
-import com.vgcenter.damagecalc.domain.model.Sp;
 import com.vgcenter.damagecalc.domain.model.Stats;
 import com.vgcenter.damagecalc.domain.model.Type;
 import java.util.List;
@@ -20,8 +17,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 class DamageFormulaMegaGoldenSetTest {
 
     private static final DamageFormula DAMAGE_FORMULA = new DamageFormula();
-
-    private static final Sp ZERO_SP = new Sp(0, 0, 0, 0, 0, 0);
 
     private static final int[] MEGA_CHARIZARD_X_DRAGON_CLAW = {
         67, 69, 69, 70, 72, 72, 73, 73, 75, 75, 76, 76, 78, 78, 79, 81
@@ -50,15 +45,18 @@ class DamageFormulaMegaGoldenSetTest {
         Move shadowBall = new Move(Type.GHOST, MoveCategory.SPECIAL, 80, false);
         Move closeCombat = new Move(Type.FIGHTING, MoveCategory.PHYSICAL, 120, false, true, false, false);
 
-        PokemonSpecies charizard = charizardWithMegaX();
-        Combatant baseCharizard = charizard.buildCombatant(50, ZERO_SP, Nature.ADAMANT, false);
-        Combatant megaCharizardX = charizard.buildCombatant(50, ZERO_SP, Nature.ADAMANT, true);
-
-        PokemonSpecies gengar = gengarWithMega();
-        Combatant megaGengar = gengar.buildCombatant(50, ZERO_SP, Nature.MODEST, true);
-
-        PokemonSpecies lucario = lucarioWithMega();
-        Combatant megaLucario = lucario.buildCombatant(50, ZERO_SP, Nature.ADAMANT, true);
+        // Final stats hardcoded (old-formula values for base/mega + Zero SP + nature) so the
+        // damage golden arrays below continue to pin the damage formula regardless of
+        // future stat-formula changes. See DamageFormulaGoldenSetTest for the same pattern.
+        Combatant baseCharizard =
+                new Combatant(50, new Stats(138, 97, 83, 102, 90, 105), List.of(Type.FIRE, Type.FLYING));
+        Combatant megaCharizardX =
+                new Combatant(50, new Stats(138, 148, 116, 121, 90, 105), List.of(Type.FIRE, Type.DRAGON));
+        Combatant megaGengar =
+                new Combatant(50, new Stats(120, 63, 85, 192, 100, 135), List.of(Type.GHOST, Type.POISON));
+        Combatant megaLucario = new Combatant(
+                        50, new Stats(130, 165, 93, 130, 75, 117), List.of(Type.FIGHTING, Type.STEEL))
+                .withAbility(Ability.ADAPTABILITY);
 
         return Stream.of(
                 Arguments.of(
@@ -82,53 +80,5 @@ class DamageFormulaMegaGoldenSetTest {
     private static DamageContext context(Combatant attacker, Combatant defender, Move move) {
         return new DamageContext(
                 attacker, defender, move, Field.clear(), SideConditions.none(), SideConditions.none(), false, 1);
-    }
-
-    private static PokemonSpecies charizardWithMegaX() {
-        return new PokemonSpecies(
-                "charizard",
-                "Charizard",
-                List.of(Type.FIRE, Type.FLYING),
-                new Stats(78, 84, 78, 109, 85, 100),
-                List.of("blaze"),
-                List.of("dragon-claw"),
-                new MegaForm(
-                        "charizard-mega-x",
-                        "Charizard-Mega-X",
-                        List.of(Type.FIRE, Type.DRAGON),
-                        new Stats(78, 130, 111, 130, 85, 100),
-                        "tough-claws"));
-    }
-
-    private static PokemonSpecies gengarWithMega() {
-        return new PokemonSpecies(
-                "gengar",
-                "Gengar",
-                List.of(Type.GHOST, Type.POISON),
-                new Stats(60, 65, 60, 130, 75, 110),
-                List.of("cursed-body"),
-                List.of("shadow-ball"),
-                new MegaForm(
-                        "gengar-mega",
-                        "Gengar-Mega",
-                        List.of(Type.GHOST, Type.POISON),
-                        new Stats(60, 65, 80, 170, 95, 130),
-                        "shadow-tag"));
-    }
-
-    private static PokemonSpecies lucarioWithMega() {
-        return new PokemonSpecies(
-                "lucario",
-                "Lucario",
-                List.of(Type.FIGHTING, Type.STEEL),
-                new Stats(70, 110, 70, 115, 70, 90),
-                List.of("steadfast"),
-                List.of("close-combat"),
-                new MegaForm(
-                        "lucario-mega",
-                        "Lucario-Mega",
-                        List.of(Type.FIGHTING, Type.STEEL),
-                        new Stats(70, 145, 88, 140, 70, 112),
-                        "adaptability"));
     }
 }
