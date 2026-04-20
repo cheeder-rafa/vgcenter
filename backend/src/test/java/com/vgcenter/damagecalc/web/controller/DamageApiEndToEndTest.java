@@ -92,4 +92,12 @@ class DamageApiEndToEndTest {
                 .andExpect(jsonPath("$.team[0].sp.speed").value(32))
                 .andExpect(jsonPath("$.team[0].moveIds[3]").value("solar-beam"));
     }
+
+    @Test
+    void exposesActuatorHealthForDockerSmokeChecks() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/vnd.spring-boot.actuator.v3+json"))
+                .andExpect(jsonPath("$.status").value("UP"));
+    }
 }
