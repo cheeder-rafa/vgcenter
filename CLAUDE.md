@@ -137,3 +137,26 @@ A milestone is done only when all of these hold:
 - A PR has been opened targeting `develop` and CI has passed.
 - Any user-facing behavior is documented in `README.md`.
 - The human maintainer has reviewed and merged the PR.
+
+## Active work after M10 — Damage Calculator Corrections Pass
+
+M0 → M10 are complete. The next work item is the **Damage Calculator Corrections Pass** defined in `PLAN.md` under the section "Corrections Pass (post-M10) — Damage Calculator UX Overhaul". Read that section before starting any task in this phase.
+
+Scope summary (full details in `PLAN.md`):
+
+1. Import modal popups render *under* the calculator — fix with `createPortal` to `document.body`.
+2. Remove the "Calculate Damage" button; damage must update reactively (debounced ~200 ms) on any input change.
+3. Result readout must show min–max range + HP% + KO chance *and* the 16 rolls simultaneously — no toggle.
+4. Species-first inputs: pick a Reg M-A species, auto-populate types/base stats/legal abilities/legal moves. User distributes SP (0–32) + nature; UI shows `Base → SP → Final`. **Level is locked to 50** — no level input in the UI. Four move slots per side with inline per-move damage; both sides are full combatants.
+5. Bundle sprites under `frontend/public/sprites/` via a one-off download script (PokéAPI official-artwork). Legends Z-A Mega sprites are manually placed.
+6. Widen the container (`max-w-[1600px]`), slim the header (≤ 80 px) so the first calculation fits above the fold at 1080p.
+
+**Reference**: `/nerd-calc.png` at the repo root illustrates the target two-way, inline-per-move readout. Do not copy the visual styling — keep the existing `arena-*` Tailwind theme.
+
+**Rules for this pass:**
+- Branch from `develop` as `feature/calc-corrections` (or split into `feature/calc-ux-corrections` + `feature/calc-sprites` if the diff grows large). Target `develop`.
+- Do **not** modify the damage formula, the dataset JSON (`backend/src/main/resources/data/regulation-m-a/`), the clean-architecture boundaries, or the existing golden tests.
+- Backend gets one new endpoint: `POST /api/v1/dataset/build-stats` that reuses `Stats.toBattleStats(Sp, Nature, level)`. Do not duplicate the SP formula in TypeScript.
+- TDD applies: write tests first for `BuildStatsUseCase`, `useReactiveDamage`, `StatTable`, and the portal regression.
+- Execute the plan in four bounded sessions (Phase A backend → Phase B+D data layer + modal portal → Phase C UI rewrite → Phase E sprites). After each, run the verification commands, commit per concern with Conventional Commits, and stop for review.
+- Ready-to-paste prompts for each phase are at the end of `PLAN.md`'s Corrections Pass section.

@@ -88,6 +88,7 @@ The frontend container serves the built SPA through nginx and proxies `/api/*` t
 - `GET /api/v1/dataset/abilities?regulation=M-A`
 - `GET /api/v1/dataset/items?regulation=M-A`
 - `GET /api/v1/dataset/natures?regulation=M-A`
+- `POST /api/v1/dataset/build-stats` (Regulation M-A, level 50 locked server-side)
 - `POST /api/v1/import/showdown`
 - `POST /api/v1/import/pokepaste`
 

@@ -1,5 +1,7 @@
 package com.vgcenter.damagecalc.web.error;
 
+import com.vgcenter.damagecalc.application.usecase.NatureNotFoundException;
+import com.vgcenter.damagecalc.application.usecase.SpeciesNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
@@ -52,6 +54,14 @@ public class ApiExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler({SpeciesNotFoundException.class, NatureNotFoundException.class})
+    ProblemDetail handleNotFound(RuntimeException exception) {
+        ProblemDetail problemDetail =
+                baseProblemDetail(HttpStatus.NOT_FOUND, "Not Found", "https://vgcenter.dev/problems/not-found");
+        problemDetail.setDetail(exception.getMessage());
+        return problemDetail;
+    }
+
     private ProblemDetail validationProblem(BindingResult bindingResult) {
         ProblemDetail problemDetail = baseProblemDetail(HttpStatus.BAD_REQUEST, "Constraint Violation");
         problemDetail.setProperty("violations", extractViolations(bindingResult));
@@ -99,9 +109,13 @@ public class ApiExceptionHandler {
     }
 
     private ProblemDetail baseProblemDetail(HttpStatus status, String title) {
+        return baseProblemDetail(status, title, "https://vgcenter.dev/problems/validation");
+    }
+
+    private ProblemDetail baseProblemDetail(HttpStatus status, String title, String type) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, title);
         problemDetail.setTitle(title);
-        problemDetail.setType(URI.create("https://vgcenter.dev/problems/validation"));
+        problemDetail.setType(URI.create(type));
         return problemDetail;
     }
 }
