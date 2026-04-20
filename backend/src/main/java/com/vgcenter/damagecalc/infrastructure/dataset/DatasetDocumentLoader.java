@@ -55,13 +55,16 @@ public class DatasetDocumentLoader {
     }
 
     public Set<String> loadNamedReferenceIds(String regulation, String filename) {
-        JsonNode referenceNode = loadDataTree(regulation, filename);
-        List<NamedReferenceDocument> references = readValue(
-                referenceNode,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, NamedReferenceDocument.class));
-        return references.stream()
+        return loadNamedReferences(regulation, filename).stream()
                 .map(NamedReferenceDocument::id)
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
+    }
+
+    public List<NamedReferenceDocument> loadNamedReferences(String regulation, String filename) {
+        JsonNode referenceNode = loadDataTree(regulation, filename);
+        return readValue(
+                referenceNode,
+                objectMapper.getTypeFactory().constructCollectionType(List.class, NamedReferenceDocument.class));
     }
 
     private <T> T readValue(JsonNode node, com.fasterxml.jackson.databind.JavaType type) {
