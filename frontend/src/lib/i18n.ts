@@ -8,7 +8,7 @@ const dictionary = {
   'panel.defender': 'Defender',
   'panel.field': 'Field',
   'panel.result': 'Result',
-  'result.waiting': 'Awaiting calculation — wire inputs to the backend in M9.',
+  'result.waiting': 'Awaiting calculation.',
 } as const
 
 type TranslationKey = keyof typeof dictionary

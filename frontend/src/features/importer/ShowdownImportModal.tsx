@@ -1,7 +1,28 @@
-export function ShowdownImportModal() {
+import { importShowdown } from '../calculator/api/importApi'
+import type { ImportedPokemon } from '../calculator/types/api'
+import { ImportTeamModal } from './ImportTeamModal'
+
+type Props = {
+  onLoadPokemon: (
+    side: 'attacker' | 'defender',
+    pokemon: ImportedPokemon,
+  ) => void
+}
+
+export function ShowdownImportModal({ onLoadPokemon }: Props) {
   return (
-    <button type="button" className="arena-button text-arena-cyan">
-      Import Showdown
-    </button>
+    <ImportTeamModal
+      accentClassName="text-arena-cyan"
+      description="Paste a Showdown export to hydrate real stats, abilities, and held items directly from the backend importer."
+      emptyState="Paste a team export, import it, then load any member into the attacker or defender side."
+      inputLabel="Showdown Paste"
+      inputPlaceholder="Charizard @ Charizardite Y"
+      submitLabel="Import Team"
+      title="Import From Showdown"
+      triggerLabel="Import Showdown"
+      multiline
+      onImport={importShowdown}
+      onLoadPokemon={onLoadPokemon}
+    />
   )
 }

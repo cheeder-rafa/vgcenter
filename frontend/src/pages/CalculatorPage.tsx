@@ -1,18 +1,95 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
+import { calculateDamage } from '../features/calculator/api/damageApi'
+import { fetchPokedex } from '../features/calculator/api/datasetApi'
+import {
+  ResultPanel,
+  type ResultMode,
+  type ResultStatus,
+} from '../features/calculator/components/ResultPanel'
 import { PokepasteImportModal } from '../features/importer/PokepasteImportModal'
 import { ShowdownImportModal } from '../features/importer/ShowdownImportModal'
+import { toCombatantRequest } from '../features/importer/importedTeamMapping'
 import { AttackerPanel } from '../features/calculator/components/AttackerPanel'
 import { DefenderPanel } from '../features/calculator/components/DefenderPanel'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
-import { ResultPanel } from '../features/calculator/components/ResultPanel'
-import { useCalculatorStore } from '../features/calculator/store/useCalculatorStore'
-import type { CalculateDamageResponse } from '../features/calculator/types/api'
+import {
+  selectDamageRequest,
+  useCalculatorStore,
+} from '../features/calculator/store/useCalculatorStore'
+import type {
+  CalculateDamageResponse,
+  ImportedPokemon,
+  PokedexEntry,
+} from '../features/calculator/types/api'
 import { t } from '../lib/i18n'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
-  const [result] = useState<CalculateDamageResponse | null>(null)
+  const setAttacker = useCalculatorStore((s) => s.setAttacker)
+  const setDefender = useCalculatorStore((s) => s.setDefender)
+  const [result, setResult] = useState<CalculateDamageResponse | null>(null)
+  const [resultMode, setResultMode] = useState<ResultMode>('range')
+  const [status, setStatus] = useState<ResultStatus>('idle')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [pokedex, setPokedex] = useState<PokedexEntry[]>([])
+
+  useEffect(() => {
+    let active = true
+
+    fetchPokedex(regulation)
+      .then((entries) => {
+        if (active) {
+          setPokedex(entries)
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setPokedex([])
+        }
+      })
+
+    return () => {
+      active = false
+    }
+  }, [regulation])
+
+  async function handleCalculate() {
+    setStatus('loading')
+    setErrorMessage(null)
+
+    try {
+      const response = await calculateDamage(
+        selectDamageRequest(useCalculatorStore.getState()),
+      )
+      setResult(response)
+      setResultMode('range')
+      setStatus('success')
+    } catch (error) {
+      setResult(null)
+      setStatus('error')
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Calculation failed.',
+      )
+    }
+  }
+
+  function handleLoadImportedPokemon(
+    side: 'attacker' | 'defender',
+    pokemon: ImportedPokemon,
+  ) {
+    const entry = pokedex.find(
+      (candidate) => candidate.id === pokemon.speciesId,
+    )
+    const nextCombatant = toCombatantRequest(pokemon, entry)
+
+    if (side === 'attacker') {
+      setAttacker(nextCombatant)
+      return
+    }
+
+    setDefender(nextCombatant)
+  }
 
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-arena-gradient text-white">
@@ -23,7 +100,11 @@ export function CalculatorPage() {
 
       <div className="relative mx-auto flex min-h-screen max-w-[1280px] flex-col gap-10 px-6 py-12 sm:px-10">
         <PageHeader regulation={regulation} />
-        <CommandBar />
+        <CommandBar
+          loading={status === 'loading'}
+          onCalculate={handleCalculate}
+          onLoadPokemon={handleLoadImportedPokemon}
+        />
 
         <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr_1.15fr]">
           <AttackerPanel />
@@ -31,10 +112,16 @@ export function CalculatorPage() {
           <DefenderPanel />
         </section>
 
-        <ResultPanel result={result} />
+        <ResultPanel
+          mode={resultMode}
+          onModeChange={setResultMode}
+          result={result}
+          status={status}
+          errorMessage={errorMessage}
+        />
 
         <footer className="pb-2 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
-          VGCenter · Champions Circuit · Regulation M-A · Build M8
+          VGCenter · Champions Circuit · Regulation M-A · Build M9
         </footer>
       </div>
     </main>
@@ -50,14 +137,14 @@ function PageHeader({ regulation }: { regulation: string }) {
             <span className="h-1.5 w-1.5 rounded-full bg-arena-plasma shadow-[0_0_10px_rgba(255,43,142,0.9)]" />
             CHAMPIONS CIRCUIT
           </span>
-          <span className="arena-chip text-arena-cyan">APRIL 8 — JUNE 17 · 2026</span>
+          <span className="arena-chip text-arena-cyan">
+            APRIL 8 — JUNE 17 · 2026
+          </span>
           <span className="arena-chip text-arena-sun">LIVE OPS</span>
         </div>
 
-        <h1 className="font-display text-4xl font-extrabold leading-none tracking-tight text-white sm:text-6xl">
-          <span className="block text-transparent [background-clip:text] [-webkit-background-clip:text] [background-image:linear-gradient(110deg,_#ffd24a,_#ff7a1a_35%,_#ff2b8e_55%,_#22d3ee_85%)]">
-            {t('calculator.title')}
-          </span>
+        <h1 className="max-w-[12ch] font-display text-4xl font-extrabold leading-[0.95] tracking-tight text-white sm:text-6xl">
+          {t('calculator.title')}
         </h1>
         <p className="max-w-2xl font-body text-base leading-relaxed text-white/70 sm:text-lg">
           {t('calculator.subtitle')}
@@ -66,7 +153,9 @@ function PageHeader({ regulation }: { regulation: string }) {
 
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
         <div className="rounded-sm border border-arena-plasma/60 bg-arena-plasma/10 px-4 py-2 shadow-[0_0_30px_-10px_rgba(255,43,142,0.9)]">
-          <p className="arena-label text-arena-plasma">{t('calculator.regulationLabel')}</p>
+          <p className="arena-label text-arena-plasma">
+            {t('calculator.regulationLabel')}
+          </p>
           <p className="font-display text-lg font-bold tracking-[0.3em] text-white">
             Regulation {regulation}
           </p>
@@ -76,17 +165,38 @@ function PageHeader({ regulation }: { regulation: string }) {
   )
 }
 
-function CommandBar() {
+function CommandBar({
+  loading,
+  onCalculate,
+  onLoadPokemon,
+}: {
+  loading: boolean
+  onCalculate: () => Promise<void>
+  onLoadPokemon: (
+    side: 'attacker' | 'defender',
+    pokemon: ImportedPokemon,
+  ) => void
+}) {
   return (
     <section className="arena-panel arena-panel--violet p-4">
       <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="font-display text-xs tracking-[0.4em] text-arena-violet">IMPORT ⟶</span>
-          <ShowdownImportModal />
-          <PokepasteImportModal />
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="font-display text-xs tracking-[0.4em] text-arena-violet">
+            IMPORT ⟶
+          </span>
+          <ShowdownImportModal onLoadPokemon={onLoadPokemon} />
+          <PokepasteImportModal onLoadPokemon={onLoadPokemon} />
+          <button
+            type="button"
+            className="arena-button text-arena-plasma"
+            onClick={onCalculate}
+            disabled={loading}
+          >
+            {loading ? 'Calculating…' : 'Calculate Damage'}
+          </button>
         </div>
         <div className="flex flex-wrap items-center gap-3 font-mono text-[0.65rem] uppercase tracking-[0.3em] text-white/50">
-          <span>ARENA: NEON COLOSSEUM</span>
+          <span>{loading ? 'ENGINE: RUNNING' : 'ENGINE: READY'}</span>
           <span className="h-1 w-1 rounded-full bg-arena-plasma" />
           <span>STREAM SYNC: READY</span>
         </div>
