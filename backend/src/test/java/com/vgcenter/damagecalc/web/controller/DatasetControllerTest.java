@@ -98,8 +98,8 @@ class DatasetControllerTest {
 
     @Test
     void buildsStatsForAValidRequest() throws Exception {
-        buildStatsUseCase.nextResult =
-                new BuildStatsResult(new StatsView(78, 84, 78, 109, 85, 100), new StatsView(144, 81, 83, 136, 90, 109));
+        buildStatsUseCase.nextResult = new BuildStatsResult(
+                new StatsView(78, 84, 78, 109, 85, 100), new StatsView(165, 97, 98, 163, 105, 128));
 
         mockMvc.perform(post("/api/v1/dataset/build-stats")
                         .contentType(APPLICATION_JSON)
@@ -107,8 +107,8 @@ class DatasetControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.baseStats.specialAttack").value(109))
-                .andExpect(jsonPath("$.finalStats.hp").value(144))
-                .andExpect(jsonPath("$.finalStats.attack").value(81));
+                .andExpect(jsonPath("$.finalStats.hp").value(165))
+                .andExpect(jsonPath("$.finalStats.attack").value(97));
     }
 
     @Test

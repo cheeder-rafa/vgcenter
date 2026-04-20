@@ -12,17 +12,17 @@ public record Stats(int hp, int attack, int defense, int specialAttack, int spec
     }
 
     public Stats toBattleStats(Sp sp, Nature nature, int level) {
-        if (level <= 0) {
-            throw new IllegalArgumentException("Level must be positive");
+        if (level != 50) {
+            throw new IllegalArgumentException("Level must be 50: Pokémon Champions battles are fixed at level 50");
         }
 
         return new Stats(
-                calculateHp(hp, sp.hp(), level),
-                calculateNonHp(Stat.ATTACK, attack, sp.attack(), nature, level),
-                calculateNonHp(Stat.DEFENSE, defense, sp.defense(), nature, level),
-                calculateNonHp(Stat.SPECIAL_ATTACK, specialAttack, sp.specialAttack(), nature, level),
-                calculateNonHp(Stat.SPECIAL_DEFENSE, specialDefense, sp.specialDefense(), nature, level),
-                calculateNonHp(Stat.SPEED, speed, sp.speed(), nature, level));
+                calculateHp(hp, sp.hp()),
+                calculateNonHp(Stat.ATTACK, attack, sp.attack(), nature),
+                calculateNonHp(Stat.DEFENSE, defense, sp.defense(), nature),
+                calculateNonHp(Stat.SPECIAL_ATTACK, specialAttack, sp.specialAttack(), nature),
+                calculateNonHp(Stat.SPECIAL_DEFENSE, specialDefense, sp.specialDefense(), nature),
+                calculateNonHp(Stat.SPEED, speed, sp.speed(), nature));
     }
 
     public int valueFor(Stat stat) {
@@ -36,13 +36,12 @@ public record Stats(int hp, int attack, int defense, int specialAttack, int spec
         };
     }
 
-    private static int calculateHp(int base, int sp, int level) {
-        return (2 * base + sp) * level / 100 + level + 10;
+    private static int calculateHp(int base, int sp) {
+        return base + sp + 75;
     }
 
-    private static int calculateNonHp(Stat stat, int base, int sp, Nature nature, int level) {
-        int unmodified = (2 * base + sp) * level / 100 + 5;
-        return nature.applyTo(stat, unmodified);
+    private static int calculateNonHp(Stat stat, int base, int sp, Nature nature) {
+        return nature.applyTo(stat, base + sp + 20);
     }
 
     private static void validatePositive(String label, int value) {

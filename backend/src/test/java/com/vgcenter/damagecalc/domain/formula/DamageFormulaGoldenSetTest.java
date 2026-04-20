@@ -7,8 +7,6 @@ import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Item;
 import com.vgcenter.damagecalc.domain.model.Move;
 import com.vgcenter.damagecalc.domain.model.MoveCategory;
-import com.vgcenter.damagecalc.domain.model.Nature;
-import com.vgcenter.damagecalc.domain.model.Sp;
 import com.vgcenter.damagecalc.domain.model.Stats;
 import com.vgcenter.damagecalc.domain.model.StatusCondition;
 import com.vgcenter.damagecalc.domain.model.Type;
@@ -54,42 +52,24 @@ class DamageFormulaGoldenSetTest {
     }
 
     private static Stream<Arguments> goldenSet() {
-        Combatant physicalAttacker = combatant(
-                List.of(Type.NORMAL),
-                new Stats(91, 123, 70, 95, 70, 80),
-                new Sp(7, 17, 5, 9, 3, 13),
-                Nature.ADAMANT,
-                50);
-        Combatant specialAttacker = combatant(
-                List.of(Type.FIRE), new Stats(80, 70, 65, 125, 90, 110), new Sp(3, 5, 7, 21, 9, 13), Nature.MODEST, 50);
-        Combatant bulkyDefender = combatant(
-                List.of(Type.WATER), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
-        Combatant grassDefender = combatant(
-                List.of(Type.GRASS), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
-        Combatant grassSteelDefender = combatant(
-                List.of(Type.GRASS, Type.STEEL),
-                new Stats(90, 70, 95, 70, 90, 60),
-                new Sp(21, 5, 11, 3, 9, 7),
-                Nature.BOLD,
-                50);
-        Combatant waterDragonDefender = combatant(
-                List.of(Type.WATER, Type.DRAGON),
-                new Stats(90, 70, 95, 70, 90, 60),
-                new Sp(21, 5, 11, 3, 9, 7),
-                Nature.BOLD,
-                50);
-        Combatant ghostDefender = combatant(
-                List.of(Type.GHOST), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
-        Combatant bugDefender = combatant(
-                List.of(Type.BUG), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
-        Combatant groundDefender = combatant(
-                List.of(Type.GROUND), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
-        Combatant rockDefender = combatant(
-                List.of(Type.ROCK), new Stats(90, 70, 110, 70, 120, 60), new Sp(21, 5, 7, 3, 15, 7), Nature.CALM, 50);
-        Combatant iceDefender = combatant(
-                List.of(Type.ICE), new Stats(90, 70, 100, 70, 80, 60), new Sp(21, 5, 13, 3, 5, 7), Nature.IMPISH, 50);
-        Combatant fightingDefender = combatant(
-                List.of(Type.FIGHTING), new Stats(90, 70, 95, 70, 90, 60), new Sp(21, 5, 11, 3, 9, 7), Nature.BOLD, 50);
+        // Final stats are hardcoded (rather than derived via toBattleStats) so that the
+        // damage-formula golden arrays below remain pinned to the same numeric inputs
+        // regardless of future stat-formula changes. These were the values produced for
+        // each (baseStats, Sp, nature) tuple under the original stat formula; preserving
+        // them keeps this golden set a check on the damage formula only.
+        Combatant physicalAttacker = combatant(List.of(Type.NORMAL), new Stats(154, 149, 77, 93, 76, 91));
+        Combatant specialAttacker = combatant(List.of(Type.FIRE), new Stats(141, 69, 73, 154, 99, 121));
+        Combatant bulkyDefender = combatant(List.of(Type.WATER), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant grassDefender = combatant(List.of(Type.GRASS), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant grassSteelDefender = combatant(List.of(Type.GRASS, Type.STEEL), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant waterDragonDefender =
+                combatant(List.of(Type.WATER, Type.DRAGON), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant ghostDefender = combatant(List.of(Type.GHOST), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant bugDefender = combatant(List.of(Type.BUG), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant groundDefender = combatant(List.of(Type.GROUND), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant rockDefender = combatant(List.of(Type.ROCK), new Stats(160, 69, 118, 76, 145, 68));
+        Combatant iceDefender = combatant(List.of(Type.ICE), new Stats(160, 77, 122, 68, 87, 68));
+        Combatant fightingDefender = combatant(List.of(Type.FIGHTING), new Stats(160, 69, 115, 76, 99, 68));
         Combatant wonderRoomDefender = new Combatant(50, new Stats(100, 100, 200, 100, 100, 100), List.of(Type.NORMAL));
 
         Move physicalNeutral = move(Type.GROUND, MoveCategory.PHYSICAL, 80, false);
@@ -413,8 +393,8 @@ class DamageFormulaGoldenSetTest {
                         CRITICAL_PHYSICAL_STAB));
     }
 
-    private static Combatant combatant(List<Type> types, Stats baseStats, Sp sp, Nature nature, int level) {
-        return Combatant.fromBaseStats(level, types, baseStats, sp, nature);
+    private static Combatant combatant(List<Type> types, Stats finalStats) {
+        return new Combatant(50, finalStats, types);
     }
 
     private static DamageContext context(Combatant attacker, Combatant defender, Move move) {

@@ -22,7 +22,14 @@ class BuildStatsUseCaseTest {
                 new BuildStatsCommand("charizard", new SpCommand(12, 4, 0, 20, 0, 8), "modest", false));
 
         assertThat(result.baseStats()).isEqualTo(new StatsView(78, 84, 78, 109, 85, 100));
-        assertThat(result.finalStats()).isEqualTo(new StatsView(144, 81, 83, 136, 90, 109));
+        // Champions formula, Charizard + MODEST (+SpA, -Atk), SP 12/4/0/20/0/8:
+        // HP  = 78 + 12 + 75                         = 165
+        // Atk = floor(0.9 × ( 84 +  4 + 20)) = ⌊97.2⌋=  97
+        // Def =              78 +  0 + 20           =  98
+        // SpA = floor(1.1 × (109 + 20 + 20)) = ⌊163.9⌋=163
+        // SpD =              85 +  0 + 20           = 105
+        // Spe =             100 +  8 + 20           = 128
+        assertThat(result.finalStats()).isEqualTo(new StatsView(165, 97, 98, 163, 105, 128));
     }
 
     @Test
@@ -34,7 +41,14 @@ class BuildStatsUseCaseTest {
                 new BuildStatsCommand("charizard", new SpCommand(12, 4, 0, 20, 0, 8), "modest", true));
 
         assertThat(result.baseStats()).isEqualTo(new StatsView(78, 104, 78, 159, 115, 100));
-        assertThat(result.finalStats()).isEqualTo(new StatsView(144, 99, 83, 191, 120, 109));
+        // Mega-Y base (78,104,78,159,115,100) + MODEST + same SP:
+        // HP  = 78 + 12 + 75                         = 165
+        // Atk = floor(0.9 × (104 +  4 + 20)) = ⌊115.2⌋=115
+        // Def =              78 +  0 + 20           =  98
+        // SpA = floor(1.1 × (159 + 20 + 20)) = ⌊218.9⌋=218
+        // SpD =             115 +  0 + 20           = 135
+        // Spe =             100 +  8 + 20           = 128
+        assertThat(result.finalStats()).isEqualTo(new StatsView(165, 115, 98, 218, 135, 128));
     }
 
     @Test
