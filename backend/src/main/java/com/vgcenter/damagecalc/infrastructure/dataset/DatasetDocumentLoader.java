@@ -40,6 +40,20 @@ public class DatasetDocumentLoader {
                 objectMapper.getTypeFactory().constructCollectionType(List.class, PokedexEntryDocument.class));
     }
 
+    public List<NatureEntryDocument> loadNatures(String regulation) {
+        JsonNode naturesNode = loadDataTree(regulation, "natures.json");
+        return readValue(
+                naturesNode,
+                objectMapper.getTypeFactory().constructCollectionType(List.class, NatureEntryDocument.class));
+    }
+
+    public List<MegaEvolutionDocument> loadMegaEvolutions(String regulation) {
+        JsonNode megaNode = loadDataTree(regulation, "mega-evolutions.json");
+        return readValue(
+                megaNode,
+                objectMapper.getTypeFactory().constructCollectionType(List.class, MegaEvolutionDocument.class));
+    }
+
     public Set<String> loadNamedReferenceIds(String regulation, String filename) {
         JsonNode referenceNode = loadDataTree(regulation, filename);
         List<NamedReferenceDocument> references = readValue(

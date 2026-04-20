@@ -11,5 +11,20 @@
   { "id": "sitrus-berry", "name": "Sitrus Berry" },
   { "id": "rocky-helmet", "name": "Rocky Helmet" },
   { "id": "assault-vest", "name": "Assault Vest" },
-  { "id": "eviolite", "name": "Eviolite" }
+  { "id": "eviolite", "name": "Eviolite" },
+  { "id": "charcoal", "name": "Charcoal" },
+  { "id": "loaded-dice", "name": "Loaded Dice" },
+  { "id": "black-glasses", "name": "Black Glasses" },
+  { "id": "black-sludge", "name": "Black Sludge" },
+  { "id": "mystic-water", "name": "Mystic Water" },
+  { "id": "wide-lens", "name": "Wide Lens" },
+  { "id": "heavy-duty-boots", "name": "Heavy-Duty Boots" },
+  { "id": "power-herb", "name": "Power Herb" },
+  { "id": "weakness-policy", "name": "Weakness Policy" },
+  { "id": "chesto-berry", "name": "Chesto Berry" },
+  { "id": "mental-herb", "name": "Mental Herb" },
+  { "id": "flame-orb", "name": "Flame Orb" },
+  { "id": "sharp-beak", "name": "Sharp Beak" },
+  { "id": "toxic-orb", "name": "Toxic Orb" },
+  { "id": "light-clay", "name": "Light Clay" }
 ]
