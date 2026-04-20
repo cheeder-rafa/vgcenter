@@ -14,7 +14,7 @@ The damage calculator is useful on its own (players will use it directly to tune
 ## Scope
 
 ### In scope (v1)
-- Curated static JSON dataset of Paldea Pokédex #001-375 and #388-392 (excluding Regulation M-A banned species), their base stats, types, abilities, movesets, and Mega forms.
+- Curated static JSON dataset of the explicit Regulation M-A Pokémon Champions roster captured under `backend/src/main/resources/data/regulation-m-a/`, with per-species base stats, types, abilities, full learnsets, and the legal Mega roster.
 - Move dataset (power, type, category, flags: spread/contact/sound/wind/punch/bite/etc.).
 - Ability and item datasets, with effects relevant to damage.
 - Damage formula per D'Awoblefet's dissertation, adapted to Pokémon Champions' SP system (no IVs; SP 0–32 replaces EVs, implicit max IVs).
@@ -233,11 +233,13 @@ All responses use `application/json`. Errors use RFC 7807 Problem Details via `@
 
 ## Dataset Sourcing & Maintenance
 
-1. Seed from Gen 9 Scarlet/Violet (base stats, moves, types, abilities, items never change mechanically).
-2. Apply Regulation M-A filter: exclude Paradox, Treasures of Ruin, Koraidon, Miraidon, non-Paldean variants, non-Fancy Vivillon.
-3. SP system: replace EV (0–252) with SP (0–32). Stat formula adjusted: `stat = floor((2·base + SP) · level / 100) + 5` (then nature multiplier). HP uses `floor((2·base + SP) · level / 100) + level + 10`. (Assume 31 IVs equivalent baked into base or documented in formula.)
-4. Mega evolutions: separate entries keyed by `(speciesId, megaFormId)` with their own stats/type/ability.
-5. JSON schemas live alongside data; validated at application startup via a `DatasetHealthCheck` bean. Startup fails loudly if any referenced move/ability/item is missing.
+1. Maintain the checked-in `regulation-m-a` JSON resources as the source of truth for the explicit Champions Regulation M-A roster rather than deriving legality from a Pokédex-range heuristic.
+2. Regulation M-A uses the corrected curated roster supplied for this project: Venusaur through Hydrapple as captured in the dataset, plus the legal Mega roster supported by Pokémon Champions / Legends: Z-A.
+3. Legal non-Mega alternate forms are represented as distinct Pokédex entries when the regulation exposes them separately (for example `rotom-heat`, `lycanroc-dusk`, `palafin-hero`, `aegislash-shield`).
+4. SP system: replace EV (0–252) with SP (0–32). Stat formula adjusted: `stat = floor((2·base + SP) · level / 100) + 5` (then nature multiplier). HP uses `floor((2·base + SP) · level / 100) + level + 10`. (Assume 31 IVs equivalent baked into base or documented in formula.)
+5. Mega evolutions: separate entries keyed by `(speciesId, megaFormId)` with their own stats/type/ability.
+6. `items.json` is the global legal item pool for the regulation; Pokédex entries do not carry per-species item legality.
+7. JSON schemas live alongside data; validated at application startup via a `DatasetHealthCheck` bean. Startup fails loudly if any referenced move/ability/item is missing.
 
 Data updates when a new regulation drops: a maintainer updates the JSON under a new `regulation-<letter>/` folder; the old folder remains for historical scenarios.
 
@@ -367,8 +369,8 @@ Each milestone ends with: all tests green, ArchUnit happy, CI green, commit made
    - Golden set scenarios for a few Megas (Charizard-X, Gengar, etc.).
 
 6. **M5 Dataset expansion**
-   - Full Regulation M-A pokedex, moves, abilities, items, natures loaded.
-   - All Megas legal in Paldea Pokédex #001-375 / #388-392.
+   - Full explicit Regulation M-A roster, moves, abilities, items, and natures loaded from the checked-in Champions dataset.
+   - Legal Mega roster loaded from the Regulation M-A dataset rather than a Pokédex range rule.
 
 7. **M6 Web layer**
    - `POST /api/v1/damage/calculate` with DTOs + validation.

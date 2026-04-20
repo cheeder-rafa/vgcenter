@@ -1,7 +1,6 @@
 package com.vgcenter.damagecalc.infrastructure.dataset;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vgcenter.damagecalc.domain.model.Ability;
 import com.vgcenter.damagecalc.domain.model.Nature;
 import com.vgcenter.damagecalc.domain.model.Stat;
 import com.vgcenter.damagecalc.domain.model.Type;
@@ -62,7 +61,6 @@ public class DatasetValidator {
             validateBaseStats(species.get("baseStats"), "pokedex.json", path + ".baseStats");
             validateTextArray(species.get("abilities"), "pokedex.json", path + ".abilities");
             validateTextArray(species.get("moves"), "pokedex.json", path + ".moves");
-            validateTextArray(species.get("items"), "pokedex.json", path + ".items");
         }
     }
 
@@ -139,14 +137,6 @@ public class DatasetValidator {
             if (!seenIds.add(id)) {
                 throw schemaFailure("mega-evolutions.json", path + ".id", "is duplicated ('" + id + "')");
             }
-
-            String ability = entry.get("ability").asText();
-            try {
-                Ability.valueOf(ability);
-            } catch (IllegalArgumentException exception) {
-                throw schemaFailure(
-                        "mega-evolutions.json", path + ".ability", "is not a known ability ('" + ability + "')");
-            }
         }
     }
 
@@ -167,20 +157,22 @@ public class DatasetValidator {
     private void validateCrossReferences(String regulation) {
         Set<String> abilityIds = datasetDocumentLoader.loadNamedReferenceIds(regulation, "abilities.json");
         Set<String> moveIds = datasetDocumentLoader.loadNamedReferenceIds(regulation, "moves.json");
-        Set<String> itemIds = datasetDocumentLoader.loadNamedReferenceIds(regulation, "items.json");
 
         Set<String> speciesIds = new HashSet<>();
         for (PokedexEntryDocument species : datasetDocumentLoader.loadPokedex(regulation)) {
             speciesIds.add(species.id());
             validateReferences(species.id(), species.abilities(), abilityIds, "ability");
             validateReferences(species.id(), species.moves(), moveIds, "move");
-            validateReferences(species.id(), species.items(), itemIds, "item");
         }
 
         for (MegaEvolutionDocument mega : datasetDocumentLoader.loadMegaEvolutions(regulation)) {
             if (!speciesIds.contains(mega.speciesId())) {
                 throw new IllegalStateException(
                         "Unknown species '" + mega.speciesId() + "' referenced by mega evolution '" + mega.id() + "'");
+            }
+            if (!abilityIds.contains(mega.ability())) {
+                throw new IllegalStateException(
+                        "Unknown ability '" + mega.ability() + "' referenced by mega evolution '" + mega.id() + "'");
             }
         }
     }

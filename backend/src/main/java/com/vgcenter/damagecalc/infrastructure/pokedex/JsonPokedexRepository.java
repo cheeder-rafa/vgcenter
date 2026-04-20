@@ -2,7 +2,6 @@ package com.vgcenter.damagecalc.infrastructure.pokedex;
 
 import com.vgcenter.damagecalc.application.port.PokedexRepository;
 import com.vgcenter.damagecalc.domain.mega.MegaForm;
-import com.vgcenter.damagecalc.domain.model.Ability;
 import com.vgcenter.damagecalc.domain.model.PokemonSpecies;
 import com.vgcenter.damagecalc.domain.model.Stats;
 import com.vgcenter.damagecalc.domain.model.Type;
@@ -12,7 +11,6 @@ import com.vgcenter.damagecalc.infrastructure.dataset.MegaEvolutionDocument;
 import com.vgcenter.damagecalc.infrastructure.dataset.PokedexEntryDocument;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -26,15 +24,18 @@ public class JsonPokedexRepository implements PokedexRepository {
 
     @Override
     public List<PokemonSpecies> findAllByRegulation(String regulationId) {
-        Map<String, MegaForm> megaBySpeciesId = datasetDocumentLoader.loadMegaEvolutions(regulationId).stream()
-                .collect(Collectors.toUnmodifiableMap(MegaEvolutionDocument::speciesId, this::toMegaForm));
+        Map<String, List<MegaForm>> megaBySpeciesId = datasetDocumentLoader.loadMegaEvolutions(regulationId).stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        MegaEvolutionDocument::speciesId,
+                        java.util.stream.Collectors.mapping(
+                                this::toMegaForm, java.util.stream.Collectors.toUnmodifiableList())));
 
         return datasetDocumentLoader.loadPokedex(regulationId).stream()
-                .map(entry -> toDomain(entry, megaBySpeciesId.get(entry.id())))
+                .map(entry -> toDomain(entry, megaBySpeciesId.getOrDefault(entry.id(), List.of())))
                 .toList();
     }
 
-    private PokemonSpecies toDomain(PokedexEntryDocument entry, MegaForm megaForm) {
+    private PokemonSpecies toDomain(PokedexEntryDocument entry, List<MegaForm> megaForms) {
         return new PokemonSpecies(
                 entry.id(),
                 entry.name(),
@@ -42,8 +43,7 @@ public class JsonPokedexRepository implements PokedexRepository {
                 toStats(entry.baseStats()),
                 entry.abilities(),
                 entry.moves(),
-                entry.items(),
-                megaForm);
+                megaForms);
     }
 
     private MegaForm toMegaForm(MegaEvolutionDocument document) {
@@ -52,7 +52,7 @@ public class JsonPokedexRepository implements PokedexRepository {
                 document.name(),
                 document.types().stream().map(Type::valueOf).toList(),
                 toStats(document.baseStats()),
-                Ability.valueOf(document.ability()));
+                document.ability());
     }
 
     private Stats toStats(BaseStatsDocument baseStats) {

@@ -3,7 +3,6 @@ package com.vgcenter.damagecalc.domain.formula;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vgcenter.damagecalc.domain.mega.MegaForm;
-import com.vgcenter.damagecalc.domain.model.Ability;
 import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Move;
 import com.vgcenter.damagecalc.domain.model.MoveCategory;
@@ -93,13 +92,12 @@ class DamageFormulaMegaGoldenSetTest {
                 new Stats(78, 84, 78, 109, 85, 100),
                 List.of("blaze"),
                 List.of("dragon-claw"),
-                List.of("charizardite-x"),
                 new MegaForm(
                         "charizard-mega-x",
                         "Charizard-Mega-X",
                         List.of(Type.FIRE, Type.DRAGON),
                         new Stats(78, 130, 111, 130, 85, 100),
-                        Ability.NONE));
+                        "tough-claws"));
     }
 
     private static PokemonSpecies gengarWithMega() {
@@ -110,13 +108,12 @@ class DamageFormulaMegaGoldenSetTest {
                 new Stats(60, 65, 60, 130, 75, 110),
                 List.of("cursed-body"),
                 List.of("shadow-ball"),
-                List.of("gengarite"),
                 new MegaForm(
                         "gengar-mega",
                         "Gengar-Mega",
                         List.of(Type.GHOST, Type.POISON),
                         new Stats(60, 65, 80, 170, 95, 130),
-                        Ability.NONE));
+                        "shadow-tag"));
     }
 
     private static PokemonSpecies lucarioWithMega() {
@@ -127,12 +124,11 @@ class DamageFormulaMegaGoldenSetTest {
                 new Stats(70, 110, 70, 115, 70, 90),
                 List.of("steadfast"),
                 List.of("close-combat"),
-                List.of("lucarionite"),
                 new MegaForm(
                         "lucario-mega",
                         "Lucario-Mega",
                         List.of(Type.FIGHTING, Type.STEEL),
                         new Stats(70, 145, 88, 140, 70, 112),
-                        Ability.ADAPTABILITY));
+                        "adaptability"));
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class JsonPokedexRepositoryIntegrationTest {
 
-    private static final int MINIMUM_REGULATION_M_A_SPECIES = 60;
+    private static final int EXPECTED_REGULATION_M_A_SPECIES = 201;
 
     private final ApplicationContextRunner contextRunner =
             new ApplicationContextRunner().withUserConfiguration(DamageCalcApplication.class);
@@ -25,7 +25,7 @@ class JsonPokedexRepositoryIntegrationTest {
             var pokedexRepository = context.getBean(PokedexRepository.class);
             var species = pokedexRepository.findAllByRegulation("M-A");
 
-            assertThat(species).hasSizeGreaterThanOrEqualTo(MINIMUM_REGULATION_M_A_SPECIES);
+            assertThat(species).hasSize(EXPECTED_REGULATION_M_A_SPECIES);
 
             assertThat(species.stream()
                             .filter(entry -> entry.id().equals("skeledirge"))
@@ -38,13 +38,12 @@ class JsonPokedexRepositoryIntegrationTest {
                         assertThat(skeledirge.baseStats().specialAttack()).isEqualTo(110);
                         assertThat(skeledirge.abilityIds()).containsExactly("blaze", "unaware");
                         assertThat(skeledirge.moveIds()).contains("torch-song", "shadow-ball", "hyper-voice");
-                        assertThat(skeledirge.itemIds()).contains("life-orb", "throat-spray");
                     });
         });
     }
 
     @Test
-    void attachesMegaFormToSpeciesDeclaredInMegaEvolutionsJson() {
+    void attachesMegaFormsToSpeciesDeclaredInMegaEvolutionsJson() {
         contextRunner.run(context -> {
             assertThat(context).hasNotFailed();
 
@@ -56,11 +55,9 @@ class JsonPokedexRepositoryIntegrationTest {
                     .findFirst()
                     .orElseThrow();
 
-            assertThat(charizard.megaForm()).isPresent().get().satisfies(mega -> {
-                assertThat(mega.id()).startsWith("charizard-mega");
-                assertThat(mega.baseStats().attack())
-                        .isGreaterThan(charizard.baseStats().attack());
-            });
+            assertThat(charizard.megaForms())
+                    .extracting(mega -> mega.id())
+                    .contains("charizard-mega-x", "charizard-mega-y");
         });
     }
 
@@ -70,12 +67,38 @@ class JsonPokedexRepositoryIntegrationTest {
             var pokedexRepository = context.getBean(PokedexRepository.class);
             var species = pokedexRepository.findAllByRegulation("M-A");
 
-            var gholdengo = species.stream()
-                    .filter(entry -> entry.id().equals("gholdengo"))
+            var hydrapple = species.stream()
+                    .filter(entry -> entry.id().equals("hydrapple"))
                     .findFirst()
                     .orElseThrow();
 
-            assertThat(gholdengo.megaForm()).isEmpty();
+            assertThat(hydrapple.megaForm()).isEmpty();
+            assertThat(species).noneMatch(entry -> entry.id().equals("gholdengo"));
+        });
+    }
+
+    @Test
+    void exposesAlternateFormsAsDistinctSpeciesEntries() {
+        contextRunner.run(context -> {
+            var pokedexRepository = context.getBean(PokedexRepository.class);
+            var species = pokedexRepository.findAllByRegulation("M-A");
+
+            assertThat(species)
+                    .extracting(PokemonSpecies::id)
+                    .contains(
+                            "rotom",
+                            "rotom-heat",
+                            "rotom-wash",
+                            "meowstic-male",
+                            "meowstic-female",
+                            "aegislash-shield",
+                            "aegislash-blade",
+                            "lycanroc-midday",
+                            "lycanroc-midnight",
+                            "lycanroc-dusk",
+                            "palafin-zero",
+                            "palafin-hero")
+                    .doesNotContain("meowstic", "aegislash", "lycanroc", "palafin");
         });
     }
 }
