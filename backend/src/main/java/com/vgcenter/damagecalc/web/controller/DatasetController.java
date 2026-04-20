@@ -1,6 +1,9 @@
 package com.vgcenter.damagecalc.web.controller;
 
+import com.vgcenter.damagecalc.application.usecase.BuildStatsUseCase;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogUseCase;
+import com.vgcenter.damagecalc.web.dto.BuildStatsRequestDto;
+import com.vgcenter.damagecalc.web.dto.BuildStatsResponseDto;
 import com.vgcenter.damagecalc.web.dto.NamedDatasetEntryDto;
 import com.vgcenter.damagecalc.web.dto.NatureResponseDto;
 import com.vgcenter.damagecalc.web.dto.PokedexEntryResponseDto;
@@ -10,6 +13,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,10 +23,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class DatasetController {
 
     private final DatasetCatalogUseCase datasetCatalogUseCase;
+    private final BuildStatsUseCase buildStatsUseCase;
     private final DatasetWebMapper mapper;
 
-    public DatasetController(DatasetCatalogUseCase datasetCatalogUseCase, DatasetWebMapper mapper) {
+    public DatasetController(
+            DatasetCatalogUseCase datasetCatalogUseCase, BuildStatsUseCase buildStatsUseCase, DatasetWebMapper mapper) {
         this.datasetCatalogUseCase = datasetCatalogUseCase;
+        this.buildStatsUseCase = buildStatsUseCase;
         this.mapper = mapper;
     }
 
@@ -48,5 +56,10 @@ public class DatasetController {
     @GetMapping("/natures")
     public List<NatureResponseDto> natures(@Valid @ModelAttribute RegulationQueryDto query) {
         return mapper.toNatureResponse(datasetCatalogUseCase.natures(query.regulation()));
+    }
+
+    @PostMapping("/build-stats")
+    public BuildStatsResponseDto buildStats(@Valid @RequestBody BuildStatsRequestDto request) {
+        return mapper.toBuildStatsResponse(buildStatsUseCase.buildStats(mapper.toBuildStatsCommand(request)));
     }
 }

@@ -683,3 +683,235 @@ Once this plan is approved, I will create these files in `/home/cheeder/dev/vgce
 5. `.claude/skills/add-ability-modifier/SKILL.md` — example skill scaffold.
 
 **Important:** no source code, no `pom.xml`, no Vite scaffolding will be created at this step — you asked for just the guidance/context files. The actual build begins when you fire up Codex and run through M0.
+
+---
+
+# Corrections Pass (post-M10) — Damage Calculator UX Overhaul
+
+M0 → M10 are complete on `develop`. Hands-on use exposed six gaps between the shipped form-style calculator and how VGC players actually build Pokémon. The reference screenshot at `/nerd-calc.png` (Trainer Tower "nerd-calc" style) captures the target mental model: pick a species, distribute SP, see base → final stats, pick four moves, and read live damage for every move in both directions. This section is the full plan to close those gaps. Execute it after M10 is merged; all work targets `develop`.
+
+## Context
+
+Implement this corrections pass as a single feature branch (or split into two PRs if the diff grows large: `feature/calc-ux-corrections` and `feature/calc-sprites`). Do **not** modify the damage formula, the clean-architecture boundaries, the dataset JSON, or the existing golden tests. The shipped TDD discipline still applies.
+
+### Six corrections in scope
+
+1. **Import modal stacking bug** — "Import Showdown" / "Import Pokepaste" popups render *under* the calculator panels because the modal root is a child of a stacking-context ancestor (the `relative isolate` main and the `arena-panel` decorative layers). Fix: render the modal via `createPortal(..., document.body)`.
+2. **Reactive damage** — replace the manual "Calculate Damage" button with a debounced effect (~200 ms) that recalculates whenever any input changes. Eight `POST /api/v1/damage/calculate` calls per recompute (4 moves × 2 directions), batched client-side.
+3. **Simultaneous range + rolls** — the result readout must show min–max range, HP%, KO chance, *and* the 16 rolls at the same time (no toggle).
+4. **Species-first inputs** — drop the raw type/stat/level form fields. A species dropdown (Reg M-A roster) auto-populates types, base stats, legal abilities, legal moves. User distributes SP (0–32 per stat) and picks a nature; UI shows `Base → SP → Final` columns. **Level is locked to 50**; the UI has no level input. Four move slots per side; each slot shows its own damage output inline. Both sides are full combatants — no "attacker only / defender only" asymmetry.
+5. **Sprites** — render the species sprite immediately on selection. Bundle sprites as static assets under `frontend/public/sprites/` via a one-off download script. Legends Z-A Mega sprites (not yet in PokéAPI) are placed manually in the same folder from the artwork the maintainer has sourced (see `/nerd-calc.png` reference and the Reddit link in the maintainer's corrections brief).
+6. **Layout — wider, slimmer header** — widen the container to `max-w-[1600px]`, keep the 3 columns on desktop, and compress the header so the first calculation fits above the fold on a 1080p screen. Target header height ≤ 80 px.
+
+## Approach
+
+### Phase A — Backend: stat-build endpoint
+
+Add `POST /api/v1/dataset/build-stats`. Reuses existing `Stats.toBattleStats(Sp, Nature, level)` in `domain/model` — do not duplicate the formula on the frontend.
+
+- **Request DTO** (`web/dto/BuildStatsRequestDto.java`, new): `{ speciesId: string, sp: { hp, attack, defense, specialAttack, specialDefense, speed }, natureId: string, megaActive: boolean }`. Level is fixed at 50 server-side (VGC).
+- **Response DTO** (`web/dto/BuildStatsResponseDto.java`, new): `{ baseStats: StatsDto, finalStats: StatsDto }`. The frontend displays both columns.
+- **Use case** (`application/usecase/BuildStatsUseCase.java`, new): loads species (Mega form if `megaActive`) from `PokedexRepository`, applies `Stats.toBattleStats`. Throws `SpeciesNotFoundException` / `NatureNotFoundException`, mapped to RFC 7807 by the existing `@ControllerAdvice`.
+- **Controller** (`web/controller/DatasetController.java`, edit): add `@PostMapping("/build-stats")`.
+- **Tests**:
+  - `BuildStatsUseCaseTest` (new) — mocked repo; covers happy path, unknown species, invalid nature, Mega-active flipping to the Mega form's stats.
+  - Extend `DatasetControllerTest` (or add one) — MockMvc slice for the new endpoint (happy + validation error + not-found).
+- ArchUnit passes by construction (new code lives in the right packages). Coverage stays ≥ 85% on domain/application.
+
+**Rationale for the endpoint** (rather than computing stats in TypeScript): `Stats.toBattleStats` is the project's single source of truth for the SP formula and is already backed by golden tests. Duplicating the formula in TypeScript would split that contract. Keeping the call server-side also makes nature/Mega lookups trivial since the dataset lives there.
+
+### Phase B — Frontend data layer
+
+1. **Types** (`frontend/src/features/calculator/types/api.ts`, edit) — add:
+   - `BuildStatsRequest`, `BuildStatsResponse`
+   - `Spread` (`{ hp, atk, def, spa, spd, spe }`, each 0–32)
+   - `CombatantBuild` (species-first shape used by the store; replaces the current `CombatantRequest` for UI state)
+   - `MoveSlot` (`{ moveId: string | null }`)
+   - Extend `PokedexEntry` with `imageUrl: string` (computed client-side as `/sprites/${id}.png`).
+
+2. **API client** (`frontend/src/features/calculator/api/datasetApi.ts`, edit) — add `buildStats(req)`. Existing `calculateDamage` stays unchanged; it's called 8 times per recompute from the reactive hook.
+
+3. **Store rewrite** (`frontend/src/features/calculator/store/useCalculatorStore.ts`, edit):
+   - Replace `CombatantRequest` with `CombatantBuild`:
+     ```ts
+     {
+       speciesId: string | null,
+       natureId: string,
+       sp: Spread,
+       abilityId: string | null,
+       itemId: string | null,
+       status: StatusCondition,
+       megaActive: boolean,
+       moves: [MoveSlot, MoveSlot, MoveSlot, MoveSlot],
+       // derived (cached from last buildStats call):
+       baseStats: Stats | null,
+       finalStats: Stats | null,
+       types: [Type, Type | null] | null,
+     }
+     ```
+   - Keep `field`, `attackerSide`, `defenderSide`, `criticalHit`, `targets`.
+   - **Remove `level` entirely**; assemble damage-calc payloads with `level: 50`.
+   - Add results cache:
+     ```ts
+     results: {
+       attackerMoves: (DamageResult | null)[4],
+       defenderMoves: (DamageResult | null)[4],
+     }
+     resultsStatus: 'idle' | 'loading' | 'success' | 'error'
+     ```
+   - Remove the existing `selectDamageRequest`; add `selectDamageRequestFor(side, moveIndex)` that composes the 8 payloads on demand.
+
+4. **Reactive recompute hook** (`frontend/src/features/calculator/hooks/useReactiveDamage.ts`, new):
+   - Subscribes to the store; debounces 200 ms.
+   - On change:
+     - If either side has `speciesId === null` → skip (nothing to compute).
+     - Call `buildStats` for any side whose `baseStats`/`finalStats` is stale (cache key `{ speciesId, natureId, sp, megaActive }`).
+     - For each populated move slot, call `calculateDamage` once per direction; run the ≤ 8 calls with `Promise.allSettled`.
+     - Store results keyed by `(side, moveIndex)`; drop stale responses using an incrementing request id.
+
+### Phase C — Frontend UI rewrite
+
+File map (edits unless marked *new* / *delete*):
+
+- `frontend/src/pages/CalculatorPage.tsx` — trim header, widen container, remove `CommandBar`'s Calculate button, drop the separate `ResultPanel`.
+- `frontend/src/features/calculator/components/PokemonPanel.tsx` *(new)* — replaces `AttackerPanel` and `DefenderPanel`. Same layout for both sides; a `side: 'attacker' | 'defender'` prop switches the accent color (`arena-plasma` vs `arena-cyan`) and binding.
+- `frontend/src/features/calculator/components/SpeciesSelect.tsx` *(new)* — searchable species dropdown, populated from `fetchPokedex`.
+- `frontend/src/features/calculator/components/SpriteBadge.tsx` *(new)* — renders `<img src="/sprites/${speciesId}.png">`; `onError` falls back to `/sprites/_unknown.png`.
+- `frontend/src/features/calculator/components/StatTable.tsx` *(new)* — 6-row table `Stat | Base | SP 0-32 | Final`. SP inputs are `<input type="number" min="0" max="32">` with a running total footer (informational — Champions has no 510-EV cap).
+- `frontend/src/features/calculator/components/MoveSlotRow.tsx` *(new)* — one row per move slot: move dropdown (filtered by `species.moveIds`) + inline damage readout (e.g. `"64.6% – 75.4%"`). Clicking the row sets the focus that `DetailedResult` renders.
+- `frontend/src/features/calculator/components/DetailedResult.tsx` *(new)* — lives under the 3 columns, full-width. Always shows range + HP% + KO description *and* the 16-roll list simultaneously for the currently-focused `(side, moveIndex)` pair — no toggle.
+- `frontend/src/features/calculator/components/FieldPanel.tsx` — keep mostly as-is (still the middle column).
+- `frontend/src/features/calculator/components/AttackerPanel.tsx`, `DefenderPanel.tsx`, `ResultPanel.tsx` — **delete**.
+- `frontend/src/features/calculator/components/shared.ts` — drop type/stat form helpers no longer used.
+
+**Layout deltas in `CalculatorPage.tsx`:**
+- Container: `max-w-[1280px]` → `max-w-[1600px]`; `py-12` → `py-5 sm:py-6`; `gap-10` → `gap-5`.
+- Header collapsed to a single row: compact title (`text-2xl sm:text-3xl`), inline regulation chip, import buttons. Removes the large chips + subtitle block. Target header height ≤ 80 px so the first calculation is visible above the fold at 1080p.
+- Columns grid stays 3-wide (`lg:grid-cols-[1.2fr_0.7fr_1.2fr]`), with `DetailedResult` beneath spanning full width.
+
+### Phase D — Import modal portal fix
+
+Edit `frontend/src/features/importer/ImportTeamModal.tsx`:
+
+- Wrap the `{open ? (...)}` block in `createPortal(..., document.body)` (imported from `react-dom`). Remove the redundant inner `relative z-10` layer. Backdrop stays `fixed inset-0 z-50`.
+- This eliminates the stacking-context issue caused by the modal being a descendant of the `relative isolate` main element and the `arena-panel` decorative overlays.
+- No API change; `ShowdownImportModal` / `PokepasteImportModal` are thin wrappers needing no edits.
+- Regression test (`ImportTeamModal.test.tsx`): assert the dialog renders under `document.body`, not under the triggering button's parent.
+
+### Phase E — Sprite bundling
+
+1. **Download script** (`scripts/fetch-sprites.mjs`, new): a Node script that reads `backend/src/main/resources/data/regulation-m-a/pokedex.json`, and for each species downloads `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${dexNumber}.png` → writes to `frontend/public/sprites/${speciesId}.png`. Skips existing files. Logs anything that 404s — those are the species that need manual placement.
+2. **Manual Legends Z-A Mega placement**: the maintainer sources the Legends Z-A Mega artwork (Reddit link noted in the corrections brief) and drops them in `frontend/public/sprites/` as `${speciesId}.png` (e.g. `dragonite-mega.png`, `meganium-mega.png`).
+3. **Fallback**: include `frontend/public/sprites/_unknown.png` (a simple grey silhouette) so `onError` never leaves a broken-image glyph.
+4. **No backend change** — sprites are served by Vite in dev and the frontend container in prod. Same URL in both: `/sprites/${id}.png`.
+5. **Do not auto-commit sprite PNGs** from the script run. The maintainer runs the script, eyeballs the output, then commits.
+
+### Phase F — Verification
+
+1. `cd backend && ./mvnw verify` — all tests green; ArchUnit green; JaCoCo ≥ 85% on domain + application.
+2. `cd frontend && pnpm lint && pnpm typecheck && pnpm test` — green. New tests:
+   - `useReactiveDamage` — debounce + stale-response cancellation with mocked fetch.
+   - `ImportTeamModal` — portal rendering under `document.body`.
+   - `StatTable` — SP clamping (0–32) and nature modifier reflection in the Final column.
+   - `PokemonPanel` — integration: select a species → sprite renders, types populate, legal-move list filters correctly.
+3. `docker compose up --build` and hand-verify in a browser:
+   - Species dropdown populated with the full Reg M-A roster.
+   - Pick *Flutter Mane* (attacker) + *Urshifu-Rapid-Strike* (defender): sprites appear immediately, Moonblast shows damage inline, changing any SP updates results within ~200 ms without a button press.
+   - Click "Import Showdown" → modal renders *above* the panels.
+   - Header + first full calculation fit in a 1080p viewport without scrolling.
+   - Toggle Mega on a Mega-capable species → stats recompute and sprite swaps to the Mega variant.
+
+## Critical files
+
+**Backend — edit:**
+- `backend/src/main/java/com/vgcenter/damagecalc/web/controller/DatasetController.java`
+- `backend/src/test/java/com/vgcenter/damagecalc/web/controller/DatasetControllerTest.java`
+
+**Backend — new:**
+- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/BuildStatsUseCase.java`
+- `backend/src/main/java/com/vgcenter/damagecalc/web/dto/BuildStatsRequestDto.java`
+- `backend/src/main/java/com/vgcenter/damagecalc/web/dto/BuildStatsResponseDto.java`
+- `backend/src/test/java/com/vgcenter/damagecalc/application/usecase/BuildStatsUseCaseTest.java`
+
+**Backend — reuse, do not modify:**
+- `backend/src/main/java/com/vgcenter/damagecalc/domain/model/Stats.java` — canonical SP formula.
+- `backend/src/main/java/com/vgcenter/damagecalc/application/port/PokedexRepository.java` — loads species + Mega form.
+
+**Frontend — edit:**
+- `frontend/src/pages/CalculatorPage.tsx`
+- `frontend/src/features/calculator/store/useCalculatorStore.ts`
+- `frontend/src/features/calculator/api/datasetApi.ts`
+- `frontend/src/features/calculator/types/api.ts`
+- `frontend/src/features/calculator/components/FieldPanel.tsx`
+- `frontend/src/features/importer/ImportTeamModal.tsx`
+- `frontend/src/features/importer/importedTeamMapping.ts` (adapt to the new `CombatantBuild` shape)
+
+**Frontend — new:**
+- `frontend/src/features/calculator/components/PokemonPanel.tsx`
+- `frontend/src/features/calculator/components/SpeciesSelect.tsx`
+- `frontend/src/features/calculator/components/SpriteBadge.tsx`
+- `frontend/src/features/calculator/components/StatTable.tsx`
+- `frontend/src/features/calculator/components/MoveSlotRow.tsx`
+- `frontend/src/features/calculator/components/DetailedResult.tsx`
+- `frontend/src/features/calculator/hooks/useReactiveDamage.ts`
+- `scripts/fetch-sprites.mjs`
+- `frontend/public/sprites/` (PNGs + `_unknown.png`)
+
+**Frontend — delete:**
+- `frontend/src/features/calculator/components/AttackerPanel.tsx`
+- `frontend/src/features/calculator/components/DefenderPanel.tsx`
+- `frontend/src/features/calculator/components/ResultPanel.tsx`
+
+## Execution notes
+
+- **Branching** — per `CLAUDE.md` / `AGENTS.md`, branch from `develop` as `feature/calc-corrections` (or split: `feature/calc-ux-corrections` + `feature/calc-sprites`). Target `develop` in the PR. Never target `main`.
+- **TDD** — write tests first for `BuildStatsUseCase`, `useReactiveDamage`, `StatTable`, and the portal regression before implementation. The existing damage-formula golden tests must stay untouched.
+- **Commit hygiene** — one concern per commit, Conventional Commits (`feat(backend): build-stats endpoint`, `feat(frontend): species-first panel`, `fix(frontend): portal import modal`, `chore(assets): sprites`).
+- **Do not** modify `pokedex.json` or the damage formula. If a legal move/ability gap surfaces during testing, raise it separately.
+
+## Phase ordering (suggested execution prompts)
+
+Run each phase in its own agent session so scope stays bounded. After each phase: green tests, commit, stop for review before moving on.
+
+**Prompt 1 — Phase A (backend stat-build endpoint)**
+```
+Execute the "Phase A — Backend: stat-build endpoint" section from PLAN.md's
+"Corrections Pass (post-M10)". Branch from develop as feature/calc-corrections.
+TDD: write BuildStatsUseCaseTest and the DatasetController slice test first, then
+implement the DTOs, use case, and controller wiring. Reuse Stats.toBattleStats —
+do not duplicate the formula. Run `cd backend && ./mvnw verify`. Commit with
+`feat(backend): add POST /api/v1/dataset/build-stats` and stop.
+```
+
+**Prompt 2 — Phase B + D (frontend data layer + modal portal fix)**
+```
+Execute "Phase B — Frontend data layer" and "Phase D — Import modal portal fix"
+from PLAN.md's Corrections Pass. Do not touch UI components yet beyond what the
+portal fix requires. Add the BuildStatsRequest/Response types, the buildStats
+API call, rewrite useCalculatorStore to the CombatantBuild shape (level removed,
+4-move slots, results cache), add useReactiveDamage, and wrap ImportTeamModal
+in createPortal. Add tests: useReactiveDamage debounce + stale-response
+cancellation, ImportTeamModal portal regression. Run
+`cd frontend && pnpm lint && pnpm typecheck && pnpm test`. Commit per concern.
+```
+
+**Prompt 3 — Phase C (frontend UI rewrite)**
+```
+Execute "Phase C — Frontend UI rewrite" from PLAN.md's Corrections Pass.
+Create PokemonPanel, SpeciesSelect, SpriteBadge, StatTable, MoveSlotRow,
+DetailedResult. Delete AttackerPanel, DefenderPanel, ResultPanel. Update
+CalculatorPage to the new layout (max-w-[1600px], compact header, 3-col grid,
+DetailedResult below). Update importedTeamMapping to produce CombatantBuild.
+Add integration tests. Run frontend checks. Commit.
+```
+
+**Prompt 4 — Phase E (sprites)**
+```
+Execute "Phase E — Sprite bundling" from PLAN.md's Corrections Pass. Create
+scripts/fetch-sprites.mjs, include _unknown.png, document the manual Legends
+Z-A Mega placement step in the script's log output. Do not run the script —
+stop after the script + fallback asset + docs are in place. Commit.
+```
+
+After all four prompts: open the PR targeting `develop`, run `docker compose up --build`, and walk through the Phase F smoke checklist.
+
