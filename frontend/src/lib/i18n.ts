@@ -1,8 +1,14 @@
 const dictionary = {
   'calculator.title': 'VGCenter Damage Calculator',
+  'calculator.tagline': 'Regulation M-A · Pokémon Champions Battle Ops',
   'calculator.subtitle':
-    'Bootstrap scaffold for the Regulation M-A calculator, ready for domain logic, dataset loading, and API wiring.',
+    'Configure attacker, defender, and field — the calculator mirrors the Champions battle circuit in real time.',
   'calculator.regulationLabel': 'Regulation',
+  'panel.attacker': 'Attacker',
+  'panel.defender': 'Defender',
+  'panel.field': 'Field',
+  'panel.result': 'Result',
+  'result.waiting': 'Awaiting calculation — wire inputs to the backend in M9.',
 } as const
 
 type TranslationKey = keyof typeof dictionary

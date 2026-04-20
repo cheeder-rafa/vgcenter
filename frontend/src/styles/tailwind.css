@@ -4,16 +4,213 @@
 
 :root {
   color-scheme: dark;
-  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
-  background-color: #020617;
+  background-color: #04030f;
+  font-family: 'Chakra Petch', 'Segoe UI', sans-serif;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: #04030f;
+  color: #e8e3ff;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100vh;
+}
+
+@layer components {
+  .arena-panel {
+    position: relative;
+    background: linear-gradient(
+      160deg,
+      rgba(19, 20, 84, 0.78) 0%,
+      rgba(10, 11, 46, 0.92) 55%,
+      rgba(4, 3, 15, 0.95) 100%
+    );
+    border: 1px solid rgba(167, 139, 250, 0.22);
+    border-radius: 4px;
+    clip-path: polygon(
+      18px 0,
+      calc(100% - 4px) 0,
+      100% 4px,
+      100% calc(100% - 18px),
+      calc(100% - 18px) 100%,
+      4px 100%,
+      0 calc(100% - 4px),
+      0 18px
+    );
+    overflow: hidden;
+  }
+  .arena-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(rgba(167, 139, 250, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(167, 139, 250, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse at top, rgba(0, 0, 0, 0.9), transparent 70%);
+    pointer-events: none;
+  }
+  .arena-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      transparent 49%,
+      rgba(255, 255, 255, 0.04) 50%,
+      transparent 51%,
+      transparent
+    );
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .arena-panel--plasma {
+    box-shadow: 0 0 0 1px rgba(255, 43, 142, 0.35), 0 24px 80px -16px rgba(255, 43, 142, 0.4);
+  }
+  .arena-panel--cyan {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 24px 80px -16px rgba(34, 211, 238, 0.4);
+  }
+  .arena-panel--ember {
+    box-shadow: 0 0 0 1px rgba(255, 122, 26, 0.35), 0 24px 80px -16px rgba(255, 122, 26, 0.4);
+  }
+  .arena-panel--violet {
+    box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.35), 0 24px 80px -16px rgba(167, 139, 250, 0.4);
+  }
+
+  .arena-label {
+    font-family: 'Orbitron', 'Chakra Petch', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.38em;
+    font-weight: 700;
+    font-size: 0.68rem;
+  }
+
+  .arena-input,
+  .arena-select {
+    width: 100%;
+    background: rgba(4, 3, 15, 0.7);
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    color: #f3eeff;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 2px;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background 0.15s ease;
+  }
+  .arena-input:focus,
+  .arena-select:focus {
+    border-color: rgba(34, 211, 238, 0.7);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+    background: rgba(10, 11, 46, 0.85);
+  }
+
+  .arena-checkbox {
+    appearance: none;
+    width: 1.05rem;
+    height: 1.05rem;
+    border: 1px solid rgba(167, 139, 250, 0.45);
+    background: rgba(4, 3, 15, 0.7);
+    border-radius: 2px;
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .arena-checkbox:checked {
+    background: linear-gradient(135deg, #ff2b8e, #ff7a1a);
+    border-color: #ff2b8e;
+    box-shadow: 0 0 12px rgba(255, 43, 142, 0.6);
+  }
+  .arena-checkbox:checked::after {
+    content: '';
+    width: 0.35rem;
+    height: 0.6rem;
+    border: solid #04030f;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  .arena-checkbox:focus-visible {
+    outline: 2px solid rgba(34, 211, 238, 0.7);
+    outline-offset: 2px;
+  }
+
+  .arena-chip {
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .arena-button {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: linear-gradient(135deg, rgba(255, 43, 142, 0.15), rgba(34, 211, 238, 0.12));
+    color: #f3eeff;
+    cursor: pointer;
+    clip-path: polygon(
+      10px 0,
+      100% 0,
+      100% calc(100% - 10px),
+      calc(100% - 10px) 100%,
+      0 100%,
+      0 10px
+    );
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.15s ease,
+      background 0.15s ease;
+  }
+  .arena-button:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, rgba(255, 43, 142, 0.35), rgba(34, 211, 238, 0.3));
+    box-shadow: 0 12px 30px -12px rgba(255, 43, 142, 0.8);
+  }
+  .arena-button:focus-visible {
+    outline: 2px solid rgba(34, 211, 238, 0.9);
+    outline-offset: 3px;
+  }
+
+  .arena-divider {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(167, 139, 250, 0.4),
+      rgba(255, 43, 142, 0.4),
+      transparent
+    );
+  }
+
+  .arena-scanlines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.02) 0 1px,
+      transparent 1px 3px
+    );
+  }
 }
