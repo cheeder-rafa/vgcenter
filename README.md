@@ -4,13 +4,14 @@ VGCenter is a hub of tools for competitive Pokemon VGC players. Sub-project 1 is
 
 ## Current Status
 
-M7 is in place:
+M9 is in place:
 
 - `backend/` is a Spring Boot 3.5 / Java 21 / Maven project with Spotless, Checkstyle, JaCoCo, ArchUnit, jqwik, and a passing application smoke test.
 - `frontend/` is a React 18 / Vite / TypeScript / Tailwind / Zustand app with ESLint, Prettier, Vitest, and Testing Library.
 - CI workflows exist for backend and frontend verification.
 - Dockerfiles exist for each app, with a root `docker-compose.yml` to build both services.
 - The backend now exposes the Regulation M-A web API for damage calculation, dataset lookup, and team imports from Showdown paste text or Pokepaste URLs.
+- The frontend now submits live calculator inputs to the backend damage API, renders both compact range and full 16-roll result modes, and can import Showdown or Pokepaste teams directly into either calculator side.
 
 ## API Surface
 
