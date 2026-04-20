@@ -13,7 +13,7 @@ class PokemonSpeciesMegaTest {
     private static final Stats CHARIZARD_BASE_STATS = new Stats(78, 84, 78, 109, 85, 100);
     private static final Stats CHARIZARD_X_STATS = new Stats(78, 130, 111, 130, 85, 100);
     private static final MegaForm MEGA_CHARIZARD_X = new MegaForm(
-            "charizard-mega-x", "Charizard-Mega-X", List.of(Type.FIRE, Type.DRAGON), CHARIZARD_X_STATS, Ability.NONE);
+            "charizard-mega-x", "Charizard-Mega-X", List.of(Type.FIRE, Type.DRAGON), CHARIZARD_X_STATS, "tough-claws");
 
     @Test
     void speciesWithoutMegaFormExposesEmptyOptional() {
@@ -27,6 +27,7 @@ class PokemonSpeciesMegaTest {
         PokemonSpecies species = charizardWithMegaX();
 
         assertThat(species.megaForm()).contains(MEGA_CHARIZARD_X);
+        assertThat(species.megaForms()).containsExactly(MEGA_CHARIZARD_X);
     }
 
     @Test
@@ -43,7 +44,7 @@ class PokemonSpeciesMegaTest {
     }
 
     @Test
-    void buildCombatantMegaActiveSwapsTypesStatsAndAbility() {
+    void buildCombatantMegaActiveSwapsTypesAndStats() {
         PokemonSpecies species = charizardWithMegaX();
 
         Combatant mega = species.buildCombatant(50, new Sp(0, 0, 0, 0, 0, 0), Nature.ADAMANT, true);
@@ -52,17 +53,16 @@ class PokemonSpeciesMegaTest {
         Combatant expected = Combatant.fromBaseStats(
                 50, List.of(Type.FIRE, Type.DRAGON), CHARIZARD_X_STATS, new Sp(0, 0, 0, 0, 0, 0), Nature.ADAMANT);
         assertThat(mega.stats()).isEqualTo(expected.stats());
-        assertThat(mega.ability()).isEqualTo(Ability.NONE);
     }
 
     @Test
-    void buildCombatantMegaActiveAdoptsMegaAbilityWhenDifferent() {
+    void buildCombatantMegaActiveAdoptsMegaAbilityWhenMappable() {
         MegaForm megaLucario = new MegaForm(
                 "lucario-mega",
                 "Lucario-Mega",
                 List.of(Type.FIGHTING, Type.STEEL),
                 new Stats(70, 145, 88, 140, 70, 112),
-                Ability.ADAPTABILITY);
+                "adaptability");
         PokemonSpecies lucario = new PokemonSpecies(
                 "lucario",
                 "Lucario",
@@ -70,12 +70,33 @@ class PokemonSpeciesMegaTest {
                 new Stats(70, 110, 70, 115, 70, 90),
                 List.of("steadfast"),
                 List.of("close-combat"),
-                List.of("lucarionite"),
                 megaLucario);
 
         Combatant mega = lucario.buildCombatant(50, new Sp(0, 0, 0, 0, 0, 0), Nature.ADAMANT, true);
 
         assertThat(mega.ability()).isEqualTo(Ability.ADAPTABILITY);
+    }
+
+    @Test
+    void buildCombatantMegaActiveFallsBackToNoneForUnmodelledAbility() {
+        MegaForm megaCharizardY = new MegaForm(
+                "charizard-mega-y",
+                "Charizard-Mega-Y",
+                List.of(Type.FIRE, Type.FLYING),
+                new Stats(78, 104, 78, 159, 115, 100),
+                "drought");
+        PokemonSpecies charizard = new PokemonSpecies(
+                "charizard",
+                "Charizard",
+                List.of(Type.FIRE, Type.FLYING),
+                CHARIZARD_BASE_STATS,
+                List.of("blaze"),
+                List.of("flamethrower"),
+                megaCharizardY);
+
+        Combatant mega = charizard.buildCombatant(50, new Sp(0, 0, 0, 0, 0, 0), Nature.MODEST, true);
+
+        assertThat(mega.ability()).isEqualTo(Ability.NONE);
     }
 
     @Test
@@ -103,8 +124,7 @@ class PokemonSpeciesMegaTest {
                 List.of(Type.ELECTRIC, Type.GHOST),
                 new Stats(50, 50, 77, 95, 77, 91),
                 List.of("levitate"),
-                List.of("shadow-ball"),
-                List.of("choice-specs"));
+                List.of("shadow-ball"));
         assertThat(species.megaForm()).isEqualTo(Optional.empty());
     }
 
@@ -115,8 +135,7 @@ class PokemonSpeciesMegaTest {
                 List.of(Type.FIRE, Type.FLYING),
                 CHARIZARD_BASE_STATS,
                 List.of("blaze"),
-                List.of("flamethrower"),
-                List.of("charcoal"));
+                List.of("flamethrower"));
     }
 
     private static PokemonSpecies charizardWithMegaX() {
@@ -127,7 +146,6 @@ class PokemonSpeciesMegaTest {
                 CHARIZARD_BASE_STATS,
                 List.of("blaze"),
                 List.of("flamethrower", "dragon-claw"),
-                List.of("charizardite-x"),
                 MEGA_CHARIZARD_X);
     }
 }

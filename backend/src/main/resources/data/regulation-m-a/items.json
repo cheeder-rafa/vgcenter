@@ -1,15 +1,470 @@
 [
-  { "id": "focus-sash", "name": "Focus Sash" },
-  { "id": "choice-band", "name": "Choice Band" },
-  { "id": "life-orb", "name": "Life Orb" },
-  { "id": "throat-spray", "name": "Throat Spray" },
-  { "id": "clear-amulet", "name": "Clear Amulet" },
-  { "id": "lum-berry", "name": "Lum Berry" },
-  { "id": "choice-specs", "name": "Choice Specs" },
-  { "id": "leftovers", "name": "Leftovers" },
-  { "id": "covert-cloak", "name": "Covert Cloak" },
-  { "id": "sitrus-berry", "name": "Sitrus Berry" },
-  { "id": "rocky-helmet", "name": "Rocky Helmet" },
-  { "id": "assault-vest", "name": "Assault Vest" },
-  { "id": "eviolite", "name": "Eviolite" }
+  {
+    "id": "roseli-berry",
+    "name": "Roseli Berry"
+  },
+  {
+    "id": "chilan-berry",
+    "name": "Chilan Berry"
+  },
+  {
+    "id": "babiri-berry",
+    "name": "Babiri Berry"
+  },
+  {
+    "id": "haban-berry",
+    "name": "Haban Berry"
+  },
+  {
+    "id": "charti-berry",
+    "name": "Charti Berry"
+  },
+  {
+    "id": "tanga-berry",
+    "name": "Tanga Berry"
+  },
+  {
+    "id": "payapa-berry",
+    "name": "Payapa Berry"
+  },
+  {
+    "id": "kebia-berry",
+    "name": "Kebia Berry"
+  },
+  {
+    "id": "chople-berry",
+    "name": "Chople Berry"
+  },
+  {
+    "id": "rindo-berry",
+    "name": "Rindo Berry"
+  },
+  {
+    "id": "occa-berry",
+    "name": "Occa Berry"
+  },
+  {
+    "id": "wacan-berry",
+    "name": "Wacan Berry"
+  },
+  {
+    "id": "colbur-berry",
+    "name": "Colbur Berry"
+  },
+  {
+    "id": "kasib-berry",
+    "name": "Kasib Berry"
+  },
+  {
+    "id": "coba-berry",
+    "name": "Coba Berry"
+  },
+  {
+    "id": "shuca-berry",
+    "name": "Shuca Berry"
+  },
+  {
+    "id": "yache-berry",
+    "name": "Yache Berry"
+  },
+  {
+    "id": "passho-berry",
+    "name": "Passho Berry"
+  },
+  {
+    "id": "manectite",
+    "name": "Manectite"
+  },
+  {
+    "id": "houndoominite",
+    "name": "Houndoominite"
+  },
+  {
+    "id": "audinite",
+    "name": "Audinite"
+  },
+  {
+    "id": "lopunnite",
+    "name": "Lopunnite"
+  },
+  {
+    "id": "sablenite",
+    "name": "Sablenite"
+  },
+  {
+    "id": "sharpedonite",
+    "name": "Sharpedonite"
+  },
+  {
+    "id": "gyaradosite",
+    "name": "Gyaradosite"
+  },
+  {
+    "id": "lucarionite",
+    "name": "Lucarionite"
+  },
+  {
+    "id": "heracronite",
+    "name": "Heracronite"
+  },
+  {
+    "id": "aerodactylite",
+    "name": "Aerodactylite"
+  },
+  {
+    "id": "glalitite",
+    "name": "Glalitite"
+  },
+  {
+    "id": "pinsirite",
+    "name": "Pinsirite"
+  },
+  {
+    "id": "gardevoirite",
+    "name": "Gardevoirite"
+  },
+  {
+    "id": "galladite",
+    "name": "Galladite"
+  },
+  {
+    "id": "skarmorite",
+    "name": "Skarmorite"
+  },
+  {
+    "id": "clefablite",
+    "name": "Clefablite"
+  },
+  {
+    "id": "alakazite",
+    "name": "Alakazite"
+  },
+  {
+    "id": "drampanite",
+    "name": "Drampanite"
+  },
+  {
+    "id": "excadrite",
+    "name": "Excadrite"
+  },
+  {
+    "id": "chandelurite",
+    "name": "Chandelurite"
+  },
+  {
+    "id": "aggronite",
+    "name": "Aggronite"
+  },
+  {
+    "id": "gengarite",
+    "name": "Gengarite"
+  },
+  {
+    "id": "medichamite",
+    "name": "Medichamite"
+  },
+  {
+    "id": "abomasite",
+    "name": "Abomasite"
+  },
+  {
+    "id": "scizorite",
+    "name": "Scizorite"
+  },
+  {
+    "id": "garchompite",
+    "name": "Garchompite"
+  },
+  {
+    "id": "steelixite",
+    "name": "Steelixite"
+  },
+  {
+    "id": "kangaskhanite",
+    "name": "Kangaskhanite"
+  },
+  {
+    "id": "charizardite-x",
+    "name": "Charizardite X"
+  },
+  {
+    "id": "charizardite-y",
+    "name": "Charizardite Y"
+  },
+  {
+    "id": "blastoisinite",
+    "name": "Blastoisinite"
+  },
+  {
+    "id": "meganiumite",
+    "name": "Meganiumite"
+  },
+  {
+    "id": "feraligite",
+    "name": "Feraligite"
+  },
+  {
+    "id": "emboarite",
+    "name": "Emboarite"
+  },
+  {
+    "id": "beedrillite",
+    "name": "Beedrillite"
+  },
+  {
+    "id": "ampharosite",
+    "name": "Ampharosite"
+  },
+  {
+    "id": "victreebelite",
+    "name": "Victreebelite"
+  },
+  {
+    "id": "banettite",
+    "name": "Banettite"
+  },
+  {
+    "id": "cameruptite",
+    "name": "Cameruptite"
+  },
+  {
+    "id": "absolite",
+    "name": "Absolite"
+  },
+  {
+    "id": "slowbronite",
+    "name": "Slowbronite"
+  },
+  {
+    "id": "hawluchanite",
+    "name": "Hawluchanite"
+  },
+  {
+    "id": "altarianite",
+    "name": "Altarianite"
+  },
+  {
+    "id": "dragoninite",
+    "name": "Dragoninite"
+  },
+  {
+    "id": "froslassite",
+    "name": "Froslassite"
+  },
+  {
+    "id": "pidgeotite",
+    "name": "Pidgeotite"
+  },
+  {
+    "id": "starminite",
+    "name": "Starminite"
+  },
+  {
+    "id": "tyranitarite",
+    "name": "Tyranitarite"
+  },
+  {
+    "id": "venusaurite",
+    "name": "Venusaurite"
+  },
+  {
+    "id": "floettite",
+    "name": "Floettite"
+  },
+  {
+    "id": "greninjite",
+    "name": "Greninjite"
+  },
+  {
+    "id": "delphoxite",
+    "name": "Delphoxite"
+  },
+  {
+    "id": "chesnaughtite",
+    "name": "Chesnaughtite"
+  },
+  {
+    "id": "chimechite",
+    "name": "Chimechite"
+  },
+  {
+    "id": "crabominite",
+    "name": "Crabominite"
+  },
+  {
+    "id": "glimmoranite",
+    "name": "Glimmoranite"
+  },
+  {
+    "id": "golurkite",
+    "name": "Golurkite"
+  },
+  {
+    "id": "meowsticite",
+    "name": "Meowsticite"
+  },
+  {
+    "id": "scovillainite",
+    "name": "Scovillainite"
+  },
+  {
+    "id": "king",
+    "name": "King"
+  },
+  {
+    "id": "bright-powder",
+    "name": "Bright Powder"
+  },
+  {
+    "id": "scope-lens",
+    "name": "Scope Lens"
+  },
+  {
+    "id": "quick-claw",
+    "name": "Quick Claw"
+  },
+  {
+    "id": "light-ball",
+    "name": "Light Ball"
+  },
+  {
+    "id": "spell-tag",
+    "name": "Spell Tag"
+  },
+  {
+    "id": "metal-coat",
+    "name": "Metal Coat"
+  },
+  {
+    "id": "soft-sand",
+    "name": "Soft Sand"
+  },
+  {
+    "id": "sharp-beak",
+    "name": "Sharp Beak"
+  },
+  {
+    "id": "silk-scarf",
+    "name": "Silk Scarf"
+  },
+  {
+    "id": "magnet",
+    "name": "Magnet"
+  },
+  {
+    "id": "black-belt",
+    "name": "Black Belt"
+  },
+  {
+    "id": "black-glasses",
+    "name": "Black Glasses"
+  },
+  {
+    "id": "silver-powder",
+    "name": "Silver Powder"
+  },
+  {
+    "id": "miracle-seed",
+    "name": "Miracle Seed"
+  },
+  {
+    "id": "hard-stone",
+    "name": "Hard Stone"
+  },
+  {
+    "id": "mystic-water",
+    "name": "Mystic Water"
+  },
+  {
+    "id": "poison-barb",
+    "name": "Poison Barb"
+  },
+  {
+    "id": "never-melt-ice",
+    "name": "Never-Melt Ice"
+  },
+  {
+    "id": "twisted-spoon",
+    "name": "Twisted Spoon"
+  },
+  {
+    "id": "charcoal",
+    "name": "Charcoal"
+  },
+  {
+    "id": "dragon-fang",
+    "name": "Dragon Fang"
+  },
+  {
+    "id": "fairy-feather",
+    "name": "Fairy Feather"
+  },
+  {
+    "id": "sitrus-berry",
+    "name": "Sitrus Berry"
+  },
+  {
+    "id": "lum-berry",
+    "name": "Lum Berry"
+  },
+  {
+    "id": "persim-berry",
+    "name": "Persim Berry"
+  },
+  {
+    "id": "oran-berry",
+    "name": "Oran Berry"
+  },
+  {
+    "id": "leppa-berry",
+    "name": "Leppa Berry"
+  },
+  {
+    "id": "aspear-berry",
+    "name": "Aspear Berry"
+  },
+  {
+    "id": "rawst-berry",
+    "name": "Rawst Berry"
+  },
+  {
+    "id": "pecha-berry",
+    "name": "Pecha Berry"
+  },
+  {
+    "id": "chesto-berry",
+    "name": "Chesto Berry"
+  },
+  {
+    "id": "cheri-berry",
+    "name": "Cheri Berry"
+  },
+  {
+    "id": "focus-band",
+    "name": "Focus Band"
+  },
+  {
+    "id": "mental-herb",
+    "name": "Mental Herb"
+  },
+  {
+    "id": "leftovers",
+    "name": "Leftovers"
+  },
+  {
+    "id": "shell-bell",
+    "name": "Shell Bell"
+  },
+  {
+    "id": "white-herb",
+    "name": "White Herb"
+  },
+  {
+    "id": "choice-scarf",
+    "name": "Choice Scarf"
+  },
+  {
+    "id": "focus-sash",
+    "name": "Focus Sash"
+  }
 ]

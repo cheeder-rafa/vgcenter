@@ -1,0 +1,1071 @@
+[
+  {
+    "speciesId": "venusaur",
+    "id": "venusaur-mega",
+    "name": "Mega Venusaur",
+    "types": [
+      "GRASS",
+      "POISON"
+    ],
+    "baseStats": {
+      "hp": 80,
+      "attack": 100,
+      "defense": 123,
+      "specialAttack": 122,
+      "specialDefense": 120,
+      "speed": 80
+    },
+    "ability": "thick-fat"
+  },
+  {
+    "speciesId": "charizard",
+    "id": "charizard-mega-x",
+    "name": "Mega Charizard X",
+    "types": [
+      "FIRE",
+      "DRAGON"
+    ],
+    "baseStats": {
+      "hp": 78,
+      "attack": 130,
+      "defense": 111,
+      "specialAttack": 130,
+      "specialDefense": 85,
+      "speed": 100
+    },
+    "ability": "tough-claws"
+  },
+  {
+    "speciesId": "charizard",
+    "id": "charizard-mega-y",
+    "name": "Mega Charizard Y",
+    "types": [
+      "FIRE",
+      "FLYING"
+    ],
+    "baseStats": {
+      "hp": 78,
+      "attack": 104,
+      "defense": 78,
+      "specialAttack": 159,
+      "specialDefense": 115,
+      "speed": 100
+    },
+    "ability": "drought"
+  },
+  {
+    "speciesId": "blastoise",
+    "id": "blastoise-mega",
+    "name": "Mega Blastoise",
+    "types": [
+      "WATER"
+    ],
+    "baseStats": {
+      "hp": 79,
+      "attack": 103,
+      "defense": 120,
+      "specialAttack": 135,
+      "specialDefense": 115,
+      "speed": 78
+    },
+    "ability": "mega-launcher"
+  },
+  {
+    "speciesId": "beedrill",
+    "id": "beedrill-mega",
+    "name": "Mega Beedrill",
+    "types": [
+      "POISON",
+      "BUG"
+    ],
+    "baseStats": {
+      "hp": 65,
+      "attack": 150,
+      "defense": 40,
+      "specialAttack": 15,
+      "specialDefense": 80,
+      "speed": 145
+    },
+    "ability": "adaptability"
+  },
+  {
+    "speciesId": "pidgeot",
+    "id": "pidgeot-mega",
+    "name": "Mega Pidgeot",
+    "types": [
+      "NORMAL",
+      "FLYING"
+    ],
+    "baseStats": {
+      "hp": 83,
+      "attack": 80,
+      "defense": 80,
+      "specialAttack": 135,
+      "specialDefense": 80,
+      "speed": 121
+    },
+    "ability": "no-guard"
+  },
+  {
+    "speciesId": "clefable",
+    "id": "clefable-mega",
+    "name": "Mega Clefable",
+    "types": [
+      "FLYING",
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 95,
+      "attack": 80,
+      "defense": 93,
+      "specialAttack": 135,
+      "specialDefense": 110,
+      "speed": 70
+    },
+    "ability": "magic-bounce"
+  },
+  {
+    "speciesId": "alakazam",
+    "id": "alakazam-mega",
+    "name": "Mega Alakazam",
+    "types": [
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 55,
+      "attack": 50,
+      "defense": 65,
+      "specialAttack": 175,
+      "specialDefense": 105,
+      "speed": 150
+    },
+    "ability": "trace"
+  },
+  {
+    "speciesId": "victreebel",
+    "id": "victreebel-mega",
+    "name": "Mega Victreebel",
+    "types": [
+      "GRASS",
+      "POISON"
+    ],
+    "baseStats": {
+      "hp": 80,
+      "attack": 125,
+      "defense": 85,
+      "specialAttack": 135,
+      "specialDefense": 95,
+      "speed": 70
+    },
+    "ability": "innards-out"
+  },
+  {
+    "speciesId": "slowbro",
+    "id": "slowbro-mega",
+    "name": "Mega Slowbro",
+    "types": [
+      "WATER",
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 95,
+      "attack": 75,
+      "defense": 180,
+      "specialAttack": 130,
+      "specialDefense": 80,
+      "speed": 30
+    },
+    "ability": "shell-armor"
+  },
+  {
+    "speciesId": "gengar",
+    "id": "gengar-mega",
+    "name": "Mega Gengar",
+    "types": [
+      "POISON",
+      "GHOST"
+    ],
+    "baseStats": {
+      "hp": 60,
+      "attack": 65,
+      "defense": 80,
+      "specialAttack": 170,
+      "specialDefense": 95,
+      "speed": 130
+    },
+    "ability": "shadow-tag"
+  },
+  {
+    "speciesId": "kangaskhan",
+    "id": "kangaskhan-mega",
+    "name": "Mega Kangaskhan",
+    "types": [
+      "NORMAL"
+    ],
+    "baseStats": {
+      "hp": 105,
+      "attack": 125,
+      "defense": 100,
+      "specialAttack": 60,
+      "specialDefense": 100,
+      "speed": 100
+    },
+    "ability": "parental-bond"
+  },
+  {
+    "speciesId": "starmie",
+    "id": "starmie-mega",
+    "name": "Mega Starmie",
+    "types": [
+      "WATER",
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 60,
+      "attack": 100,
+      "defense": 105,
+      "specialAttack": 130,
+      "specialDefense": 105,
+      "speed": 120
+    },
+    "ability": "huge-power"
+  },
+  {
+    "speciesId": "pinsir",
+    "id": "pinsir-mega",
+    "name": "Mega Pinsir",
+    "types": [
+      "FLYING",
+      "BUG"
+    ],
+    "baseStats": {
+      "hp": 65,
+      "attack": 155,
+      "defense": 120,
+      "specialAttack": 65,
+      "specialDefense": 90,
+      "speed": 105
+    },
+    "ability": "aerilate"
+  },
+  {
+    "speciesId": "gyarados",
+    "id": "gyarados-mega",
+    "name": "Mega Gyarados",
+    "types": [
+      "WATER",
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 95,
+      "attack": 155,
+      "defense": 109,
+      "specialAttack": 70,
+      "specialDefense": 130,
+      "speed": 81
+    },
+    "ability": "mold-breaker"
+  },
+  {
+    "speciesId": "aerodactyl",
+    "id": "aerodactyl-mega",
+    "name": "Mega Aerodactyl",
+    "types": [
+      "FLYING",
+      "ROCK"
+    ],
+    "baseStats": {
+      "hp": 80,
+      "attack": 135,
+      "defense": 85,
+      "specialAttack": 70,
+      "specialDefense": 95,
+      "speed": 150
+    },
+    "ability": "tough-claws"
+  },
+  {
+    "speciesId": "dragonite",
+    "id": "dragonite-mega",
+    "name": "Mega Dragonite",
+    "types": [
+      "FLYING",
+      "DRAGON"
+    ],
+    "baseStats": {
+      "hp": 91,
+      "attack": 124,
+      "defense": 115,
+      "specialAttack": 145,
+      "specialDefense": 125,
+      "speed": 100
+    },
+    "ability": "multiscale"
+  },
+  {
+    "speciesId": "meganium",
+    "id": "meganium-mega",
+    "name": "Mega Meganium",
+    "types": [
+      "GRASS",
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 80,
+      "attack": 92,
+      "defense": 115,
+      "specialAttack": 143,
+      "specialDefense": 115,
+      "speed": 80
+    },
+    "ability": "mega-sol"
+  },
+  {
+    "speciesId": "feraligatr",
+    "id": "feraligatr-mega",
+    "name": "Mega Feraligatr",
+    "types": [
+      "WATER",
+      "DRAGON"
+    ],
+    "baseStats": {
+      "hp": 85,
+      "attack": 160,
+      "defense": 125,
+      "specialAttack": 89,
+      "specialDefense": 93,
+      "speed": 78
+    },
+    "ability": "dragonize"
+  },
+  {
+    "speciesId": "ampharos",
+    "id": "ampharos-mega",
+    "name": "Mega Ampharos",
+    "types": [
+      "ELECTRIC",
+      "DRAGON"
+    ],
+    "baseStats": {
+      "hp": 90,
+      "attack": 95,
+      "defense": 105,
+      "specialAttack": 165,
+      "specialDefense": 110,
+      "speed": 45
+    },
+    "ability": "mold-breaker"
+  },
+  {
+    "speciesId": "steelix",
+    "id": "steelix-mega",
+    "name": "Mega Steelix",
+    "types": [
+      "GROUND",
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 75,
+      "attack": 125,
+      "defense": 230,
+      "specialAttack": 55,
+      "specialDefense": 95,
+      "speed": 30
+    },
+    "ability": "sand-force"
+  },
+  {
+    "speciesId": "scizor",
+    "id": "scizor-mega",
+    "name": "Mega Scizor",
+    "types": [
+      "BUG",
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 150,
+      "defense": 140,
+      "specialAttack": 65,
+      "specialDefense": 100,
+      "speed": 75
+    },
+    "ability": "technician"
+  },
+  {
+    "speciesId": "heracross",
+    "id": "heracross-mega",
+    "name": "Mega Heracross",
+    "types": [
+      "FIGHTING",
+      "BUG"
+    ],
+    "baseStats": {
+      "hp": 80,
+      "attack": 185,
+      "defense": 115,
+      "specialAttack": 40,
+      "specialDefense": 105,
+      "speed": 75
+    },
+    "ability": "skill-link"
+  },
+  {
+    "speciesId": "skarmory",
+    "id": "skarmory-mega",
+    "name": "Mega Skarmory",
+    "types": [
+      "FLYING",
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 65,
+      "attack": 140,
+      "defense": 110,
+      "specialAttack": 40,
+      "specialDefense": 100,
+      "speed": 110
+    },
+    "ability": "stalwart"
+  },
+  {
+    "speciesId": "houndoom",
+    "id": "houndoom-mega",
+    "name": "Mega Houndoom",
+    "types": [
+      "FIRE",
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 75,
+      "attack": 90,
+      "defense": 90,
+      "specialAttack": 140,
+      "specialDefense": 90,
+      "speed": 115
+    },
+    "ability": "solar-power"
+  },
+  {
+    "speciesId": "tyranitar",
+    "id": "tyranitar-mega",
+    "name": "Mega Tyranitar",
+    "types": [
+      "ROCK",
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 100,
+      "attack": 164,
+      "defense": 150,
+      "specialAttack": 95,
+      "specialDefense": 120,
+      "speed": 71
+    },
+    "ability": "sand-stream"
+  },
+  {
+    "speciesId": "gardevoir",
+    "id": "gardevoir-mega",
+    "name": "Mega Gardevoir",
+    "types": [
+      "PSYCHIC",
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 68,
+      "attack": 85,
+      "defense": 65,
+      "specialAttack": 165,
+      "specialDefense": 135,
+      "speed": 100
+    },
+    "ability": "pixilate"
+  },
+  {
+    "speciesId": "sableye",
+    "id": "sableye-mega",
+    "name": "Mega Sableye",
+    "types": [
+      "GHOST",
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 50,
+      "attack": 85,
+      "defense": 125,
+      "specialAttack": 85,
+      "specialDefense": 115,
+      "speed": 20
+    },
+    "ability": "magic-bounce"
+  },
+  {
+    "speciesId": "aggron",
+    "id": "aggron-mega",
+    "name": "Mega Aggron",
+    "types": [
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 140,
+      "defense": 230,
+      "specialAttack": 60,
+      "specialDefense": 80,
+      "speed": 50
+    },
+    "ability": "filter"
+  },
+  {
+    "speciesId": "medicham",
+    "id": "medicham-mega",
+    "name": "Mega Medicham",
+    "types": [
+      "FIGHTING",
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 60,
+      "attack": 100,
+      "defense": 85,
+      "specialAttack": 80,
+      "specialDefense": 85,
+      "speed": 100
+    },
+    "ability": "pure-power"
+  },
+  {
+    "speciesId": "manectric",
+    "id": "manectric-mega",
+    "name": "Mega Manectric",
+    "types": [
+      "ELECTRIC"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 75,
+      "defense": 80,
+      "specialAttack": 135,
+      "specialDefense": 80,
+      "speed": 135
+    },
+    "ability": "intimidate"
+  },
+  {
+    "speciesId": "sharpedo",
+    "id": "sharpedo-mega",
+    "name": "Mega Sharpedo",
+    "types": [
+      "WATER",
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 140,
+      "defense": 70,
+      "specialAttack": 110,
+      "specialDefense": 65,
+      "speed": 105
+    },
+    "ability": "strong-jaw"
+  },
+  {
+    "speciesId": "camerupt",
+    "id": "camerupt-mega",
+    "name": "Mega Camerupt",
+    "types": [
+      "FIRE",
+      "GROUND"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 120,
+      "defense": 100,
+      "specialAttack": 145,
+      "specialDefense": 105,
+      "speed": 20
+    },
+    "ability": "sheer-force"
+  },
+  {
+    "speciesId": "altaria",
+    "id": "altaria-mega",
+    "name": "Mega Altaria",
+    "types": [
+      "DRAGON",
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 75,
+      "attack": 110,
+      "defense": 110,
+      "specialAttack": 110,
+      "specialDefense": 105,
+      "speed": 80
+    },
+    "ability": "pixilate"
+  },
+  {
+    "speciesId": "banette",
+    "id": "banette-mega",
+    "name": "Mega Banette",
+    "types": [
+      "GHOST"
+    ],
+    "baseStats": {
+      "hp": 64,
+      "attack": 165,
+      "defense": 75,
+      "specialAttack": 93,
+      "specialDefense": 83,
+      "speed": 75
+    },
+    "ability": "prankster"
+  },
+  {
+    "speciesId": "chimecho",
+    "id": "chimecho-mega",
+    "name": "Mega Chimecho",
+    "types": [
+      "PSYCHIC",
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 75,
+      "attack": 50,
+      "defense": 110,
+      "specialAttack": 135,
+      "specialDefense": 120,
+      "speed": 65
+    },
+    "ability": "levitate"
+  },
+  {
+    "speciesId": "absol",
+    "id": "absol-mega",
+    "name": "Mega Absol",
+    "types": [
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 65,
+      "attack": 150,
+      "defense": 60,
+      "specialAttack": 115,
+      "specialDefense": 60,
+      "speed": 115
+    },
+    "ability": "magic-bounce"
+  },
+  {
+    "speciesId": "glalie",
+    "id": "glalie-mega",
+    "name": "Mega Glalie",
+    "types": [
+      "ICE"
+    ],
+    "baseStats": {
+      "hp": 80,
+      "attack": 120,
+      "defense": 80,
+      "specialAttack": 120,
+      "specialDefense": 80,
+      "speed": 100
+    },
+    "ability": "refrigerate"
+  },
+  {
+    "speciesId": "lopunny",
+    "id": "lopunny-mega",
+    "name": "Mega Lopunny",
+    "types": [
+      "NORMAL",
+      "FIGHTING"
+    ],
+    "baseStats": {
+      "hp": 65,
+      "attack": 136,
+      "defense": 94,
+      "specialAttack": 54,
+      "specialDefense": 96,
+      "speed": 135
+    },
+    "ability": "scrappy"
+  },
+  {
+    "speciesId": "garchomp",
+    "id": "garchomp-mega",
+    "name": "Mega Garchomp",
+    "types": [
+      "GROUND",
+      "DRAGON"
+    ],
+    "baseStats": {
+      "hp": 108,
+      "attack": 170,
+      "defense": 115,
+      "specialAttack": 120,
+      "specialDefense": 95,
+      "speed": 92
+    },
+    "ability": "sand-force"
+  },
+  {
+    "speciesId": "lucario",
+    "id": "lucario-mega",
+    "name": "Mega Lucario",
+    "types": [
+      "FIGHTING",
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 145,
+      "defense": 88,
+      "specialAttack": 140,
+      "specialDefense": 70,
+      "speed": 112
+    },
+    "ability": "adaptability"
+  },
+  {
+    "speciesId": "abomasnow",
+    "id": "abomasnow-mega",
+    "name": "Mega Abomasnow",
+    "types": [
+      "GRASS",
+      "ICE"
+    ],
+    "baseStats": {
+      "hp": 90,
+      "attack": 132,
+      "defense": 105,
+      "specialAttack": 132,
+      "specialDefense": 105,
+      "speed": 30
+    },
+    "ability": "snow-warning"
+  },
+  {
+    "speciesId": "gallade",
+    "id": "gallade-mega",
+    "name": "Mega Gallade",
+    "types": [
+      "FIGHTING",
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 68,
+      "attack": 165,
+      "defense": 95,
+      "specialAttack": 65,
+      "specialDefense": 115,
+      "speed": 110
+    },
+    "ability": "inner-focus"
+  },
+  {
+    "speciesId": "froslass",
+    "id": "froslass-mega",
+    "name": "Mega Froslass",
+    "types": [
+      "ICE",
+      "GHOST"
+    ],
+    "baseStats": {
+      "hp": 70,
+      "attack": 80,
+      "defense": 70,
+      "specialAttack": 140,
+      "specialDefense": 100,
+      "speed": 120
+    },
+    "ability": "snow-warning"
+  },
+  {
+    "speciesId": "emboar",
+    "id": "emboar-mega",
+    "name": "Mega Emboar",
+    "types": [
+      "FIRE",
+      "FIGHTING"
+    ],
+    "baseStats": {
+      "hp": 110,
+      "attack": 148,
+      "defense": 75,
+      "specialAttack": 110,
+      "specialDefense": 110,
+      "speed": 75
+    },
+    "ability": "mold-breaker"
+  },
+  {
+    "speciesId": "excadrill",
+    "id": "excadrill-mega",
+    "name": "Mega Excadrill",
+    "types": [
+      "GROUND",
+      "STEEL"
+    ],
+    "baseStats": {
+      "hp": 110,
+      "attack": 165,
+      "defense": 100,
+      "specialAttack": 65,
+      "specialDefense": 65,
+      "speed": 103
+    },
+    "ability": "piercing-drill"
+  },
+  {
+    "speciesId": "audino",
+    "id": "audino-mega",
+    "name": "Mega Audino",
+    "types": [
+      "NORMAL",
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 103,
+      "attack": 60,
+      "defense": 126,
+      "specialAttack": 80,
+      "specialDefense": 126,
+      "speed": 50
+    },
+    "ability": "healer"
+  },
+  {
+    "speciesId": "chandelure",
+    "id": "chandelure-mega",
+    "name": "Mega Chandelure",
+    "types": [
+      "FIRE",
+      "GHOST"
+    ],
+    "baseStats": {
+      "hp": 60,
+      "attack": 75,
+      "defense": 110,
+      "specialAttack": 175,
+      "specialDefense": 110,
+      "speed": 90
+    },
+    "ability": "infiltrator"
+  },
+  {
+    "speciesId": "golurk",
+    "id": "golurk-mega",
+    "name": "Mega Golurk",
+    "types": [
+      "GROUND",
+      "GHOST"
+    ],
+    "baseStats": {
+      "hp": 89,
+      "attack": 159,
+      "defense": 105,
+      "specialAttack": 70,
+      "specialDefense": 105,
+      "speed": 55
+    },
+    "ability": "unseen-fist"
+  },
+  {
+    "speciesId": "chesnaught",
+    "id": "chesnaught-mega",
+    "name": "Mega Chesnaught",
+    "types": [
+      "GRASS",
+      "FIGHTING"
+    ],
+    "baseStats": {
+      "hp": 88,
+      "attack": 137,
+      "defense": 172,
+      "specialAttack": 74,
+      "specialDefense": 115,
+      "speed": 44
+    },
+    "ability": "bulletproof"
+  },
+  {
+    "speciesId": "delphox",
+    "id": "delphox-mega",
+    "name": "Mega Delphox",
+    "types": [
+      "FIRE",
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 75,
+      "attack": 69,
+      "defense": 72,
+      "specialAttack": 159,
+      "specialDefense": 125,
+      "speed": 134
+    },
+    "ability": "levitate"
+  },
+  {
+    "speciesId": "greninja",
+    "id": "greninja-mega",
+    "name": "Mega Greninja",
+    "types": [
+      "WATER",
+      "DARK"
+    ],
+    "baseStats": {
+      "hp": 72,
+      "attack": 125,
+      "defense": 77,
+      "specialAttack": 133,
+      "specialDefense": 81,
+      "speed": 142
+    },
+    "ability": "protean"
+  },
+  {
+    "speciesId": "floette",
+    "id": "floette-mega",
+    "name": "Mega Floette",
+    "types": [
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 74,
+      "attack": 85,
+      "defense": 87,
+      "specialAttack": 155,
+      "specialDefense": 148,
+      "speed": 102
+    },
+    "ability": "fairy-aura"
+  },
+  {
+    "speciesId": "meowstic-male",
+    "id": "meowstic-male-mega",
+    "name": "Mega Meowstic (Male)",
+    "types": [
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 74,
+      "attack": 48,
+      "defense": 76,
+      "specialAttack": 143,
+      "specialDefense": 101,
+      "speed": 124
+    },
+    "ability": "trace"
+  },
+  {
+    "speciesId": "meowstic-female",
+    "id": "meowstic-female-mega",
+    "name": "Mega Meowstic (Female)",
+    "types": [
+      "PSYCHIC"
+    ],
+    "baseStats": {
+      "hp": 74,
+      "attack": 48,
+      "defense": 76,
+      "specialAttack": 83,
+      "specialDefense": 81,
+      "speed": 104
+    },
+    "ability": "trace"
+  },
+  {
+    "speciesId": "hawlucha",
+    "id": "hawlucha-mega",
+    "name": "Mega Hawlucha",
+    "types": [
+      "FIGHTING",
+      "FLYING"
+    ],
+    "baseStats": {
+      "hp": 78,
+      "attack": 137,
+      "defense": 100,
+      "specialAttack": 74,
+      "specialDefense": 93,
+      "speed": 118
+    },
+    "ability": "no-guard"
+  },
+  {
+    "speciesId": "crabominable",
+    "id": "crabominable-mega",
+    "name": "Mega Crabominable",
+    "types": [
+      "ICE",
+      "FIGHTING"
+    ],
+    "baseStats": {
+      "hp": 97,
+      "attack": 157,
+      "defense": 122,
+      "specialAttack": 62,
+      "specialDefense": 107,
+      "speed": 33
+    },
+    "ability": "iron-fist"
+  },
+  {
+    "speciesId": "drampa",
+    "id": "drampa-mega",
+    "name": "Mega Drampa",
+    "types": [
+      "NORMAL",
+      "DRAGON"
+    ],
+    "baseStats": {
+      "hp": 78,
+      "attack": 85,
+      "defense": 110,
+      "specialAttack": 160,
+      "specialDefense": 116,
+      "speed": 36
+    },
+    "ability": "berserk"
+  },
+  {
+    "speciesId": "scovillain",
+    "id": "scovillain-mega",
+    "name": "Mega Scovillain",
+    "types": [
+      "FIRE",
+      "GRASS"
+    ],
+    "baseStats": {
+      "hp": 65,
+      "attack": 138,
+      "defense": 85,
+      "specialAttack": 138,
+      "specialDefense": 85,
+      "speed": 75
+    },
+    "ability": "spicy-spray"
+  },
+  {
+    "speciesId": "glimmora",
+    "id": "glimmora-mega",
+    "name": "Mega Glimmora",
+    "types": [
+      "POISON",
+      "ROCK"
+    ],
+    "baseStats": {
+      "hp": 83,
+      "attack": 90,
+      "defense": 105,
+      "specialAttack": 150,
+      "specialDefense": 96,
+      "speed": 101
+    },
+    "ability": "adaptability"
+  }
+]

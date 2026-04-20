@@ -121,7 +121,9 @@ Write a failing test before every new behavior. Red → green → refactor.
 
 - All Pokémon, move, ability, item, and nature data lives in `backend/src/main/resources/data/regulation-m-a/` as JSON.
 - Schema is validated at application startup via `DatasetHealthCheck`; any dangling reference (e.g., a Pokémon's ability that isn't in `abilities.json`) must fail startup loudly.
-- Regulation M-A roster: Paldea Pokédex #001–375 and #388–392, excluding Paradox Pokémon, Treasures of Ruin, Koraidon, Miraidon, non-Paldean regional variants, and non-Fancy Vivillon.
+- Regulation M-A roster: the explicit Pokémon Champions launch roster captured in `backend/src/main/resources/data/regulation-m-a/` (the corrected curated list spanning Venusaur through Hydrapple, plus the legal Mega roster), not a Paldea Pokédex range rule.
+- Legal non-Mega alternate forms are stored as distinct Pokédex entries when Regulation M-A exposes them separately.
+- `items.json` is the global legal item pool for Regulation M-A. Do not model item legality as per-species lists in `pokedex.json`.
 - SP (0–32) replaces EVs. Assume all Pokémon have max-equivalent IVs. HP and stat formulas are documented in `PLAN.md` under the "Damage Formula Reference" / "Dataset Sourcing" sections.
 
 ## Definitions of "done" per milestone

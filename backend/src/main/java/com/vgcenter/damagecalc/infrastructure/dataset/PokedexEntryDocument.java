@@ -8,5 +8,4 @@ public record PokedexEntryDocument(
         List<String> types,
         BaseStatsDocument baseStats,
         List<String> abilities,
-        List<String> moves,
-        List<String> items) {}
+        List<String> moves) {}
