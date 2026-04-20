@@ -76,4 +76,20 @@ class DamageApiEndToEndTest {
                 .andExpect(jsonPath("$[0].id").value("venusaur"))
                 .andExpect(content().string(containsString("\"charizard-mega-x\"")));
     }
+
+    @Test
+    void importsShowdownTextThroughTheRealSpringContext() throws Exception {
+        mockMvc.perform(post("/api/v1/import/showdown")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "text": "Solaris (Charizard) (M) @ Charizardite Y\\nAbility: Blaze\\nLevel: 50\\nEVs: 4 HP / 252 SpA / 252 Spe\\nTimid Nature\\n- Heat Wave\\n- Air Slash\\n- Protect\\n- Solar Beam"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.team[0].speciesId").value("charizard"))
+                .andExpect(jsonPath("$.team[0].itemId").value("charizardite-y"))
+                .andExpect(jsonPath("$.team[0].sp.speed").value(32))
+                .andExpect(jsonPath("$.team[0].moveIds[3]").value("solar-beam"));
+    }
 }

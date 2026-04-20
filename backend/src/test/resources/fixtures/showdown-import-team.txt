@@ -1,0 +1,19 @@
+Solaris (Charizard) (M) @ Charizardite Y
+Ability: Blaze
+Level: 50
+EVs: 4 HP / 252 SpA / 252 Spe
+Timid Nature
+- Heat Wave
+- Air Slash
+- Protect
+- Solar Beam
+
+Venusaur (F) @ Focus Sash
+Ability: Chlorophyll
+Level: 50
+EVs: 252 HP / 4 Def / 252 Spe
+Calm Nature
+- Sleep Powder
+- Sludge Bomb
+- Giga Drain
+- Protect
