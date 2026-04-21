@@ -241,4 +241,76 @@ describe('PokemonPanel', () => {
       }
     `)
   })
+
+  it("changing species clears that side's moves and per-side results; does not affect opposite side", async () => {
+    const store = useCalculatorStore.getState()
+    store.setAttacker({
+      speciesId: 'charizard',
+      abilityId: 'blaze',
+      baseStats: pokedex[0].baseStats,
+      finalStats: pokedex[0].baseStats,
+      types: ['FIRE', 'FLYING'],
+      grounded: false,
+    })
+    store.setDefender({
+      speciesId: 'amoonguss',
+      abilityId: 'regenerator',
+      baseStats: pokedex[1].baseStats,
+      finalStats: pokedex[1].baseStats,
+      types: ['GRASS', 'POISON'],
+      grounded: true,
+    })
+    store.setMoveSlot('attacker', 0, 'heat-wave')
+    store.setMoveSlot('attacker', 1, 'protect')
+    store.setMoveSlot('defender', 0, 'spore')
+    store.setResult('attacker', 0, {
+      rolls: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
+      min: 10,
+      max: 25,
+      minPct: 10,
+      maxPct: 25,
+      koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+    })
+    store.setResult('defender', 0, {
+      rolls: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45],
+      min: 30,
+      max: 45,
+      minPct: 30,
+      maxPct: 45,
+      koChance: { description: 'Possible 2HKO', probability: 0.5, hits: 2 },
+    })
+
+    const onFocus = vi.fn()
+    renderPanel(onFocus)
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.clear(speciesInput)
+    await user.type(speciesInput, 'amoo')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    expect(useCalculatorStore.getState().attacker.speciesId).toBe('amoonguss')
+    expect(useCalculatorStore.getState().attacker.moves).toEqual([
+      { moveId: null },
+      { moveId: null },
+      { moveId: null },
+      { moveId: null },
+    ])
+    expect(useCalculatorStore.getState().results.attackerMoves).toEqual([
+      null,
+      null,
+      null,
+      null,
+    ])
+    expect(useCalculatorStore.getState().defender.moves).toEqual([
+      { moveId: 'spore' },
+      { moveId: null },
+      { moveId: null },
+      { moveId: null },
+    ])
+    expect(useCalculatorStore.getState().results.defenderMoves[0]).toEqual(
+      expect.objectContaining({ min: 30, max: 45 }),
+    )
+    expect(onFocus).toHaveBeenCalledWith('attacker', 0)
+  })
 })

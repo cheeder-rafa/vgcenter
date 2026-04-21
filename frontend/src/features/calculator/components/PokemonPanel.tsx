@@ -47,6 +47,9 @@ export function PokemonPanel({
   const setCombatant = useCalculatorStore((s) =>
     side === 'attacker' ? s.setAttacker : s.setDefender,
   )
+  const clearSideMovesAndResults = useCalculatorStore(
+    (s) => s.clearSideMovesAndResults,
+  )
   const setMoveSlot = useCalculatorStore((s) => s.setMoveSlot)
 
   const ids = {
@@ -98,6 +101,9 @@ export function PokemonPanel({
   const speciesName = speciesEntry?.name ?? null
 
   function handleSpeciesChange(entry: PokedexEntry | null) {
+    clearSideMovesAndResults(side)
+    onFocusSlot(side, 0)
+
     if (entry === null) {
       setCombatant({
         speciesId: null,
