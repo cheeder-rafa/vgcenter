@@ -8,6 +8,7 @@ import {
   fetchPokedex,
 } from '../features/calculator/api/datasetApi'
 import { DetailedResult } from '../features/calculator/components/DetailedResult'
+import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { PokemonPanel } from '../features/calculator/components/PokemonPanel'
 import { useReactiveDamage } from '../features/calculator/hooks/useReactiveDamage'
@@ -44,7 +45,9 @@ export function CalculatorPage() {
   const [focusedSide, setFocusedSide] = useState<CalculatorSide>('attacker')
   const [focusedMoveIndex, setFocusedMoveIndex] = useState(0)
 
-  useReactiveDamage(pokedex)
+  useBuildStatsSync('attacker', pokedex)
+  useBuildStatsSync('defender', pokedex)
+  useReactiveDamage()
 
   useEffect(() => {
     let active = true

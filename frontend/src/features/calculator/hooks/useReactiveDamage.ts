@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react'
 
 import { calculateDamage } from '../api/damageApi'
-import { buildStats } from '../api/datasetApi'
 import {
   selectDamageRequestFor,
   useCalculatorStore,
   type CalculatorSide,
 } from '../store/useCalculatorStore'
-import type { CombatantBuild, DamageResult, PokedexEntry } from '../types/api'
+import type { CombatantBuild, DamageResult } from '../types/api'
 
 const RECOMPUTE_DEBOUNCE_MS = 200
 
@@ -23,6 +22,8 @@ type ReactiveCombatantInputs = Pick<
   | 'moves'
   | 'grounded'
   | 'fullHp'
+  | 'finalStats'
+  | 'types'
 >
 
 type SettledDamage = {
@@ -61,16 +62,9 @@ function selectCombatantInputs(
     moves: combatant.moves,
     grounded: combatant.grounded,
     fullHp: combatant.fullHp,
+    finalStats: combatant.finalStats,
+    types: combatant.types,
   }
-}
-
-function createBuildKey(combatant: CombatantBuild): string {
-  return JSON.stringify({
-    speciesId: combatant.speciesId,
-    natureId: combatant.natureId,
-    megaActive: combatant.megaActive,
-    sp: combatant.sp,
-  })
 }
 
 function createEmptyResults() {
@@ -90,42 +84,9 @@ function createEmptyResults() {
   }
 }
 
-function resolveCombatantTypes(
-  combatant: CombatantBuild,
-  pokedex: PokedexEntry[],
-): CombatantBuild['types'] {
-  if (combatant.speciesId === null) {
-    return combatant.types
-  }
-
-  const entry = pokedex.find(
-    (candidate) => candidate.id === combatant.speciesId,
-  )
-  if (!entry) {
-    return combatant.types
-  }
-
-  if (combatant.megaActive && entry.megaForms.length > 0) {
-    const [primary, secondary] = entry.megaForms[0].types
-    return [primary, secondary ?? null]
-  }
-
-  const [primary, secondary] = entry.types
-  return [primary, secondary ?? null]
-}
-
-export function useReactiveDamage(pokedex: PokedexEntry[]) {
-  const pokedexRef = useRef(pokedex)
+export function useReactiveDamage() {
   const requestIdRef = useRef(0)
-  const buildKeyRef = useRef<Record<CalculatorSide, string | null>>({
-    attacker: null,
-    defender: null,
-  })
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    pokedexRef.current = pokedex
-  }, [pokedex])
 
   useEffect(() => {
     const recompute = async (requestId: number) => {
@@ -143,38 +104,6 @@ export function useReactiveDamage(pokedex: PokedexEntry[]) {
       store.setResultsStatus('loading')
 
       try {
-        for (const side of ['attacker', 'defender'] as const) {
-          const combatant = useCalculatorStore.getState()[side]
-          const currentBuildKey = createBuildKey(combatant)
-          const needsBuild =
-            buildKeyRef.current[side] !== currentBuildKey ||
-            combatant.baseStats === null ||
-            combatant.finalStats === null ||
-            combatant.types === null
-
-          if (!needsBuild || combatant.speciesId === null) {
-            continue
-          }
-
-          const buildResponse = await buildStats({
-            speciesId: combatant.speciesId,
-            natureId: combatant.natureId,
-            megaActive: combatant.megaActive,
-            sp: combatant.sp,
-          })
-
-          if (requestId !== requestIdRef.current) {
-            return
-          }
-
-          useCalculatorStore.getState().setCombatantDerived(side, {
-            baseStats: buildResponse.baseStats,
-            finalStats: buildResponse.finalStats,
-            types: resolveCombatantTypes(combatant, pokedexRef.current),
-          })
-          buildKeyRef.current[side] = currentBuildKey
-        }
-
         const nextResults = createEmptyResults()
         const tasks: Array<Promise<SettledDamage>> = []
         const latestState = useCalculatorStore.getState()

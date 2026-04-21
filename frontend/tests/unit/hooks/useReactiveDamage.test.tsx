@@ -22,6 +22,7 @@ vi.mock('../../../src/features/calculator/api/damageApi', () => ({
 }))
 
 import { useReactiveDamage } from '../../../src/features/calculator/hooks/useReactiveDamage'
+import { useBuildStatsSync } from '../../../src/features/calculator/hooks/useBuildStatsSync'
 import { useCalculatorStore } from '../../../src/features/calculator/store/useCalculatorStore'
 import type { PokedexEntry } from '../../../src/features/calculator/types/api'
 
@@ -88,7 +89,9 @@ const moveCatalog = [
 ] as const
 
 function Harness() {
-  useReactiveDamage(pokedex)
+  useBuildStatsSync('attacker', pokedex)
+  useBuildStatsSync('defender', pokedex)
+  useReactiveDamage()
   return null
 }
 
@@ -152,6 +155,7 @@ describe('useReactiveDamage', () => {
         speciesId: 'charizard',
         natureId: 'timid',
         sp: { hp: 0, atk: 0, def: 4, spa: 32, spd: 0, spe: 32 },
+        finalStats: null,
         moves: [
           { moveId: 'heat-wave' },
           { moveId: null },
@@ -163,6 +167,7 @@ describe('useReactiveDamage', () => {
         speciesId: 'amoonguss',
         natureId: 'bold',
         sp: { hp: 32, atk: 0, def: 32, spa: 0, spd: 32, spe: 0 },
+        finalStats: null,
         moves: [
           { moveId: null },
           { moveId: null },
@@ -182,7 +187,7 @@ describe('useReactiveDamage', () => {
     expect(mocks.buildStats).not.toHaveBeenCalled()
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(1)
+      await vi.runAllTimersAsync()
     })
 
     expect(mocks.buildStats).toHaveBeenCalledTimes(2)
@@ -196,7 +201,7 @@ describe('useReactiveDamage', () => {
     expect(useCalculatorStore.getState().resultsStatus).toBe('success')
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(400)
+      await vi.runAllTimersAsync()
     })
 
     expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
@@ -231,6 +236,7 @@ describe('useReactiveDamage', () => {
         speciesId: 'charizard',
         natureId: 'timid',
         sp: { hp: 0, atk: 0, def: 4, spa: 32, spd: 0, spe: 32 },
+        finalStats: null,
         moves: [
           { moveId: 'heat-wave' },
           { moveId: null },
@@ -242,6 +248,7 @@ describe('useReactiveDamage', () => {
         speciesId: 'amoonguss',
         natureId: 'bold',
         sp: { hp: 32, atk: 0, def: 32, spa: 0, spd: 32, spe: 0 },
+        finalStats: null,
         moves: [
           { moveId: null },
           { moveId: null },
@@ -252,7 +259,7 @@ describe('useReactiveDamage', () => {
     })
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(200)
+      await vi.runAllTimersAsync()
     })
 
     act(() => {
@@ -260,7 +267,7 @@ describe('useReactiveDamage', () => {
     })
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(200)
+      await vi.runAllTimersAsync()
     })
 
     expect(mocks.calculateDamage).toHaveBeenCalledTimes(2)
@@ -310,6 +317,7 @@ describe('useReactiveDamage', () => {
         speciesId: 'charizard',
         natureId: 'timid',
         sp: { hp: 0, atk: 0, def: 4, spa: 32, spd: 0, spe: 32 },
+        finalStats: null,
         moves: [
           { moveId: 'protect' },
           { moveId: 'heat-wave' },
@@ -321,6 +329,7 @@ describe('useReactiveDamage', () => {
         speciesId: 'amoonguss',
         natureId: 'bold',
         sp: { hp: 32, atk: 0, def: 32, spa: 0, spd: 32, spe: 0 },
+        finalStats: null,
         moves: [
           { moveId: null },
           { moveId: null },
@@ -331,7 +340,7 @@ describe('useReactiveDamage', () => {
     })
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(200)
+      await vi.runAllTimersAsync()
     })
 
     expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
