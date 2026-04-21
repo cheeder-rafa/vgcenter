@@ -41,6 +41,7 @@ export function CalculatorPage() {
   const setMoveCatalog = useCalculatorStore((s) => s.setMoveCatalog)
   const results = useCalculatorStore((s) => s.results)
   const resultsStatus = useCalculatorStore((s) => s.resultsStatus)
+  const importSavedTeam = useSavedTeamStore((s) => s.importTeam)
 
   const [pokedex, setPokedex] = useState<PokedexEntry[]>([])
   const [abilities, setAbilities] = useState<NamedDatasetEntry[]>([])
@@ -131,10 +132,13 @@ export function CalculatorPage() {
 
     handleLoadImportedPokemon(side, activePokemon)
 
-    savedPokemon.forEach((pokemon) => {
-      const entry = pokedex.find((candidate) => candidate.id === pokemon.speciesId)
-      useSavedTeamStore.getState().save(side, toSavedPokemon(pokemon, entry))
-    })
+    importSavedTeam(
+      side,
+      savedPokemon.map((pokemon) => {
+        const entry = pokedex.find((candidate) => candidate.id === pokemon.speciesId)
+        return toSavedPokemon(pokemon, entry)
+      }),
+    )
   }
 
   function handleLoadSavedPokemon(

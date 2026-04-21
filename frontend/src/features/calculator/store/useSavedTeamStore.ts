@@ -30,6 +30,7 @@ type SavedTeamState = {
     SavedPokemonSlot,
   ]
   save: (side: CalculatorSide, pokemon: SavedPokemon) => void
+  importTeam: (side: CalculatorSide, pokemon: SavedPokemon[]) => void
   remove: (side: CalculatorSide, index: number) => void
   load: (side: CalculatorSide, index: number) => CombatantBuild | null
   reset: () => void
@@ -113,6 +114,18 @@ export const useSavedTeamStore = create<SavedTeamState>()(
           }
 
           nextRail[firstEmptyIndex] = cloneSavedPokemon(pokemon)
+          return { [key]: nextRail }
+        }),
+      importTeam: (side, pokemon) =>
+        set(() => {
+          const key = railKeyFor(side)
+          const imported = pokemon
+            .slice(0, 6)
+            .map((entry) => cloneSavedPokemon(entry))
+          const nextRail = createEmptyRail()
+          imported.forEach((entry, index) => {
+            nextRail[index] = entry
+          })
           return { [key]: nextRail }
         }),
       remove: (side, index) =>

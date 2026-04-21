@@ -186,4 +186,52 @@ describe('useSavedTeamStore', () => {
       }),
     )
   })
+
+  it('importTeam replaces rail with provided entries', async () => {
+    const localStorage = createLocalStorageStub()
+    vi.stubGlobal('localStorage', localStorage)
+
+    const { useSavedTeamStore } = await import(
+      '../../../src/features/calculator/store/useSavedTeamStore'
+    )
+
+    useSavedTeamStore.getState().save(
+      'attacker',
+      savedPokemonFactory({
+        speciesId: 'old-one',
+        speciesName: 'Old One',
+        spriteId: 'old-one',
+      }),
+    )
+    useSavedTeamStore.getState().save(
+      'attacker',
+      savedPokemonFactory({
+        speciesId: 'old-two',
+        speciesName: 'Old Two',
+        spriteId: 'old-two',
+      }),
+    )
+
+    useSavedTeamStore.getState().importTeam('attacker', [
+      savedPokemonFactory({
+        speciesId: 'amoonguss',
+        speciesName: 'Amoonguss',
+        spriteId: 'amoonguss',
+      }),
+      savedPokemonFactory({
+        speciesId: 'incineroar',
+        speciesName: 'Incineroar',
+        spriteId: 'incineroar',
+      }),
+    ])
+
+    expect(useSavedTeamStore.getState().attackerSaved).toEqual([
+      expect.objectContaining({ speciesId: 'amoonguss' }),
+      expect.objectContaining({ speciesId: 'incineroar' }),
+      null,
+      null,
+      null,
+      null,
+    ])
+  })
 })

@@ -398,4 +398,255 @@ describe('CalculatorPage', () => {
       ),
     )
   })
+
+  it('all five pokemon appear on rail after import', async () => {
+    mocks.importShowdown.mockResolvedValue({
+      team: [
+        {
+          speciesId: 'charizard',
+          speciesName: 'Charizard',
+          nickname: 'Solaris',
+          level: 50,
+          gender: 'M',
+          abilityId: 'blaze',
+          itemId: 'charizardite-y',
+          natureId: 'timid',
+          sp: {
+            hp: 1,
+            attack: 0,
+            defense: 0,
+            specialAttack: 32,
+            specialDefense: 0,
+            speed: 32,
+          },
+          stats: {
+            hp: 138,
+            attack: 80,
+            defense: 83,
+            specialAttack: 157,
+            specialDefense: 105,
+            speed: 132,
+          },
+          moveIds: ['heat-wave', 'protect'],
+        },
+        {
+          speciesId: 'amoonguss',
+          speciesName: 'Amoonguss',
+          nickname: null,
+          level: 50,
+          gender: 'F',
+          abilityId: 'regenerator',
+          itemId: 'sitrus-berry',
+          natureId: 'serious',
+          sp: {
+            hp: 32,
+            attack: 0,
+            defense: 12,
+            specialAttack: 0,
+            specialDefense: 12,
+            speed: 0,
+          },
+          stats: {
+            hp: 221,
+            attack: 105,
+            defense: 91,
+            specialAttack: 105,
+            specialDefense: 111,
+            speed: 50,
+          },
+          moveIds: ['spore'],
+        },
+        {
+          speciesId: 'incineroar',
+          speciesName: 'Incineroar',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'intimidate',
+          itemId: 'safety-goggles',
+          natureId: 'careful',
+          sp: {
+            hp: 32,
+            attack: 8,
+            defense: 12,
+            specialAttack: 0,
+            specialDefense: 12,
+            speed: 0,
+          },
+          stats: {
+            hp: 202,
+            attack: 137,
+            defense: 117,
+            specialAttack: 110,
+            specialDefense: 143,
+            speed: 80,
+          },
+          moveIds: ['fake-out'],
+        },
+        {
+          speciesId: 'rillaboom',
+          speciesName: 'Rillaboom',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'grassy-surge',
+          itemId: 'assault-vest',
+          natureId: 'adamant',
+          sp: {
+            hp: 28,
+            attack: 32,
+            defense: 0,
+            specialAttack: 0,
+            specialDefense: 0,
+            speed: 0,
+          },
+          stats: {
+            hp: 207,
+            attack: 177,
+            defense: 110,
+            specialAttack: 80,
+            specialDefense: 90,
+            speed: 105,
+          },
+          moveIds: ['wood-hammer'],
+        },
+        {
+          speciesId: 'ursaluna-bloodmoon',
+          speciesName: 'Ursaluna-Bloodmoon',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'mind-s-eye',
+          itemId: 'life-orb',
+          natureId: 'modest',
+          sp: {
+            hp: 28,
+            attack: 0,
+            defense: 0,
+            specialAttack: 32,
+            specialDefense: 0,
+            speed: 0,
+          },
+          stats: {
+            hp: 219,
+            attack: 120,
+            defense: 126,
+            specialAttack: 205,
+            specialDefense: 101,
+            speed: 72,
+          },
+          moveIds: ['blood-moon'],
+        },
+        {
+          speciesId: 'pelipper',
+          speciesName: 'Pelipper',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'drizzle',
+          itemId: 'focus-sash',
+          natureId: 'bold',
+          sp: {
+            hp: 20,
+            attack: 0,
+            defense: 32,
+            specialAttack: 0,
+            specialDefense: 12,
+            speed: 0,
+          },
+          stats: {
+            hp: 167,
+            attack: 70,
+            defense: 133,
+            specialAttack: 115,
+            specialDefense: 102,
+            speed: 85,
+          },
+          moveIds: ['hurricane'],
+        },
+      ],
+    })
+
+    useSavedTeamStore.getState().save('attacker', {
+      ...useSavedTeamStore.getState().attackerSaved[0],
+      ...{
+        speciesId: 'stale-one',
+        speciesName: 'Stale One',
+        spriteId: 'stale-one',
+        natureId: 'serious',
+        sp: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+        abilityId: null,
+        itemId: null,
+        status: 'NONE',
+        megaActive: false,
+        moves: [
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+        baseStats: null,
+        finalStats: null,
+        types: null,
+        grounded: true,
+        fullHp: true,
+      },
+    } as never)
+    useSavedTeamStore.getState().save('attacker', {
+      ...useSavedTeamStore.getState().attackerSaved[0],
+      ...{
+        speciesId: 'stale-two',
+        speciesName: 'Stale Two',
+        spriteId: 'stale-two',
+        natureId: 'serious',
+        sp: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+        abilityId: null,
+        itemId: null,
+        status: 'NONE',
+        megaActive: false,
+        moves: [
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+        baseStats: null,
+        finalStats: null,
+        types: null,
+        grounded: true,
+        fullHp: true,
+      },
+    } as never)
+
+    render(<CalculatorPage />)
+    const user = userEvent.setup()
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: /import showdown/i }))
+    await user.type(
+      screen.getByLabelText(/showdown paste/i),
+      'Charizard @ Charizardite Y',
+    )
+    await user.click(screen.getByRole('button', { name: /import team/i }))
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /load pelipper for attacker/i }),
+      ).toBeInTheDocument(),
+    )
+
+    expect(
+      screen.queryByRole('button', { name: /load stale one for attacker/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /load stale two for attacker/i }),
+    ).not.toBeInTheDocument()
+    expect(useSavedTeamStore.getState().attackerSaved[0]?.speciesId).toBe(
+      'amoonguss',
+    )
+    expect(useSavedTeamStore.getState().attackerSaved[4]?.speciesId).toBe(
+      'pelipper',
+    )
+  })
 })
