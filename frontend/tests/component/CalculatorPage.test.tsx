@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({
   calculateDamage: vi.fn(),
   fetchPokedex: vi.fn(),
+  buildStats: vi.fn(),
   importShowdown: vi.fn(),
   importPokepaste: vi.fn(),
 }))
@@ -15,6 +16,7 @@ vi.mock('../../src/features/calculator/api/damageApi', () => ({
 
 vi.mock('../../src/features/calculator/api/datasetApi', () => ({
   fetchPokedex: mocks.fetchPokedex,
+  buildStats: mocks.buildStats,
 }))
 
 vi.mock('../../src/features/calculator/api/importApi', () => ({
@@ -30,12 +32,43 @@ describe('CalculatorPage', () => {
     useCalculatorStore.getState().reset()
     mocks.calculateDamage.mockReset()
     mocks.fetchPokedex.mockReset()
+    mocks.buildStats.mockReset()
     mocks.importShowdown.mockReset()
     mocks.importPokepaste.mockReset()
+    mocks.buildStats.mockResolvedValue({
+      baseStats: {
+        hp: 78,
+        attack: 84,
+        defense: 78,
+        specialAttack: 109,
+        specialDefense: 85,
+        speed: 100,
+      },
+      finalStats: {
+        hp: 153,
+        attack: 104,
+        defense: 99,
+        specialAttack: 177,
+        specialDefense: 105,
+        speed: 132,
+      },
+    })
+    mocks.calculateDamage.mockResolvedValue({
+      rolls: [
+        168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194,
+        196, 200,
+      ],
+      min: 168,
+      max: 200,
+      minPct: 87.0,
+      maxPct: 103.6,
+      koChance: { description: 'Possible OHKO', probability: 0.6875, hits: 1 },
+    })
     mocks.fetchPokedex.mockResolvedValue([
       {
         id: 'charizard',
         name: 'Charizard',
+        imageUrl: '/sprites/charizard.png',
         types: ['FIRE', 'FLYING'],
         baseStats: {
           hp: 78,
@@ -52,6 +85,7 @@ describe('CalculatorPage', () => {
       {
         id: 'amoonguss',
         name: 'Amoonguss',
+        imageUrl: '/sprites/amoonguss.png',
         types: ['GRASS', 'POISON'],
         baseStats: {
           hp: 114,
@@ -102,29 +136,20 @@ describe('CalculatorPage', () => {
   })
 
   it('submits the current calculator state to the damage API and renders the range result', async () => {
-    mocks.calculateDamage.mockResolvedValue({
-      rolls: [
-        168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194,
-        196, 200,
-      ],
-      min: 168,
-      max: 200,
-      minPct: 87.0,
-      maxPct: 103.6,
-      koChance: { description: 'Possible OHKO', probability: 0.6875, hits: 1 },
-    })
-
     render(<CalculatorPage />)
     const user = userEvent.setup()
 
-    const attackerLevel = screen.getAllByLabelText(/^level$/i)[0]
-    fireEvent.change(attackerLevel, { target: { value: '75' } })
+    const attackerAttack = screen.getByLabelText(/^attack$/i)
+    fireEvent.change(attackerAttack, { target: { value: '175' } })
     await user.click(screen.getByRole('button', { name: /calculate damage/i }))
 
     await waitFor(() => expect(mocks.calculateDamage).toHaveBeenCalledTimes(1))
     expect(mocks.calculateDamage).toHaveBeenCalledWith(
       expect.objectContaining({
-        attacker: expect.objectContaining({ level: 75 }),
+        attacker: expect.objectContaining({
+          level: 50,
+          stats: expect.objectContaining({ attack: 175 }),
+        }),
       }),
     )
     expect(await screen.findByText(/possible ohko/i)).toBeInTheDocument()
@@ -180,15 +205,13 @@ describe('CalculatorPage', () => {
     await waitFor(() =>
       expect(useCalculatorStore.getState().attacker).toEqual(
         expect.objectContaining({
-          level: 50,
+          speciesId: 'charizard',
+          natureId: 'timid',
           abilityId: 'blaze',
           itemId: 'charizardite-y',
           types: ['FIRE', 'FLYING'],
           grounded: false,
-          stats: expect.objectContaining({
-            hp: 138,
-            specialAttack: 157,
-          }),
+          moves: expect.arrayContaining([{ moveId: 'heat-wave' }]),
         }),
       ),
     )
@@ -243,15 +266,13 @@ describe('CalculatorPage', () => {
     await waitFor(() =>
       expect(useCalculatorStore.getState().defender).toEqual(
         expect.objectContaining({
-          level: 50,
+          speciesId: 'amoonguss',
+          natureId: 'bold',
           abilityId: 'regenerator',
           itemId: 'sitrus-berry',
           types: ['GRASS', 'POISON'],
           grounded: true,
-          stats: expect.objectContaining({
-            hp: 221,
-            defense: 134,
-          }),
+          moves: expect.arrayContaining([{ moveId: 'spore' }]),
         }),
       ),
     )

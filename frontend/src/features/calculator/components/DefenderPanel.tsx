@@ -40,20 +40,24 @@ export function DefenderPanel() {
             <input
               id={ids.level}
               type="number"
-              min={1}
-              max={100}
               className="arena-input"
-              value={defender.level}
-              onChange={(e) => setDefender({ level: toInt(e.target.value, 50) })}
+              value={50}
+              onChange={() => {}}
+              disabled
             />
           </Field>
           <Field id={ids.primary} label="Primary Type">
             <select
               id={ids.primary}
               className="arena-select"
-              value={defender.types[0] ?? 'NORMAL'}
+              value={defender.types?.[0] ?? 'NORMAL'}
               onChange={(e) =>
-                setDefender({ types: [e.target.value, ...defender.types.slice(1)] })
+                setDefender({
+                  types: [e.target.value, defender.types?.[1] ?? null],
+                  grounded:
+                    e.target.value !== 'FLYING' &&
+                    (defender.types?.[1] === null || defender.types?.[1] !== 'FLYING'),
+                })
               }
             >
               {TYPE_OPTIONS.map((t) => (
@@ -67,11 +71,16 @@ export function DefenderPanel() {
             <select
               id={ids.secondary}
               className="arena-select"
-              value={defender.types[1] ?? ''}
+              value={defender.types?.[1] ?? ''}
               onChange={(e) => {
                 const value = e.target.value
-                const next = value === '' ? [defender.types[0] ?? 'NORMAL'] : [defender.types[0] ?? 'NORMAL', value]
-                setDefender({ types: next })
+                const primary = defender.types?.[0] ?? 'NORMAL'
+                const next: [string, string | null] =
+                  value === '' ? [primary, null] : [primary, value]
+                setDefender({
+                  types: next,
+                  grounded: !next.includes('FLYING'),
+                })
               }}
             >
               <option value="" className="bg-arena-void">
@@ -130,10 +139,8 @@ export function DefenderPanel() {
               id={ids.hp}
               type="number"
               className="arena-input"
-              value={defender.stats.hp}
-              onChange={(e) =>
-                setDefender({ stats: { ...defender.stats, hp: toInt(e.target.value, 1) } })
-              }
+              value={defender.finalStats?.hp ?? 1}
+              onChange={(e) => setDefender({ finalStats: { hp: toInt(e.target.value, 1) } })}
             />
           </Field>
           <Field id={ids.def} label="Defense">
@@ -141,9 +148,9 @@ export function DefenderPanel() {
               id={ids.def}
               type="number"
               className="arena-input"
-              value={defender.stats.defense}
+              value={defender.finalStats?.defense ?? 1}
               onChange={(e) =>
-                setDefender({ stats: { ...defender.stats, defense: toInt(e.target.value, 1) } })
+                setDefender({ finalStats: { defense: toInt(e.target.value, 1) } })
               }
             />
           </Field>
@@ -152,10 +159,10 @@ export function DefenderPanel() {
               id={ids.spd}
               type="number"
               className="arena-input"
-              value={defender.stats.specialDefense}
+              value={defender.finalStats?.specialDefense ?? 1}
               onChange={(e) =>
                 setDefender({
-                  stats: { ...defender.stats, specialDefense: toInt(e.target.value, 1) },
+                  finalStats: { specialDefense: toInt(e.target.value, 1) },
                 })
               }
             />

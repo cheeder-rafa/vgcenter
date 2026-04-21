@@ -1,4 +1,5 @@
 import { useId, useState, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 
 import type {
   ImportedPokemon,
@@ -76,7 +77,8 @@ export function ImportTeamModal({
         {triggerLabel}
       </button>
 
-      {open ? (
+      {open
+        ? createPortal(
         <div
           className="fixed inset-0 z-50 flex items-end bg-[rgba(4,3,15,0.72)] p-4 backdrop-blur-sm sm:items-center sm:justify-center"
           role="dialog"
@@ -84,7 +86,7 @@ export function ImportTeamModal({
           aria-labelledby={`${inputId}-title`}
         >
           <div className="arena-panel arena-panel--violet relative w-full max-w-3xl p-5 sm:p-6">
-            <div className="relative z-10 flex flex-col gap-5">
+            <div className="flex flex-col gap-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="space-y-2">
                   <p className="arena-label text-arena-violet">Team Import</p>
@@ -236,7 +238,10 @@ export function ImportTeamModal({
             </div>
           </div>
         </div>
-      ) : null}
+            ,
+            document.body,
+          )
+        : null}
     </>
   )
 }

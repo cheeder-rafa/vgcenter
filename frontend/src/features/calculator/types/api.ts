@@ -15,7 +15,9 @@ export type Weather = 'NONE' | 'SUN' | 'RAIN' | 'SAND' | 'SNOW'
 export type Terrain = 'NONE' | 'GRASSY' | 'ELECTRIC' | 'MISTY' | 'PSYCHIC'
 export type Room = 'NONE' | 'TRICK_ROOM' | 'WONDER_ROOM'
 
-export type StatsRequest = {
+export type Type = string
+
+export type Stats = {
   hp: number
   attack: number
   defense: number
@@ -23,6 +25,8 @@ export type StatsRequest = {
   specialDefense: number
   speed: number
 }
+
+export type StatsRequest = Stats
 
 export type CombatantRequest = {
   level: number
@@ -86,7 +90,50 @@ export type CalculateDamageResponse = {
   koChance: KoChance
 }
 
-export type StatsResponse = StatsRequest
+export type DamageResult = CalculateDamageResponse
+
+export type StatsResponse = Stats
+
+export type Spread = {
+  hp: number
+  atk: number
+  def: number
+  spa: number
+  spd: number
+  spe: number
+}
+
+export type MoveSlot = {
+  moveId: string | null
+}
+
+export type BuildStatsRequest = {
+  speciesId: string
+  sp: Spread
+  natureId: string
+  megaActive: boolean
+}
+
+export type BuildStatsResponse = {
+  baseStats: StatsResponse
+  finalStats: StatsResponse
+}
+
+export type CombatantBuild = {
+  speciesId: string | null
+  natureId: string
+  sp: Spread
+  abilityId: string | null
+  itemId: string | null
+  status: StatusCondition
+  megaActive: boolean
+  moves: [MoveSlot, MoveSlot, MoveSlot, MoveSlot]
+  baseStats: Stats | null
+  finalStats: Stats | null
+  types: [Type, Type | null] | null
+  grounded: boolean
+  fullHp: boolean
+}
 
 export type MegaFormResponse = {
   id: string
@@ -104,6 +151,7 @@ export type PokedexEntry = {
   abilityIds: string[]
   moveIds: string[]
   megaForms: MegaFormResponse[]
+  imageUrl: string
 }
 
 export type NamedDatasetEntry = { id: string; name: string }

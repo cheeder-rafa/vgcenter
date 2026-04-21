@@ -51,16 +51,21 @@ export function AttackerPanel() {
             id={ids.level}
             label="Level"
             type="number"
-            min={1}
-            max={100}
-            value={attacker.level}
-            onChange={(v) => setAttacker({ level: toInt(v, 50) })}
+            value={50}
+            onChange={() => {}}
+            disabled
           />
           <LabeledSelect
             id={ids.type}
             label="Primary Type"
-            value={attacker.types[0] ?? 'NORMAL'}
-            onChange={(v) => setAttacker({ types: [v, ...attacker.types.slice(1)] })}
+            value={attacker.types?.[0] ?? 'NORMAL'}
+            onChange={(v) =>
+              setAttacker({
+                types: [v, attacker.types?.[1] ?? null],
+                grounded:
+                  v !== 'FLYING' && (attacker.types?.[1] === null || attacker.types?.[1] !== 'FLYING'),
+              })
+            }
             options={TYPE_OPTIONS.map((t) => ({ value: t, label: t }))}
           />
           <LabeledInput
@@ -93,24 +98,22 @@ export function AttackerPanel() {
             id={ids.hp}
             label="HP"
             type="number"
-            value={attacker.stats.hp}
-            onChange={(v) => setAttacker({ stats: { ...attacker.stats, hp: toInt(v, 1) } })}
+            value={attacker.finalStats?.hp ?? 1}
+            onChange={(v) => setAttacker({ finalStats: { hp: toInt(v, 1) } })}
           />
           <LabeledInput
             id={ids.atk}
             label="Attack"
             type="number"
-            value={attacker.stats.attack}
-            onChange={(v) => setAttacker({ stats: { ...attacker.stats, attack: toInt(v, 1) } })}
+            value={attacker.finalStats?.attack ?? 1}
+            onChange={(v) => setAttacker({ finalStats: { attack: toInt(v, 1) } })}
           />
           <LabeledInput
             id={ids.spa}
             label="Special Attack"
             type="number"
-            value={attacker.stats.specialAttack}
-            onChange={(v) =>
-              setAttacker({ stats: { ...attacker.stats, specialAttack: toInt(v, 1) } })
-            }
+            value={attacker.finalStats?.specialAttack ?? 1}
+            onChange={(v) => setAttacker({ finalStats: { specialAttack: toInt(v, 1) } })}
           />
         </div>
 
@@ -174,6 +177,7 @@ type LabeledInputProps = {
   min?: number
   max?: number
   placeholder?: string
+  disabled?: boolean
 }
 
 function LabeledInput({ id, label, value, onChange, ...rest }: LabeledInputProps) {
