@@ -23,10 +23,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ShowdownTextParser implements TeamParser {
+    private static final Pattern DANGLING_METADATA_HEADER =
+            Pattern.compile("^(Ability|Level|EVs|IVs|Tera Type|Shiny|Happiness|[A-Za-z]+ Nature|-\\s).*$");
 
     private final PokedexRepository pokedexRepository;
     private final MoveRepository moveRepository;
@@ -55,13 +58,31 @@ public class ShowdownTextParser implements TeamParser {
         Map<String, String> abilityIdsByKey = datasetLookup(abilityRepository.findAllByRegulation(regulationId));
         Map<String, String> itemIdsByKey = datasetLookup(itemRepository.findAllByRegulation(regulationId));
         List<ImportedPokemonView> importedTeam = new ArrayList<>();
-        for (String block : showdownText.split("\\R\\s*\\R")) {
+        for (String block : mergeDanglingBlocks(showdownText.split("\\R\\s*\\R"))) {
             if (!block.isBlank()) {
                 importedTeam.add(
                         parseBlock(regulationId, block, speciesByKey, moveIdsByKey, abilityIdsByKey, itemIdsByKey));
             }
         }
         return importedTeam;
+    }
+
+    private List<String> mergeDanglingBlocks(String[] rawBlocks) {
+        List<String> mergedBlocks = new ArrayList<>();
+        for (String rawBlock : rawBlocks) {
+            if (rawBlock.isBlank()) {
+                continue;
+            }
+            String trimmedBlock = rawBlock.trim();
+            if (!mergedBlocks.isEmpty() && startsWithDanglingMetadata(trimmedBlock)) {
+                int previousIndex = mergedBlocks.size() - 1;
+                mergedBlocks.set(
+                        previousIndex, mergedBlocks.get(previousIndex) + System.lineSeparator() + trimmedBlock);
+                continue;
+            }
+            mergedBlocks.add(trimmedBlock);
+        }
+        return mergedBlocks;
     }
 
     private ImportedPokemonView parseBlock(
@@ -141,6 +162,9 @@ public class ShowdownTextParser implements TeamParser {
 
     private Header parseHeader(String line) {
         String trimmedLine = requireText(line, "Showdown set header");
+        if (startsWithDanglingMetadata(trimmedLine)) {
+            throw new IllegalArgumentException("Invalid Showdown set header: " + trimmedLine);
+        }
         String itemName = null;
         int itemSeparator = trimmedLine.lastIndexOf(" @ ");
         if (itemSeparator >= 0) {
@@ -164,6 +188,15 @@ public class ShowdownTextParser implements TeamParser {
                     .trim();
         }
         return new Header(blankToNull(nickname), speciesName, gender, blankToNull(itemName));
+    }
+
+    private boolean startsWithDanglingMetadata(String line) {
+        String firstLine = line.lines()
+                .map(String::trim)
+                .filter(candidate -> !candidate.isBlank())
+                .findFirst()
+                .orElse("");
+        return DANGLING_METADATA_HEADER.matcher(firstLine).matches();
     }
 
     private Map<Stat, Integer> parseEffortValues(String rawEffortValues) {
