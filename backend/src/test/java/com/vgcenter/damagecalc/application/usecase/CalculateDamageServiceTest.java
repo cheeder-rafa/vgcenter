@@ -3,6 +3,7 @@ package com.vgcenter.damagecalc.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.vgcenter.damagecalc.domain.model.Combatant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +52,32 @@ class CalculateDamageServiceTest {
         assertThatThrownBy(() -> service.calculate(invalidCommand))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unsupported type");
+    }
+
+    @Test
+    void paralyzedAttackerFinalSpeedIsHalved() {
+        Combatant combatant = invokeToCombatant(new CombatantCommand(
+                50,
+                new StatsCommand(140, 76, 70, 158, 95, 123),
+                List.of("FIRE"),
+                "none",
+                "none",
+                "PARALYSIS",
+                true,
+                true));
+
+        assertThat(combatant.stats().speed()).isEqualTo(61);
+    }
+
+    private Combatant invokeToCombatant(CombatantCommand command) {
+        try {
+            java.lang.reflect.Method method =
+                    CalculateDamageService.class.getDeclaredMethod("toCombatant", CombatantCommand.class);
+            method.setAccessible(true);
+            return (Combatant) method.invoke(service, command);
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError(exception);
+        }
     }
 
     private static CombatantCommand attacker() {

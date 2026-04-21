@@ -363,6 +363,7 @@ export function PokemonPanel({
           sp={combatant.sp}
           baseStats={combatant.baseStats}
           finalStats={combatant.finalStats}
+          status={combatant.status}
           accent={accent}
           onSpChange={(patch) => setCombatant({ sp: patch, finalStats: null })}
         />

@@ -36,6 +36,16 @@ class StatsTest {
     }
 
     @Test
+    void paralysisHalvesSpeed() {
+        Stats baseStats = new Stats(80, 70, 65, 125, 90, 110);
+        Sp sp = new Sp(3, 5, 7, 21, 9, 13);
+
+        Stats battleStats = baseStats.toBattleStats(sp, Nature.SERIOUS, 50, StatusCondition.PARALYSIS);
+
+        assertThat(battleStats).isEqualTo(new Stats(158, 95, 92, 166, 119, 71));
+    }
+
+    @Test
     void pinsChampionsConstantsWithZeroSpAndNeutralNature() {
         Stats baseStats = new Stats(100, 100, 100, 100, 100, 100);
         Sp sp = new Sp(0, 0, 0, 0, 0, 0);

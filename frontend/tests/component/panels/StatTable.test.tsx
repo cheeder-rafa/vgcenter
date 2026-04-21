@@ -35,6 +35,7 @@ describe('StatTable', () => {
         sp={ZERO_SPREAD}
         baseStats={BASE}
         finalStats={FINAL}
+        status="NONE"
         onSpChange={() => {}}
       />,
     )
@@ -60,6 +61,7 @@ describe('StatTable', () => {
         sp={ZERO_SPREAD}
         baseStats={BASE}
         finalStats={FINAL}
+        status="NONE"
         onSpChange={onSpChange}
       />,
     )
@@ -76,6 +78,7 @@ describe('StatTable', () => {
         sp={ZERO_SPREAD}
         baseStats={BASE}
         finalStats={null}
+        status="NONE"
         onSpChange={() => {}}
       />,
     )
@@ -89,6 +92,7 @@ describe('StatTable', () => {
         sp={ZERO_SPREAD}
         baseStats={BASE}
         finalStats={FINAL}
+        status="NONE"
         onSpChange={() => {}}
       />,
     )
@@ -100,11 +104,26 @@ describe('StatTable', () => {
         sp={ZERO_SPREAD}
         baseStats={BASE}
         finalStats={timidFinal}
+        status="NONE"
         onSpChange={() => {}}
       />,
     )
 
     expect(screen.getByTestId('stat-final-spe').textContent).toBe('160')
     expect(screen.getByTestId('stat-final-atk').textContent).toBe('90')
+  })
+
+  it('halves displayed final speed when status is paralysis', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="PARALYSIS"
+        onSpChange={() => {}}
+      />,
+    )
+
+    expect(screen.getByTestId('stat-final-spe').textContent).toBe('72')
   })
 })

@@ -42,21 +42,23 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
     }
 
     private Combatant toCombatant(CombatantCommand command) {
+        StatusCondition status = parseEnum(StatusCondition.class, command.status(), "status");
+        Stats adjustedStats = new Stats(
+                command.stats().hp(),
+                command.stats().attack(),
+                command.stats().defense(),
+                command.stats().specialAttack(),
+                command.stats().specialDefense(),
+                command.stats().speed());
         return new Combatant(
                 command.level(),
-                new Stats(
-                        command.stats().hp(),
-                        command.stats().attack(),
-                        command.stats().defense(),
-                        command.stats().specialAttack(),
-                        command.stats().specialDefense(),
-                        command.stats().speed()),
+                adjustStatsForStatus(adjustedStats, status),
                 command.types().stream()
                         .map(type -> parseEnum(Type.class, type, "type"))
                         .toList(),
                 Ability.fromId(command.abilityId()),
                 Item.fromId(command.itemId()),
-                parseEnum(StatusCondition.class, command.status(), "status"),
+                status,
                 command.grounded(),
                 command.fullHp());
     }
@@ -101,6 +103,19 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
         }
         String description = String.format(Locale.ROOT, "%.1f%% chance to OHKO", probability * 100.0d);
         return new KoChanceResult(description, probability, 1);
+    }
+
+    private Stats adjustStatsForStatus(Stats stats, StatusCondition status) {
+        if (status != StatusCondition.PARALYSIS) {
+            return stats;
+        }
+        return new Stats(
+                stats.hp(),
+                stats.attack(),
+                stats.defense(),
+                stats.specialAttack(),
+                stats.specialDefense(),
+                stats.speed() / 2);
     }
 
     private static <E extends Enum<E>> E parseEnum(Class<E> enumType, String rawValue, String label) {

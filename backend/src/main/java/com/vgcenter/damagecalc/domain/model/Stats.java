@@ -12,6 +12,10 @@ public record Stats(int hp, int attack, int defense, int specialAttack, int spec
     }
 
     public Stats toBattleStats(Sp sp, Nature nature, int level) {
+        return toBattleStats(sp, nature, level, StatusCondition.NONE);
+    }
+
+    public Stats toBattleStats(Sp sp, Nature nature, int level, StatusCondition status) {
         if (level != 50) {
             throw new IllegalArgumentException("Level must be 50: Pokémon Champions battles are fixed at level 50");
         }
@@ -22,7 +26,7 @@ public record Stats(int hp, int attack, int defense, int specialAttack, int spec
                 calculateNonHp(Stat.DEFENSE, defense, sp.defense(), nature),
                 calculateNonHp(Stat.SPECIAL_ATTACK, specialAttack, sp.specialAttack(), nature),
                 calculateNonHp(Stat.SPECIAL_DEFENSE, specialDefense, sp.specialDefense(), nature),
-                calculateNonHp(Stat.SPEED, speed, sp.speed(), nature));
+                applyStatusToSpeed(calculateNonHp(Stat.SPEED, speed, sp.speed(), nature), status));
     }
 
     public int valueFor(Stat stat) {
@@ -42,6 +46,13 @@ public record Stats(int hp, int attack, int defense, int specialAttack, int spec
 
     private static int calculateNonHp(Stat stat, int base, int sp, Nature nature) {
         return nature.applyTo(stat, base + sp + 20);
+    }
+
+    private static int applyStatusToSpeed(int calculatedSpeed, StatusCondition status) {
+        if (status == StatusCondition.PARALYSIS) {
+            return calculatedSpeed / 2;
+        }
+        return calculatedSpeed;
     }
 
     private static void validatePositive(String label, int value) {
