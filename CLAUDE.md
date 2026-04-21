@@ -138,25 +138,25 @@ A milestone is done only when all of these hold:
 - Any user-facing behavior is documented in `README.md`.
 - The human maintainer has reviewed and merged the PR.
 
-## Active work after M10 — Damage Calculator Corrections Pass
+## Active work — Improvements Pass 2
 
-M0 → M10 are complete. The next work item is the **Damage Calculator Corrections Pass** defined in `PLAN.md` under the section "Corrections Pass (post-M10) — Damage Calculator UX Overhaul". Read that section before starting any task in this phase.
+The Corrections Pass (post-M10) is complete. The next work item is **Improvements Pass 2**, defined in `PLAN-IMPROVEMENTS-2.md` at the repo root. **Read that file in full before starting any task in this phase.**
 
-Scope summary (full details in `PLAN.md`):
+Scope summary (full details in `PLAN-IMPROVEMENTS-2.md`):
 
-1. Import modal popups render *under* the calculator — fix with `createPortal` to `document.body`.
-2. Remove the "Calculate Damage" button; damage must update reactively (debounced ~200 ms) on any input change.
-3. Result readout must show min–max range + HP% + KO chance *and* the 16 rolls simultaneously — no toggle.
-4. Species-first inputs: pick a Reg M-A species, auto-populate types/base stats/legal abilities/legal moves. User distributes SP (0–32) + nature; UI shows `Base → SP → Final`. **Level is locked to 50** — no level input in the UI. Four move slots per side with inline per-move damage; both sides are full combatants.
-5. Bundle sprites under `frontend/public/sprites/` via a one-off download script (PokéAPI official-artwork). Legends Z-A Mega sprites are manually placed.
-6. Widen the container (`max-w-[1600px]`), slim the header (≤ 80 px) so the first calculation fits above the fold at 1080p.
-
-**Reference**: `/nerd-calc.png` at the repo root illustrates the target two-way, inline-per-move readout. Do not copy the visual styling — keep the existing `arena-*` Tailwind theme.
+1. Species search becomes an inline combobox (type → filtered list → Enter).
+2. Final stats compute per side independently (no more waiting on the opposite side).
+3. Fix Showdown import for `Basculegion (M)` / `(F)` via `ShowdownTextParser` dex-lookup.
+4. Compact, single-line damage readout; click the card to copy to clipboard.
+5. Saved-Pokémon rails on left/right (6 per side, persisted in `localStorage`).
+6. Type-colored chips (18 standard type colors) in panels and move badges.
+7. Mega toggle updates the panel name (`Mega <Species>`) and swaps the sprite; bundle all classic + Legends Z-A mega sprites via a new download script.
+8. Species change clears all 4 move slots and the stale per-move damage results.
 
 **Rules for this pass:**
-- Branch from `develop` as `feature/calc-corrections` (or split into `feature/calc-ux-corrections` + `feature/calc-sprites` if the diff grows large). Target `develop`.
+- Branch from `develop` as `feature/calc-improvements-pass-2`. Target `develop`. One PR for the whole pass.
 - Do **not** modify the damage formula, the dataset JSON (`backend/src/main/resources/data/regulation-m-a/`), the clean-architecture boundaries, or the existing golden tests.
-- Backend gets one new endpoint: `POST /api/v1/dataset/build-stats` that reuses `Stats.toBattleStats(Sp, Nature, level)`. Do not duplicate the SP formula in TypeScript.
-- TDD applies: write tests first for `BuildStatsUseCase`, `useReactiveDamage`, `StatTable`, and the portal regression.
-- Execute the plan in four bounded sessions (Phase A backend → Phase B+D data layer + modal portal → Phase C UI rewrite → Phase E sprites). After each, run the verification commands, commit per concern with Conventional Commits, and stop for review.
-- Ready-to-paste prompts for each phase are at the end of `PLAN.md`'s Corrections Pass section.
+- Only one backend change is in scope: `ShowdownTextParser` gender-suffix resolution. No new endpoints.
+- Reuse `/api/v1/dataset/build-stats` per side; do not reimplement the SP formula in TypeScript.
+- TDD applies: write failing tests first for `ShowdownTextParserTest`, `useBuildStatsSync`, `DetailedResult` (format + copy), `useSavedTeamStore`, `SpeciesSelect` combobox, `SpriteBadge` mega fallback, and the species-change clear.
+- Execute in four bounded sessions (A backend + data layer → B search/readout/types → C saved rails → D mega name/sprites). After each session, run the verification commands, commit per concern with Conventional Commits, and stop for human review. The exact session scope and commit subjects are listed under "Execution — four bounded sessions" in `PLAN-IMPROVEMENTS-2.md`.
