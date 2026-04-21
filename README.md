@@ -64,6 +64,27 @@ pnpm dev
 
 The Vite dev server proxies `/api/*` requests to `http://localhost:8080`, so the backend can stay on its default port while you use the browser at `http://localhost:5173`.
 
+## Sprite Assets
+
+Phase E bundles calculator sprites under `frontend/public/sprites/`. To populate
+them locally, run the one-off fetcher from the repo root:
+
+```bash
+node scripts/fetch-sprites.mjs
+```
+
+The script reads the Regulation M-A roster from
+`backend/src/main/resources/data/regulation-m-a/`, skips any sprite PNGs already
+present in `frontend/public/sprites/`, and downloads official-artwork PNGs for
+species/forms that PokéAPI exposes.
+
+If the script logs missing entries, place the maintainer-sourced Legends Z-A
+Mega artwork in `frontend/public/sprites/` as `${speciesId}.png` (for example
+`dragonite-mega.png` and `meganium-mega.png`). Leave
+`frontend/public/sprites/_unknown.png` in place as the frontend fallback for
+missing or broken sprite URLs, and review the generated PNGs before committing
+them.
+
 ## Docker Run
 
 From the repo root:
