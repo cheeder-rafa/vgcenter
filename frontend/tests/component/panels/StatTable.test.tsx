@@ -126,4 +126,21 @@ describe('StatTable', () => {
 
     expect(screen.getByTestId('stat-final-spe').textContent).toBe('72')
   })
+
+  it('shows negative remaining in red when over 66', () => {
+    render(
+      <StatTable
+        sp={{ hp: 12, atk: 12, def: 12, spa: 12, spd: 12, spe: 12 }}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+      />,
+    )
+
+    expect(screen.getByTestId('sp-remaining').textContent).toContain('-6')
+    expect(screen.getByTestId('sp-remaining').className).toContain(
+      'text-red-400',
+    )
+  })
 })

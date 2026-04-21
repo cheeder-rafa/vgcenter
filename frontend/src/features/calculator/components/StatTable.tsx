@@ -52,6 +52,7 @@ export function StatTable({
   const accentLabel =
     accent === 'cyan' ? 'text-arena-cyan' : 'text-arena-plasma'
   const total = sp.hp + sp.atk + sp.def + sp.spa + sp.spd + sp.spe
+  const remaining = 66 - total
 
   return (
     <div className="flex flex-col gap-2">
@@ -59,8 +60,13 @@ export function StatTable({
         <p id={headingId} className={`arena-label ${accentLabel}`}>
           Build · Base → SP → Final
         </p>
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-white/44">
-          Lv 50 · {total}/192 SP
+        <span
+          data-testid="sp-remaining"
+          className={`font-mono text-[0.7rem] uppercase tracking-[0.22em] ${
+            remaining < 0 ? 'text-red-400' : 'text-white/44'
+          }`}
+        >
+          Lv 50 · {remaining} SP remaining
         </span>
       </div>
       <div
