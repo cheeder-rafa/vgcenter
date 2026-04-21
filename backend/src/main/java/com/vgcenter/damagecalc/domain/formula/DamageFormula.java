@@ -270,7 +270,7 @@ public final class DamageFormula {
             return switch (context.attacker().item()) {
                 case LIFE_ORB -> applyMultiplier(damage, 13, 10);
                 case EXPERT_BELT -> context.superEffective() ? applyMultiplier(damage, 6, 5) : damage;
-                case NONE -> damage;
+                case NONE, LEFTOVERS, SITRUS_BERRY -> damage;
             };
         }
     }

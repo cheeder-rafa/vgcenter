@@ -5,7 +5,9 @@ import java.util.Locale;
 public enum Item {
     NONE,
     EXPERT_BELT,
-    LIFE_ORB;
+    LIFE_ORB,
+    LEFTOVERS,
+    SITRUS_BERRY;
 
     public static Item fromId(String id) {
         if (id == null || id.isBlank()) {

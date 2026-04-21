@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.vgcenter.damagecalc.domain.model.Combatant;
+import com.vgcenter.damagecalc.domain.model.Item;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,7 @@ class CalculateDamageServiceTest {
         assertThat(result.max()).isEqualTo(388);
         assertThat(result.minPct()).isEqualTo(205.0d);
         assertThat(result.maxPct()).isEqualTo(242.5d);
-        assertThat(result.koChance()).isEqualTo(new KoChanceResult("Guaranteed OHKO", 1.0d, 1));
+        assertThat(result.koChance()).isEqualTo(new KoChanceResult("guaranteed OHKO", 1.0d, 1));
     }
 
     @Test
@@ -69,12 +70,65 @@ class CalculateDamageServiceTest {
         assertThat(combatant.stats().speed()).isEqualTo(61);
     }
 
+    @Test
+    void guaranteed2HKOWhenMinRollKillsInTwo() {
+        KoChanceResult result = invokeToKoChance(
+                new int[] {40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40, 40}, 70, Item.NONE);
+
+        assertThat(result).isEqualTo(new KoChanceResult("guaranteed 2HKO", 1.0d, 2));
+    }
+
+    @Test
+    void reportsPercentChanceTo2HKOWhenProbabilityPartial() {
+        KoChanceResult result = invokeToKoChance(
+                new int[] {40, 40, 40, 40, 40, 40, 40, 40, 60, 60, 60, 60, 60, 60, 60, 60}, 100, Item.NONE);
+
+        assertThat(result).isEqualTo(new KoChanceResult("75.00% chance to 2HKO", 0.75d, 2));
+    }
+
+    @Test
+    void accountsForLeftoversRecoveryBetweenHits() {
+        KoChanceResult result = invokeToKoChance(
+                new int[] {50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50}, 100, Item.LEFTOVERS);
+
+        assertThat(result).isEqualTo(new KoChanceResult("guaranteed 3HKO after Leftovers recovery", 1.0d, 3));
+    }
+
+    @Test
+    void accountsForSitrusBerryRecoveryOnce() {
+        KoChanceResult result = invokeToKoChance(
+                new int[] {55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55}, 100, Item.SITRUS_BERRY);
+
+        assertThat(result).isEqualTo(new KoChanceResult("guaranteed 3HKO after Sitrus Berry recovery", 1.0d, 3));
+    }
+
+    @Test
+    void reportsGuaranteedOHKOWhenAllRollsKill() {
+        KoChanceResult result = invokeToKoChance(
+                new int[] {120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120},
+                100,
+                Item.NONE);
+
+        assertThat(result).isEqualTo(new KoChanceResult("guaranteed OHKO", 1.0d, 1));
+    }
+
     private Combatant invokeToCombatant(CombatantCommand command) {
         try {
             java.lang.reflect.Method method =
                     CalculateDamageService.class.getDeclaredMethod("toCombatant", CombatantCommand.class);
             method.setAccessible(true);
             return (Combatant) method.invoke(service, command);
+        } catch (ReflectiveOperationException exception) {
+            throw new AssertionError(exception);
+        }
+    }
+
+    private KoChanceResult invokeToKoChance(int[] rolls, int defenderHp, Item item) {
+        try {
+            java.lang.reflect.Method method =
+                    CalculateDamageService.class.getDeclaredMethod("toKoChance", int[].class, int.class, Item.class);
+            method.setAccessible(true);
+            return (KoChanceResult) method.invoke(service, rolls, defenderHp, item);
         } catch (ReflectiveOperationException exception) {
             throw new AssertionError(exception);
         }

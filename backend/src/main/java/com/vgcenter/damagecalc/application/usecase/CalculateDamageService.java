@@ -24,6 +24,7 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
 
     @Override
     public CalculateDamageResult calculate(CalculateDamageCommand command) {
+        Item defenderItem = Item.fromId(command.defender().itemId());
         DamageContext context = new DamageContext(
                 toCombatant(command.attacker()),
                 toCombatant(command.defender()),
@@ -38,7 +39,12 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
         int max = rolls[rolls.length - 1];
         int defenderHp = context.defender().stats().hp();
         return new CalculateDamageResult(
-                rolls, min, max, min * 100.0d / defenderHp, max * 100.0d / defenderHp, toKoChance(rolls, defenderHp));
+                rolls,
+                min,
+                max,
+                min * 100.0d / defenderHp,
+                max * 100.0d / defenderHp,
+                toKoChance(rolls, defenderHp, defenderItem));
     }
 
     private Combatant toCombatant(CombatantCommand command) {
@@ -90,19 +96,96 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 command.helpingHand());
     }
 
-    private KoChanceResult toKoChance(int[] rolls, int defenderHp) {
-        long koRolls = java.util.Arrays.stream(rolls)
-                .filter(roll -> roll >= defenderHp)
-                .count();
-        double probability = koRolls / 16.0d;
-        if (probability == 1.0d) {
-            return new KoChanceResult("Guaranteed OHKO", probability, 1);
+    private KoChanceResult toKoChance(int[] rolls, int defenderHp, Item defenderItem) {
+        KoChanceResult baseline = evaluateKoChance(rolls, defenderHp, Item.NONE);
+        KoChanceResult actual = evaluateKoChance(rolls, defenderHp, defenderItem);
+        if (defenderItem == Item.LEFTOVERS && differsFromBaseline(actual, baseline)) {
+            return new KoChanceResult(
+                    actual.description() + " after Leftovers recovery", actual.probability(), actual.hits());
         }
-        if (probability == 0.0d) {
-            return new KoChanceResult("No OHKO", probability, 1);
+        if (defenderItem == Item.SITRUS_BERRY && differsFromBaseline(actual, baseline)) {
+            return new KoChanceResult(
+                    actual.description() + " after Sitrus Berry recovery", actual.probability(), actual.hits());
         }
-        String description = String.format(Locale.ROOT, "%.1f%% chance to OHKO", probability * 100.0d);
-        return new KoChanceResult(description, probability, 1);
+        return actual;
+    }
+
+    private KoChanceResult evaluateKoChance(int[] rolls, int defenderHp, Item defenderItem) {
+        for (int hits = 1; hits <= 5; hits++) {
+            double probability = knockoutProbability(rolls, defenderHp, defenderItem, hits);
+            if (probability == 1.0d) {
+                return new KoChanceResult(guaranteedDescription(hits), probability, hits);
+            }
+            if (probability > 0.0d) {
+                return new KoChanceResult(chanceDescription(hits, probability), probability, hits);
+            }
+        }
+        return new KoChanceResult("no 5HKO", 0.0d, 5);
+    }
+
+    private double knockoutProbability(int[] rolls, int defenderHp, Item defenderItem, int hits) {
+        long koSequences = countKoSequences(rolls, defenderHp, defenderHp, defenderItem, hits, false);
+        double totalSequences = Math.pow(rolls.length, hits);
+        return koSequences / totalSequences;
+    }
+
+    private long countKoSequences(
+            int[] rolls, int maxHp, int currentHp, Item defenderItem, int remainingHits, boolean sitrusConsumed) {
+        long koSequences = 0L;
+        for (int roll : rolls) {
+            HitState nextState = applyHit(maxHp, currentHp, defenderItem, sitrusConsumed, roll, remainingHits > 1);
+            if (nextState.knockedOut()) {
+                koSequences += (long) Math.pow(rolls.length, remainingHits - 1);
+                continue;
+            }
+            if (remainingHits > 1) {
+                koSequences += countKoSequences(
+                        rolls,
+                        maxHp,
+                        nextState.remainingHp(),
+                        defenderItem,
+                        remainingHits - 1,
+                        nextState.sitrusConsumed());
+            }
+        }
+        return koSequences;
+    }
+
+    private HitState applyHit(
+            int maxHp, int currentHp, Item defenderItem, boolean sitrusConsumed, int damage, boolean canRecover) {
+        int remainingHp = currentHp - damage;
+        if (remainingHp <= 0) {
+            return new HitState(0, sitrusConsumed, true);
+        }
+        if (!canRecover) {
+            return new HitState(remainingHp, sitrusConsumed, false);
+        }
+
+        return switch (defenderItem) {
+            case LEFTOVERS -> new HitState(Math.min(maxHp, remainingHp + maxHp / 16), sitrusConsumed, false);
+            case SITRUS_BERRY -> applySitrus(maxHp, currentHp, remainingHp, sitrusConsumed);
+            default -> new HitState(remainingHp, sitrusConsumed, false);
+        };
+    }
+
+    private HitState applySitrus(int maxHp, int currentHp, int remainingHp, boolean sitrusConsumed) {
+        if (sitrusConsumed || currentHp <= maxHp / 2 || remainingHp > maxHp / 2) {
+            return new HitState(remainingHp, sitrusConsumed, false);
+        }
+        return new HitState(Math.min(maxHp, remainingHp + maxHp / 4), true, false);
+    }
+
+    private boolean differsFromBaseline(KoChanceResult actual, KoChanceResult baseline) {
+        return actual.hits() != baseline.hits() || Double.compare(actual.probability(), baseline.probability()) != 0;
+    }
+
+    private String guaranteedDescription(int hits) {
+        return hits == 1 ? "guaranteed OHKO" : "guaranteed " + hits + "HKO";
+    }
+
+    private String chanceDescription(int hits, double probability) {
+        String koLabel = hits == 1 ? "OHKO" : hits + "HKO";
+        return String.format(Locale.ROOT, "%.2f%% chance to %s", probability * 100.0d, koLabel);
     }
 
     private Stats adjustStatsForStatus(Stats stats, StatusCondition status) {
@@ -133,4 +216,6 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
         }
         return rawValue.trim().toUpperCase(Locale.ROOT).replace('-', '_');
     }
+
+    private record HitState(int remainingHp, boolean sitrusConsumed, boolean knockedOut) {}
 }
