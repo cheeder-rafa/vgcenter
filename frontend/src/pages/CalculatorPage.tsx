@@ -28,7 +28,9 @@ import type {
 import { PokepasteImportModal } from '../features/importer/PokepasteImportModal'
 import { ShowdownImportModal } from '../features/importer/ShowdownImportModal'
 import { toCombatantBuild } from '../features/importer/importedTeamMapping'
+import { toSavedPokemon } from '../features/importer/importedTeamMapping'
 import { t } from '../lib/i18n'
+import { useSavedTeamStore } from '../features/calculator/store/useSavedTeamStore'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
@@ -121,6 +123,20 @@ export function CalculatorPage() {
     setFocusedSide(side)
   }
 
+  function handleImportTeam(side: CalculatorSide, team: ImportedPokemon[]) {
+    const [activePokemon, ...savedPokemon] = team
+    if (activePokemon === undefined) {
+      return
+    }
+
+    handleLoadImportedPokemon(side, activePokemon)
+
+    savedPokemon.forEach((pokemon) => {
+      const entry = pokedex.find((candidate) => candidate.id === pokemon.speciesId)
+      useSavedTeamStore.getState().save(side, toSavedPokemon(pokemon, entry))
+    })
+  }
+
   function handleLoadSavedPokemon(
     side: CalculatorSide,
     build: ReturnType<typeof useCalculatorStore.getState>['attacker'],
@@ -148,7 +164,9 @@ export function CalculatorPage() {
 
       <div className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-8 sm:py-6">
         <CompactHeader
+          activeSide={focusedSide}
           regulation={regulation}
+          onImportTeam={handleImportTeam}
           onLoadPokemon={handleLoadImportedPokemon}
         />
 
@@ -229,10 +247,14 @@ function useMoveNameForSlot(
 }
 
 function CompactHeader({
+  activeSide,
   regulation,
+  onImportTeam,
   onLoadPokemon,
 }: {
+  activeSide: CalculatorSide
   regulation: string
+  onImportTeam: (side: CalculatorSide, team: ImportedPokemon[]) => void
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
 }) {
   return (
@@ -250,8 +272,16 @@ function CompactHeader({
         <span className="font-display text-xs tracking-[0.3em] text-arena-violet">
           IMPORT ⟶
         </span>
-        <ShowdownImportModal onLoadPokemon={onLoadPokemon} />
-        <PokepasteImportModal onLoadPokemon={onLoadPokemon} />
+        <ShowdownImportModal
+          activeSide={activeSide}
+          onImportTeam={onImportTeam}
+          onLoadPokemon={onLoadPokemon}
+        />
+        <PokepasteImportModal
+          activeSide={activeSide}
+          onImportTeam={onImportTeam}
+          onLoadPokemon={onLoadPokemon}
+        />
       </div>
     </header>
   )

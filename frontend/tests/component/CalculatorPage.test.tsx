@@ -34,10 +34,15 @@ vi.mock('../../src/features/calculator/api/importApi', () => ({
 
 import { CalculatorPage } from '../../src/pages/CalculatorPage'
 import { useCalculatorStore } from '../../src/features/calculator/store/useCalculatorStore'
+import { useSavedTeamStore } from '../../src/features/calculator/store/useSavedTeamStore'
+import { useToastStore } from '../../src/features/calculator/store/useToastStore'
 
 describe('CalculatorPage', () => {
   beforeEach(() => {
     useCalculatorStore.getState().reset()
+    useSavedTeamStore.getState().reset()
+    useSavedTeamStore.persist.clearStorage()
+    useToastStore.getState().clear()
     Object.values(mocks).forEach((fn) => fn.mockReset?.())
     mocks.buildStats.mockResolvedValue({
       baseStats: {
@@ -173,7 +178,7 @@ describe('CalculatorPage', () => {
     ).not.toBeInTheDocument()
   })
 
-  it('imports a Showdown team and applies the selected entry to the attacker', async () => {
+  it('imports a Showdown team into the active side and saves the remaining members to the rail', async () => {
     mocks.importShowdown.mockResolvedValue({
       team: [
         {
@@ -203,6 +208,141 @@ describe('CalculatorPage', () => {
           },
           moveIds: ['heat-wave', 'protect'],
         },
+        {
+          speciesId: 'amoonguss',
+          speciesName: 'Amoonguss',
+          nickname: null,
+          level: 50,
+          gender: 'F',
+          abilityId: 'regenerator',
+          itemId: 'sitrus-berry',
+          natureId: 'serious',
+          sp: {
+            hp: 32,
+            attack: 0,
+            defense: 12,
+            specialAttack: 0,
+            specialDefense: 12,
+            speed: 0,
+          },
+          stats: {
+            hp: 221,
+            attack: 105,
+            defense: 91,
+            specialAttack: 105,
+            specialDefense: 111,
+            speed: 50,
+          },
+          moveIds: ['spore'],
+        },
+        {
+          speciesId: 'incineroar',
+          speciesName: 'Incineroar',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'intimidate',
+          itemId: 'safety-goggles',
+          natureId: 'careful',
+          sp: {
+            hp: 32,
+            attack: 8,
+            defense: 12,
+            specialAttack: 0,
+            specialDefense: 12,
+            speed: 0,
+          },
+          stats: {
+            hp: 202,
+            attack: 137,
+            defense: 117,
+            specialAttack: 110,
+            specialDefense: 143,
+            speed: 80,
+          },
+          moveIds: ['fake-out'],
+        },
+        {
+          speciesId: 'rillaboom',
+          speciesName: 'Rillaboom',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'grassy-surge',
+          itemId: 'assault-vest',
+          natureId: 'adamant',
+          sp: {
+            hp: 28,
+            attack: 32,
+            defense: 0,
+            specialAttack: 0,
+            specialDefense: 0,
+            speed: 0,
+          },
+          stats: {
+            hp: 207,
+            attack: 177,
+            defense: 110,
+            specialAttack: 80,
+            specialDefense: 90,
+            speed: 105,
+          },
+          moveIds: ['wood-hammer'],
+        },
+        {
+          speciesId: 'ursaluna-bloodmoon',
+          speciesName: 'Ursaluna-Bloodmoon',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'mind-s-eye',
+          itemId: 'life-orb',
+          natureId: 'modest',
+          sp: {
+            hp: 28,
+            attack: 0,
+            defense: 0,
+            specialAttack: 32,
+            specialDefense: 0,
+            speed: 0,
+          },
+          stats: {
+            hp: 219,
+            attack: 120,
+            defense: 126,
+            specialAttack: 205,
+            specialDefense: 101,
+            speed: 72,
+          },
+          moveIds: ['blood-moon'],
+        },
+        {
+          speciesId: 'pelipper',
+          speciesName: 'Pelipper',
+          nickname: null,
+          level: 50,
+          gender: 'M',
+          abilityId: 'drizzle',
+          itemId: 'focus-sash',
+          natureId: 'bold',
+          sp: {
+            hp: 20,
+            attack: 0,
+            defense: 32,
+            specialAttack: 0,
+            specialDefense: 12,
+            speed: 0,
+          },
+          stats: {
+            hp: 167,
+            attack: 70,
+            defense: 133,
+            specialAttack: 115,
+            specialDefense: 102,
+            speed: 85,
+          },
+          moveIds: ['hurricane'],
+        },
       ],
     })
 
@@ -218,9 +358,6 @@ describe('CalculatorPage', () => {
     )
     await user.click(screen.getByRole('button', { name: /import team/i }))
 
-    expect(await screen.findByText(/solaris/i)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /load attacker/i }))
-
     await waitFor(() =>
       expect(useCalculatorStore.getState().attacker).toEqual(
         expect.objectContaining({
@@ -231,6 +368,32 @@ describe('CalculatorPage', () => {
           types: ['FIRE', 'FLYING'],
           grounded: false,
           moves: expect.arrayContaining([{ moveId: 'heat-wave' }]),
+        }),
+      ),
+    )
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    expect(
+      screen.getByRole('button', { name: /load amoonguss for attacker/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /load incineroar for attacker/i }),
+    ).toBeInTheDocument()
+    expect(useSavedTeamStore.getState().attackerSaved[4]?.speciesId).toBe(
+      'pelipper',
+    )
+
+    await user.click(
+      screen.getByRole('button', { name: /load amoonguss for attacker/i }),
+    )
+
+    await waitFor(() =>
+      expect(useCalculatorStore.getState().attacker).toEqual(
+        expect.objectContaining({
+          speciesId: 'amoonguss',
+          abilityId: 'regenerator',
+          itemId: 'sitrus-berry',
+          moves: expect.arrayContaining([{ moveId: 'spore' }]),
         }),
       ),
     )
