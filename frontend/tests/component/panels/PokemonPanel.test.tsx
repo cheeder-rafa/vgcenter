@@ -271,7 +271,7 @@ describe('PokemonPanel', () => {
       {
         "fire": "arena-chip border-[#ff9c54]/45 bg-[#ff9c54]/18 text-[#ffd4b4]",
         "flying": "arena-chip border-[#8fa8ff]/45 bg-[#8fa8ff]/18 text-[#dde6ff]",
-        "move": "arena-chip min-w-[7.5ch] justify-center border-[#ff9c54]/45 bg-[#ff9c54]/18 text-[#ffd4b4]",
+        "move": "arena-chip min-w-[7.5ch] justify-center whitespace-nowrap border-[#ff9c54]/45 bg-[#ff9c54]/18 text-[#ffd4b4]",
       }
     `)
   })
