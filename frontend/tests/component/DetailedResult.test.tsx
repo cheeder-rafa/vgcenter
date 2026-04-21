@@ -18,7 +18,7 @@ describe('DetailedResult', () => {
     mocks.copyDamageReport.mockResolvedValue(undefined)
   })
 
-  it('copies the compact damage report and shows a toast when the card is clicked', async () => {
+  it('doesNotRenderInlineCopiedIndicator', async () => {
     const user = userEvent.setup()
 
     render(
@@ -51,7 +51,7 @@ describe('DetailedResult', () => {
         'Aegislash-Shield Poltergeist vs. Aegislash-Shield: 108-126 (64.6 - 75.4%) -- guaranteed 2HKO\n(108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122, 122, 126, 126)',
       ),
     )
-    expect(screen.getByText(/copied damage report/i)).toBeInTheDocument()
+    expect(screen.queryByText(/copied damage report/i)).not.toBeInTheDocument()
     expect(screen.getByText(/guaranteed 2hko/i)).toBeInTheDocument()
   })
 })

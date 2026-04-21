@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react'
+import { useMemo, type KeyboardEvent } from 'react'
 
 import type { CalculatorSide } from '../store/useCalculatorStore'
 import type { DamageResult } from '../types/api'
@@ -26,7 +26,6 @@ export function DetailedResult({
   defenderName,
   moveName,
 }: Props) {
-  const [copied, setCopied] = useState(false)
   const attackerLabel = focusedSide === 'attacker' ? attackerName : defenderName
   const defenderLabel = focusedSide === 'attacker' ? defenderName : attackerName
 
@@ -43,22 +42,12 @@ export function DetailedResult({
     [attackerLabel, defenderLabel, moveName, result],
   )
 
-  useEffect(() => {
-    if (!copied) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => setCopied(false), 1400)
-    return () => window.clearTimeout(timeoutId)
-  }, [copied])
-
   async function handleCopy() {
     if (copyText === null) {
       return
     }
 
     await copyDamageReport(copyText)
-    setCopied(true)
   }
 
   const buttonProps =
@@ -142,12 +131,6 @@ export function DetailedResult({
           />
         )}
       </div>
-
-      {copied ? (
-        <div className="pointer-events-none absolute right-4 top-3 rounded-full border border-emerald-300/35 bg-emerald-400/15 px-3 py-1 font-mono text-[0.68rem] uppercase tracking-[0.22em] text-emerald-100 transition-opacity">
-          Copied damage report
-        </div>
-      ) : null}
     </article>
   )
 }
