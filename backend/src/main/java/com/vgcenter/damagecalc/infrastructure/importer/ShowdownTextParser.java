@@ -72,7 +72,9 @@ public class ShowdownTextParser implements TeamParser {
             Map<String, String> abilityIdsByKey,
             Map<String, String> itemIdsByKey) {
         ParsedSet parsedSet = parseRawSet(block);
-        PokemonSpecies species = resolveSpecies(speciesByKey, parsedSet.speciesName());
+        String resolvedSpeciesName =
+                resolveGenderedSpeciesName(regulationId, parsedSet.speciesName(), parsedSet.gender());
+        PokemonSpecies species = resolveSpecies(speciesByKey, resolvedSpeciesName);
         Nature nature = resolveNature(regulationId, parsedSet.natureName());
         String abilityId = resolveAbility(species, abilityIdsByKey, parsedSet.abilityName());
         String itemId = resolveDatasetId(itemIdsByKey, parsedSet.itemName(), "item", true);
@@ -226,6 +228,18 @@ public class ShowdownTextParser implements TeamParser {
             throw new IllegalArgumentException("Unknown species: " + rawSpeciesName);
         }
         return species;
+    }
+
+    private String resolveGenderedSpeciesName(String regulationId, String rawSpeciesName, String gender) {
+        if (!"M".equals(gender) && !"F".equals(gender)) {
+            return rawSpeciesName;
+        }
+
+        String candidateId = normalizeKey(rawSpeciesName) + ("M".equals(gender) ? "-male" : "-female");
+        if (pokedexRepository.findById(regulationId, candidateId).isPresent()) {
+            return candidateId;
+        }
+        return rawSpeciesName;
     }
 
     private Map<String, PokemonSpecies> speciesLookup(String regulationId) {

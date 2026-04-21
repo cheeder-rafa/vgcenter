@@ -35,7 +35,42 @@ class ShowdownTextParserTest {
                     List.of(Type.GRASS, Type.POISON),
                     new Stats(80, 82, 83, 100, 100, 80),
                     List.of("overgrow", "chlorophyll"),
-                    List.of("sleep-powder", "sludge-bomb", "giga-drain", "protect")));
+                    List.of("sleep-powder", "sludge-bomb", "giga-drain", "protect")),
+            new PokemonSpecies(
+                    "basculegion",
+                    "Basculegion",
+                    List.of(Type.WATER, Type.GHOST),
+                    new Stats(120, 92, 65, 80, 75, 78),
+                    List.of("adaptability"),
+                    List.of("protect")),
+            new PokemonSpecies(
+                    "basculegion-male",
+                    "Basculegion-Male",
+                    List.of(Type.WATER, Type.GHOST),
+                    new Stats(120, 112, 65, 80, 75, 78),
+                    List.of("adaptability"),
+                    List.of("protect")),
+            new PokemonSpecies(
+                    "pikachu",
+                    "Pikachu",
+                    List.of(Type.ELECTRIC),
+                    new Stats(35, 55, 40, 50, 50, 90),
+                    List.of("static"),
+                    List.of("protect")),
+            new PokemonSpecies(
+                    "indeedee",
+                    "Indeedee",
+                    List.of(Type.PSYCHIC, Type.NORMAL),
+                    new Stats(60, 65, 55, 105, 95, 95),
+                    List.of("inner-focus"),
+                    List.of("protect")),
+            new PokemonSpecies(
+                    "indeedee-female",
+                    "Indeedee-Female",
+                    List.of(Type.PSYCHIC, Type.NORMAL),
+                    new Stats(70, 55, 65, 95, 105, 85),
+                    List.of("psychic-surge"),
+                    List.of("protect")));
 
     private final MoveRepository moveRepository = regulationId -> List.of(
             new NamedDatasetEntry("heat-wave", "Heat Wave"),
@@ -94,6 +129,46 @@ class ShowdownTextParserTest {
                     .isEqualTo(new com.vgcenter.damagecalc.application.usecase.StatsView(32, 0, 1, 0, 0, 32));
             assertThat(venusaur.moveIds()).containsExactly("sleep-powder", "sludge-bomb", "giga-drain", "protect");
         });
+    }
+
+    @Test
+    void resolvesGenderSuffixToMaleSpeciesFormWhenDexEntryExists() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Basculegion (M)\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("basculegion-male");
+        assertThat(pokemon.speciesName()).isEqualTo("Basculegion-Male");
+        assertThat(pokemon.gender()).isEqualTo("M");
+    }
+
+    @Test
+    void stillResolvesExplicitMaleSpeciesFormName() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Basculegion-Male\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("basculegion-male");
+        assertThat(pokemon.speciesName()).isEqualTo("Basculegion-Male");
+        assertThat(pokemon.gender()).isNull();
+    }
+
+    @Test
+    void ignoresGenderSuffixWhenSpeciesHasNoGenderedDexForm() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Pikachu (M)\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("pikachu");
+        assertThat(pokemon.speciesName()).isEqualTo("Pikachu");
+        assertThat(pokemon.gender()).isEqualTo("M");
+    }
+
+    @Test
+    void resolvesGenderSuffixToFemaleSpeciesFormWhenDexEntryExists() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Indeedee (F)\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("indeedee-female");
+        assertThat(pokemon.speciesName()).isEqualTo("Indeedee-Female");
+        assertThat(pokemon.gender()).isEqualTo("F");
     }
 
     private static String loadFixture(String fileName) throws IOException {
