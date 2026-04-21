@@ -101,6 +101,10 @@ export function PokemonPanel({
 
   const typesLabel = formatTypes(combatant)
   const speciesName = speciesEntry?.name ?? null
+  const displayName =
+    combatant.megaActive && speciesName !== null
+      ? `Mega ${speciesName}`
+      : speciesName
 
   function handleSpeciesChange(entry: PokedexEntry | null) {
     clearSideMovesAndResults(side)
@@ -172,6 +176,7 @@ export function PokemonPanel({
           <SpriteBadge
             speciesId={combatant.speciesId}
             speciesName={speciesName}
+            megaActive={combatant.megaActive}
             accent={accent}
             size="lg"
           />
@@ -180,7 +185,7 @@ export function PokemonPanel({
               id={ids.heading}
               className="font-display text-2xl font-bold tracking-wide text-white"
             >
-              {speciesName ?? (side === 'attacker' ? 'Attacker' : 'Defender')}
+              {displayName ?? (side === 'attacker' ? 'Attacker' : 'Defender')}
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {typesLabel.map((type) => (

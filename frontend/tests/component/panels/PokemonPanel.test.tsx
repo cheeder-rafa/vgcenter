@@ -27,7 +27,22 @@ const pokedex: PokedexEntry[] = [
     },
     abilityIds: ['blaze', 'solar-power'],
     moveIds: ['heat-wave', 'protect', 'air-slash'],
-    megaForms: [],
+    megaForms: [
+      {
+        id: 'charizard-mega-y',
+        name: 'Mega Charizard Y',
+        types: ['FIRE', 'FLYING'],
+        baseStats: {
+          hp: 78,
+          attack: 104,
+          defense: 78,
+          specialAttack: 159,
+          specialDefense: 115,
+          speed: 100,
+        },
+        abilityId: 'drought',
+      },
+    ],
   },
   {
     id: 'amoonguss',
@@ -51,6 +66,7 @@ const pokedex: PokedexEntry[] = [
 const abilities: NamedDatasetEntry[] = [
   { id: 'blaze', name: 'Blaze' },
   { id: 'solar-power', name: 'Solar Power' },
+  { id: 'drought', name: 'Drought' },
   { id: 'regenerator', name: 'Regenerator' },
   { id: 'levitate', name: 'Levitate' },
 ]
@@ -312,5 +328,22 @@ describe('PokemonPanel', () => {
       expect.objectContaining({ min: 30, max: 45 }),
     )
     expect(onFocus).toHaveBeenCalledWith('attacker', 0)
+  })
+
+  it('renders the Mega species prefix in the heading when mega evolution is active', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+    await user.click(screen.getByLabelText(/mega evolution/i))
+
+    expect(
+      screen.getByRole('heading', { name: /^mega charizard$/i, level: 2 }),
+    ).toBeInTheDocument()
+    expect(useCalculatorStore.getState().attacker.speciesId).toBe('charizard')
+    expect(useCalculatorStore.getState().attacker.megaActive).toBe(true)
   })
 })
