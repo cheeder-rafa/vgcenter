@@ -64,11 +64,11 @@ export function SavedPokemonRail({
     >
       <button
         type="button"
-        className="arena-button h-12 px-3 text-[0.68rem] uppercase tracking-[0.24em] text-white/88 disabled:cursor-not-allowed disabled:opacity-40"
+        className="arena-button h-12 whitespace-nowrap px-3 text-[0.68rem] uppercase tracking-[0.24em] text-white/88 disabled:cursor-not-allowed disabled:opacity-40"
         onClick={handleSaveCurrent}
         disabled={!canSave}
       >
-        Save {sideLabel}
+        Save
       </button>
       <div className="flex flex-col gap-3">
         {saved.map((pokemon, index) =>

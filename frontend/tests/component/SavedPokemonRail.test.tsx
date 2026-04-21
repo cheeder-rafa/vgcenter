@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -65,6 +65,7 @@ describe('SavedPokemonRail', () => {
   it('saves the current side and loads it back into the panel when a card is clicked', async () => {
     render(<CalculatorPage />)
     const user = userEvent.setup()
+    const attackerRail = screen.getByLabelText(/attacker saved rail/i)
 
     useCalculatorStore.getState().setAttacker({
       speciesId: 'charizard',
@@ -100,7 +101,9 @@ describe('SavedPokemonRail', () => {
       fullHp: false,
     })
 
-    await user.click(screen.getByRole('button', { name: /save attacker/i }))
+    await user.click(
+      within(attackerRail).getByRole('button', { name: /^save$/i }),
+    )
 
     useCalculatorStore.getState().setAttacker({
       speciesId: 'amoonguss',
@@ -152,5 +155,15 @@ describe('SavedPokemonRail', () => {
         }),
       ),
     )
+  })
+
+  it('saveButtonLabelFitsWithoutClip', async () => {
+    render(<CalculatorPage />)
+    const attackerRail = screen.getByLabelText(/attacker saved rail/i)
+
+    const button = within(attackerRail).getByRole('button', { name: /^save$/i })
+
+    expect(button).toHaveTextContent(/^save$/i)
+    expect(button.className).toContain('whitespace-nowrap')
   })
 })
