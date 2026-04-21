@@ -4,6 +4,7 @@ import com.vgcenter.damagecalc.application.usecase.BuildStatsUseCase;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogUseCase;
 import com.vgcenter.damagecalc.web.dto.BuildStatsRequestDto;
 import com.vgcenter.damagecalc.web.dto.BuildStatsResponseDto;
+import com.vgcenter.damagecalc.web.dto.MoveDefinitionDto;
 import com.vgcenter.damagecalc.web.dto.NamedDatasetEntryDto;
 import com.vgcenter.damagecalc.web.dto.NatureResponseDto;
 import com.vgcenter.damagecalc.web.dto.PokedexEntryResponseDto;
@@ -39,8 +40,8 @@ public class DatasetController {
     }
 
     @GetMapping("/moves")
-    public List<NamedDatasetEntryDto> moves(@Valid @ModelAttribute RegulationQueryDto query) {
-        return mapper.toNamedEntries(datasetCatalogUseCase.moves(query.regulation()));
+    public List<MoveDefinitionDto> moves(@Valid @ModelAttribute RegulationQueryDto query) {
+        return mapper.toMoveDefinitions(datasetCatalogUseCase.moves(query.regulation()));
     }
 
     @GetMapping("/abilities")

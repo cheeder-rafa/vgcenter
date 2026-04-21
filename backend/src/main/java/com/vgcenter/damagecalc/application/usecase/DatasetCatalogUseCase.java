@@ -6,7 +6,7 @@ public interface DatasetCatalogUseCase {
 
     List<PokedexEntryView> pokedex(String regulationId);
 
-    List<NamedDatasetEntry> moves(String regulationId);
+    List<MoveDefinition> moves(String regulationId);
 
     List<NamedDatasetEntry> abilities(String regulationId);
 

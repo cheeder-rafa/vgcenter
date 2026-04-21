@@ -3,6 +3,7 @@ package com.vgcenter.damagecalc.web.mapper;
 import com.vgcenter.damagecalc.application.usecase.BuildStatsCommand;
 import com.vgcenter.damagecalc.application.usecase.BuildStatsResult;
 import com.vgcenter.damagecalc.application.usecase.MegaFormView;
+import com.vgcenter.damagecalc.application.usecase.MoveDefinition;
 import com.vgcenter.damagecalc.application.usecase.NamedDatasetEntry;
 import com.vgcenter.damagecalc.application.usecase.NatureDefinition;
 import com.vgcenter.damagecalc.application.usecase.PokedexEntryView;
@@ -11,6 +12,7 @@ import com.vgcenter.damagecalc.application.usecase.StatsView;
 import com.vgcenter.damagecalc.web.dto.BuildStatsRequestDto;
 import com.vgcenter.damagecalc.web.dto.BuildStatsResponseDto;
 import com.vgcenter.damagecalc.web.dto.MegaFormResponseDto;
+import com.vgcenter.damagecalc.web.dto.MoveDefinitionDto;
 import com.vgcenter.damagecalc.web.dto.NamedDatasetEntryDto;
 import com.vgcenter.damagecalc.web.dto.NatureResponseDto;
 import com.vgcenter.damagecalc.web.dto.PokedexEntryResponseDto;
@@ -54,6 +56,21 @@ public class DatasetWebMapper {
     public java.util.List<NamedDatasetEntryDto> toNamedEntries(java.util.List<NamedDatasetEntry> entries) {
         return entries.stream()
                 .map(entry -> new NamedDatasetEntryDto(entry.id(), entry.name()))
+                .toList();
+    }
+
+    public java.util.List<MoveDefinitionDto> toMoveDefinitions(java.util.List<MoveDefinition> entries) {
+        return entries.stream()
+                .map(entry -> new MoveDefinitionDto(
+                        entry.id(),
+                        entry.name(),
+                        entry.type(),
+                        entry.category(),
+                        entry.basePower(),
+                        entry.spread(),
+                        entry.contact(),
+                        entry.doublePowerWhenUserStatused(),
+                        entry.ignoreBurnPenaltyWhenUserStatused()))
                 .toList();
     }
 

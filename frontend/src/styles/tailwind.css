@@ -52,7 +52,11 @@ body {
       linear-gradient(rgba(167, 139, 250, 0.06) 1px, transparent 1px),
       linear-gradient(90deg, rgba(167, 139, 250, 0.06) 1px, transparent 1px);
     background-size: 32px 32px;
-    mask-image: radial-gradient(ellipse at top, rgba(0, 0, 0, 0.9), transparent 70%);
+    mask-image: radial-gradient(
+      ellipse at top,
+      rgba(0, 0, 0, 0.9),
+      transparent 70%
+    );
     pointer-events: none;
   }
   .arena-panel::after {
@@ -73,16 +77,24 @@ body {
   }
 
   .arena-panel--plasma {
-    box-shadow: 0 0 0 1px rgba(255, 43, 142, 0.35), 0 24px 80px -16px rgba(255, 43, 142, 0.4);
+    box-shadow:
+      0 0 0 1px rgba(255, 43, 142, 0.35),
+      0 24px 80px -16px rgba(255, 43, 142, 0.4);
   }
   .arena-panel--cyan {
-    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.35), 0 24px 80px -16px rgba(34, 211, 238, 0.4);
+    box-shadow:
+      0 0 0 1px rgba(34, 211, 238, 0.35),
+      0 24px 80px -16px rgba(34, 211, 238, 0.4);
   }
   .arena-panel--ember {
-    box-shadow: 0 0 0 1px rgba(255, 122, 26, 0.35), 0 24px 80px -16px rgba(255, 122, 26, 0.4);
+    box-shadow:
+      0 0 0 1px rgba(255, 122, 26, 0.35),
+      0 24px 80px -16px rgba(255, 122, 26, 0.4);
   }
   .arena-panel--violet {
-    box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.35), 0 24px 80px -16px rgba(167, 139, 250, 0.4);
+    box-shadow:
+      0 0 0 1px rgba(167, 139, 250, 0.35),
+      0 24px 80px -16px rgba(167, 139, 250, 0.4);
   }
 
   .arena-label {
@@ -169,7 +181,11 @@ body {
     font-size: 0.72rem;
     padding: 0.55rem 1rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
-    background: linear-gradient(135deg, rgba(255, 43, 142, 0.15), rgba(34, 211, 238, 0.12));
+    background: linear-gradient(
+      135deg,
+      rgba(255, 43, 142, 0.15),
+      rgba(34, 211, 238, 0.12)
+    );
     color: #f3eeff;
     cursor: pointer;
     clip-path: polygon(
@@ -187,7 +203,11 @@ body {
   }
   .arena-button:hover {
     transform: translateY(-1px);
-    background: linear-gradient(135deg, rgba(255, 43, 142, 0.35), rgba(34, 211, 238, 0.3));
+    background: linear-gradient(
+      135deg,
+      rgba(255, 43, 142, 0.35),
+      rgba(34, 211, 238, 0.3)
+    );
     box-shadow: 0 12px 30px -12px rgba(255, 43, 142, 0.8);
   }
   .arena-button:focus-visible {

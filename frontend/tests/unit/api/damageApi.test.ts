@@ -10,7 +10,14 @@ const sampleRequest: DamageCalculationRequest = {
   regulation: 'M-A',
   attacker: {
     level: 50,
-    stats: { hp: 175, attack: 182, defense: 120, specialAttack: 100, specialDefense: 120, speed: 110 },
+    stats: {
+      hp: 175,
+      attack: 182,
+      defense: 120,
+      specialAttack: 100,
+      specialDefense: 120,
+      speed: 110,
+    },
     types: ['FIRE'],
     abilityId: 'blaze',
     itemId: 'life-orb',
@@ -20,7 +27,14 @@ const sampleRequest: DamageCalculationRequest = {
   },
   defender: {
     level: 50,
-    stats: { hp: 180, attack: 110, defense: 130, specialAttack: 120, specialDefense: 130, speed: 100 },
+    stats: {
+      hp: 180,
+      attack: 110,
+      defense: 130,
+      specialAttack: 120,
+      specialDefense: 130,
+      speed: 100,
+    },
     types: ['GRASS', 'POISON'],
     abilityId: 'overgrow',
     itemId: null,
@@ -57,7 +71,10 @@ const sampleRequest: DamageCalculationRequest = {
 }
 
 const sampleResponse: CalculateDamageResponse = {
-  rolls: [168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196, 200],
+  rolls: [
+    168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194, 196,
+    200,
+  ],
   min: 168,
   max: 200,
   minPct: 87.0,
@@ -105,11 +122,16 @@ describe('calculateDamage', () => {
           status: 400,
           detail: 'attacker.level must be <= 100',
         }),
-        { status: 400, headers: { 'Content-Type': 'application/problem+json' } },
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/problem+json' },
+        },
       ),
     )
 
-    await expect(calculateDamage(sampleRequest)).rejects.toThrow(/attacker\.level must be <= 100/)
+    await expect(calculateDamage(sampleRequest)).rejects.toThrow(
+      /attacker\.level must be <= 100/,
+    )
   })
 
   it('throws a generic error when the server returns an opaque failure', async () => {

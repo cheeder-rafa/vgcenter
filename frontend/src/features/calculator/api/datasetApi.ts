@@ -2,6 +2,7 @@ import { requestJson } from '../../../lib/api-client'
 import type {
   BuildStatsRequest,
   BuildStatsResponse,
+  MoveDefinition,
   NamedDatasetEntry,
   NatureResponse,
   PokedexEntry,
@@ -13,9 +14,12 @@ function datasetUrl(resource: string, regulation: Regulation) {
 }
 
 export function fetchPokedex(regulation: Regulation): Promise<PokedexEntry[]> {
-  return requestJson<Omit<PokedexEntry, 'imageUrl'>[]>(datasetUrl('pokedex', regulation), {
-    method: 'GET',
-  }).then((entries) =>
+  return requestJson<Omit<PokedexEntry, 'imageUrl'>[]>(
+    datasetUrl('pokedex', regulation),
+    {
+      method: 'GET',
+    },
+  ).then((entries) =>
     entries.map((entry) => ({
       ...entry,
       imageUrl: `/sprites/${entry.id}.png`,
@@ -23,23 +27,41 @@ export function fetchPokedex(regulation: Regulation): Promise<PokedexEntry[]> {
   )
 }
 
-export function fetchMoves(regulation: Regulation): Promise<NamedDatasetEntry[]> {
-  return requestJson<NamedDatasetEntry[]>(datasetUrl('moves', regulation), { method: 'GET' })
+export function fetchMoves(
+  regulation: Regulation,
+): Promise<MoveDefinition[]> {
+  return requestJson<MoveDefinition[]>(datasetUrl('moves', regulation), {
+    method: 'GET',
+  })
 }
 
-export function fetchAbilities(regulation: Regulation): Promise<NamedDatasetEntry[]> {
-  return requestJson<NamedDatasetEntry[]>(datasetUrl('abilities', regulation), { method: 'GET' })
+export function fetchAbilities(
+  regulation: Regulation,
+): Promise<NamedDatasetEntry[]> {
+  return requestJson<NamedDatasetEntry[]>(datasetUrl('abilities', regulation), {
+    method: 'GET',
+  })
 }
 
-export function fetchItems(regulation: Regulation): Promise<NamedDatasetEntry[]> {
-  return requestJson<NamedDatasetEntry[]>(datasetUrl('items', regulation), { method: 'GET' })
+export function fetchItems(
+  regulation: Regulation,
+): Promise<NamedDatasetEntry[]> {
+  return requestJson<NamedDatasetEntry[]>(datasetUrl('items', regulation), {
+    method: 'GET',
+  })
 }
 
-export function fetchNatures(regulation: Regulation): Promise<NatureResponse[]> {
-  return requestJson<NatureResponse[]>(datasetUrl('natures', regulation), { method: 'GET' })
+export function fetchNatures(
+  regulation: Regulation,
+): Promise<NatureResponse[]> {
+  return requestJson<NatureResponse[]>(datasetUrl('natures', regulation), {
+    method: 'GET',
+  })
 }
 
-export function buildStats(request: BuildStatsRequest): Promise<BuildStatsResponse> {
+export function buildStats(
+  request: BuildStatsRequest,
+): Promise<BuildStatsResponse> {
   return requestJson<BuildStatsResponse>('/dataset/build-stats', {
     method: 'POST',
     body: JSON.stringify({

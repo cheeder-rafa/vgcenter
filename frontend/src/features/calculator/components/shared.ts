@@ -1,5 +1,5 @@
 export const WEATHER_OPTIONS = [
-  { value: 'NONE', label: 'None' },
+  { value: 'CLEAR', label: 'None' },
   { value: 'SUN', label: 'Sun' },
   { value: 'RAIN', label: 'Rain' },
   { value: 'SAND', label: 'Sandstorm' },
@@ -16,8 +16,8 @@ export const TERRAIN_OPTIONS = [
 
 export const ROOM_OPTIONS = [
   { value: 'NONE', label: 'None' },
-  { value: 'TRICK_ROOM', label: 'Trick Room' },
-  { value: 'WONDER_ROOM', label: 'Wonder Room' },
+  { value: 'TRICK', label: 'Trick Room' },
+  { value: 'WONDER', label: 'Wonder Room' },
 ] as const
 
 export const STATUS_OPTIONS = [

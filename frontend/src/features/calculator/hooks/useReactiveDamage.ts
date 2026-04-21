@@ -31,21 +31,25 @@ type SettledDamage = {
   result: DamageResult
 }
 
-function selectReactiveInputs(state: ReturnType<typeof useCalculatorStore.getState>) {
-  return {
+function selectReactiveInputs(
+  state: ReturnType<typeof useCalculatorStore.getState>,
+) {
+  return JSON.stringify({
     regulation: state.regulation,
+    moveCatalogVersion: state.moveCatalogVersion,
     attacker: selectCombatantInputs(state.attacker),
     defender: selectCombatantInputs(state.defender),
     field: state.field,
     attackerSide: state.attackerSide,
     defenderSide: state.defenderSide,
-    move: state.move,
     criticalHit: state.criticalHit,
     targets: state.targets,
-  }
+  })
 }
 
-function selectCombatantInputs(combatant: CombatantBuild): ReactiveCombatantInputs {
+function selectCombatantInputs(
+  combatant: CombatantBuild,
+): ReactiveCombatantInputs {
   return {
     speciesId: combatant.speciesId,
     natureId: combatant.natureId,
@@ -94,7 +98,9 @@ function resolveCombatantTypes(
     return combatant.types
   }
 
-  const entry = pokedex.find((candidate) => candidate.id === combatant.speciesId)
+  const entry = pokedex.find(
+    (candidate) => candidate.id === combatant.speciesId,
+  )
   if (!entry) {
     return combatant.types
   }
@@ -125,7 +131,10 @@ export function useReactiveDamage(pokedex: PokedexEntry[]) {
     const recompute = async (requestId: number) => {
       const store = useCalculatorStore.getState()
 
-      if (store.attacker.speciesId === null || store.defender.speciesId === null) {
+      if (
+        store.attacker.speciesId === null ||
+        store.defender.speciesId === null
+      ) {
         store.clearResults()
         store.setResultsStatus('idle')
         return
@@ -213,12 +222,15 @@ export function useReactiveDamage(pokedex: PokedexEntry[]) {
             return
           }
 
-          const key = result.value.side === 'attacker' ? 'attackerMoves' : 'defenderMoves'
+          const key =
+            result.value.side === 'attacker' ? 'attackerMoves' : 'defenderMoves'
           nextResults[key][result.value.moveIndex] = result.value.result
         })
 
         useCalculatorStore.getState().setResults(nextResults)
-        useCalculatorStore.getState().setResultsStatus(hasFailure ? 'error' : 'success')
+        useCalculatorStore
+          .getState()
+          .setResultsStatus(hasFailure ? 'error' : 'success')
       } catch {
         if (requestId !== requestIdRef.current) {
           return
@@ -240,7 +252,10 @@ export function useReactiveDamage(pokedex: PokedexEntry[]) {
       }, RECOMPUTE_DEBOUNCE_MS)
     }
 
-    const unsubscribe = useCalculatorStore.subscribe(selectReactiveInputs, schedule)
+    const unsubscribe = useCalculatorStore.subscribe(
+      selectReactiveInputs,
+      schedule,
+    )
     schedule()
 
     return () => {

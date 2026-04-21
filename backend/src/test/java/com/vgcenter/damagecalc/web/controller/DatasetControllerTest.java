@@ -12,6 +12,7 @@ import com.vgcenter.damagecalc.application.usecase.BuildStatsResult;
 import com.vgcenter.damagecalc.application.usecase.BuildStatsUseCase;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogUseCase;
 import com.vgcenter.damagecalc.application.usecase.MegaFormView;
+import com.vgcenter.damagecalc.application.usecase.MoveDefinition;
 import com.vgcenter.damagecalc.application.usecase.NamedDatasetEntry;
 import com.vgcenter.damagecalc.application.usecase.NatureDefinition;
 import com.vgcenter.damagecalc.application.usecase.PokedexEntryView;
@@ -63,7 +64,8 @@ class DatasetControllerTest {
                         List.of("FIRE", "FLYING"),
                         new StatsView(78, 104, 78, 159, 115, 100),
                         "drought"))));
-        datasetCatalogUseCase.moves = List.of(new NamedDatasetEntry("heat-wave", "Heat Wave"));
+        datasetCatalogUseCase.moves =
+                List.of(new MoveDefinition("heat-wave", "Heat Wave", "FIRE", "SPECIAL", 95, true, false, false, false));
         datasetCatalogUseCase.abilities = List.of(new NamedDatasetEntry("blaze", "Blaze"));
         datasetCatalogUseCase.items = List.of(new NamedDatasetEntry("life-orb", "Life Orb"));
         datasetCatalogUseCase.natures = List.of(new NatureDefinition("modest", "Modest", "SPECIAL_ATTACK", "ATTACK"));
@@ -75,7 +77,9 @@ class DatasetControllerTest {
                 .andExpect(jsonPath("$[0].megaForms[0].id").value("charizard-mega-y"));
         mockMvc.perform(get("/api/v1/dataset/moves").queryParam("regulation", "M-A"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Heat Wave"));
+                .andExpect(jsonPath("$[0].name").value("Heat Wave"))
+                .andExpect(jsonPath("$[0].type").value("FIRE"))
+                .andExpect(jsonPath("$[0].basePower").value(95));
         mockMvc.perform(get("/api/v1/dataset/abilities").queryParam("regulation", "M-A"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value("blaze"));
@@ -172,7 +176,7 @@ class DatasetControllerTest {
     private static final class StubDatasetCatalogUseCase implements DatasetCatalogUseCase {
 
         private List<PokedexEntryView> pokedex = List.of();
-        private List<NamedDatasetEntry> moves = List.of();
+        private List<MoveDefinition> moves = List.of();
         private List<NamedDatasetEntry> abilities = List.of();
         private List<NamedDatasetEntry> items = List.of();
         private List<NatureDefinition> natures = List.of();
@@ -183,7 +187,7 @@ class DatasetControllerTest {
         }
 
         @Override
-        public List<NamedDatasetEntry> moves(String regulationId) {
+        public List<MoveDefinition> moves(String regulationId) {
             return moves;
         }
 

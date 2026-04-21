@@ -62,6 +62,31 @@ const pokedex: PokedexEntry[] = [
   },
 ]
 
+const moveCatalog = [
+  {
+    id: 'heat-wave',
+    name: 'Heat Wave',
+    type: 'FIRE',
+    category: 'SPECIAL',
+    basePower: 95,
+    spread: true,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+  {
+    id: 'protect',
+    name: 'Protect',
+    type: 'NORMAL',
+    category: 'STATUS',
+    basePower: 0,
+    spread: false,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+] as const
+
 function Harness() {
   useReactiveDamage(pokedex)
   return null
@@ -82,6 +107,7 @@ describe('useReactiveDamage', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     useCalculatorStore.getState().reset()
+    useCalculatorStore.getState().setMoveCatalog([...moveCatalog])
     mocks.buildStats.mockReset()
     mocks.calculateDamage.mockReset()
     mocks.buildStats.mockResolvedValue({
@@ -168,6 +194,12 @@ describe('useReactiveDamage', () => {
       }),
     )
     expect(useCalculatorStore.getState().resultsStatus).toBe('success')
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(400)
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
   })
 
   it('drops stale responses when a newer recalculation finishes later', async () => {
@@ -224,7 +256,7 @@ describe('useReactiveDamage', () => {
     })
 
     act(() => {
-      useCalculatorStore.getState().setMove({ basePower: 110 })
+      useCalculatorStore.getState().setField({ weather: 'SUN' })
     })
 
     await act(async () => {
@@ -256,6 +288,65 @@ describe('useReactiveDamage', () => {
       expect.objectContaining({
         min: 40,
         max: 55,
+      }),
+    )
+  })
+
+  it('uses selected move metadata and still calculates with no field modifiers active', async () => {
+    mocks.calculateDamage.mockResolvedValue({
+      rolls: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
+      min: 20,
+      max: 35,
+      minPct: 20,
+      maxPct: 35,
+      koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+    })
+
+    render(<Harness />)
+
+    act(() => {
+      const store = useCalculatorStore.getState()
+      store.setAttacker({
+        speciesId: 'charizard',
+        natureId: 'timid',
+        sp: { hp: 0, atk: 0, def: 4, spa: 32, spd: 0, spe: 32 },
+        moves: [
+          { moveId: 'protect' },
+          { moveId: 'heat-wave' },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+      store.setDefender({
+        speciesId: 'amoonguss',
+        natureId: 'bold',
+        sp: { hp: 32, atk: 0, def: 32, spa: 0, spd: 32, spe: 0 },
+        moves: [
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+    })
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200)
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
+    expect(mocks.calculateDamage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        move: expect.objectContaining({
+          type: 'FIRE',
+          category: 'SPECIAL',
+          basePower: 95,
+        }),
+        field: expect.objectContaining({
+          weather: 'CLEAR',
+          terrain: 'NONE',
+          room: 'NONE',
+        }),
       }),
     )
   })

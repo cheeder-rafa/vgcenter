@@ -16,14 +16,14 @@ describe('useCalculatorStore', () => {
     expect(state.regulation).toBe('M-A')
     expect(state.attacker.speciesId).toBeNull()
     expect(state.attacker.moves).toEqual([
-      { moveId: 'manual' },
+      { moveId: null },
       { moveId: null },
       { moveId: null },
       { moveId: null },
     ])
     expect(state.defender.finalStats?.defense).toBe(120)
-    expect(state.field.weather).toBe('NONE')
-    expect(state.move.basePower).toBeGreaterThan(0)
+    expect(state.field.weather).toBe('CLEAR')
+    expect(state.field.room).toBe('NONE')
     expect(state.results.attackerMoves).toEqual([null, null, null, null])
     expect(state.results.defenderMoves).toEqual([null, null, null, null])
     expect(state.resultsStatus).toBe('idle')
@@ -55,10 +55,6 @@ describe('useCalculatorStore', () => {
 
     store.toggleCriticalHit()
     expect(useCalculatorStore.getState().criticalHit).toBe(true)
-
-    store.setMove({ basePower: 90, type: 'WATER' })
-    expect(useCalculatorStore.getState().move.basePower).toBe(90)
-    expect(useCalculatorStore.getState().move.type).toBe('WATER')
 
     store.setMoveSlot('attacker', 1, 'protect')
     expect(useCalculatorStore.getState().attacker.moves[1]).toEqual({
@@ -95,6 +91,19 @@ describe('useCalculatorStore', () => {
 
   it('selectDamageRequestFor builds a backend payload with level fixed to 50', () => {
     const store = useCalculatorStore.getState()
+    store.setMoveCatalog([
+      {
+        id: 'heat-wave',
+        name: 'Heat Wave',
+        type: 'FIRE',
+        category: 'SPECIAL',
+        basePower: 95,
+        spread: true,
+        contact: false,
+        doublePowerWhenUserStatused: false,
+        ignoreBurnPenaltyWhenUserStatused: false,
+      },
+    ])
     store.setAttacker({
       finalStats: {
         hp: 160,
@@ -124,11 +133,14 @@ describe('useCalculatorStore', () => {
       },
       types: ['GRASS', 'POISON'],
     })
-    store.setMove({ basePower: 95, type: 'FIRE', category: 'SPECIAL' })
-    store.setField({ weather: 'SUN' })
+    store.setField({ weather: 'CLEAR' })
     store.setTargets(2)
 
-    const request = selectDamageRequestFor(useCalculatorStore.getState(), 'attacker', 0)
+    const request = selectDamageRequestFor(
+      useCalculatorStore.getState(),
+      'attacker',
+      0,
+    )
 
     expect(request).toEqual(
       expect.objectContaining({
@@ -142,9 +154,81 @@ describe('useCalculatorStore', () => {
           basePower: 95,
           type: 'FIRE',
           category: 'SPECIAL',
+          spread: true,
         }),
-        field: expect.objectContaining({ weather: 'SUN' }),
+        field: expect.objectContaining({ weather: 'CLEAR', room: 'NONE' }),
         targets: 2,
+      }),
+    )
+  })
+
+  it('returns null for status moves and resolves move metadata by slot', () => {
+    const store = useCalculatorStore.getState()
+    store.setMoveCatalog([
+      {
+        id: 'protect',
+        name: 'Protect',
+        type: 'NORMAL',
+        category: 'STATUS',
+        basePower: 0,
+        spread: false,
+        contact: false,
+        doublePowerWhenUserStatused: false,
+        ignoreBurnPenaltyWhenUserStatused: false,
+      },
+      {
+        id: 'moonblast',
+        name: 'Moonblast',
+        type: 'FAIRY',
+        category: 'SPECIAL',
+        basePower: 95,
+        spread: false,
+        contact: false,
+        doublePowerWhenUserStatused: false,
+        ignoreBurnPenaltyWhenUserStatused: false,
+      },
+    ])
+    store.setAttacker({
+      finalStats: {
+        hp: 160,
+        attack: 70,
+        defense: 90,
+        specialAttack: 180,
+        specialDefense: 120,
+        speed: 110,
+      },
+      types: ['FAIRY', null],
+      moves: [
+        { moveId: 'protect' },
+        { moveId: 'moonblast' },
+        { moveId: null },
+        { moveId: null },
+      ],
+    })
+    store.setDefender({
+      finalStats: {
+        hp: 180,
+        attack: 100,
+        defense: 120,
+        specialAttack: 110,
+        specialDefense: 130,
+        speed: 90,
+      },
+      types: ['DARK', null],
+    })
+
+    expect(
+      selectDamageRequestFor(useCalculatorStore.getState(), 'attacker', 0),
+    ).toBeNull()
+    expect(
+      selectDamageRequestFor(useCalculatorStore.getState(), 'attacker', 1),
+    ).toEqual(
+      expect.objectContaining({
+        move: expect.objectContaining({
+          type: 'FAIRY',
+          category: 'SPECIAL',
+          basePower: 95,
+        }),
       }),
     )
   })
