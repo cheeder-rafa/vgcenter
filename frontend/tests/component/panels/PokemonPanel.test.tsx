@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PokemonPanel } from '../../../src/features/calculator/components/PokemonPanel'
 import { useCalculatorStore } from '../../../src/features/calculator/store/useCalculatorStore'
 import type {
+  MoveDefinition,
   NamedDatasetEntry,
   NatureResponse,
   PokedexEntry,
@@ -59,12 +60,62 @@ const items: NamedDatasetEntry[] = [
   { id: 'sitrus-berry', name: 'Sitrus Berry' },
 ]
 
-const moves: NamedDatasetEntry[] = [
-  { id: 'heat-wave', name: 'Heat Wave' },
-  { id: 'protect', name: 'Protect' },
-  { id: 'air-slash', name: 'Air Slash' },
-  { id: 'spore', name: 'Spore' },
-  { id: 'rage-powder', name: 'Rage Powder' },
+const moves: MoveDefinition[] = [
+  {
+    id: 'heat-wave',
+    name: 'Heat Wave',
+    type: 'FIRE',
+    category: 'SPECIAL',
+    basePower: 95,
+    spread: true,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+  {
+    id: 'protect',
+    name: 'Protect',
+    type: 'NORMAL',
+    category: 'STATUS',
+    basePower: 0,
+    spread: false,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+  {
+    id: 'air-slash',
+    name: 'Air Slash',
+    type: 'FLYING',
+    category: 'SPECIAL',
+    basePower: 75,
+    spread: false,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+  {
+    id: 'spore',
+    name: 'Spore',
+    type: 'GRASS',
+    category: 'STATUS',
+    basePower: 0,
+    spread: false,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+  {
+    id: 'rage-powder',
+    name: 'Rage Powder',
+    type: 'BUG',
+    category: 'STATUS',
+    basePower: 0,
+    spread: false,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
 ]
 
 const natures: NatureResponse[] = [
@@ -165,5 +216,29 @@ describe('PokemonPanel', () => {
 
     await user.click(screen.getByTestId('move-slot-2'))
     expect(onFocus).toHaveBeenCalledWith('attacker', 2)
+  })
+
+  it('renders stable palette styling for species types and selected move badges', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    await user.selectOptions(screen.getByLabelText(/move slot 1/i), 'heat-wave')
+
+    expect({
+      fire: screen.getByTestId('types-attacker-FIRE').className,
+      flying: screen.getByTestId('types-attacker-FLYING').className,
+      move: screen.getByTestId('move-slot-type-0').className,
+    }).toMatchInlineSnapshot(`
+      {
+        "fire": "arena-chip border-[#ff9c54]/45 bg-[#ff9c54]/18 text-[#ffd4b4]",
+        "flying": "arena-chip border-[#8fa8ff]/45 bg-[#8fa8ff]/18 text-[#dde6ff]",
+        "move": "arena-chip min-w-[7.5ch] justify-center border-[#ff9c54]/45 bg-[#ff9c54]/18 text-[#ffd4b4]",
+      }
+    `)
   })
 })

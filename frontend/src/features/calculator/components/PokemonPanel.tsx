@@ -15,6 +15,7 @@ import { SpeciesSelect } from './SpeciesSelect'
 import { SpriteBadge } from './SpriteBadge'
 import { StatTable } from './StatTable'
 import { STATUS_OPTIONS } from './shared'
+import { getTypeChipClasses } from './typeColors'
 
 type Props = {
   side: CalculatorSide
@@ -173,7 +174,7 @@ export function PokemonPanel({
               {typesLabel.map((type) => (
                 <span
                   key={type}
-                  className="arena-chip text-white/80"
+                  className={`arena-chip ${getTypeChipClasses(type)}`}
                   data-testid={`types-${side}-${type}`}
                 >
                   {type}
