@@ -113,8 +113,10 @@ describe('PokemonPanel', () => {
     renderPanel()
     const user = userEvent.setup()
 
-    const speciesSelect = screen.getByRole('combobox', { name: /^species$/i })
-    await user.selectOptions(speciesSelect, 'charizard')
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
 
     const state = useCalculatorStore.getState().attacker
     expect(state.speciesId).toBe('charizard')
@@ -140,8 +142,10 @@ describe('PokemonPanel', () => {
     renderPanel()
     const user = userEvent.setup()
 
-    const speciesSelect = screen.getByRole('combobox', { name: /^species$/i })
-    await user.selectOptions(speciesSelect, 'charizard')
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
 
     const slot = screen.getByTestId('move-slot-0')
     const options = within(slot).getAllByRole('option')
