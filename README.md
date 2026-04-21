@@ -64,6 +64,16 @@ pnpm dev
 
 The Vite dev server proxies `/api/*` requests to `http://localhost:8080`, so the backend can stay on its default port while you use the browser at `http://localhost:5173`.
 
+## Calculator UX
+
+The current calculator flow is species-first and fully reactive:
+
+- Choose a Regulation M-A species for each side to auto-populate types, base stats, legal abilities, and legal moves.
+- Damage updates automatically for all four move slots as species, moves, stats, abilities, items, status, or field inputs change. There is no manual "Calculate Damage" button.
+- Each move shows the full damage range, HP percentages, KO odds, and the 16-roll spread at the same time.
+- Weather, terrain, and room effects are optional. Leaving all field modifiers inactive is a valid battle state and still produces damage results.
+- Level is locked to 50. The UI shows `Base -> SP -> Final` so the final stat build stays traceable while the backend remains the source of truth for stat calculation.
+
 ## Sprite Assets
 
 Phase E bundles calculator sprites under `frontend/public/sprites/`. To populate

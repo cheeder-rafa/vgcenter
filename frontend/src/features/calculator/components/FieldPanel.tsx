@@ -82,8 +82,12 @@ export function FieldPanel() {
               checked={spread}
               onChange={(e) => setTargets(e.target.checked ? 2 : 1)}
             />
-            <span className="font-body text-sm text-white/90">Spread move (2 targets)</span>
-            <span className="ml-auto font-mono text-xs text-white/60">×0.75</span>
+            <span className="font-body text-sm text-white/90">
+              Spread move (2 targets)
+            </span>
+            <span className="ml-auto font-mono text-xs text-white/60">
+              ×0.75
+            </span>
           </label>
         </div>
 

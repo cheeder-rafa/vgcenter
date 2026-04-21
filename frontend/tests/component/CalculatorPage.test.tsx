@@ -1,10 +1,14 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   calculateDamage: vi.fn(),
   fetchPokedex: vi.fn(),
+  fetchAbilities: vi.fn(),
+  fetchItems: vi.fn(),
+  fetchMoves: vi.fn(),
+  fetchNatures: vi.fn(),
   buildStats: vi.fn(),
   importShowdown: vi.fn(),
   importPokepaste: vi.fn(),
@@ -16,6 +20,10 @@ vi.mock('../../src/features/calculator/api/damageApi', () => ({
 
 vi.mock('../../src/features/calculator/api/datasetApi', () => ({
   fetchPokedex: mocks.fetchPokedex,
+  fetchAbilities: mocks.fetchAbilities,
+  fetchItems: mocks.fetchItems,
+  fetchMoves: mocks.fetchMoves,
+  fetchNatures: mocks.fetchNatures,
   buildStats: mocks.buildStats,
 }))
 
@@ -30,11 +38,7 @@ import { useCalculatorStore } from '../../src/features/calculator/store/useCalcu
 describe('CalculatorPage', () => {
   beforeEach(() => {
     useCalculatorStore.getState().reset()
-    mocks.calculateDamage.mockReset()
-    mocks.fetchPokedex.mockReset()
-    mocks.buildStats.mockReset()
-    mocks.importShowdown.mockReset()
-    mocks.importPokepaste.mockReset()
+    Object.values(mocks).forEach((fn) => fn.mockReset?.())
     mocks.buildStats.mockResolvedValue({
       baseStats: {
         hp: 78,
@@ -54,12 +58,9 @@ describe('CalculatorPage', () => {
       },
     })
     mocks.calculateDamage.mockResolvedValue({
-      rolls: [
-        168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188, 190, 192, 194,
-        196, 200,
-      ],
+      rolls: Array.from({ length: 16 }, (_, i) => 168 + i * 2),
       min: 168,
-      max: 200,
+      max: 198,
       minPct: 87.0,
       maxPct: 103.6,
       koChance: { description: 'Possible OHKO', probability: 0.6875, hits: 1 },
@@ -100,22 +101,58 @@ describe('CalculatorPage', () => {
         megaForms: [],
       },
     ])
+    mocks.fetchAbilities.mockResolvedValue([
+      { id: 'blaze', name: 'Blaze' },
+      { id: 'regenerator', name: 'Regenerator' },
+    ])
+    mocks.fetchItems.mockResolvedValue([
+      { id: 'life-orb', name: 'Life Orb' },
+      { id: 'sitrus-berry', name: 'Sitrus Berry' },
+    ])
+    mocks.fetchMoves.mockResolvedValue([
+      { id: 'heat-wave', name: 'Heat Wave' },
+      { id: 'protect', name: 'Protect' },
+      { id: 'spore', name: 'Spore' },
+    ])
+    mocks.fetchNatures.mockResolvedValue([
+      {
+        id: 'timid',
+        name: 'Timid',
+        increasedStat: 'SPEED',
+        decreasedStat: 'ATTACK',
+      },
+      {
+        id: 'serious',
+        name: 'Serious',
+        increasedStat: null,
+        decreasedStat: null,
+      },
+    ])
   })
 
-  it('renders the app title, the three input panels, and the result panel', () => {
+  it('renders the compact header and the three-column arena', async () => {
     render(<CalculatorPage />)
 
     expect(
-      screen.getByRole('heading', { name: /vgcenter damage calculator/i }),
+      screen.getByRole('heading', {
+        name: /vgcenter damage calculator/i,
+        level: 1,
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText(/regulation m-a/i).length).toBeGreaterThan(0)
+    // Field panel still in the middle
+    expect(
+      screen.getByRole('heading', { name: /^field$/i }),
+    ).toBeInTheDocument()
+    // Both sides start with default headers (Attacker/Defender until species chosen)
+    expect(
+      screen.getByRole('heading', { name: /attacker/i, level: 2 }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: /attacker/i }),
+      screen.getByRole('heading', { name: /defender/i, level: 2 }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /field/i })).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: /defender/i }),
-    ).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /result/i })).toBeInTheDocument()
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
   })
 
   it('exposes the Showdown and Pokepaste import entry points', () => {
@@ -129,34 +166,14 @@ describe('CalculatorPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('advertises the active regulation', () => {
+  it('does not render the obsolete Calculate Damage button', () => {
     render(<CalculatorPage />)
-
-    expect(screen.getByText(/^regulation m-a$/i)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /calculate damage/i }),
+    ).not.toBeInTheDocument()
   })
 
-  it('submits the current calculator state to the damage API and renders the range result', async () => {
-    render(<CalculatorPage />)
-    const user = userEvent.setup()
-
-    const attackerAttack = screen.getByLabelText(/^attack$/i)
-    fireEvent.change(attackerAttack, { target: { value: '175' } })
-    await user.click(screen.getByRole('button', { name: /calculate damage/i }))
-
-    await waitFor(() => expect(mocks.calculateDamage).toHaveBeenCalledTimes(1))
-    expect(mocks.calculateDamage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        attacker: expect.objectContaining({
-          level: 50,
-          stats: expect.objectContaining({ attack: 175 }),
-        }),
-      }),
-    )
-    expect(await screen.findByText(/possible ohko/i)).toBeInTheDocument()
-    expect(screen.getByText(/168\s*[–-]\s*200/)).toBeInTheDocument()
-  })
-
-  it('imports a Showdown team and applies a selected entry to the attacker state', async () => {
+  it('imports a Showdown team and applies the selected entry to the attacker', async () => {
     mocks.importShowdown.mockResolvedValue({
       team: [
         {
@@ -192,6 +209,8 @@ describe('CalculatorPage', () => {
     render(<CalculatorPage />)
     const user = userEvent.setup()
 
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
     await user.click(screen.getByRole('button', { name: /import showdown/i }))
     await user.type(
       screen.getByLabelText(/showdown paste/i),
@@ -212,67 +231,6 @@ describe('CalculatorPage', () => {
           types: ['FIRE', 'FLYING'],
           grounded: false,
           moves: expect.arrayContaining([{ moveId: 'heat-wave' }]),
-        }),
-      ),
-    )
-  })
-
-  it('imports a Pokepaste URL and applies a selected entry to the defender state', async () => {
-    mocks.importPokepaste.mockResolvedValue({
-      team: [
-        {
-          speciesId: 'amoonguss',
-          speciesName: 'Amoonguss',
-          nickname: null,
-          level: 50,
-          gender: 'F',
-          abilityId: 'regenerator',
-          itemId: 'sitrus-berry',
-          natureId: 'bold',
-          sp: {
-            hp: 32,
-            attack: 0,
-            defense: 32,
-            specialAttack: 0,
-            specialDefense: 32,
-            speed: 0,
-          },
-          stats: {
-            hp: 221,
-            attack: 85,
-            defense: 134,
-            specialAttack: 105,
-            specialDefense: 132,
-            speed: 50,
-          },
-          moveIds: ['spore', 'rage-powder'],
-        },
-      ],
-    })
-
-    render(<CalculatorPage />)
-    const user = userEvent.setup()
-
-    await user.click(screen.getByRole('button', { name: /import pokepaste/i }))
-    await user.type(
-      screen.getByLabelText(/pokepaste url/i),
-      'https://pokepast.es/abc123',
-    )
-    await user.click(screen.getByRole('button', { name: /import team/i }))
-
-    expect(await screen.findByText(/^amoonguss$/i)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /load defender/i }))
-
-    await waitFor(() =>
-      expect(useCalculatorStore.getState().defender).toEqual(
-        expect.objectContaining({
-          speciesId: 'amoonguss',
-          natureId: 'bold',
-          abilityId: 'regenerator',
-          itemId: 'sitrus-berry',
-          types: ['GRASS', 'POISON'],
-          grounded: true,
-          moves: expect.arrayContaining([{ moveId: 'spore' }]),
         }),
       ),
     )

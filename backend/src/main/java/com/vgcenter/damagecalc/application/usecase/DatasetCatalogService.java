@@ -43,8 +43,8 @@ public final class DatasetCatalogService implements DatasetCatalogUseCase {
     }
 
     @Override
-    public java.util.List<NamedDatasetEntry> moves(String regulationId) {
-        return moveRepository.findAllByRegulation(regulationId);
+    public java.util.List<MoveDefinition> moves(String regulationId) {
+        return moveRepository.findDefinitionsByRegulation(regulationId);
     }
 
     @Override

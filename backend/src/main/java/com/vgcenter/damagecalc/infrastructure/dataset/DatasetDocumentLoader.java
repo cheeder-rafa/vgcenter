@@ -60,6 +60,13 @@ public class DatasetDocumentLoader {
                 .collect(java.util.stream.Collectors.toUnmodifiableSet());
     }
 
+    public List<MoveDefinitionDocument> loadMoveDefinitions(String regulation) {
+        JsonNode referenceNode = loadDataTree(regulation, "move-details.json");
+        return readValue(
+                referenceNode,
+                objectMapper.getTypeFactory().constructCollectionType(List.class, MoveDefinitionDocument.class));
+    }
+
     public List<NamedReferenceDocument> loadNamedReferences(String regulation, String filename) {
         JsonNode referenceNode = loadDataTree(regulation, filename);
         return readValue(

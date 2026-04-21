@@ -6,6 +6,7 @@ import type {
   DamageCalculationRequest,
   DamageResult,
   FieldRequest,
+  MoveDefinition,
   MoveRequest,
   Regulation,
   SideConditions,
@@ -15,15 +16,27 @@ import type {
 
 export type CalculatorSide = 'attacker' | 'defender'
 
-type CombatantBuildPatch = Partial<Omit<CombatantBuild, 'sp' | 'baseStats' | 'finalStats'>> & {
+type CombatantBuildPatch = Partial<
+  Omit<CombatantBuild, 'sp' | 'baseStats' | 'finalStats'>
+> & {
   sp?: Partial<Spread>
   baseStats?: Partial<Stats> | null
   finalStats?: Partial<Stats> | null
 }
 
 type DamageResults = {
-  attackerMoves: [DamageResult | null, DamageResult | null, DamageResult | null, DamageResult | null]
-  defenderMoves: [DamageResult | null, DamageResult | null, DamageResult | null, DamageResult | null]
+  attackerMoves: [
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+  ]
+  defenderMoves: [
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+  ]
 }
 
 type ResultsStatus = 'idle' | 'loading' | 'success' | 'error'
@@ -46,17 +59,11 @@ const defaultDefenderStats: Stats = {
   speed: 100,
 }
 
-const defaultMove: MoveRequest = {
-  type: 'NORMAL',
-  category: 'PHYSICAL',
-  basePower: 80,
-  spread: false,
-  contact: true,
-  doublePowerWhenUserStatused: false,
-  ignoreBurnPenaltyWhenUserStatused: false,
+const defaultField: FieldRequest = {
+  weather: 'CLEAR',
+  terrain: 'NONE',
+  room: 'NONE',
 }
-
-const defaultField: FieldRequest = { weather: 'NONE', terrain: 'NONE', room: 'NONE' }
 
 const defaultSide: SideConditions = {
   reflect: false,
@@ -76,7 +83,7 @@ const defaultSpread: Spread = {
 }
 
 const defaultMoveSlots: CombatantBuild['moves'] = [
-  { moveId: 'manual' },
+  { moveId: null },
   { moveId: null },
   { moveId: null },
   { moveId: null },
@@ -107,11 +114,16 @@ function createEmptyResults(): DamageResults {
   }
 }
 
-function cloneMoveSlots(moves: CombatantBuild['moves']): CombatantBuild['moves'] {
+function cloneMoveSlots(
+  moves: CombatantBuild['moves'],
+): CombatantBuild['moves'] {
   return moves.map((move) => ({ ...move })) as CombatantBuild['moves']
 }
 
-function mergeStats(current: Stats | null, patch: Partial<Stats> | null | undefined) {
+function mergeStats(
+  current: Stats | null,
+  patch: Partial<Stats> | null | undefined,
+) {
   if (patch === undefined) {
     return current
   }
@@ -121,7 +133,10 @@ function mergeStats(current: Stats | null, patch: Partial<Stats> | null | undefi
   return current === null ? ({ ...patch } as Stats) : { ...current, ...patch }
 }
 
-function mergeCombatant(current: CombatantBuild, patch: CombatantBuildPatch): CombatantBuild {
+function mergeCombatant(
+  current: CombatantBuild,
+  patch: CombatantBuildPatch,
+): CombatantBuild {
   return {
     ...current,
     ...patch,
@@ -143,7 +158,8 @@ type CalculatorState = {
   regulation: Regulation
   attacker: CombatantBuild
   defender: CombatantBuild
-  move: MoveRequest
+  moveCatalog: MoveDefinition[]
+  moveCatalogVersion: number
   field: FieldRequest
   attackerSide: SideConditions
   defenderSide: SideConditions
@@ -154,17 +170,25 @@ type CalculatorState = {
   setRegulation: (regulation: Regulation) => void
   setAttacker: (patch: CombatantBuildPatch) => void
   setDefender: (patch: CombatantBuildPatch) => void
+  setMoveCatalog: (moves: MoveDefinition[]) => void
   setCombatantDerived: (
     side: CalculatorSide,
     patch: Pick<CombatantBuildPatch, 'baseStats' | 'finalStats' | 'types'>,
   ) => void
-  setMove: (patch: Partial<MoveRequest>) => void
   setField: (patch: Partial<FieldRequest>) => void
   setAttackerSide: (patch: Partial<SideConditions>) => void
   setDefenderSide: (patch: Partial<SideConditions>) => void
   setTargets: (targets: number) => void
-  setMoveSlot: (side: CalculatorSide, index: number, moveId: string | null) => void
-  setResult: (side: CalculatorSide, index: number, result: DamageResult | null) => void
+  setMoveSlot: (
+    side: CalculatorSide,
+    index: number,
+    moveId: string | null,
+  ) => void
+  setResult: (
+    side: CalculatorSide,
+    index: number,
+    result: DamageResult | null,
+  ) => void
   setResults: (results: DamageResults) => void
   clearResults: () => void
   setResultsStatus: (status: ResultsStatus) => void
@@ -177,7 +201,8 @@ function createInitialState() {
     regulation: 'M-A' as Regulation,
     attacker: createDefaultCombatant(defaultAttackerStats),
     defender: createDefaultCombatant(defaultDefenderStats),
-    move: { ...defaultMove },
+    moveCatalog: [],
+    moveCatalogVersion: 0,
     field: { ...defaultField },
     attackerSide: { ...defaultSide },
     defenderSide: { ...defaultSide },
@@ -192,14 +217,21 @@ export const useCalculatorStore = create<CalculatorState>()(
   subscribeWithSelector((set) => ({
     ...createInitialState(),
     setRegulation: (regulation) => set({ regulation }),
-    setAttacker: (patch) => set((state) => ({ attacker: mergeCombatant(state.attacker, patch) })),
-    setDefender: (patch) => set((state) => ({ defender: mergeCombatant(state.defender, patch) })),
+    setAttacker: (patch) =>
+      set((state) => ({ attacker: mergeCombatant(state.attacker, patch) })),
+    setDefender: (patch) =>
+      set((state) => ({ defender: mergeCombatant(state.defender, patch) })),
+    setMoveCatalog: (moveCatalog) =>
+      set((state) => ({
+        moveCatalog,
+        moveCatalogVersion: state.moveCatalogVersion + 1,
+      })),
     setCombatantDerived: (side, patch) =>
       set((state) => ({
         [side]: mergeCombatant(state[side], patch),
       })),
-    setMove: (patch) => set((state) => ({ move: { ...state.move, ...patch } })),
-    setField: (patch) => set((state) => ({ field: { ...state.field, ...patch } })),
+    setField: (patch) =>
+      set((state) => ({ field: { ...state.field, ...patch } })),
     setAttackerSide: (patch) =>
       set((state) => ({ attackerSide: { ...state.attackerSide, ...patch } })),
     setDefenderSide: (patch) =>
@@ -226,7 +258,8 @@ export const useCalculatorStore = create<CalculatorState>()(
     setResults: (results) => set({ results }),
     clearResults: () => set({ results: createEmptyResults() }),
     setResultsStatus: (resultsStatus) => set({ resultsStatus }),
-    toggleCriticalHit: () => set((state) => ({ criticalHit: !state.criticalHit })),
+    toggleCriticalHit: () =>
+      set((state) => ({ criticalHit: !state.criticalHit })),
     reset: () => set({ ...createInitialState() }),
   })),
 )
@@ -237,16 +270,28 @@ export function selectDamageRequestFor(
   moveIndex: number,
 ): DamageCalculationRequest | null {
   const attackerSideKey: CalculatorSide = side
-  const defenderSideKey: CalculatorSide = side === 'attacker' ? 'defender' : 'attacker'
+  const defenderSideKey: CalculatorSide =
+    side === 'attacker' ? 'defender' : 'attacker'
   const attacker = state[attackerSideKey]
   const defender = state[defenderSideKey]
+
+  const moveId = attacker.moves[moveIndex]?.moveId
 
   if (
     attacker.finalStats === null ||
     defender.finalStats === null ||
     attacker.types === null ||
     defender.types === null ||
-    attacker.moves[moveIndex]?.moveId === null
+    moveId === null
+  ) {
+    return null
+  }
+
+  const move = state.moveCatalog.find((entry) => entry.id === moveId)
+  if (
+    move === undefined ||
+    move.category === 'STATUS' ||
+    move.basePower <= 0
   ) {
     return null
   }
@@ -273,11 +318,23 @@ export function selectDamageRequestFor(
       grounded: defender.grounded,
       fullHp: defender.fullHp,
     },
-    move: state.move,
+    move: toMoveRequest(move),
     field: state.field,
     attackerSide: side === 'attacker' ? state.attackerSide : state.defenderSide,
     defenderSide: side === 'attacker' ? state.defenderSide : state.attackerSide,
     criticalHit: state.criticalHit,
     targets: state.targets,
+  }
+}
+
+function toMoveRequest(move: MoveDefinition): MoveRequest {
+  return {
+    type: move.type,
+    category: move.category,
+    basePower: move.basePower,
+    spread: move.spread,
+    contact: move.contact,
+    doublePowerWhenUserStatused: move.doublePowerWhenUserStatused,
+    ignoreBurnPenaltyWhenUserStatused: move.ignoreBurnPenaltyWhenUserStatused,
   }
 }

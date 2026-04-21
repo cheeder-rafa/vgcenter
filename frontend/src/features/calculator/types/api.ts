@@ -1,6 +1,6 @@
 export type Regulation = 'M-A'
 
-export type MoveCategory = 'PHYSICAL' | 'SPECIAL'
+export type MoveCategory = 'PHYSICAL' | 'SPECIAL' | 'STATUS'
 
 export type StatusCondition =
   | 'NONE'
@@ -11,9 +11,9 @@ export type StatusCondition =
   | 'SLEEP'
   | 'FREEZE'
 
-export type Weather = 'NONE' | 'SUN' | 'RAIN' | 'SAND' | 'SNOW'
+export type Weather = 'CLEAR' | 'SUN' | 'RAIN' | 'SAND' | 'SNOW'
 export type Terrain = 'NONE' | 'GRASSY' | 'ELECTRIC' | 'MISTY' | 'PSYCHIC'
-export type Room = 'NONE' | 'TRICK_ROOM' | 'WONDER_ROOM'
+export type Room = 'NONE' | 'TRICK' | 'WONDER' | 'MAGIC'
 
 export type Type = string
 
@@ -105,6 +105,18 @@ export type Spread = {
 
 export type MoveSlot = {
   moveId: string | null
+}
+
+export type MoveDefinition = {
+  id: string
+  name: string
+  type: string
+  category: MoveCategory
+  basePower: number
+  spread: boolean
+  contact: boolean
+  doublePowerWhenUserStatused: boolean
+  ignoreBurnPenaltyWhenUserStatused: boolean
 }
 
 export type BuildStatsRequest = {

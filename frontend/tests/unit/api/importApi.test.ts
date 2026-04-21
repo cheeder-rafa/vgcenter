@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { importPokepaste, importShowdown } from '../../../src/features/calculator/api/importApi'
+import {
+  importPokepaste,
+  importShowdown,
+} from '../../../src/features/calculator/api/importApi'
 
 describe('importApi', () => {
   const fetchMock = vi.fn()

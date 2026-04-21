@@ -75,6 +75,35 @@ describe('datasetApi', () => {
     ])
   })
 
+  it('returns move metadata from the dataset moves endpoint', async () => {
+    fetchMock.mockResolvedValue(
+      okJson([
+        {
+          id: 'moonblast',
+          name: 'Moonblast',
+          type: 'FAIRY',
+          category: 'SPECIAL',
+          basePower: 95,
+          spread: false,
+          contact: false,
+          doublePowerWhenUserStatused: false,
+          ignoreBurnPenaltyWhenUserStatused: false,
+        },
+      ]),
+    )
+
+    const result = await fetchMoves('M-A')
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: 'moonblast',
+        type: 'FAIRY',
+        category: 'SPECIAL',
+        basePower: 95,
+      }),
+    ])
+  })
+
   it('POSTs build-stats with frontend spread keys mapped to the backend dto', async () => {
     fetchMock.mockResolvedValue(
       okJson({

@@ -38,5 +38,7 @@ async function parseError(response: Response): Promise<Error> {
     }
   }
   const text = await response.text().catch(() => '')
-  return new Error(`[${response.status}] ${text || response.statusText || 'request failed'}`)
+  return new Error(
+    `[${response.status}] ${text || response.statusText || 'request failed'}`,
+  )
 }
