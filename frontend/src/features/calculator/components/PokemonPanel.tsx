@@ -27,6 +27,7 @@ type Props = {
   focusedSide: CalculatorSide
   focusedMoveIndex: number
   onFocusSlot: (side: CalculatorSide, index: number) => void
+  onActivateSide?: (side: CalculatorSide) => void
 }
 
 export function PokemonPanel({
@@ -39,6 +40,7 @@ export function PokemonPanel({
   focusedSide,
   focusedMoveIndex,
   onFocusSlot,
+  onActivateSide,
 }: Props) {
   const combatant = useCalculatorStore((s) => s[side])
   const results = useCalculatorStore((s) =>
@@ -146,7 +148,11 @@ export function PokemonPanel({
   }
 
   return (
-    <article className={`arena-panel ${panelVariant} p-5`}>
+    <article
+      className={`arena-panel ${panelVariant} p-5`}
+      onFocusCapture={() => onActivateSide?.(side)}
+      onPointerDownCapture={() => onActivateSide?.(side)}
+    >
       <div className="relative z-10 space-y-4">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
