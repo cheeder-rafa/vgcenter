@@ -68,6 +68,7 @@ export function buildStats(
       speciesId: request.speciesId,
       natureId: request.natureId,
       megaActive: request.megaActive,
+      megaFormId: request.megaFormId,
       sp: {
         hp: request.sp.hp,
         attack: request.sp.atk,

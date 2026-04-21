@@ -29,8 +29,11 @@ export function FieldPanel() {
   const spread = targets > 1
 
   return (
-    <article className="arena-panel arena-panel--ember p-6">
-      <div className="relative z-10 space-y-5">
+    <article
+      className="arena-panel arena-panel--ember p-4"
+      data-testid="field-panel"
+    >
+      <div className="relative z-10 space-y-4">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 animate-pulse-glow rounded-full bg-arena-ember shadow-[0_0_14px_rgba(255,122,26,0.9)]" />
@@ -43,7 +46,7 @@ export function FieldPanel() {
           Field
         </h2>
 
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           <Select
             id={ids.weather}
             label="Weather"
@@ -73,7 +76,7 @@ export function FieldPanel() {
           <p className="arena-label text-arena-sun">Targets</p>
           <label
             htmlFor={ids.spread}
-            className="flex items-center gap-3 rounded-sm border border-arena-ember/30 bg-arena-ember/10 px-4 py-3 transition hover:border-arena-ember/60"
+            className="flex items-center gap-3 rounded-sm border border-arena-ember/30 bg-arena-ember/10 px-3 py-2.5 transition hover:border-arena-ember/60"
           >
             <input
               id={ids.spread}

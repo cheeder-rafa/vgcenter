@@ -7,6 +7,7 @@ import type {
 } from '../calculator/types/api'
 
 type Props = {
+  activeSide: 'attacker' | 'defender'
   accentClassName: string
   description: string
   emptyState: string
@@ -17,6 +18,10 @@ type Props = {
   triggerLabel: string
   multiline?: boolean
   onImport: (value: string) => Promise<ImportedTeamResponse>
+  onImportTeam: (
+    side: 'attacker' | 'defender',
+    team: ImportedPokemon[],
+  ) => void
   onLoadPokemon: (
     side: 'attacker' | 'defender',
     pokemon: ImportedPokemon,
@@ -24,6 +29,7 @@ type Props = {
 }
 
 export function ImportTeamModal({
+  activeSide,
   accentClassName,
   description,
   emptyState,
@@ -34,6 +40,7 @@ export function ImportTeamModal({
   triggerLabel,
   multiline = false,
   onImport,
+  onImportTeam,
   onLoadPokemon,
 }: Props) {
   const inputId = useId()
@@ -50,6 +57,13 @@ export function ImportTeamModal({
     setErrorMessage(null)
     try {
       const imported = await onImport(value)
+      if (imported.team.length > 0) {
+        onImportTeam(activeSide, imported.team)
+        setOpen(false)
+        setValue('')
+        setTeam([])
+        return
+      }
       setTeam(imported.team)
     } catch (error) {
       setTeam([])

@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-import type { Spread, Stats } from '../types/api'
+import type { Spread, Stats, StatusCondition } from '../types/api'
 import { MAX_SP_PER_STAT, clampSp } from './statTableUtils'
 
 type StatKey = 'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe'
@@ -35,6 +35,7 @@ type Props = {
   sp: Spread
   baseStats: Stats | null
   finalStats: Stats | null
+  status: StatusCondition
   accent?: 'plasma' | 'cyan'
   onSpChange: (patch: Partial<Spread>) => void
 }
@@ -43,6 +44,7 @@ export function StatTable({
   sp,
   baseStats,
   finalStats,
+  status,
   accent = 'plasma',
   onSpChange,
 }: Props) {
@@ -50,6 +52,7 @@ export function StatTable({
   const accentLabel =
     accent === 'cyan' ? 'text-arena-cyan' : 'text-arena-plasma'
   const total = sp.hp + sp.atk + sp.def + sp.spa + sp.spd + sp.spe
+  const remaining = 66 - total
 
   return (
     <div className="flex flex-col gap-2">
@@ -57,8 +60,13 @@ export function StatTable({
         <p id={headingId} className={`arena-label ${accentLabel}`}>
           Build · Base → SP → Final
         </p>
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-white/44">
-          Lv 50 · {total}/192 SP
+        <span
+          data-testid="sp-remaining"
+          className={`font-mono text-[0.7rem] uppercase tracking-[0.22em] ${
+            remaining < 0 ? 'text-red-400' : 'text-white/44'
+          }`}
+        >
+          Lv 50 · {remaining} SP remaining
         </span>
       </div>
       <div
@@ -81,7 +89,7 @@ export function StatTable({
             row={row}
             sp={sp[row.key]}
             base={baseStats?.[row.baseKey] ?? null}
-            final={finalStats?.[row.finalKey] ?? null}
+            final={resolveDisplayedFinalStat(finalStats, row.finalKey, status)}
             onChange={(value) => onSpChange({ [row.key]: clampSp(value) })}
           />
         ))}
@@ -143,4 +151,18 @@ function StatRow({ row, sp, base, final, onChange }: RowProps) {
       </span>
     </div>
   )
+}
+
+function resolveDisplayedFinalStat(
+  finalStats: Stats | null,
+  key: keyof Stats,
+  status: StatusCondition,
+) {
+  if (finalStats === null) {
+    return null
+  }
+  if (key === 'speed' && status === 'PARALYSIS') {
+    return Math.floor(finalStats.speed / 2)
+  }
+  return finalStats[key]
 }

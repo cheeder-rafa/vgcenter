@@ -1,19 +1,13 @@
 import { useState } from 'react'
 
+import { FALLBACK_SRC, resolveSpriteSources } from './spriteBadgeSources'
+
 type Props = {
   speciesId: string | null
   speciesName?: string | null
+  megaActive?: boolean
   accent?: 'plasma' | 'cyan'
   size?: 'sm' | 'md' | 'lg'
-}
-
-const FALLBACK_SRC = '/sprites/_unknown.png'
-
-function resolveSrc(speciesId: string | null): string {
-  if (speciesId === null || speciesId.trim() === '') {
-    return FALLBACK_SRC
-  }
-  return `/sprites/${speciesId}.png`
 }
 
 const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
@@ -24,16 +18,20 @@ const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
 
 export function SpriteBadge(props: Props) {
   // Re-mount inner sprite when speciesId changes so local fallback state resets.
-  return <SpriteBadgeInner key={props.speciesId ?? '__empty__'} {...props} />
+  const key = `${props.speciesId ?? '__empty__'}:${props.megaActive ? 'mega' : 'base'}`
+  return <SpriteBadgeInner key={key} {...props} />
 }
 
 function SpriteBadgeInner({
   speciesId,
   speciesName = null,
+  megaActive = false,
   accent = 'plasma',
   size = 'md',
 }: Props) {
-  const [src, setSrc] = useState(() => resolveSrc(speciesId))
+  const sources = resolveSpriteSources(speciesId, megaActive)
+  const [srcIndex, setSrcIndex] = useState(0)
+  const src = sources[srcIndex] ?? FALLBACK_SRC
 
   const ringColor =
     accent === 'cyan' ? 'border-arena-cyan/55' : 'border-arena-plasma/55'
@@ -54,8 +52,8 @@ function SpriteBadgeInner({
         className="h-full w-full object-contain p-1.5"
         loading="lazy"
         onError={() => {
-          if (src !== FALLBACK_SRC) {
-            setSrc(FALLBACK_SRC)
+          if (srcIndex < sources.length - 1) {
+            setSrcIndex((current) => current + 1)
           }
         }}
       />

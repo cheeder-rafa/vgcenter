@@ -1,3 +1,4 @@
+import type { SavedPokemon } from '../calculator/store/useSavedTeamStore'
 import type {
   CombatantBuild,
   ImportedPokemon,
@@ -25,12 +26,26 @@ export function toCombatantBuild(
     itemId: pokemon.itemId,
     status: 'NONE',
     megaActive: false,
+    megaFormId: null,
     moves: toMoveSlots(pokemon.moveIds),
     baseStats: pokedexEntry?.baseStats ?? pokemon.stats,
     finalStats: pokemon.stats,
     types,
     grounded: !types.includes('FLYING'),
     fullHp: true,
+  }
+}
+
+export function toSavedPokemon(
+  pokemon: ImportedPokemon,
+  pokedexEntry?: PokedexEntry,
+): SavedPokemon {
+  const build = toCombatantBuild(pokemon, pokedexEntry)
+
+  return {
+    ...build,
+    speciesName: pokemon.speciesName,
+    spriteId: pokemon.speciesId,
   }
 }
 

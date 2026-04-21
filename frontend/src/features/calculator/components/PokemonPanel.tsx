@@ -14,7 +14,9 @@ import { MoveSlotRow } from './MoveSlotRow'
 import { SpeciesSelect } from './SpeciesSelect'
 import { SpriteBadge } from './SpriteBadge'
 import { StatTable } from './StatTable'
+import { MEGA_STONE_MAP } from '../data/megaStoneMap'
 import { STATUS_OPTIONS } from './shared'
+import { getTypeChipClasses } from './typeColors'
 
 type Props = {
   side: CalculatorSide
@@ -26,6 +28,7 @@ type Props = {
   focusedSide: CalculatorSide
   focusedMoveIndex: number
   onFocusSlot: (side: CalculatorSide, index: number) => void
+  onActivateSide?: (side: CalculatorSide) => void
 }
 
 export function PokemonPanel({
@@ -38,6 +41,7 @@ export function PokemonPanel({
   focusedSide,
   focusedMoveIndex,
   onFocusSlot,
+  onActivateSide,
 }: Props) {
   const combatant = useCalculatorStore((s) => s[side])
   const results = useCalculatorStore((s) =>
@@ -45,6 +49,9 @@ export function PokemonPanel({
   )
   const setCombatant = useCalculatorStore((s) =>
     side === 'attacker' ? s.setAttacker : s.setDefender,
+  )
+  const clearSideMovesAndResults = useCalculatorStore(
+    (s) => s.clearSideMovesAndResults,
   )
   const setMoveSlot = useCalculatorStore((s) => s.setMoveSlot)
 
@@ -75,15 +82,25 @@ export function PokemonPanel({
     [combatant.speciesId, pokedex],
   )
 
+  const activeMegaForm = useMemo(() => {
+    if (speciesEntry === null || !combatant.megaActive || speciesEntry.megaForms.length === 0) {
+      return null
+    }
+    return (
+      speciesEntry.megaForms.find((candidate) => candidate.id === combatant.megaFormId) ??
+      speciesEntry.megaForms[0]
+    )
+  }, [speciesEntry, combatant.megaActive, combatant.megaFormId])
+
   const legalAbilityIds = useMemo(() => {
     if (speciesEntry === null) {
       return null
     }
-    if (combatant.megaActive && speciesEntry.megaForms.length > 0) {
-      return [speciesEntry.megaForms[0].abilityId]
+    if (activeMegaForm !== null) {
+      return [activeMegaForm.abilityId]
     }
     return speciesEntry.abilityIds
-  }, [speciesEntry, combatant.megaActive])
+  }, [speciesEntry, activeMegaForm])
 
   const abilityOptions = useMemo(() => {
     if (legalAbilityIds === null) {
@@ -95,8 +112,15 @@ export function PokemonPanel({
 
   const typesLabel = formatTypes(combatant)
   const speciesName = speciesEntry?.name ?? null
+  const displayName =
+    combatant.megaActive && speciesName !== null
+      ? `Mega ${speciesName}`
+      : speciesName
 
   function handleSpeciesChange(entry: PokedexEntry | null) {
+    clearSideMovesAndResults(side)
+    onFocusSlot(side, 0)
+
     if (entry === null) {
       setCombatant({
         speciesId: null,
@@ -104,6 +128,7 @@ export function PokemonPanel({
         finalStats: null,
         types: null,
         megaActive: false,
+        megaFormId: null,
       })
       return
     }
@@ -112,6 +137,7 @@ export function PokemonPanel({
     setCombatant({
       speciesId: entry.id,
       megaActive: false,
+      megaFormId: null,
       abilityId: entry.abilityIds[0] ?? null,
       baseStats: entry.baseStats,
       finalStats: null,
@@ -124,13 +150,17 @@ export function PokemonPanel({
     if (speciesEntry === null || speciesEntry.megaForms.length === 0) {
       return
     }
-    const megaForm = speciesEntry.megaForms[0]
+    const megaForm =
+      speciesEntry.megaForms.find((candidate) => candidate.id === combatant.megaFormId) ??
+      speciesEntry.megaForms[0]
     const [primary, secondary] = next ? megaForm.types : speciesEntry.types
     setCombatant({
       megaActive: next,
+      megaFormId: next ? megaForm.id : combatant.megaFormId,
       abilityId: next
         ? megaForm.abilityId
         : (speciesEntry.abilityIds[0] ?? combatant.abilityId),
+      itemId: next ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId) : combatant.itemId,
       baseStats: next ? megaForm.baseStats : speciesEntry.baseStats,
       finalStats: null,
       types: [primary, secondary ?? null],
@@ -138,9 +168,34 @@ export function PokemonPanel({
     })
   }
 
+  function handleMegaVariantChange(nextMegaFormId: string) {
+    if (speciesEntry === null) {
+      return
+    }
+    const megaForm = speciesEntry.megaForms.find((candidate) => candidate.id === nextMegaFormId)
+    if (!megaForm) {
+      return
+    }
+    const [primary, secondary] = megaForm.types
+    setCombatant({
+      megaFormId: nextMegaFormId,
+      megaActive: true,
+      itemId: MEGA_STONE_MAP[nextMegaFormId] ?? combatant.itemId,
+      abilityId: megaForm.abilityId,
+      baseStats: megaForm.baseStats,
+      finalStats: null,
+      types: [primary, secondary ?? null],
+      grounded: !(primary === 'FLYING' || secondary === 'FLYING'),
+    })
+  }
+
   return (
-    <article className={`arena-panel ${panelVariant} p-5`}>
-      <div className="relative z-10 space-y-4">
+    <article
+      className={`arena-panel ${panelVariant} p-4`}
+      onFocusCapture={() => onActivateSide?.(side)}
+      onPointerDownCapture={() => onActivateSide?.(side)}
+    >
+      <div className="relative z-10 space-y-3">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span
@@ -155,10 +210,11 @@ export function PokemonPanel({
           </span>
         </header>
 
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-3">
           <SpriteBadge
             speciesId={combatant.speciesId}
             speciesName={speciesName}
+            megaActive={combatant.megaActive}
             accent={accent}
             size="lg"
           />
@@ -167,13 +223,13 @@ export function PokemonPanel({
               id={ids.heading}
               className="font-display text-2xl font-bold tracking-wide text-white"
             >
-              {speciesName ?? (side === 'attacker' ? 'Attacker' : 'Defender')}
+              {displayName ?? (side === 'attacker' ? 'Attacker' : 'Defender')}
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {typesLabel.map((type) => (
                 <span
                   key={type}
-                  className="arena-chip text-white/80"
+                  className={`arena-chip text-[0.62rem] tracking-[0.2em] ${getTypeChipClasses(type)}`}
                   data-testid={`types-${side}-${type}`}
                 >
                   {type}
@@ -181,7 +237,7 @@ export function PokemonPanel({
               ))}
               {speciesEntry?.megaForms.length ? (
                 <span
-                  className={`arena-chip ${accentText}`}
+                  className={`arena-chip text-[0.62rem] tracking-[0.2em] ${accentText}`}
                   data-testid={`mega-available-${side}`}
                 >
                   MEGA READY
@@ -315,28 +371,49 @@ export function PokemonPanel({
         </div>
 
         {speciesEntry?.megaForms.length ? (
-          <label
-            htmlFor={ids.mega}
-            className={`flex items-center gap-3 rounded-sm border px-3 py-2 transition ${
-              combatant.megaActive
-                ? 'border-arena-violet/60 bg-arena-violet/15'
-                : 'border-white/10 bg-white/5 hover:border-arena-violet/40'
-            }`}
-          >
-            <input
-              id={ids.mega}
-              type="checkbox"
-              className="arena-checkbox"
-              checked={combatant.megaActive}
-              onChange={(event) => handleMegaToggle(event.target.checked)}
-            />
-            <span className="arena-label text-arena-violet">
-              Mega Evolution
-            </span>
-            <span className="ml-auto font-mono text-[0.7rem] uppercase tracking-[0.22em] text-white/55">
-              mid-battle toggle
-            </span>
-          </label>
+          <div className="flex flex-col gap-1.5 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
+            <label
+              htmlFor={ids.mega}
+              className={`flex items-center gap-3 transition ${
+                combatant.megaActive
+                  ? 'text-white'
+                  : 'hover:text-white/90'
+              }`}
+            >
+              <input
+                id={ids.mega}
+                type="checkbox"
+                className="arena-checkbox"
+                checked={combatant.megaActive}
+                onChange={(event) => handleMegaToggle(event.target.checked)}
+              />
+              <span className="arena-label text-arena-violet">
+                Mega Evolution
+              </span>
+              <span className="ml-auto font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/55">
+                mid-battle toggle
+              </span>
+            </label>
+            {speciesEntry.megaForms.length > 1 && combatant.megaActive ? (
+              <div className="flex items-center gap-2">
+                <label htmlFor={`${ids.mega}-variant`} className="arena-label text-arena-violet">
+                  Mega Variant
+                </label>
+                <select
+                  id={`${ids.mega}-variant`}
+                  className="arena-select flex-1"
+                  value={activeMegaForm?.id ?? speciesEntry.megaForms[0].id}
+                  onChange={(event) => handleMegaVariantChange(event.target.value)}
+                >
+                  {speciesEntry.megaForms.map((megaForm) => (
+                    <option key={megaForm.id} value={megaForm.id} className="bg-arena-void">
+                      {megaForm.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+          </div>
         ) : null}
 
         <div className="arena-divider" />
@@ -345,13 +422,14 @@ export function PokemonPanel({
           sp={combatant.sp}
           baseStats={combatant.baseStats}
           finalStats={combatant.finalStats}
+          status={combatant.status}
           accent={accent}
           onSpChange={(patch) => setCombatant({ sp: patch, finalStats: null })}
         />
 
         <div className="arena-divider" />
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <p className={`arena-label ${accentText}`}>Moves · 4 slots</p>
           <div className="flex flex-col gap-1.5">
             {combatant.moves.map((slot, index) => (

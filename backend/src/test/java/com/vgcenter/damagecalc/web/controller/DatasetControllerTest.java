@@ -113,6 +113,51 @@ class DatasetControllerTest {
                 .andExpect(jsonPath("$.baseStats.specialAttack").value(109))
                 .andExpect(jsonPath("$.finalStats.hp").value(165))
                 .andExpect(jsonPath("$.finalStats.attack").value(97));
+
+        org.assertj.core.api.Assertions.assertThat(buildStatsUseCase.lastCommand)
+                .isEqualTo(new BuildStatsCommand(
+                        "charizard",
+                        new com.vgcenter.damagecalc.application.usecase.SpCommand(12, 4, 0, 20, 0, 8),
+                        "modest",
+                        false,
+                        null));
+    }
+
+    @Test
+    void roundTripsMegaFormIdOnBuildStatsRequest() throws Exception {
+        buildStatsUseCase.nextResult = new BuildStatsResult(
+                new StatsView(78, 104, 78, 159, 115, 100), new StatsView(165, 115, 98, 218, 135, 128));
+
+        mockMvc.perform(post("/api/v1/dataset/build-stats")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "speciesId": "charizard",
+                                  "sp": {
+                                    "hp": 12,
+                                    "attack": 4,
+                                    "defense": 0,
+                                    "specialAttack": 20,
+                                    "specialDefense": 0,
+                                    "speed": 8
+                                  },
+                                  "natureId": "modest",
+                                  "megaActive": true,
+                                  "megaFormId": "charizard-mega-y"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.baseStats.specialAttack").value(159))
+                .andExpect(jsonPath("$.finalStats.specialAttack").value(218));
+
+        org.assertj.core.api.Assertions.assertThat(buildStatsUseCase.lastCommand)
+                .isEqualTo(new BuildStatsCommand(
+                        "charizard",
+                        new com.vgcenter.damagecalc.application.usecase.SpCommand(12, 4, 0, 20, 0, 8),
+                        "modest",
+                        true,
+                        "charizard-mega-y"));
     }
 
     @Test
@@ -211,9 +256,11 @@ class DatasetControllerTest {
 
         private BuildStatsResult nextResult;
         private RuntimeException nextException;
+        private BuildStatsCommand lastCommand;
 
         @Override
         public BuildStatsResult buildStats(BuildStatsCommand command) {
+            lastCommand = command;
             if (nextException != null) {
                 throw nextException;
             }

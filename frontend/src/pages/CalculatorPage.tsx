@@ -8,8 +8,11 @@ import {
   fetchPokedex,
 } from '../features/calculator/api/datasetApi'
 import { DetailedResult } from '../features/calculator/components/DetailedResult'
+import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { PokemonPanel } from '../features/calculator/components/PokemonPanel'
+import { SavedPokemonRail } from '../features/calculator/components/SavedPokemonRail'
+import { ToastViewport } from '../features/calculator/components/ToastViewport'
 import { useReactiveDamage } from '../features/calculator/hooks/useReactiveDamage'
 import {
   useCalculatorStore,
@@ -25,15 +28,20 @@ import type {
 import { PokepasteImportModal } from '../features/importer/PokepasteImportModal'
 import { ShowdownImportModal } from '../features/importer/ShowdownImportModal'
 import { toCombatantBuild } from '../features/importer/importedTeamMapping'
+import { toSavedPokemon } from '../features/importer/importedTeamMapping'
 import { t } from '../lib/i18n'
+import { useSavedTeamStore } from '../features/calculator/store/useSavedTeamStore'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
+  const attacker = useCalculatorStore((s) => s.attacker)
+  const defender = useCalculatorStore((s) => s.defender)
   const setAttacker = useCalculatorStore((s) => s.setAttacker)
   const setDefender = useCalculatorStore((s) => s.setDefender)
   const setMoveCatalog = useCalculatorStore((s) => s.setMoveCatalog)
   const results = useCalculatorStore((s) => s.results)
   const resultsStatus = useCalculatorStore((s) => s.resultsStatus)
+  const importSavedTeam = useSavedTeamStore((s) => s.importTeam)
 
   const [pokedex, setPokedex] = useState<PokedexEntry[]>([])
   const [abilities, setAbilities] = useState<NamedDatasetEntry[]>([])
@@ -44,7 +52,9 @@ export function CalculatorPage() {
   const [focusedSide, setFocusedSide] = useState<CalculatorSide>('attacker')
   const [focusedMoveIndex, setFocusedMoveIndex] = useState(0)
 
-  useReactiveDamage(pokedex)
+  useBuildStatsSync('attacker', pokedex)
+  useBuildStatsSync('defender', pokedex)
+  useReactiveDamage()
 
   useEffect(() => {
     let active = true
@@ -75,8 +85,10 @@ export function CalculatorPage() {
     }
   }, [regulation, setMoveCatalog])
 
-  const attackerName = useNameForSide('attacker', pokedex)
-  const defenderName = useNameForSide('defender', pokedex)
+  const attackerEntry = usePokedexEntryForSide('attacker', pokedex)
+  const defenderEntry = usePokedexEntryForSide('defender', pokedex)
+  const attackerName = attackerEntry?.name ?? null
+  const defenderName = defenderEntry?.name ?? null
 
   const focusedResult =
     focusedSide === 'attacker'
@@ -108,6 +120,38 @@ export function CalculatorPage() {
     } else {
       setDefender(nextCombatant)
     }
+
+    setFocusedSide(side)
+  }
+
+  function handleImportTeam(side: CalculatorSide, team: ImportedPokemon[]) {
+    const [activePokemon, ...savedPokemon] = team
+    if (activePokemon === undefined) {
+      return
+    }
+
+    handleLoadImportedPokemon(side, activePokemon)
+
+    importSavedTeam(
+      side,
+      savedPokemon.map((pokemon) => {
+        const entry = pokedex.find((candidate) => candidate.id === pokemon.speciesId)
+        return toSavedPokemon(pokemon, entry)
+      }),
+    )
+  }
+
+  function handleLoadSavedPokemon(
+    side: CalculatorSide,
+    build: ReturnType<typeof useCalculatorStore.getState>['attacker'],
+  ) {
+    if (side === 'attacker') {
+      setAttacker(build)
+    } else {
+      setDefender(build)
+    }
+
+    setFocusedSide(side)
   }
 
   const datasets = useMemo(
@@ -122,19 +166,55 @@ export function CalculatorPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[4px] bg-gradient-to-r from-arena-plasma via-arena-sun to-arena-cyan shadow-[0_0_32px_rgba(255,43,142,0.7)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-arena-cyan via-arena-violet to-arena-plasma" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-8 sm:py-6">
+      <div
+        className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-3 px-4 py-4 sm:px-6 sm:py-4"
+        data-testid="calculator-shell"
+      >
         <CompactHeader
+          activeSide={focusedSide}
           regulation={regulation}
+          onImportTeam={handleImportTeam}
           onLoadPokemon={handleLoadImportedPokemon}
         />
 
-        <section className="grid gap-4 lg:grid-cols-[1.2fr_0.7fr_1.2fr]">
+        <section
+          className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          data-testid="detailed-result-grid"
+        >
+          <div
+            className="lg:col-start-2 lg:col-end-5"
+            data-testid="detailed-result-span"
+          >
+            <DetailedResult
+              focusedSide={focusedSide}
+              focusedIndex={focusedMoveIndex}
+              result={focusedResult}
+              status={resultsStatus}
+              attackerName={attackerName}
+              defenderName={defenderName}
+              moveName={focusedMoveName}
+            />
+          </div>
+        </section>
+
+        <section
+          className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          data-testid="calculator-main-grid"
+        >
+          <SavedPokemonRail
+            side="attacker"
+            currentBuild={attacker}
+            speciesName={attackerEntry?.name ?? null}
+            spriteId={attacker.speciesId}
+            onLoadBuild={handleLoadSavedPokemon}
+          />
           <PokemonPanel
             side="attacker"
             {...datasets}
             focusedSide={focusedSide}
             focusedMoveIndex={focusedMoveIndex}
             onFocusSlot={handleFocusSlot}
+            onActivateSide={setFocusedSide}
           />
           <FieldPanel />
           <PokemonPanel
@@ -143,36 +223,35 @@ export function CalculatorPage() {
             focusedSide={focusedSide}
             focusedMoveIndex={focusedMoveIndex}
             onFocusSlot={handleFocusSlot}
+            onActivateSide={setFocusedSide}
+          />
+          <SavedPokemonRail
+            side="defender"
+            currentBuild={defender}
+            speciesName={defenderEntry?.name ?? null}
+            spriteId={defender.speciesId}
+            onLoadBuild={handleLoadSavedPokemon}
           />
         </section>
-
-        <DetailedResult
-          focusedSide={focusedSide}
-          focusedIndex={focusedMoveIndex}
-          result={focusedResult}
-          status={resultsStatus}
-          attackerName={attackerName}
-          defenderName={defenderName}
-          moveName={focusedMoveName}
-        />
 
         <footer className="pb-1 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
           VGCenter · Champions Circuit · Regulation M-A
         </footer>
       </div>
+      <ToastViewport />
     </main>
   )
 }
 
-function useNameForSide(
+function usePokedexEntryForSide(
   side: CalculatorSide,
   pokedex: PokedexEntry[],
-): string | null {
+): PokedexEntry | null {
   const speciesId = useCalculatorStore((s) => s[side].speciesId)
   if (speciesId === null) {
     return null
   }
-  return pokedex.find((entry) => entry.id === speciesId)?.name ?? speciesId
+  return pokedex.find((entry) => entry.id === speciesId) ?? null
 }
 
 function useMoveNameForSlot(
@@ -188,17 +267,24 @@ function useMoveNameForSlot(
 }
 
 function CompactHeader({
+  activeSide,
   regulation,
+  onImportTeam,
   onLoadPokemon,
 }: {
+  activeSide: CalculatorSide
   regulation: string
+  onImportTeam: (side: CalculatorSide, team: ImportedPokemon[]) => void
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
 }) {
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+    <header
+      className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2"
+      data-testid="calculator-header"
+    >
       <div className="flex items-center gap-3">
         <span className="h-2 w-2 rounded-full bg-arena-plasma shadow-[0_0_12px_rgba(255,43,142,0.9)]" />
-        <h1 className="font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+        <h1 className="font-display text-xl font-extrabold tracking-tight text-white sm:text-2xl">
           {t('calculator.title')}
         </h1>
         <span className="arena-chip text-arena-plasma">
@@ -209,8 +295,16 @@ function CompactHeader({
         <span className="font-display text-xs tracking-[0.3em] text-arena-violet">
           IMPORT ⟶
         </span>
-        <ShowdownImportModal onLoadPokemon={onLoadPokemon} />
-        <PokepasteImportModal onLoadPokemon={onLoadPokemon} />
+        <ShowdownImportModal
+          activeSide={activeSide}
+          onImportTeam={onImportTeam}
+          onLoadPokemon={onLoadPokemon}
+        />
+        <PokepasteImportModal
+          activeSide={activeSide}
+          onImportTeam={onImportTeam}
+          onLoadPokemon={onLoadPokemon}
+        />
       </div>
     </header>
   )

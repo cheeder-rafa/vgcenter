@@ -8,4 +8,5 @@ public record BuildStatsRequestDto(
         @NotBlank String speciesId,
         @NotNull @Valid SpDto sp,
         @NotBlank String natureId,
-        boolean megaActive) {}
+        boolean megaActive,
+        String megaFormId) {}
