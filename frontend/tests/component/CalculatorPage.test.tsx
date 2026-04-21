@@ -679,4 +679,29 @@ describe('CalculatorPage', () => {
       'pelipper',
     )
   })
+
+  it('fitsWithin1080pViewportHeight', async () => {
+    render(<CalculatorPage />)
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    const shell = screen.getByTestId('calculator-shell')
+    const header = screen.getByTestId('calculator-header')
+    const mainGrid = screen.getByTestId('calculator-main-grid')
+    const fieldPanel = screen.getByTestId('field-panel')
+    const readout = screen.getByText(/detailed readout/i).closest('article')
+    const sidePanels = screen
+      .getAllByRole('heading', { level: 2 })
+      .filter((heading) => /attacker|defender/i.test(heading.textContent ?? ''))
+      .map((heading) => heading.closest('article'))
+
+    expect(shell.className).toContain('gap-3')
+    expect(shell.className).toContain('py-4')
+    expect(header.className).toContain('pb-2')
+    expect(mainGrid.className).toContain('gap-3')
+    expect(fieldPanel.className).toContain('p-4')
+    expect(readout?.className).toContain('px-3')
+    expect(readout?.className).toContain('py-2')
+    sidePanels.forEach((panel) => expect(panel?.className).toContain('p-4'))
+  })
 })

@@ -166,7 +166,10 @@ export function CalculatorPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[4px] bg-gradient-to-r from-arena-plasma via-arena-sun to-arena-cyan shadow-[0_0_32px_rgba(255,43,142,0.7)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-arena-cyan via-arena-violet to-arena-plasma" />
 
-      <div className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-8 sm:py-6">
+      <div
+        className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-3 px-4 py-4 sm:px-6 sm:py-4"
+        data-testid="calculator-shell"
+      >
         <CompactHeader
           activeSide={focusedSide}
           regulation={regulation}
@@ -175,7 +178,7 @@ export function CalculatorPage() {
         />
 
         <section
-          className="grid gap-4 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
           data-testid="detailed-result-grid"
         >
           <div
@@ -195,7 +198,7 @@ export function CalculatorPage() {
         </section>
 
         <section
-          className="grid gap-4 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
           data-testid="calculator-main-grid"
         >
           <SavedPokemonRail
@@ -275,10 +278,13 @@ function CompactHeader({
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
 }) {
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
+    <header
+      className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2"
+      data-testid="calculator-header"
+    >
       <div className="flex items-center gap-3">
         <span className="h-2 w-2 rounded-full bg-arena-plasma shadow-[0_0_12px_rgba(255,43,142,0.9)]" />
-        <h1 className="font-display text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+        <h1 className="font-display text-xl font-extrabold tracking-tight text-white sm:text-2xl">
           {t('calculator.title')}
         </h1>
         <span className="arena-chip text-arena-plasma">

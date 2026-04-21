@@ -191,11 +191,11 @@ export function PokemonPanel({
 
   return (
     <article
-      className={`arena-panel ${panelVariant} p-5`}
+      className={`arena-panel ${panelVariant} p-4`}
       onFocusCapture={() => onActivateSide?.(side)}
       onPointerDownCapture={() => onActivateSide?.(side)}
     >
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-3">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span
@@ -210,7 +210,7 @@ export function PokemonPanel({
           </span>
         </header>
 
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-3">
           <SpriteBadge
             speciesId={combatant.speciesId}
             speciesName={speciesName}
@@ -229,7 +229,7 @@ export function PokemonPanel({
               {typesLabel.map((type) => (
                 <span
                   key={type}
-                  className={`arena-chip ${getTypeChipClasses(type)}`}
+                  className={`arena-chip text-[0.62rem] tracking-[0.2em] ${getTypeChipClasses(type)}`}
                   data-testid={`types-${side}-${type}`}
                 >
                   {type}
@@ -237,7 +237,7 @@ export function PokemonPanel({
               ))}
               {speciesEntry?.megaForms.length ? (
                 <span
-                  className={`arena-chip ${accentText}`}
+                  className={`arena-chip text-[0.62rem] tracking-[0.2em] ${accentText}`}
                   data-testid={`mega-available-${side}`}
                 >
                   MEGA READY
@@ -371,7 +371,7 @@ export function PokemonPanel({
         </div>
 
         {speciesEntry?.megaForms.length ? (
-          <div className="flex flex-col gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
+          <div className="flex flex-col gap-1.5 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
             <label
               htmlFor={ids.mega}
               className={`flex items-center gap-3 transition ${
@@ -390,12 +390,12 @@ export function PokemonPanel({
               <span className="arena-label text-arena-violet">
                 Mega Evolution
               </span>
-              <span className="ml-auto font-mono text-[0.7rem] uppercase tracking-[0.22em] text-white/55">
+              <span className="ml-auto font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/55">
                 mid-battle toggle
               </span>
             </label>
             {speciesEntry.megaForms.length > 1 && combatant.megaActive ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <label htmlFor={`${ids.mega}-variant`} className="arena-label text-arena-violet">
                   Mega Variant
                 </label>
@@ -429,7 +429,7 @@ export function PokemonPanel({
 
         <div className="arena-divider" />
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <p className={`arena-label ${accentText}`}>Moves · 4 slots</p>
           <div className="flex flex-col gap-1.5">
             {combatant.moves.map((slot, index) => (
