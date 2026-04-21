@@ -124,6 +124,7 @@ export type BuildStatsRequest = {
   sp: Spread
   natureId: string
   megaActive: boolean
+  megaFormId: string | null
 }
 
 export type BuildStatsResponse = {
@@ -139,6 +140,7 @@ export type CombatantBuild = {
   itemId: string | null
   status: StatusCondition
   megaActive: boolean
+  megaFormId: string | null
   moves: [MoveSlot, MoveSlot, MoveSlot, MoveSlot]
   baseStats: Stats | null
   finalStats: Stats | null

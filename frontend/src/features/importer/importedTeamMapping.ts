@@ -26,6 +26,7 @@ export function toCombatantBuild(
     itemId: pokemon.itemId,
     status: 'NONE',
     megaActive: false,
+    megaFormId: null,
     moves: toMoveSlots(pokemon.moveIds),
     baseStats: pokedexEntry?.baseStats ?? pokemon.stats,
     finalStats: pokemon.stats,

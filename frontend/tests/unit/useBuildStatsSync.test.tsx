@@ -35,7 +35,36 @@ const pokedex: PokedexEntry[] = [
     },
     abilityIds: ['blaze'],
     moveIds: ['heat-wave'],
-    megaForms: [],
+    megaForms: [
+      {
+        id: 'charizard-mega-x',
+        name: 'Mega Charizard X',
+        types: ['FIRE', 'DRAGON'],
+        baseStats: {
+          hp: 78,
+          attack: 130,
+          defense: 111,
+          specialAttack: 130,
+          specialDefense: 85,
+          speed: 100,
+        },
+        abilityId: 'tough-claws',
+      },
+      {
+        id: 'charizard-mega-y',
+        name: 'Mega Charizard Y',
+        types: ['FIRE', 'FLYING'],
+        baseStats: {
+          hp: 78,
+          attack: 104,
+          defense: 78,
+          specialAttack: 159,
+          specialDefense: 115,
+          speed: 100,
+        },
+        abilityId: 'drought',
+      },
+    ],
   },
   {
     id: 'amoonguss',
@@ -111,6 +140,7 @@ describe('useBuildStatsSync', () => {
       speciesId: 'charizard',
       natureId: 'timid',
       megaActive: false,
+      megaFormId: null,
       sp: {
         hp: 0,
         atk: 0,
@@ -144,6 +174,45 @@ describe('useBuildStatsSync', () => {
     )
 
     expect(mocks.buildStats).toHaveBeenCalledTimes(1)
+  })
+
+  it('sendsMegaFormIdInBuildStatsRequest', async () => {
+    renderHook(() => useBuildStatsSync('attacker', pokedex))
+
+    act(() => {
+      useCalculatorStore.getState().setAttacker({
+        speciesId: 'charizard',
+        natureId: 'timid',
+        megaActive: true,
+        megaFormId: 'charizard-mega-x',
+        sp: {
+          spa: 32,
+          spe: 32,
+        },
+        baseStats: null,
+        finalStats: null,
+        types: null,
+      })
+    })
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200)
+    })
+
+    expect(mocks.buildStats).toHaveBeenCalledWith({
+      speciesId: 'charizard',
+      natureId: 'timid',
+      megaActive: true,
+      megaFormId: 'charizard-mega-x',
+      sp: {
+        hp: 0,
+        atk: 0,
+        def: 0,
+        spa: 32,
+        spd: 0,
+        spe: 32,
+      },
+    })
   })
 })
 

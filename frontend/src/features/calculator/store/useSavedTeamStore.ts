@@ -74,6 +74,7 @@ function toCombatantBuild(pokemon: SavedPokemon): CombatantBuild {
     itemId: pokemon.itemId,
     status: pokemon.status,
     megaActive: pokemon.megaActive,
+    megaFormId: pokemon.megaFormId,
     moves: cloneMoves(pokemon.moves),
     baseStats: cloneStats(pokemon.baseStats),
     finalStats: cloneStats(pokemon.finalStats),

@@ -98,6 +98,7 @@ function createDefaultCombatant(stats: Stats): CombatantBuild {
     itemId: null,
     status: 'NONE',
     megaActive: false,
+    megaFormId: null,
     moves: cloneMoveSlots(defaultMoveSlots),
     baseStats: { ...stats },
     finalStats: { ...stats },

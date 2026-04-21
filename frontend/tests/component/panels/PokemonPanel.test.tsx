@@ -29,6 +29,20 @@ const pokedex: PokedexEntry[] = [
     moveIds: ['heat-wave', 'protect', 'air-slash'],
     megaForms: [
       {
+        id: 'charizard-mega-x',
+        name: 'Mega Charizard X',
+        types: ['FIRE', 'DRAGON'],
+        baseStats: {
+          hp: 78,
+          attack: 130,
+          defense: 111,
+          specialAttack: 130,
+          specialDefense: 85,
+          speed: 100,
+        },
+        abilityId: 'tough-claws',
+      },
+      {
         id: 'charizard-mega-y',
         name: 'Mega Charizard Y',
         types: ['FIRE', 'FLYING'],
@@ -66,12 +80,16 @@ const pokedex: PokedexEntry[] = [
 const abilities: NamedDatasetEntry[] = [
   { id: 'blaze', name: 'Blaze' },
   { id: 'solar-power', name: 'Solar Power' },
+  { id: 'tough-claws', name: 'Tough Claws' },
   { id: 'drought', name: 'Drought' },
   { id: 'regenerator', name: 'Regenerator' },
   { id: 'levitate', name: 'Levitate' },
 ]
 
 const items: NamedDatasetEntry[] = [
+  { id: 'charizardite-x', name: 'Charizardite X' },
+  { id: 'charizardite-y', name: 'Charizardite Y' },
+  { id: 'froslassite', name: 'Froslassite' },
   { id: 'life-orb', name: 'Life Orb' },
   { id: 'sitrus-berry', name: 'Sitrus Berry' },
 ]
@@ -345,5 +363,68 @@ describe('PokemonPanel', () => {
     ).toBeInTheDocument()
     expect(useCalculatorStore.getState().attacker.speciesId).toBe('charizard')
     expect(useCalculatorStore.getState().attacker.megaActive).toBe(true)
+  })
+
+  it('showsMegaVariantPickerWhenSpeciesHasMultipleMegas', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+    await user.click(screen.getByLabelText(/mega evolution/i))
+
+    expect(screen.getByLabelText(/mega variant/i)).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /mega charizard x/i })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /mega charizard y/i })).toBeInTheDocument()
+  })
+
+  it('selectsMegaCharizardXAndAutoFillsCharizarditeX', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+    await user.click(screen.getByLabelText(/mega evolution/i))
+    await user.selectOptions(screen.getByLabelText(/mega variant/i), 'charizard-mega-x')
+
+    expect(useCalculatorStore.getState().attacker.megaFormId).toBe('charizard-mega-x')
+    expect(useCalculatorStore.getState().attacker.itemId).toBe('charizardite-x')
+  })
+
+  it('switchingFromXToYReplacesStone', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+    await user.click(screen.getByLabelText(/mega evolution/i))
+    await user.selectOptions(screen.getByLabelText(/mega variant/i), 'charizard-mega-x')
+    await user.selectOptions(screen.getByLabelText(/mega variant/i), 'charizard-mega-y')
+
+    expect(useCalculatorStore.getState().attacker.megaFormId).toBe('charizard-mega-y')
+    expect(useCalculatorStore.getState().attacker.itemId).toBe('charizardite-y')
+  })
+
+  it('togglingMegaOffPreservesExistingItem', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+    await user.click(screen.getByLabelText(/^item$/i))
+    await user.selectOptions(screen.getByLabelText(/^item$/i), 'life-orb')
+    await user.click(screen.getByLabelText(/mega evolution/i))
+    await user.click(screen.getByLabelText(/mega evolution/i))
+
+    expect(useCalculatorStore.getState().attacker.megaActive).toBe(false)
+    expect(useCalculatorStore.getState().attacker.itemId).toBe('charizardite-x')
   })
 })

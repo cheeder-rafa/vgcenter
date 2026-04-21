@@ -130,6 +130,7 @@ describe('datasetApi', () => {
       speciesId: 'charizard',
       natureId: 'timid',
       megaActive: false,
+      megaFormId: null,
       sp: { hp: 12, atk: 0, def: 4, spa: 32, spd: 0, spe: 32 },
     })
 
@@ -141,6 +142,7 @@ describe('datasetApi', () => {
           speciesId: 'charizard',
           natureId: 'timid',
           megaActive: false,
+          megaFormId: null,
           sp: {
             hp: 12,
             attack: 0,

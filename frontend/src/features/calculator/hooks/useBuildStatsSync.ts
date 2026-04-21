@@ -6,13 +6,17 @@ import type { CombatantBuild, PokedexEntry } from '../types/api'
 
 const RECOMPUTE_DEBOUNCE_MS = 200
 
-type BuildInputs = Pick<CombatantBuild, 'speciesId' | 'natureId' | 'megaActive' | 'sp'>
+type BuildInputs = Pick<
+  CombatantBuild,
+  'speciesId' | 'natureId' | 'megaActive' | 'megaFormId' | 'sp'
+>
 
 function selectBuildInputs(combatant: CombatantBuild) {
   return JSON.stringify({
     speciesId: combatant.speciesId,
     natureId: combatant.natureId,
     megaActive: combatant.megaActive,
+    megaFormId: combatant.megaFormId,
     sp: combatant.sp,
   } satisfies BuildInputs)
 }
@@ -22,6 +26,7 @@ function createBuildKey(combatant: CombatantBuild): string {
     speciesId: combatant.speciesId,
     natureId: combatant.natureId,
     megaActive: combatant.megaActive,
+    megaFormId: combatant.megaFormId,
     sp: combatant.sp,
   })
 }
@@ -40,7 +45,10 @@ function resolveCombatantTypes(
   }
 
   if (combatant.megaActive && entry.megaForms.length > 0) {
-    const [primary, secondary] = entry.megaForms[0].types
+    const megaForm =
+      entry.megaForms.find((candidate) => candidate.id === combatant.megaFormId) ??
+      entry.megaForms[0]
+    const [primary, secondary] = megaForm.types
     return [primary, secondary ?? null]
   }
 
@@ -82,6 +90,7 @@ export function useBuildStatsSync(side: CalculatorSide, pokedex: PokedexEntry[])
         speciesId: combatant.speciesId,
         natureId: combatant.natureId,
         megaActive: combatant.megaActive,
+        megaFormId: combatant.megaFormId,
         sp: combatant.sp,
       })
 

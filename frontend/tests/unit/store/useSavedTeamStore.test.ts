@@ -22,6 +22,7 @@ const savedPokemonFactory = (
   itemId: 'life-orb',
   status: 'NONE' as const,
   megaActive: false,
+  megaFormId: null,
   moves: [
     { moveId: 'heat-wave' },
     { moveId: 'protect' },
