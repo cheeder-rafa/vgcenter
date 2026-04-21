@@ -18,6 +18,13 @@ describe('SpriteBadge', () => {
     expect(resolveSpriteSources(null, true)).toEqual(['/sprites/_unknown.png'])
   })
 
+  it('resolves floette to the eternal variant art', () => {
+    expect(resolveSpriteSources('floette', false)).toEqual([
+      '/sprites/floette-eternal.png',
+      '/sprites/_unknown.png',
+    ])
+  })
+
   it('falls back from mega art to base art and then to the unknown sprite', () => {
     render(
       <SpriteBadge
