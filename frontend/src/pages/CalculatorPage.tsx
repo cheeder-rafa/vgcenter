@@ -174,7 +174,30 @@ export function CalculatorPage() {
           onLoadPokemon={handleLoadImportedPokemon}
         />
 
-        <section className="grid gap-4 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]">
+        <section
+          className="grid gap-4 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          data-testid="detailed-result-grid"
+        >
+          <div
+            className="lg:col-start-2 lg:col-end-5"
+            data-testid="detailed-result-span"
+          >
+            <DetailedResult
+              focusedSide={focusedSide}
+              focusedIndex={focusedMoveIndex}
+              result={focusedResult}
+              status={resultsStatus}
+              attackerName={attackerName}
+              defenderName={defenderName}
+              moveName={focusedMoveName}
+            />
+          </div>
+        </section>
+
+        <section
+          className="grid gap-4 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          data-testid="calculator-main-grid"
+        >
           <SavedPokemonRail
             side="attacker"
             currentBuild={attacker}
@@ -207,16 +230,6 @@ export function CalculatorPage() {
             onLoadBuild={handleLoadSavedPokemon}
           />
         </section>
-
-        <DetailedResult
-          focusedSide={focusedSide}
-          focusedIndex={focusedMoveIndex}
-          result={focusedResult}
-          status={resultsStatus}
-          attackerName={attackerName}
-          defenderName={defenderName}
-          moveName={focusedMoveName}
-        />
 
         <footer className="pb-1 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
           VGCenter · Champions Circuit · Regulation M-A

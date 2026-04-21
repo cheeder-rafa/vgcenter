@@ -178,6 +178,36 @@ describe('CalculatorPage', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('rendersDetailedResultAboveMainGrid', async () => {
+    render(<CalculatorPage />)
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    const detailedResult = screen.getByText(/detailed readout/i).closest('article')
+    const mainGrid = screen.getByTestId('calculator-main-grid')
+
+    expect(detailedResult).not.toBeNull()
+    expect(mainGrid).not.toBeNull()
+    expect(
+      detailedResult?.compareDocumentPosition(mainGrid as Node),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  it('detailedResultWidthMatchesMiddleColumns', async () => {
+    render(<CalculatorPage />)
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    const wrapper = screen.getByTestId('detailed-result-grid')
+    const content = screen.getByTestId('detailed-result-span')
+
+    expect(wrapper.className).toContain(
+      'lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]',
+    )
+    expect(content.className).toContain('lg:col-start-2')
+    expect(content.className).toContain('lg:col-end-5')
+  })
+
   it('imports a Showdown team into the active side and saves the remaining members to the rail', async () => {
     mocks.importShowdown.mockResolvedValue({
       team: [
