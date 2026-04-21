@@ -114,6 +114,14 @@ function createEmptyResults(): DamageResults {
   }
 }
 
+function createEmptyMoveSlots(): CombatantBuild['moves'] {
+  return cloneMoveSlots(defaultMoveSlots)
+}
+
+function createEmptySideResults(): DamageResults['attackerMoves'] {
+  return [null, null, null, null]
+}
+
 function cloneMoveSlots(
   moves: CombatantBuild['moves'],
 ): CombatantBuild['moves'] {
@@ -184,6 +192,7 @@ type CalculatorState = {
     index: number,
     moveId: string | null,
   ) => void
+  clearSideMovesAndResults: (side: CalculatorSide) => void
   setResult: (
     side: CalculatorSide,
     index: number,
@@ -242,6 +251,22 @@ export const useCalculatorStore = create<CalculatorState>()(
         const moves = cloneMoveSlots(state[side].moves)
         moves[index] = { moveId }
         return { [side]: { ...state[side], moves } }
+      }),
+    clearSideMovesAndResults: (side) =>
+      set((state) => {
+        const resultKey =
+          side === 'attacker' ? 'attackerMoves' : 'defenderMoves'
+
+        return {
+          [side]: {
+            ...state[side],
+            moves: createEmptyMoveSlots(),
+          },
+          results: {
+            ...state.results,
+            [resultKey]: createEmptySideResults(),
+          },
+        }
       }),
     setResult: (side, index, result) =>
       set((state) => {
