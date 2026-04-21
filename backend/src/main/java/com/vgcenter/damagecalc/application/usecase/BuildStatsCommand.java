@@ -2,7 +2,12 @@ package com.vgcenter.damagecalc.application.usecase;
 
 import java.util.Objects;
 
-public record BuildStatsCommand(String speciesId, SpCommand sp, String natureId, boolean megaActive) {
+public record BuildStatsCommand(
+        String speciesId, SpCommand sp, String natureId, boolean megaActive, String megaFormId) {
+
+    public BuildStatsCommand(String speciesId, SpCommand sp, String natureId, boolean megaActive) {
+        this(speciesId, sp, natureId, megaActive, null);
+    }
 
     public BuildStatsCommand {
         requireText(speciesId, "speciesId");

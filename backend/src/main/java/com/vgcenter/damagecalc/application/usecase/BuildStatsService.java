@@ -3,6 +3,7 @@ package com.vgcenter.damagecalc.application.usecase;
 import com.vgcenter.damagecalc.application.port.NatureRepository;
 import com.vgcenter.damagecalc.application.port.PokedexRepository;
 import com.vgcenter.damagecalc.domain.mega.MegaForm;
+import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Nature;
 import com.vgcenter.damagecalc.domain.model.PokemonSpecies;
 import com.vgcenter.damagecalc.domain.model.Sp;
@@ -29,19 +30,49 @@ public final class BuildStatsService implements BuildStatsUseCase {
         Nature nature = natureRepository
                 .findById(DEFAULT_REGULATION, command.natureId())
                 .orElseThrow(() -> new NatureNotFoundException(command.natureId()));
-        Stats baseStats = resolveBaseStats(species, command.megaActive());
-        Stats finalStats = baseStats.toBattleStats(toDomain(command.sp()), nature, VGC_LEVEL);
+        Sp sp = toDomain(command.sp());
+        Stats baseStats = resolveBaseStats(species, command);
+        Stats finalStats = buildCombatant(species, sp, nature, command).stats();
         return new BuildStatsResult(toStatsView(baseStats), toStatsView(finalStats));
     }
 
-    private Stats resolveBaseStats(PokemonSpecies species, boolean megaActive) {
-        if (!megaActive) {
+    private Combatant buildCombatant(PokemonSpecies species, Sp sp, Nature nature, BuildStatsCommand command) {
+        if (!command.megaActive()) {
+            return species.buildCombatant(VGC_LEVEL, sp, nature, false);
+        }
+        if (command.megaFormId() != null && !command.megaFormId().isBlank()) {
+            return species.buildCombatant(VGC_LEVEL, sp, nature, command.megaFormId());
+        }
+        if (species.megaForms().size() > 1) {
+            throw new IllegalArgumentException(
+                    "Species '%s' requires megaFormId when Mega evolution is active".formatted(species.id()));
+        }
+        return species.buildCombatant(VGC_LEVEL, sp, nature, true);
+    }
+
+    private Stats resolveBaseStats(PokemonSpecies species, BuildStatsCommand command) {
+        if (!command.megaActive()) {
             return species.baseStats();
+        }
+        if (command.megaFormId() != null && !command.megaFormId().isBlank()) {
+            return resolveMegaForm(species, command.megaFormId()).baseStats();
+        }
+        if (species.megaForms().size() > 1) {
+            throw new IllegalArgumentException(
+                    "Species '%s' requires megaFormId when Mega evolution is active".formatted(species.id()));
         }
         MegaForm megaForm = species.megaForm()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Species '%s' has no Mega form registered".formatted(species.id())));
         return megaForm.baseStats();
+    }
+
+    private MegaForm resolveMegaForm(PokemonSpecies species, String megaFormId) {
+        return species.megaForms().stream()
+                .filter(candidate -> candidate.id().equals(megaFormId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Species '%s' has no Mega form '%s' registered".formatted(species.id(), megaFormId)));
     }
 
     private Sp toDomain(SpCommand command) {

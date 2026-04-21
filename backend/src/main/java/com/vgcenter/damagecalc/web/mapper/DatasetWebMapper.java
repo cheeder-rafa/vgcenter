@@ -33,7 +33,8 @@ public class DatasetWebMapper {
                         request.sp().specialDefense(),
                         request.sp().speed()),
                 request.natureId(),
-                request.megaActive());
+                request.megaActive(),
+                request.megaFormId());
     }
 
     public BuildStatsResponseDto toBuildStatsResponse(BuildStatsResult result) {
