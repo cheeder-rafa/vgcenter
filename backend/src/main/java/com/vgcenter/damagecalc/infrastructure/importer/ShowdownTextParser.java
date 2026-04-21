@@ -264,14 +264,26 @@ public class ShowdownTextParser implements TeamParser {
     }
 
     private String resolveGenderedSpeciesName(String regulationId, String rawSpeciesName, String gender) {
-        if (!"M".equals(gender) && !"F".equals(gender)) {
+        String normalizedSpeciesKey = normalizeKey(rawSpeciesName);
+        if ("M".equals(gender) || "F".equals(gender)) {
+            String candidateId = normalizedSpeciesKey + ("M".equals(gender) ? "-male" : "-female");
+            if (pokedexRepository.findById(regulationId, candidateId).isPresent()) {
+                return candidateId;
+            }
             return rawSpeciesName;
         }
 
-        String candidateId = normalizeKey(rawSpeciesName) + ("M".equals(gender) ? "-male" : "-female");
-        if (pokedexRepository.findById(regulationId, candidateId).isPresent()) {
-            return candidateId;
+        if (pokedexRepository.findById(regulationId, normalizedSpeciesKey).isPresent()) {
+            return rawSpeciesName;
         }
+
+        for (String suffix : List.of("-male", "-female")) {
+            String candidateId = normalizedSpeciesKey + suffix;
+            if (pokedexRepository.findById(regulationId, candidateId).isPresent()) {
+                return candidateId;
+            }
+        }
+
         return rawSpeciesName;
     }
 

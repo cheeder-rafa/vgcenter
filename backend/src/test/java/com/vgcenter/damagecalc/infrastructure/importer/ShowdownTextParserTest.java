@@ -38,13 +38,6 @@ class ShowdownTextParserTest {
                     List.of("overgrow", "chlorophyll"),
                     List.of("sleep-powder", "sludge-bomb", "giga-drain", "protect")),
             new PokemonSpecies(
-                    "basculegion",
-                    "Basculegion",
-                    List.of(Type.WATER, Type.GHOST),
-                    new Stats(120, 92, 65, 80, 75, 78),
-                    List.of("adaptability"),
-                    List.of("protect")),
-            new PokemonSpecies(
                     "basculegion-male",
                     "Basculegion-Male",
                     List.of(Type.WATER, Type.GHOST),
@@ -210,6 +203,16 @@ class ShowdownTextParserTest {
     void stillResolvesExplicitMaleSpeciesFormName() {
         ImportedPokemonView pokemon =
                 parser.parse("M-A", "Basculegion-Male\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("basculegion-male");
+        assertThat(pokemon.speciesName()).isEqualTo("Basculegion-Male");
+        assertThat(pokemon.gender()).isNull();
+    }
+
+    @Test
+    void resolvesBasculegionWithoutGenderMarkerToMaleForm() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Basculegion\n- Protect").getFirst();
 
         assertThat(pokemon.speciesId()).isEqualTo("basculegion-male");
         assertThat(pokemon.speciesName()).isEqualTo("Basculegion-Male");
