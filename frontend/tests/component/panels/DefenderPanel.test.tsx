@@ -24,6 +24,6 @@ describe('DefenderPanel', () => {
     const def = screen.getByLabelText(/^defense$/i) as HTMLInputElement
     fireEvent.change(def, { target: { value: '150' } })
 
-    expect(useCalculatorStore.getState().defender.stats.defense).toBe(150)
+    expect(useCalculatorStore.getState().defender.finalStats?.defense).toBe(150)
   })
 })

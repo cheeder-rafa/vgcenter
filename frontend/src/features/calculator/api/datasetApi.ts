@@ -1,5 +1,7 @@
 import { requestJson } from '../../../lib/api-client'
 import type {
+  BuildStatsRequest,
+  BuildStatsResponse,
   NamedDatasetEntry,
   NatureResponse,
   PokedexEntry,
@@ -11,7 +13,14 @@ function datasetUrl(resource: string, regulation: Regulation) {
 }
 
 export function fetchPokedex(regulation: Regulation): Promise<PokedexEntry[]> {
-  return requestJson<PokedexEntry[]>(datasetUrl('pokedex', regulation), { method: 'GET' })
+  return requestJson<Omit<PokedexEntry, 'imageUrl'>[]>(datasetUrl('pokedex', regulation), {
+    method: 'GET',
+  }).then((entries) =>
+    entries.map((entry) => ({
+      ...entry,
+      imageUrl: `/sprites/${entry.id}.png`,
+    })),
+  )
 }
 
 export function fetchMoves(regulation: Regulation): Promise<NamedDatasetEntry[]> {
@@ -28,4 +37,23 @@ export function fetchItems(regulation: Regulation): Promise<NamedDatasetEntry[]>
 
 export function fetchNatures(regulation: Regulation): Promise<NatureResponse[]> {
   return requestJson<NatureResponse[]>(datasetUrl('natures', regulation), { method: 'GET' })
+}
+
+export function buildStats(request: BuildStatsRequest): Promise<BuildStatsResponse> {
+  return requestJson<BuildStatsResponse>('/dataset/build-stats', {
+    method: 'POST',
+    body: JSON.stringify({
+      speciesId: request.speciesId,
+      natureId: request.natureId,
+      megaActive: request.megaActive,
+      sp: {
+        hp: request.sp.hp,
+        attack: request.sp.atk,
+        defense: request.sp.def,
+        specialAttack: request.sp.spa,
+        specialDefense: request.sp.spd,
+        speed: request.sp.spe,
+      },
+    }),
+  })
 }

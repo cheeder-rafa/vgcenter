@@ -20,13 +20,14 @@ describe('AttackerPanel', () => {
     expect(screen.getByLabelText(/^status$/i)).toBeInTheDocument()
   })
 
-  it('wires the level input to the store', () => {
+  it('locks the level input to 50', () => {
     render(<AttackerPanel />)
 
     const level = screen.getByLabelText(/^level$/i) as HTMLInputElement
     fireEvent.change(level, { target: { value: '75' } })
 
-    expect(useCalculatorStore.getState().attacker.level).toBe(75)
+    expect(level).toBeDisabled()
+    expect(level.value).toBe('50')
   })
 
   it('toggles critical hit via the checkbox', async () => {

@@ -2,23 +2,22 @@ import { useEffect, useState } from 'react'
 
 import { calculateDamage } from '../features/calculator/api/damageApi'
 import { fetchPokedex } from '../features/calculator/api/datasetApi'
+import { useReactiveDamage } from '../features/calculator/hooks/useReactiveDamage'
 import {
   ResultPanel,
   type ResultMode,
-  type ResultStatus,
 } from '../features/calculator/components/ResultPanel'
 import { PokepasteImportModal } from '../features/importer/PokepasteImportModal'
 import { ShowdownImportModal } from '../features/importer/ShowdownImportModal'
-import { toCombatantRequest } from '../features/importer/importedTeamMapping'
+import { toCombatantBuild } from '../features/importer/importedTeamMapping'
 import { AttackerPanel } from '../features/calculator/components/AttackerPanel'
 import { DefenderPanel } from '../features/calculator/components/DefenderPanel'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import {
-  selectDamageRequest,
+  selectDamageRequestFor,
   useCalculatorStore,
 } from '../features/calculator/store/useCalculatorStore'
 import type {
-  CalculateDamageResponse,
   ImportedPokemon,
   PokedexEntry,
 } from '../features/calculator/types/api'
@@ -28,11 +27,12 @@ export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
   const setAttacker = useCalculatorStore((s) => s.setAttacker)
   const setDefender = useCalculatorStore((s) => s.setDefender)
-  const [result, setResult] = useState<CalculateDamageResponse | null>(null)
+  const results = useCalculatorStore((s) => s.results)
+  const resultsStatus = useCalculatorStore((s) => s.resultsStatus)
   const [resultMode, setResultMode] = useState<ResultMode>('range')
-  const [status, setStatus] = useState<ResultStatus>('idle')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [pokedex, setPokedex] = useState<PokedexEntry[]>([])
+
+  useReactiveDamage(pokedex)
 
   useEffect(() => {
     let active = true
@@ -55,22 +55,25 @@ export function CalculatorPage() {
   }, [regulation])
 
   async function handleCalculate() {
-    setStatus('loading')
-    setErrorMessage(null)
+    const store = useCalculatorStore.getState()
+    const request = selectDamageRequestFor(store, 'attacker', 0)
+
+    store.clearResults()
+    store.setResultsStatus('loading')
+
+    if (request === null) {
+      store.setResultsStatus('error')
+      return
+    }
 
     try {
-      const response = await calculateDamage(
-        selectDamageRequest(useCalculatorStore.getState()),
-      )
-      setResult(response)
+      const response = await calculateDamage(request)
+      useCalculatorStore.getState().setResult('attacker', 0, response)
       setResultMode('range')
-      setStatus('success')
-    } catch (error) {
-      setResult(null)
-      setStatus('error')
-      setErrorMessage(
-        error instanceof Error ? error.message : 'Calculation failed.',
-      )
+      useCalculatorStore.getState().setResultsStatus('success')
+    } catch {
+      useCalculatorStore.getState().clearResults()
+      useCalculatorStore.getState().setResultsStatus('error')
     }
   }
 
@@ -81,7 +84,7 @@ export function CalculatorPage() {
     const entry = pokedex.find(
       (candidate) => candidate.id === pokemon.speciesId,
     )
-    const nextCombatant = toCombatantRequest(pokemon, entry)
+    const nextCombatant = toCombatantBuild(pokemon, entry)
 
     if (side === 'attacker') {
       setAttacker(nextCombatant)
@@ -101,7 +104,7 @@ export function CalculatorPage() {
       <div className="relative mx-auto flex min-h-screen max-w-[1280px] flex-col gap-10 px-6 py-12 sm:px-10">
         <PageHeader regulation={regulation} />
         <CommandBar
-          loading={status === 'loading'}
+          loading={resultsStatus === 'loading'}
           onCalculate={handleCalculate}
           onLoadPokemon={handleLoadImportedPokemon}
         />
@@ -115,9 +118,11 @@ export function CalculatorPage() {
         <ResultPanel
           mode={resultMode}
           onModeChange={setResultMode}
-          result={result}
-          status={status}
-          errorMessage={errorMessage}
+          result={results.attackerMoves[0]}
+          status={resultsStatus}
+          errorMessage={
+            resultsStatus === 'error' ? 'The calculator could not complete the request.' : null
+          }
         />
 
         <footer className="pb-2 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
