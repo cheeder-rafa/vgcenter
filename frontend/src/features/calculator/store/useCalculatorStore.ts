@@ -73,6 +73,7 @@ const defaultSide: SideConditions = {
   auroraVeil: false,
   friendGuard: false,
   helpingHand: false,
+  tailwind: false,
   protect: false,
 }
 

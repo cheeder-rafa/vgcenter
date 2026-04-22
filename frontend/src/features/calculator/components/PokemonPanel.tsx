@@ -19,6 +19,30 @@ import { MEGA_STONE_MAP } from '../data/megaStoneMap'
 import { STATUS_OPTIONS } from './shared'
 import { getTypeChipClasses } from './typeColors'
 
+const DEFAULT_SPREAD: CombatantBuild['sp'] = {
+  hp: 0,
+  atk: 0,
+  def: 0,
+  spa: 0,
+  spd: 0,
+  spe: 0,
+}
+
+const DEFAULT_STAGES: CombatantBuild['stages'] = {
+  atk: 0,
+  def: 0,
+  spa: 0,
+  spd: 0,
+  spe: 0,
+}
+
+const EMPTY_MOVE_SLOTS: CombatantBuild['moves'] = [
+  { moveId: null },
+  { moveId: null },
+  { moveId: null },
+  { moveId: null },
+]
+
 type Props = {
   side: CalculatorSide
   pokedex: PokedexEntry[]
@@ -128,11 +152,20 @@ export function PokemonPanel({
     if (entry === null) {
       setCombatant({
         speciesId: null,
+        natureId: 'serious',
+        sp: { ...DEFAULT_SPREAD },
+        stages: { ...DEFAULT_STAGES },
+        abilityId: null,
+        itemId: null,
+        status: 'NONE',
         baseStats: null,
         finalStats: null,
         types: null,
         megaActive: false,
         megaFormId: null,
+        moves: EMPTY_MOVE_SLOTS,
+        grounded: true,
+        fullHp: true,
       })
       return
     }
@@ -140,13 +173,20 @@ export function PokemonPanel({
     const [primary, secondary] = entry.types
     setCombatant({
       speciesId: entry.id,
+      natureId: 'serious',
+      sp: { ...DEFAULT_SPREAD },
+      stages: { ...DEFAULT_STAGES },
       megaActive: false,
       megaFormId: null,
       abilityId: entry.abilityIds[0] ?? null,
+      itemId: null,
+      status: 'NONE',
+      moves: EMPTY_MOVE_SLOTS,
       baseStats: entry.baseStats,
       finalStats: null,
       types: [primary, secondary ?? null],
       grounded: !(primary === 'FLYING' || secondary === 'FLYING'),
+      fullHp: true,
     })
   }
 

@@ -42,8 +42,9 @@ export function FieldPanel({
       stagedSpeed: stagedSpeed(spd, attackerRaw.stages.spe),
       itemId: attackerRaw.itemId ?? null,
       status: attackerRaw.status,
+      tailwind: attackerSide.tailwind,
     }
-  }, [attackerRaw, attackerName])
+  }, [attackerName, attackerRaw, attackerSide.tailwind])
 
   const defenderCombatant = useMemo((): SpeedCombatant | null => {
     const spd = defenderRaw.finalStats?.speed ?? null
@@ -54,8 +55,9 @@ export function FieldPanel({
       stagedSpeed: stagedSpeed(spd, defenderRaw.stages.spe),
       itemId: defenderRaw.itemId ?? null,
       status: defenderRaw.status,
+      tailwind: defenderSide.tailwind,
     }
-  }, [defenderRaw, defenderName])
+  }, [defenderName, defenderRaw, defenderSide.tailwind])
 
   const ids = {
     weather: useId(),
@@ -66,6 +68,8 @@ export function FieldPanel({
     lightScreen: useId(),
     auroraVeil: useId(),
     helpingHand: useId(),
+    attackingTailwind: useId(),
+    defendingTailwind: useId(),
     friendGuard: useId(),
     protect: useId(),
   }
@@ -181,6 +185,13 @@ export function FieldPanel({
             onChange={(v) => setDefendingConditions({ friendGuard: v })}
           />
           <ToggleRow
+            id={ids.defendingTailwind}
+            label="Tailwind"
+            ariaLabel="Defender Tailwind"
+            checked={defendingConditions.tailwind}
+            onChange={(v) => setDefendingConditions({ tailwind: v })}
+          />
+          <ToggleRow
             id={ids.protect}
             label="Protect"
             checked={defendingConditions.protect}
@@ -197,6 +208,13 @@ export function FieldPanel({
             label="Helping Hand"
             checked={attackingConditions.helpingHand}
             onChange={(v) => setAttackingConditions({ helpingHand: v })}
+          />
+          <ToggleRow
+            id={ids.attackingTailwind}
+            label="Tailwind"
+            ariaLabel="Attacker Tailwind"
+            checked={attackingConditions.tailwind}
+            onChange={(v) => setAttackingConditions({ tailwind: v })}
           />
         </div>
       </div>
@@ -237,11 +255,13 @@ function Select({ id, label, value, onChange, options }: SelectProps) {
 function ToggleRow({
   id,
   label,
+  ariaLabel,
   checked,
   onChange,
 }: {
   id: string
   label: string
+  ariaLabel?: string
   checked: boolean
   onChange: (value: boolean) => void
 }) {
@@ -254,6 +274,7 @@ function ToggleRow({
         id={id}
         type="checkbox"
         className="arena-checkbox"
+        aria-label={ariaLabel}
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />

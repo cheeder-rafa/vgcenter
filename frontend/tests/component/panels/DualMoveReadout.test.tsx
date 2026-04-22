@@ -112,6 +112,13 @@ describe('DualMoveReadout', () => {
     expect(screen.getByTestId('overview-rolls-text').textContent).toContain(
       '108',
     )
+    expect(screen.getByTestId('overview-roll-summary')).toHaveTextContent(
+      '0 lethal',
+    )
+    expect(screen.getByTestId('overview-roll-summary')).toHaveTextContent(
+      '16 safe',
+    )
+    expect(screen.queryByTestId('heatmap-hp-label')).not.toBeInTheDocument()
   })
 
   it('shows copy button in expanded detail panel', async () => {
@@ -289,10 +296,7 @@ describe('DualMoveReadout', () => {
     expect(safeReadout).toHaveAttribute('data-ko-tier', 'safe')
   })
 
-  it('shows actual defender HP label (not roll max) in detail panel heatmap', async () => {
-    // The bug: Close Combat does 324-384 damage, but defenderHp was set to
-    // result.max + 1 (385) instead of the actual defender finalStats.hp.
-    // This caused all rolls to read as "safe" even on a guaranteed OHKO.
+  it('uses the actual defender HP when counting lethal rolls in detail', async () => {
     const user = userEvent.setup()
     const OHKO_RESULT = {
       rolls: [
@@ -328,7 +332,51 @@ describe('DualMoveReadout', () => {
 
     await user.click(screen.getByTestId('overview-move-attacker-0'))
 
-    // The heatmap label should show the actual HP, not 384+1=385
-    expect(screen.getByTestId('heatmap-hp-label')).toHaveTextContent('183')
+    expect(screen.getByTestId('overview-roll-summary')).toHaveTextContent(
+      '16 lethal',
+    )
+    expect(screen.getByTestId('overview-roll-summary')).toHaveTextContent(
+      '0 safe',
+    )
+  })
+
+  it('shows lethal and safe counts in expanded detail without a heatmap', async () => {
+    const user = userEvent.setup()
+    const MIXED_RESULT = {
+      rolls: [
+        90, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 118, 120,
+        122,
+      ],
+      min: 90,
+      max: 122,
+      minPct: 50,
+      maxPct: 67.8,
+      koChance: { description: 'possible OHKO', probability: 0.25, hits: 1 },
+    }
+
+    render(
+      <DualMoveReadout
+        attackerName="Flutter Mane"
+        defenderName="Amoonguss"
+        attackerMoves={[
+          { moveName: 'Moonblast', moveType: 'FAIRY', result: MIXED_RESULT },
+          { moveName: null, moveType: null, result: null },
+          { moveName: null, moveType: null, result: null },
+          { moveName: null, moveType: null, result: null },
+        ]}
+        defenderMoves={DEFENDER_MOVES}
+        defenderHp={110}
+      />,
+    )
+
+    await user.click(screen.getByTestId('overview-move-attacker-0'))
+
+    expect(screen.getByTestId('overview-roll-summary')).toHaveTextContent(
+      '7 lethal',
+    )
+    expect(screen.getByTestId('overview-roll-summary')).toHaveTextContent(
+      '9 safe',
+    )
+    expect(screen.queryByTestId('heatmap-hp-label')).not.toBeInTheDocument()
   })
 })

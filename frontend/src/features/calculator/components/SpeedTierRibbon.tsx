@@ -8,6 +8,7 @@ export type SpeedCombatant = {
   stagedSpeed: number
   itemId: string | null
   status: StatusCondition
+  tailwind: boolean
 }
 
 type Props = {
@@ -20,6 +21,7 @@ function effectiveSpeed(combatant: SpeedCombatant): number {
   let spd = combatant.stagedSpeed
   if (combatant.itemId === 'choice-scarf') spd = Math.floor(spd * 1.5)
   if (combatant.status === 'PARALYSIS') spd = Math.floor(spd * 0.5)
+  if (combatant.tailwind) spd = Math.floor(spd * 2)
   return spd
 }
 
