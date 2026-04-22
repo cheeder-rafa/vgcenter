@@ -63,6 +63,7 @@ export type SideConditions = {
   auroraVeil: boolean
   friendGuard: boolean
   helpingHand: boolean
+  tailwind: boolean
   protect: boolean
 }
 

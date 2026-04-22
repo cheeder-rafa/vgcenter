@@ -25,8 +25,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 move(),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
                 false,
                 1));
 
@@ -46,8 +46,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 new MoveCommand("not-a-type", "SPECIAL", 90, false, false, false, false),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
                 false,
                 1);
 
@@ -97,8 +97,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 new MoveCommand("NORMAL", "PHYSICAL", 80, false, true, false, false),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, true),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, true),
                 false,
                 1));
 
@@ -114,8 +114,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 new MoveCommand("NORMAL", "PHYSICAL", 80, false, true, false, false),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
                 false,
                 1));
         CalculateDamageResult protectedResult = service.calculate(new CalculateDamageCommand(
@@ -124,8 +124,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 new MoveCommand("NORMAL", "PHYSICAL", 80, false, true, false, false),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, true),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, true),
                 false,
                 1));
 
@@ -141,8 +141,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 move(),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
                 false,
                 1));
         CalculateDamageResult protectedResult = service.calculate(new CalculateDamageCommand(
@@ -151,8 +151,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 move(),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false, true),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, true),
                 false,
                 1));
 

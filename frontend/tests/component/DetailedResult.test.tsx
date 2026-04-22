@@ -84,6 +84,13 @@ describe('DetailedResult', () => {
     )
     expect(screen.queryByText(/copied damage report/i)).not.toBeInTheDocument()
     expect(screen.getByText(/guaranteed 2hko/i)).toBeInTheDocument()
+    expect(screen.getByTestId('detailed-roll-summary')).toHaveTextContent(
+      '0 lethal',
+    )
+    expect(screen.getByTestId('detailed-roll-summary')).toHaveTextContent(
+      '16 safe',
+    )
+    expect(screen.queryByTestId('heatmap-hp-label')).not.toBeInTheDocument()
   })
 
   it('shows through Protect for protect-piercing abilities', () => {
@@ -126,5 +133,51 @@ describe('DetailedResult', () => {
     expect(
       screen.getByText(/golurk giga impact vs\. excadrill through protect/i),
     ).toBeInTheDocument()
+  })
+
+  it('shows lethal and safe roll counts against the current defender HP', () => {
+    useCalculatorStore.getState().setDefender({
+      finalStats: {
+        hp: 120,
+        attack: 80,
+        defense: 100,
+        specialAttack: 80,
+        specialDefense: 100,
+        speed: 60,
+      },
+    })
+
+    render(
+      <DetailedResult
+        focusedSide="attacker"
+        focusedIndex={0}
+        status="success"
+        attackerName="Flutter Mane"
+        defenderName="Amoonguss"
+        moveName="Moonblast"
+        result={{
+          rolls: [
+            108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122,
+            122, 126, 126,
+          ],
+          min: 108,
+          max: 126,
+          minPct: 64.6,
+          maxPct: 75.4,
+          koChance: {
+            description: 'possible OHKO',
+            probability: 0.375,
+            hits: 1,
+          },
+        }}
+      />,
+    )
+
+    expect(screen.getByTestId('detailed-roll-summary')).toHaveTextContent(
+      '6 lethal',
+    )
+    expect(screen.getByTestId('detailed-roll-summary')).toHaveTextContent(
+      '10 safe',
+    )
   })
 })

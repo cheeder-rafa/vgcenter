@@ -5,6 +5,7 @@ import java.util.Locale;
 public enum Ability {
     NONE,
     ADAPTABILITY,
+    FAIRY_AURA,
     FILTER,
     FLUFFY,
     GUTS,

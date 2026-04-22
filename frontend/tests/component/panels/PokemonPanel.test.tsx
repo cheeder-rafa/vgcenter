@@ -281,10 +281,30 @@ describe('PokemonPanel', () => {
     store.setAttacker({
       speciesId: 'charizard',
       abilityId: 'blaze',
+      itemId: 'life-orb',
+      natureId: 'timid',
+      status: 'PARALYSIS',
+      sp: {
+        hp: 4,
+        atk: 1,
+        def: 2,
+        spa: 32,
+        spd: 3,
+        spe: 32,
+      },
+      megaActive: true,
+      megaFormId: 'charizard-mega-x',
       baseStats: pokedex[0].baseStats,
-      finalStats: pokedex[0].baseStats,
-      types: ['FIRE', 'FLYING'],
-      grounded: false,
+      finalStats: {
+        hp: 200,
+        attack: 180,
+        defense: 150,
+        specialAttack: 170,
+        specialDefense: 140,
+        speed: 160,
+      },
+      types: ['FIRE', 'DRAGON'],
+      grounded: true,
     })
     store.setDefender({
       speciesId: 'amoonguss',
@@ -324,6 +344,31 @@ describe('PokemonPanel', () => {
     await user.keyboard('{ArrowDown}{Enter}')
 
     expect(useCalculatorStore.getState().attacker.speciesId).toBe('amoonguss')
+    expect(useCalculatorStore.getState().attacker.abilityId).toBe(
+      'regenerator',
+    )
+    expect(useCalculatorStore.getState().attacker.itemId).toBeNull()
+    expect(useCalculatorStore.getState().attacker.natureId).toBe('serious')
+    expect(useCalculatorStore.getState().attacker.status).toBe('NONE')
+    expect(useCalculatorStore.getState().attacker.sp).toEqual({
+      hp: 0,
+      atk: 0,
+      def: 0,
+      spa: 0,
+      spd: 0,
+      spe: 0,
+    })
+    expect(useCalculatorStore.getState().attacker.megaActive).toBe(false)
+    expect(useCalculatorStore.getState().attacker.megaFormId).toBeNull()
+    expect(useCalculatorStore.getState().attacker.baseStats).toEqual(
+      pokedex[1].baseStats,
+    )
+    expect(useCalculatorStore.getState().attacker.finalStats).toBeNull()
+    expect(useCalculatorStore.getState().attacker.types).toEqual([
+      'GRASS',
+      'POISON',
+    ])
+    expect(useCalculatorStore.getState().attacker.grounded).toBe(true)
     expect(useCalculatorStore.getState().attacker.moves).toEqual([
       { moveId: null },
       { moveId: null },

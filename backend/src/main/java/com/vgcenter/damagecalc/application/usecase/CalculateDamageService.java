@@ -97,6 +97,7 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 command.auroraVeil(),
                 command.friendGuard(),
                 command.helpingHand(),
+                command.tailwind(),
                 command.protect());
     }
 

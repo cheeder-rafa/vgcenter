@@ -74,6 +74,7 @@ class DamageFormulaGoldenSetTest {
 
         Move physicalNeutral = move(Type.GROUND, MoveCategory.PHYSICAL, 80, false);
         Move physicalStab = move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false);
+        Move fairyPhysical = move(Type.FAIRY, MoveCategory.PHYSICAL, 80, false);
         Move physicalContact = move(Type.NORMAL, MoveCategory.PHYSICAL, 80, false, true);
         Move specialFire = move(Type.FIRE, MoveCategory.SPECIAL, 90, false);
         Move electricSpecial = move(Type.ELECTRIC, MoveCategory.SPECIAL, 90, false);
@@ -195,6 +196,13 @@ class DamageFormulaGoldenSetTest {
                         context(physicalAttacker.withAbility(Ability.ADAPTABILITY), bulkyDefender, physicalStab),
                         scaled(NEUTRAL_PHYSICAL, 2, 1)),
                 Arguments.of(
+                        "fairy aura boosts fairy moves",
+                        context(
+                                physicalAttacker.withTypes(List.of(Type.FAIRY)).withAbility(Ability.FAIRY_AURA),
+                                bulkyDefender,
+                                fairyPhysical),
+                        scaled(PHYSICAL_STAB, 4, 3)),
+                Arguments.of(
                         "reflect reduces physical damage",
                         context(
                                 physicalAttacker,
@@ -202,7 +210,7 @@ class DamageFormulaGoldenSetTest {
                                 physicalStab,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(true, false, false, false, false, false),
+                                new SideConditions(true, false, false, false, false, false, false),
                                 false,
                                 1),
                         scaled(PHYSICAL_STAB, 2, 3)),
@@ -214,7 +222,7 @@ class DamageFormulaGoldenSetTest {
                                 specialFire,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, true, false, false, false, false),
+                                new SideConditions(false, true, false, false, false, false, false),
                                 false,
                                 1),
                         scaled(SPECIAL_STAB, 2, 3)),
@@ -226,7 +234,7 @@ class DamageFormulaGoldenSetTest {
                                 physicalStab,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, false, true, false, false, false),
+                                new SideConditions(false, false, true, false, false, false, false),
                                 false,
                                 1),
                         scaled(PHYSICAL_STAB, 2, 3)),
@@ -238,7 +246,7 @@ class DamageFormulaGoldenSetTest {
                                 specialFire,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, false, true, false, false, false),
+                                new SideConditions(false, false, true, false, false, false, false),
                                 false,
                                 1),
                         scaled(SPECIAL_STAB, 2, 3)),
@@ -249,7 +257,7 @@ class DamageFormulaGoldenSetTest {
                                 bulkyDefender,
                                 physicalStab,
                                 Field.clear(),
-                                new SideConditions(false, false, false, false, true, false),
+                                new SideConditions(false, false, false, false, true, false, false),
                                 SideConditions.none(),
                                 false,
                                 1),
@@ -262,7 +270,7 @@ class DamageFormulaGoldenSetTest {
                                 physicalStab,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, false, false, true, false, false),
+                                new SideConditions(false, false, false, true, false, false, false),
                                 false,
                                 1),
                         scaled(PHYSICAL_STAB, 3, 4)),
@@ -274,7 +282,7 @@ class DamageFormulaGoldenSetTest {
                                 physicalContact,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, false, false, false, false, true),
+                                new SideConditions(false, false, false, false, false, false, true),
                                 false,
                                 1),
                         zeroes()),
@@ -286,7 +294,7 @@ class DamageFormulaGoldenSetTest {
                                 physicalContact,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, false, false, false, false, true),
+                                new SideConditions(false, false, false, false, false, false, true),
                                 false,
                                 1),
                         scaled(PHYSICAL_STAB, 1, 4)),
@@ -298,7 +306,7 @@ class DamageFormulaGoldenSetTest {
                                 specialFire,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(false, false, false, false, false, true),
+                                new SideConditions(false, false, false, false, false, false, true),
                                 false,
                                 1),
                         scaled(SPECIAL_STAB, 1, 4)),
@@ -423,7 +431,7 @@ class DamageFormulaGoldenSetTest {
                                 physicalStab,
                                 Field.clear(),
                                 SideConditions.none(),
-                                new SideConditions(true, false, false, false, false, false),
+                                new SideConditions(true, false, false, false, false, false, false),
                                 true,
                                 1),
                         CRITICAL_PHYSICAL_STAB));

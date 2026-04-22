@@ -6,4 +6,5 @@ public record SideConditionsCommand(
         boolean auroraVeil,
         boolean friendGuard,
         boolean helpingHand,
+        boolean tailwind,
         boolean protect) {}

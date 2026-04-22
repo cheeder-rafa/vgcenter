@@ -165,6 +165,7 @@ public final class DamageFormula {
                 new ProtectModifier(),
                 new TerrainModifier(),
                 new HelpingHandModifier(),
+                new AuraModifier(),
                 new ScreenModifier(),
                 new FriendGuardModifier(),
                 new AttackerItemModifier(),
@@ -266,6 +267,24 @@ public final class DamageFormula {
         }
     }
 
+    private final class AuraModifier implements Modifier {
+
+        @Override
+        public boolean applies(DamageContext context) {
+            return context.move().type() == Type.FAIRY && fairyAuraActive(context);
+        }
+
+        @Override
+        public long apply(long damage, DamageContext context) {
+            return applyMultiplier(damage, 4, 3);
+        }
+
+        private boolean fairyAuraActive(DamageContext context) {
+            return context.attacker().ability() == Ability.FAIRY_AURA
+                    || context.defender().ability() == Ability.FAIRY_AURA;
+        }
+    }
+
     private final class FriendGuardModifier implements Modifier {
 
         @Override
@@ -306,6 +325,7 @@ public final class DamageFormula {
         @Override
         public long apply(long damage, DamageContext context) {
             return switch (context.attacker().ability()) {
+                case FAIRY_AURA -> damage;
                 case GUTS -> gutsAdjustment(damage, context);
                 case NEUROFORCE -> context.superEffective() ? applyMultiplier(damage, 5, 4) : damage;
                 case PIERCING_DRILL, UNSEEN_FIST -> damage;
@@ -334,6 +354,7 @@ public final class DamageFormula {
         @Override
         public long apply(long damage, DamageContext context) {
             return switch (context.defender().ability()) {
+                case FAIRY_AURA -> damage;
                 case FILTER, SOLID_ROCK -> context.superEffective() ? applyMultiplier(damage, 3, 4) : damage;
                 case FLUFFY -> fluffyAdjustment(damage, context);
                 case MULTISCALE -> context.defender().fullHp() ? applyMultiplier(damage, 1, 2) : damage;

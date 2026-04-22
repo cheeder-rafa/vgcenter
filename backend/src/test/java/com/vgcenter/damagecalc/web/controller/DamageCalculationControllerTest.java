@@ -94,8 +94,8 @@ class DamageCalculationControllerTest {
                                     "ignoreBurnPenaltyWhenUserStatused": false
                                   },
                                   "field": { "weather": "CLEAR", "terrain": "NONE", "room": "NONE" },
-                                  "attackerSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false },
-                                  "defenderSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false },
+                                  "attackerSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false, "tailwind": false },
+                                  "defenderSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false, "tailwind": false },
                                   "criticalHit": false,
                                   "targets": 1
                                 }
@@ -138,8 +138,8 @@ class DamageCalculationControllerTest {
                     "ignoreBurnPenaltyWhenUserStatused": false
                   },
                   "field": { "weather": "CLEAR", "terrain": "NONE", "room": "NONE" },
-                  "attackerSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false },
-                  "defenderSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false },
+                  "attackerSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false, "tailwind": false },
+                  "defenderSide": { "reflect": false, "lightScreen": false, "auroraVeil": false, "friendGuard": false, "helpingHand": false, "tailwind": false },
                   "criticalHit": false,
                   "targets": 1
                 }

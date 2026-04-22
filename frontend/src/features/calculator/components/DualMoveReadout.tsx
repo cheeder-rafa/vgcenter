@@ -3,8 +3,8 @@ import { useState } from 'react'
 import type { DamageResult } from '../types/api'
 import { copyDamageReport } from './copyDamageReport'
 import { DamageBar } from './DamageBar'
-import { formatRollsText, formatSummaryText } from './formatReadoutText'
-import { RollHeatmap } from './RollHeatmap'
+import { formatSummaryText } from './formatReadoutText'
+import { RollSummary } from './RollSummary'
 import { useToastStore } from '../store/useToastStore'
 import { getTypeChipClasses } from './typeColors'
 
@@ -156,10 +156,7 @@ function DetailPanel({
     moveName,
     result,
   })
-  const rollsText = formatRollsText(result)
   const hp = effectiveDefenderHp ?? result.max + 1
-  const koChancePct = result.koChance.probability * 100
-  const accent = side === 'attacker' ? 'plasma' : 'cyan'
 
   async function handleCopy() {
     await copyDamageReport(summaryText)
@@ -176,12 +173,15 @@ function DetailPanel({
           <p className="font-mono text-[0.78rem] leading-5 text-white/90">
             {summaryText}
           </p>
-          <p
-            className="pt-0.5 font-mono text-[0.65rem] leading-4 text-white/40"
-            data-testid="overview-rolls-text"
-          >
-            {rollsText}
-          </p>
+          <div className="pt-1">
+            <RollSummary
+              rolls={result.rolls}
+              defenderHp={hp}
+              summaryTestId="overview-roll-summary"
+              rollsTestId="overview-rolls-text"
+              compact
+            />
+          </div>
         </div>
         <button
           type="button"
@@ -192,13 +192,6 @@ function DetailPanel({
           Copy
         </button>
       </div>
-      <RollHeatmap
-        rolls={result.rolls}
-        defenderHp={hp}
-        koChancePct={koChancePct}
-        defenderName={effectiveDefender}
-        accent={accent}
-      />
     </div>
   )
 }

@@ -24,6 +24,8 @@ describe('useCalculatorStore', () => {
     expect(state.defender.finalStats?.defense).toBe(120)
     expect(state.field.weather).toBe('CLEAR')
     expect(state.field.room).toBe('NONE')
+    expect(state.attackerSide.tailwind).toBe(false)
+    expect(state.defenderSide.tailwind).toBe(false)
     expect(state.results.attackerMoves).toEqual([null, null, null, null])
     expect(state.results.defenderMoves).toEqual([null, null, null, null])
     expect(state.resultsStatus).toBe('idle')
@@ -117,11 +119,19 @@ describe('useCalculatorStore', () => {
   })
 
   it('updates side conditions independently for attacker and defender sides', () => {
-    useCalculatorStore.getState().setAttackerSide({ helpingHand: true })
-    useCalculatorStore.getState().setDefenderSide({ reflect: true })
+    useCalculatorStore.getState().setAttackerSide({
+      helpingHand: true,
+      tailwind: true,
+    })
+    useCalculatorStore.getState().setDefenderSide({
+      reflect: true,
+      tailwind: false,
+    })
 
     expect(useCalculatorStore.getState().attackerSide.helpingHand).toBe(true)
+    expect(useCalculatorStore.getState().attackerSide.tailwind).toBe(true)
     expect(useCalculatorStore.getState().defenderSide.reflect).toBe(true)
+    expect(useCalculatorStore.getState().defenderSide.tailwind).toBe(false)
     expect(useCalculatorStore.getState().attackerSide.reflect).toBe(false)
   })
 

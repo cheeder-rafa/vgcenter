@@ -56,6 +56,7 @@ public class DamageCalculationWebMapper {
                         request.attackerSide().auroraVeil(),
                         request.attackerSide().friendGuard(),
                         request.attackerSide().helpingHand(),
+                        request.attackerSide().tailwind(),
                         request.attackerSide().protect()),
                 new SideConditionsCommand(
                         request.defenderSide().reflect(),
@@ -63,6 +64,7 @@ public class DamageCalculationWebMapper {
                         request.defenderSide().auroraVeil(),
                         request.defenderSide().friendGuard(),
                         request.defenderSide().helpingHand(),
+                        request.defenderSide().tailwind(),
                         request.defenderSide().protect()),
                 request.criticalHit(),
                 request.targets());

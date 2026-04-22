@@ -51,4 +51,26 @@ describe('FieldPanel', () => {
 
     expect(useCalculatorStore.getState().defenderSide.reflect).toBe(true)
   })
+
+  it('toggles tailwind for the defending side', async () => {
+    render(<FieldPanel focusedSide="attacker" />)
+    const user = userEvent.setup()
+
+    const tailwind = screen.getByLabelText(/defender tailwind/i)
+    await user.click(tailwind)
+
+    expect(useCalculatorStore.getState().defenderSide.tailwind).toBe(true)
+    expect(useCalculatorStore.getState().attackerSide.tailwind).toBe(false)
+  })
+
+  it('toggles tailwind for the attacking side', async () => {
+    render(<FieldPanel focusedSide="attacker" />)
+    const user = userEvent.setup()
+
+    const tailwind = screen.getByLabelText(/attacker tailwind/i)
+    await user.click(tailwind)
+
+    expect(useCalculatorStore.getState().attackerSide.tailwind).toBe(true)
+    expect(useCalculatorStore.getState().defenderSide.tailwind).toBe(false)
+  })
 })

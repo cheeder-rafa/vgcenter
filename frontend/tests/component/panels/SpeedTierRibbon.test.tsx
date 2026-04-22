@@ -23,8 +23,8 @@ describe('SpeedTierRibbon', () => {
   it('shows attacker moves first when attacker is faster', () => {
     render(
       <SpeedTierRibbon
-        attacker={{ ...BASE_COMBATANT, name: 'Sneasler' }}
-        defender={{ ...SLOW_COMBATANT, name: 'Kingambit' }}
+        attacker={{ ...BASE_COMBATANT, name: 'Sneasler', tailwind: false }}
+        defender={{ ...SLOW_COMBATANT, name: 'Kingambit', tailwind: false }}
         trickRoom={false}
       />,
     )
@@ -36,8 +36,8 @@ describe('SpeedTierRibbon', () => {
   it('shows defender moves first when defender is faster', () => {
     render(
       <SpeedTierRibbon
-        attacker={{ ...SLOW_COMBATANT, name: 'Kingambit' }}
-        defender={{ ...BASE_COMBATANT, name: 'Sneasler' }}
+        attacker={{ ...SLOW_COMBATANT, name: 'Kingambit', tailwind: false }}
+        defender={{ ...BASE_COMBATANT, name: 'Sneasler', tailwind: false }}
         trickRoom={false}
       />,
     )
@@ -52,8 +52,9 @@ describe('SpeedTierRibbon', () => {
           ...SLOW_COMBATANT,
           name: 'Kingambit',
           itemId: 'choice-scarf',
+          tailwind: false,
         }}
-        defender={{ ...BASE_COMBATANT, name: 'Sneasler' }}
+        defender={{ ...BASE_COMBATANT, name: 'Sneasler', tailwind: false }}
         trickRoom={false}
       />,
     )
@@ -68,8 +69,8 @@ describe('SpeedTierRibbon', () => {
   it('inverts winner in Trick Room', () => {
     render(
       <SpeedTierRibbon
-        attacker={{ ...BASE_COMBATANT, name: 'Sneasler' }}
-        defender={{ ...SLOW_COMBATANT, name: 'Kingambit' }}
+        attacker={{ ...BASE_COMBATANT, name: 'Sneasler', tailwind: false }}
+        defender={{ ...SLOW_COMBATANT, name: 'Kingambit', tailwind: false }}
         trickRoom={true}
       />,
     )
@@ -82,8 +83,13 @@ describe('SpeedTierRibbon', () => {
   it('applies paralysis ×0.5 speed penalty', () => {
     render(
       <SpeedTierRibbon
-        attacker={{ ...BASE_COMBATANT, name: 'Sneasler', status: 'PARALYSIS' }}
-        defender={{ ...SLOW_COMBATANT, name: 'Kingambit' }}
+        attacker={{
+          ...BASE_COMBATANT,
+          name: 'Sneasler',
+          status: 'PARALYSIS',
+          tailwind: false,
+        }}
+        defender={{ ...SLOW_COMBATANT, name: 'Kingambit', tailwind: false }}
         trickRoom={false}
       />,
     )
@@ -103,12 +109,14 @@ describe('SpeedTierRibbon', () => {
           name: 'Mon A',
           baseSpeed: 100,
           stagedSpeed: 100,
+          tailwind: false,
         }}
         defender={{
           ...BASE_COMBATANT,
           name: 'Mon B',
           baseSpeed: 100,
           stagedSpeed: 100,
+          tailwind: false,
         }}
         trickRoom={false}
       />,
@@ -121,7 +129,7 @@ describe('SpeedTierRibbon', () => {
     render(
       <SpeedTierRibbon
         attacker={null}
-        defender={{ ...BASE_COMBATANT, name: 'Sneasler' }}
+        defender={{ ...BASE_COMBATANT, name: 'Sneasler', tailwind: false }}
         trickRoom={false}
       />,
     )
@@ -137,12 +145,14 @@ describe('SpeedTierRibbon', () => {
           name: 'Sneasler',
           baseSpeed: 110,
           stagedSpeed: 110,
+          tailwind: false,
         }}
         defender={{
           ...SLOW_COMBATANT,
           name: 'Kingambit',
           baseSpeed: 65,
           stagedSpeed: 65,
+          tailwind: false,
         }}
         trickRoom={false}
       />,
@@ -154,5 +164,20 @@ describe('SpeedTierRibbon', () => {
     expect(screen.getByTestId('speed-defender-effective')).toHaveTextContent(
       '65',
     )
+  })
+
+  it('applies tailwind by doubling effective speed for the affected side', () => {
+    render(
+      <SpeedTierRibbon
+        attacker={{ ...SLOW_COMBATANT, name: 'Kingambit', tailwind: true }}
+        defender={{ ...BASE_COMBATANT, name: 'Sneasler', tailwind: false }}
+        trickRoom={false}
+      />,
+    )
+
+    expect(screen.getByTestId('speed-attacker-effective')).toHaveTextContent(
+      '150',
+    )
+    expect(screen.getByTestId('speed-winner')).toHaveTextContent('Kingambit')
   })
 })
