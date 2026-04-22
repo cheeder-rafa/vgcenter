@@ -78,16 +78,16 @@ export function StatTable({
         aria-labelledby={headingId}
         className="overflow-x-auto rounded-sm border border-white/10 bg-arena-void/50"
       >
-        <div className="min-w-[34rem]">
+        <div className="w-full">
           <div
             role="row"
-            className="grid grid-cols-[0.7fr_0.8fr_1.2fr_0.8fr_0.9fr] items-center gap-2 border-b border-white/10 px-3 py-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/50"
+            className="grid grid-cols-[2rem_2.6rem_1fr_4.5rem_2.6rem] items-center gap-x-2 border-b border-white/10 px-2 py-1.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/45"
           >
             <span role="columnheader">Stat</span>
             <span role="columnheader">Base</span>
             <span role="columnheader">SP 0–32</span>
-            <span role="columnheader">Stage</span>
-            <span role="columnheader">Final</span>
+            <span role="columnheader" className="text-center">Stage</span>
+            <span role="columnheader" className="text-right">Final</span>
           </div>
           {ROWS.map((row) => (
             <StatRow
@@ -139,52 +139,63 @@ function StatRow({
   return (
     <div
       role="row"
-      className="grid grid-cols-[0.7fr_0.8fr_1.2fr_0.8fr_0.9fr] items-center gap-2 border-b border-white/5 px-3 py-2 last:border-b-0"
+      className="grid grid-cols-[2rem_2.6rem_1fr_4.5rem_2.6rem] items-center gap-x-2 border-b border-white/5 px-2 py-1.5 last:border-b-0"
     >
       <label
         htmlFor={inputId}
-        className="font-display text-sm font-bold tracking-[0.18em] text-white/80"
+        className="font-display text-[0.72rem] font-bold tracking-[0.12em] text-white/75"
       >
         {row.label}
       </label>
       <span
         role="cell"
-        className="font-mono text-sm text-white/72"
+        className="font-mono text-xs text-white/60"
         data-testid={`stat-base-${row.key}`}
       >
         {base ?? '—'}
       </span>
-      <input
-        id={inputId}
-        role="cell"
-        type="number"
-        inputMode="numeric"
-        min={0}
-        max={MAX_SP_PER_STAT}
-        step={1}
-        value={sp}
-        aria-label={`${row.label} SP`}
-        className="arena-input h-10 w-full max-w-[80px] px-1.5 py-1 text-sm"
-        onChange={(event) => {
-          const parsed = Number.parseInt(event.target.value, 10)
-          onChange(Number.isFinite(parsed) ? parsed : 0)
-        }}
-      />
+      <div role="cell" className="flex items-center gap-1">
+        <button
+          type="button"
+          className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
+          aria-label={`${row.label} SP decrease`}
+          onClick={() => onChange(Math.max(0, sp - 1))}
+        >
+          −
+        </button>
+        <input
+          id={inputId}
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={MAX_SP_PER_STAT}
+          step={1}
+          value={sp}
+          aria-label={`${row.label} SP`}
+          className="stat-sp-input h-6 w-full min-w-0 rounded-[2px] border border-white/15 bg-black/30 px-1 py-0 text-center font-mono text-xs text-white/90 focus:border-arena-cyan/60 focus:outline-none focus:ring-1 focus:ring-arena-cyan/20"
+          onChange={(event) => {
+            const parsed = Number.parseInt(event.target.value, 10)
+            onChange(Number.isFinite(parsed) ? parsed : 0)
+          }}
+        />
+        <button
+          type="button"
+          className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
+          aria-label={`${row.label} SP increase`}
+          onClick={() => onChange(Math.min(MAX_SP_PER_STAT, sp + 1))}
+        >
+          +
+        </button>
+      </div>
       {row.key === 'hp' || stage === null || onStageChange === undefined ? (
         <div
           role="cell"
           data-testid={`stat-stage-${row.key}`}
           className="flex items-center justify-end gap-1"
         >
-          <span className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-transparent">
-            -
-          </span>
-          <span className="min-w-[3ch] text-center font-mono text-xs text-white/22">
-            —
-          </span>
-          <span className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-transparent">
-            +
-          </span>
+          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">−</span>
+          <span className="w-6 text-center font-mono text-[0.7rem] text-white/22">—</span>
+          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">+</span>
         </div>
       ) : (
         <StageControl
@@ -196,7 +207,7 @@ function StatRow({
       <span
         role="cell"
         data-testid={`stat-final-${row.key}`}
-        className="text-right font-display text-base font-semibold text-white"
+        className="text-right font-display text-sm font-semibold text-white"
       >
         {final ?? '—'}
       </span>
@@ -223,21 +234,21 @@ function StageControl({
     >
       <button
         type="button"
-        className="arena-chip min-h-7 min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
+        className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
         aria-label={`${label} stage down`}
         onClick={() => onChange(Math.max(-6, value - 1))}
       >
-        -
+        −
       </button>
       <span
-        className="min-w-[3ch] text-center font-mono text-xs text-white/78"
+        className="w-6 text-center font-mono text-[0.7rem] text-white/75"
         data-testid={`stage-value-${statKey}`}
       >
         {value > 0 ? `+${value}` : value}
       </span>
       <button
         type="button"
-        className="arena-chip min-h-7 min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
+        className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
         aria-label={`${label} stage up`}
         onClick={() => onChange(Math.min(6, value + 1))}
       >
