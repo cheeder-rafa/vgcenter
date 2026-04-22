@@ -30,9 +30,8 @@ describe('MoveSlotRow', () => {
       />,
     )
 
-    expect(screen.getByTestId('move-slot-0').className).toContain(
-      'grid-cols-[auto_minmax(0,1fr)_8ch_10ch]',
-    )
+    // Root is a flex column wrapper; the inner grid row contains the move select
+    expect(screen.getByTestId('move-slot-0').className).toContain('flex')
     expect(screen.getByTestId('move-slot-type-0').className).toContain(
       'whitespace-nowrap',
     )

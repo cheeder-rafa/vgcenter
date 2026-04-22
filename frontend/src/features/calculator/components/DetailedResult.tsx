@@ -1,10 +1,14 @@
 import { useMemo, type KeyboardEvent } from 'react'
 
-import { useCalculatorStore, type CalculatorSide } from '../store/useCalculatorStore'
+import {
+  useCalculatorStore,
+  type CalculatorSide,
+} from '../store/useCalculatorStore'
 import { useToastStore } from '../store/useToastStore'
 import type { DamageResult } from '../types/api'
 import { copyDamageReport } from './copyDamageReport'
 import { formatReadoutText, formatSummaryText } from './formatReadoutText'
+import { RollHeatmap } from './RollHeatmap'
 
 type Props = {
   focusedSide: CalculatorSide
@@ -39,14 +43,21 @@ export function DetailedResult({
   const move = useCalculatorStore((state) =>
     moveId === null
       ? null
-      : state.moveCatalog.find((entry) => entry.id === moveId) ?? null,
+      : (state.moveCatalog.find((entry) => entry.id === moveId) ?? null),
   )
+  const defenderHp = useCalculatorStore((state) =>
+    focusedSide === 'attacker'
+      ? (state.defender.finalStats?.hp ?? null)
+      : (state.attacker.finalStats?.hp ?? null),
+  )
+
   const throughProtect =
     result !== null &&
     result.max > 0 &&
     defendingSide.protect &&
     (attackingCombatant.abilityId === 'piercing-drill' ||
-      (attackingCombatant.abilityId === 'unseen-fist' && move?.contact === true))
+      (attackingCombatant.abilityId === 'unseen-fist' &&
+        move?.contact === true))
 
   const copyText = useMemo(
     () =>
@@ -141,6 +152,8 @@ export function DetailedResult({
             moveName={moveName}
             result={result}
             throughProtect={throughProtect}
+            defenderHp={defenderHp}
+            focusedSide={focusedSide}
           />
         )}
       </div>
@@ -177,12 +190,16 @@ function LiveBlock({
   moveName,
   result,
   throughProtect,
+  defenderHp,
+  focusedSide,
 }: {
   attackerName: string | null
   defenderName: string | null
   moveName: string | null
   result: DamageResult
   throughProtect: boolean
+  defenderHp: number | null
+  focusedSide: CalculatorSide
 }) {
   const readout = formatReadoutText({
     attackerName,
@@ -192,18 +209,32 @@ function LiveBlock({
     throughProtect,
   })
   const [summary, rolls] = readout.split('\n')
+  const hp = defenderHp ?? result.max + 1
+  const koChancePct = result.koChance.probability * 100
 
   return (
-    <div className="rounded-sm border border-white/10 bg-white/[0.04] px-3 py-2">
-      <p className="font-mono text-[0.86rem] leading-6 text-white sm:text-[0.92rem]">
-        {summary}
-      </p>
-      <p
-        className="pt-1 font-mono text-[0.72rem] leading-5 text-white/58"
-        data-testid="detailed-rolls"
-      >
-        {rolls}
-      </p>
+    <div className="rounded-sm border border-white/10 bg-white/[0.04]">
+      <div className="px-3 py-2">
+        <p className="font-mono text-[0.86rem] leading-6 text-white sm:text-[0.92rem]">
+          {summary}
+        </p>
+        <p
+          className="pt-0.5 font-mono text-[0.72rem] leading-5 text-white/55"
+          data-testid="detailed-rolls"
+        >
+          {rolls}
+        </p>
+      </div>
+      <div className="arena-divider" />
+      <div className="px-3 py-2.5">
+        <RollHeatmap
+          rolls={result.rolls}
+          defenderHp={hp}
+          koChancePct={koChancePct}
+          defenderName={defenderName}
+          accent={focusedSide === 'attacker' ? 'plasma' : 'cyan'}
+        />
+      </div>
     </div>
   )
 }
