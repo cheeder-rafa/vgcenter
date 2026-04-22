@@ -6,9 +6,14 @@ import {
   clampSp,
   MAX_SP_PER_STAT,
 } from '../../../src/features/calculator/components/statTableUtils'
-import type { Spread, Stats } from '../../../src/features/calculator/types/api'
+import type {
+  Spread,
+  StatStages,
+  Stats,
+} from '../../../src/features/calculator/types/api'
 
 const ZERO_SPREAD: Spread = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
+const ZERO_STAGES: StatStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }
 
 const BASE: Stats = {
   hp: 78,
@@ -33,13 +38,17 @@ describe('StatTable', () => {
     render(
       <StatTable
         sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
         baseStats={BASE}
         finalStats={FINAL}
         status="NONE"
         onSpChange={() => {}}
+        onStageChange={() => {}}
       />,
     )
 
+    expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent))
+      .toEqual(['Stat', 'Base', 'SP 0–32', 'Stage', 'Final'])
     expect(screen.getByTestId('stat-base-hp').textContent).toBe('78')
     expect(screen.getByTestId('stat-final-spa').textContent).toBe('200')
     expect(screen.getByTestId('stat-final-spe').textContent).toBe('145')
@@ -59,10 +68,12 @@ describe('StatTable', () => {
     render(
       <StatTable
         sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
         baseStats={BASE}
         finalStats={FINAL}
         status="NONE"
         onSpChange={onSpChange}
+        onStageChange={() => {}}
       />,
     )
 
@@ -76,10 +87,12 @@ describe('StatTable', () => {
     render(
       <StatTable
         sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
         baseStats={BASE}
         finalStats={null}
         status="NONE"
         onSpChange={() => {}}
+        onStageChange={() => {}}
       />,
     )
 
@@ -90,10 +103,12 @@ describe('StatTable', () => {
     const { rerender } = render(
       <StatTable
         sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
         baseStats={BASE}
         finalStats={FINAL}
         status="NONE"
         onSpChange={() => {}}
+        onStageChange={() => {}}
       />,
     )
     expect(screen.getByTestId('stat-final-spe').textContent).toBe('145')
@@ -102,10 +117,12 @@ describe('StatTable', () => {
     rerender(
       <StatTable
         sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
         baseStats={BASE}
         finalStats={timidFinal}
         status="NONE"
         onSpChange={() => {}}
+        onStageChange={() => {}}
       />,
     )
 
@@ -117,24 +134,94 @@ describe('StatTable', () => {
     render(
       <StatTable
         sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
         baseStats={BASE}
         finalStats={FINAL}
         status="PARALYSIS"
         onSpChange={() => {}}
+        onStageChange={() => {}}
       />,
     )
 
     expect(screen.getByTestId('stat-final-spe').textContent).toBe('72')
   })
 
-  it('shows negative remaining in red when over 66', () => {
+  it('applies positive stages to the displayed final stat', () => {
     render(
       <StatTable
-        sp={{ hp: 12, atk: 12, def: 12, spa: 12, spd: 12, spe: 12 }}
+        sp={ZERO_SPREAD}
+        stages={{ ...ZERO_STAGES, atk: 2 }}
         baseStats={BASE}
         finalStats={FINAL}
         status="NONE"
         onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    expect(screen.getByTestId('stat-final-atk').textContent).toBe('208')
+  })
+
+  it('applies negative stages to the displayed final stat', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={{ ...ZERO_STAGES, def: -1 }}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    expect(screen.getByTestId('stat-final-def').textContent).toBe('66')
+  })
+
+  it('applies stages before paralysis to displayed speed', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={{ ...ZERO_STAGES, spe: 1 }}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="PARALYSIS"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    expect(screen.getByTestId('stat-final-spe').textContent).toBe('108')
+  })
+
+  it('keeps the HP placeholder aligned with the stage column', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    expect(screen.getByTestId('stat-stage-hp').className).toContain(
+      'justify-end',
+    )
+  })
+
+  it('shows negative remaining in red when over 66', () => {
+    render(
+      <StatTable
+        sp={{ hp: 12, atk: 12, def: 12, spa: 12, spd: 12, spe: 12 }}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
       />,
     )
 

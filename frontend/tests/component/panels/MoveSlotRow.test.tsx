@@ -31,7 +31,7 @@ describe('MoveSlotRow', () => {
     )
 
     expect(screen.getByTestId('move-slot-0').className).toContain(
-      'grid-cols-[auto_minmax(0,1fr)_7.5ch_10ch]',
+      'grid-cols-[auto_minmax(0,1fr)_8ch_10ch]',
     )
     expect(screen.getByTestId('move-slot-type-0').className).toContain(
       'whitespace-nowrap',

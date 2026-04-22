@@ -48,7 +48,7 @@ describe('DetailedResult', () => {
 
     await waitFor(() =>
       expect(mocks.copyDamageReport).toHaveBeenCalledWith(
-        'Aegislash-Shield Poltergeist vs. Aegislash-Shield: 108-126 (64.6 - 75.4%) -- guaranteed 2HKO\n(108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122, 122, 126, 126)',
+        'Aegislash-Shield Poltergeist vs. Aegislash-Shield: 108-126 (64.6 - 75.4%) -- guaranteed 2HKO',
       ),
     )
     expect(screen.queryByText(/copied damage report/i)).not.toBeInTheDocument()

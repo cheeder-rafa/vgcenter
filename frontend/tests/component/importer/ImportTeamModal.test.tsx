@@ -12,6 +12,7 @@ describe('ImportTeamModal', () => {
     render(
       <div data-testid="host">
         <ImportTeamModal
+          activeSide="attacker"
           accentClassName="text-arena-plasma"
           description="Import a team."
           emptyState="Nothing loaded."
@@ -21,6 +22,7 @@ describe('ImportTeamModal', () => {
           title="Showdown"
           triggerLabel="Open import"
           onImport={onImport}
+          onImportTeam={vi.fn()}
           onLoadPokemon={vi.fn()}
         />
       </div>,
@@ -33,5 +35,31 @@ describe('ImportTeamModal', () => {
 
     expect(document.body).toContainElement(dialog)
     expect(host).not.toContainElement(dialog)
+  })
+
+  it('shows the active import target side in the modal copy', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <ImportTeamModal
+        activeSide="defender"
+        accentClassName="text-arena-cyan"
+        description="Import a team."
+        emptyState="Nothing loaded."
+        inputLabel="Paste"
+        inputPlaceholder="Paste here"
+        submitLabel="Import team"
+        title="Showdown"
+        triggerLabel="Open import"
+        onImport={vi.fn().mockResolvedValue({ team: [] })}
+        onImportTeam={vi.fn()}
+        onLoadPokemon={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /open import/i }))
+
+    expect(screen.getByText(/import target/i)).toBeInTheDocument()
+    expect(screen.getByText(/right side/i)).toBeInTheDocument()
   })
 })

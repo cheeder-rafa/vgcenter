@@ -11,16 +11,19 @@ describe('FieldPanel', () => {
   })
 
   it('renders weather, terrain, and room selectors', () => {
-    render(<FieldPanel />)
+    render(<FieldPanel focusedSide="attacker" />)
 
-    expect(screen.getByRole('heading', { name: /field/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /modifiers/i }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/^field$/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/weather/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/terrain/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/room/i)).toBeInTheDocument()
   })
 
   it('selecting a weather updates the store', async () => {
-    render(<FieldPanel />)
+    render(<FieldPanel focusedSide="attacker" />)
     const user = userEvent.setup()
 
     const weather = screen.getByLabelText(/weather/i)
@@ -30,7 +33,7 @@ describe('FieldPanel', () => {
   })
 
   it('toggling spread sets targets to 2', async () => {
-    render(<FieldPanel />)
+    render(<FieldPanel focusedSide="attacker" />)
     const user = userEvent.setup()
 
     const spread = screen.getByLabelText(/spread/i) as HTMLInputElement
@@ -40,7 +43,7 @@ describe('FieldPanel', () => {
   })
 
   it('checking reflect updates the defender side', async () => {
-    render(<FieldPanel />)
+    render(<FieldPanel focusedSide="attacker" />)
     const user = userEvent.setup()
 
     const reflect = screen.getByLabelText(/reflect/i) as HTMLInputElement
