@@ -226,7 +226,7 @@ describe('CalculatorPage', () => {
 
     expect(wrapper.className).toContain('grid-cols-1')
     expect(wrapper.className).toContain(
-      'xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]',
+      'xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]',
     )
     expect(content.className).toContain('xl:col-start-2')
     expect(content.className).toContain('xl:col-end-5')
@@ -239,7 +239,7 @@ describe('CalculatorPage', () => {
 
     expect(mainGrid.className).toContain('grid-cols-1')
     expect(mainGrid.className).toContain(
-      'xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]',
+      'xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]',
     )
   })
 

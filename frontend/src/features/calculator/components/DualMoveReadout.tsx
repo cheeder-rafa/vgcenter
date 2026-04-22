@@ -166,7 +166,7 @@ function DetailPanel({
   return (
     <div
       data-testid="move-detail-panel"
-      className="flex flex-col gap-2 rounded-sm border border-white/10 bg-white/[0.04] px-3 py-2.5"
+      className="flex h-full flex-col gap-3 rounded-sm border border-white/10 bg-white/[0.04] px-3 py-3"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
@@ -200,34 +200,24 @@ function SideColumn({
   label,
   accentText,
   accentBorder,
+  className = '',
   side,
   moves,
   selected,
   onSelect,
-  attackerName,
-  defenderName,
-  attackerHp,
-  defenderHp,
 }: {
   label: string
   accentText: string
   accentBorder: string
+  className?: string
   side: 'attacker' | 'defender'
   moves: MoveEntry[]
   selected: SelectedMove | null
   onSelect: (index: number) => void
-  attackerName: string | null
-  defenderName: string | null
-  attackerHp: number | null
-  defenderHp: number | null
 }) {
-  const expandedIndex = selected?.side === side ? selected.index : null
-  const expandedEntry =
-    expandedIndex !== null ? (moves[expandedIndex] ?? null) : null
-
   return (
     <div
-      className={`flex min-w-0 flex-1 flex-col gap-2 rounded-sm border ${accentBorder} bg-white/[0.03] px-2 py-2`}
+      className={`flex min-w-0 flex-col gap-2 rounded-sm border ${accentBorder} bg-white/[0.03] px-2 py-2 ${className}`}
     >
       <p className={`arena-label px-1 ${accentText}`}>{label} · Moves</p>
       <div className="flex flex-col gap-1">
@@ -242,16 +232,75 @@ function SideColumn({
           />
         ))}
       </div>
+    </div>
+  )
+}
 
-      {expandedEntry !== null && expandedEntry.result !== null && (
+function FocusLane({
+  selected,
+  hasAny,
+  attackerMoves,
+  defenderMoves,
+  attackerName,
+  defenderName,
+  attackerHp,
+  defenderHp,
+}: {
+  selected: SelectedMove | null
+  hasAny: boolean
+  attackerMoves: MoveEntry[]
+  defenderMoves: MoveEntry[]
+  attackerName: string | null
+  defenderName: string | null
+  attackerHp: number | null
+  defenderHp: number | null
+}) {
+  const activeEntry =
+    selected === null
+      ? null
+      : (selected.side === 'attacker'
+          ? attackerMoves[selected.index]
+          : defenderMoves[selected.index]) ?? null
+
+  return (
+    <div
+      data-testid="overview-focus-lane"
+      className="order-3 flex min-h-[176px] flex-col xl:col-start-2 xl:row-start-1"
+    >
+      {selected !== null && activeEntry !== null && activeEntry.result !== null ? (
         <DetailPanel
-          entry={expandedEntry}
+          entry={activeEntry}
           attackerName={attackerName}
           defenderName={defenderName}
-          side={side}
+          side={selected.side}
           attackerHp={attackerHp}
           defenderHp={defenderHp}
         />
+      ) : (
+        <div className="flex h-full min-h-[176px] flex-col justify-between rounded-sm border border-white/10 bg-white/[0.03] px-3 py-3">
+          <div className="space-y-2">
+            <p className="arena-label text-arena-violet">Roll Focus</p>
+            <h3 className="font-display text-lg font-semibold tracking-wide text-white">
+              {hasAny ? 'Select a move' : 'Waiting for live damage'}
+            </h3>
+            <p className="font-body text-sm leading-6 text-white/65">
+              {hasAny
+                ? 'Pick either side to inspect the 16 rolls, KO counts, and a copy-ready readout without breaking the matchup rhythm.'
+                : 'Load both sides with a legal move to populate this analysis lane.'}
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <div className="rounded-sm border border-white/10 bg-white/[0.04] px-2.5 py-2">
+              <p className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-white/35">
+                16 rolls
+              </p>
+              <p className="pt-1 font-body text-sm text-white/70">
+                Range, lethal count, and copy text stay centered between both
+                combatants.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -285,7 +334,7 @@ export function DualMoveReadout({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-arena-plasma to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-arena-cyan to-transparent" />
 
-      <div className="relative z-10 flex flex-col gap-2">
+      <div className="relative z-10 flex flex-col gap-3">
         <header className="flex flex-wrap items-center gap-2">
           <p className="arena-label text-arena-violet">Damage Overview</p>
           {!hasAny && (
@@ -301,10 +350,11 @@ export function DualMoveReadout({
         </header>
 
         <div
-          className="flex flex-col gap-3 xl:flex-row"
+          className="grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)] xl:items-start"
           data-testid="damage-overview-columns"
         >
           <SideColumn
+            className="order-1 xl:col-start-1 xl:row-start-1"
             label={attackerName ?? 'Side A'}
             accentText="text-arena-plasma"
             accentBorder="border-arena-plasma/20"
@@ -312,12 +362,19 @@ export function DualMoveReadout({
             moves={attackerMoves}
             selected={selected}
             onSelect={(i) => handleSelect('attacker', i)}
+          />
+          <FocusLane
+            selected={selected}
+            hasAny={hasAny}
+            attackerMoves={attackerMoves}
+            defenderMoves={defenderMoves}
             attackerName={attackerName}
             defenderName={defenderName}
             attackerHp={attackerHp}
             defenderHp={defenderHp}
           />
           <SideColumn
+            className="order-2 xl:col-start-3 xl:row-start-1"
             label={defenderName ?? 'Side B'}
             accentText="text-arena-cyan"
             accentBorder="border-arena-cyan/20"
@@ -325,10 +382,6 @@ export function DualMoveReadout({
             moves={defenderMoves}
             selected={selected}
             onSelect={(i) => handleSelect('defender', i)}
-            attackerName={attackerName}
-            defenderName={defenderName}
-            attackerHp={attackerHp}
-            defenderHp={defenderHp}
           />
         </div>
       </div>

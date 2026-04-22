@@ -226,7 +226,7 @@ export function CalculatorPage() {
         />
 
         <section
-          className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]"
           data-testid="detailed-result-grid"
         >
           <div
@@ -245,7 +245,7 @@ export function CalculatorPage() {
         </section>
 
         <section
-          className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]"
           data-testid="calculator-main-grid"
         >
           <div className="order-2 xl:order-none">
