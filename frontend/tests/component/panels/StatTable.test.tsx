@@ -78,7 +78,7 @@ describe('StatTable', () => {
       />,
     )
 
-    const atkInput = screen.getByLabelText(/atk sp/i) as HTMLInputElement
+    const atkInput = screen.getByRole('spinbutton', { name: /^Atk SP$/i }) as HTMLInputElement
     fireEvent.change(atkInput, { target: { value: '99' } })
 
     expect(onSpChange).toHaveBeenCalledWith({ atk: MAX_SP_PER_STAT })
@@ -232,7 +232,7 @@ describe('StatTable', () => {
     )
   })
 
-  it('uses a horizontal overflow wrapper instead of forcing the page width', () => {
+  it('uses a horizontal overflow wrapper that allows the table to fit narrow panels', () => {
     render(
       <StatTable
         sp={ZERO_SPREAD}
@@ -247,6 +247,89 @@ describe('StatTable', () => {
 
     const table = screen.getByRole('table')
     expect(table.className).toContain('overflow-x-auto')
-    expect(table.firstElementChild?.className).toContain('min-w-[34rem]')
+    // Inner wrapper must NOT impose a wide min-width that forces scroll in narrow panels
+    expect(table.firstElementChild?.className).not.toContain('min-w-[34rem]')
+  })
+
+  it('SP input uses the stat-sp-input class for compact spinner-free styling', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const spInput = screen.getByRole('spinbutton', { name: /^HP SP$/i })
+    expect(spInput.className).toContain('stat-sp-input')
+    expect(spInput.className).not.toContain('max-w-[100px]')
+    expect(spInput.className).not.toContain('min-w-8')
+  })
+
+  it('stage control buttons are compact and do not use arena-chip padding', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const stageControls = document
+      .querySelectorAll('[data-testid^="stage-control-"]')
+    const buttons = Array.from(stageControls).flatMap((cell) =>
+      Array.from(cell.querySelectorAll('button')),
+    )
+    expect(buttons.length).toBeGreaterThan(0)
+    for (const btn of buttons) {
+      expect(btn.className).not.toContain('min-w-8')
+      expect(btn.className).not.toContain('arena-chip')
+    }
+  })
+
+  it('SP increment button increases SP by 1', () => {
+    const onSpChange = vi.fn()
+    render(
+      <StatTable
+        sp={{ ...ZERO_SPREAD, atk: 5 }}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={onSpChange}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const increaseBtn = screen.getByLabelText(/Atk SP increase/i)
+    increaseBtn.click()
+    expect(onSpChange).toHaveBeenCalledWith({ atk: 6 })
+  })
+
+  it('SP decrement button decreases SP by 1', () => {
+    const onSpChange = vi.fn()
+    render(
+      <StatTable
+        sp={{ ...ZERO_SPREAD, atk: 5 }}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={onSpChange}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const decreaseBtn = screen.getByLabelText(/Atk SP decrease/i)
+    decreaseBtn.click()
+    expect(onSpChange).toHaveBeenCalledWith({ atk: 4 })
   })
 })

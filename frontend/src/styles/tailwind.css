@@ -215,6 +215,17 @@ body {
     outline-offset: 3px;
   }
 
+  /* Hide number input spinners inside .stat-sp-input */
+  .stat-sp-input::-webkit-outer-spin-button,
+  .stat-sp-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .stat-sp-input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
   .arena-divider {
     height: 1px;
     background: linear-gradient(

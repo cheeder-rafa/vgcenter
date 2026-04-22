@@ -489,4 +489,37 @@ describe('PokemonPanel', () => {
     expect(useCalculatorStore.getState().attacker.megaActive).toBe(false)
     expect(useCalculatorStore.getState().attacker.itemId).toBe('charizardite-x')
   })
+
+  it('mega toggle chip appears before the ability dropdown in the DOM', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.clear(speciesInput)
+    await user.type(speciesInput, 'char')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    const megaToggle = screen.getByLabelText(/mega evolution/i)
+    const abilitySelect = screen.getByLabelText(/^ability$/i)
+
+    // Mega toggle must appear before ability select in DOM order
+    expect(
+      megaToggle.compareDocumentPosition(abilitySelect) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('no empty mega placeholder is rendered for a non-mega species', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.clear(speciesInput)
+    await user.type(speciesInput, 'amoo')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    // The old min-h-[56px] placeholder should not exist for non-mega species
+    const placeholder = document.querySelector('[class*="min-h-\\[56px\\]"]')
+    expect(placeholder).toBeNull()
+  })
 })

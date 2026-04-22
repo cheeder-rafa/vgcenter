@@ -4,13 +4,13 @@ import type { CalculatorSide } from '../store/useCalculatorStore'
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import type {
   CombatantBuild,
-  DamageResult,
   MoveDefinition,
   NamedDatasetEntry,
   NatureResponse,
   PokedexEntry,
   StatusCondition,
 } from '../types/api'
+import { MoveSummaryStrip } from './MoveSummaryStrip'
 import { MoveSlotRow } from './MoveSlotRow'
 import { SpeciesSelect } from './SpeciesSelect'
 import { SpriteBadge } from './SpriteBadge'
@@ -290,14 +290,53 @@ export function PokemonPanel({
                 </span>
               ))}
               {speciesEntry?.megaForms.length ? (
-                <span
-                  className={`arena-chip text-[0.62rem] tracking-[0.2em] ${accentText}`}
+                <label
+                  htmlFor={ids.mega}
+                  className={`arena-chip cursor-pointer text-[0.62rem] tracking-[0.2em] ${accentText} ${combatant.megaActive ? 'ring-1 ring-white/20' : ''}`}
                   data-testid={`mega-available-${side}`}
                 >
-                  MEGA READY
-                </span>
+                  <input
+                    id={ids.mega}
+                    type="checkbox"
+                    className="sr-only"
+                    aria-label="Mega Evolution"
+                    checked={combatant.megaActive}
+                    onChange={(event) => handleMegaToggle(event.target.checked)}
+                  />
+                  {combatant.megaActive ? '✓ Mega Active' : 'Mega Evolution'}
+                </label>
               ) : null}
             </div>
+            {speciesEntry &&
+            speciesEntry.megaForms.length > 1 &&
+            combatant.megaActive ? (
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <label
+                  htmlFor={`${ids.mega}-variant`}
+                  className="arena-label text-arena-violet"
+                >
+                  Mega Variant
+                </label>
+                <select
+                  id={`${ids.mega}-variant`}
+                  className="arena-select flex-1"
+                  value={activeMegaForm?.id ?? speciesEntry.megaForms[0].id}
+                  onChange={(event) =>
+                    handleMegaVariantChange(event.target.value)
+                  }
+                >
+                  {speciesEntry.megaForms.map((megaForm) => (
+                    <option
+                      key={megaForm.id}
+                      value={megaForm.id}
+                      className="bg-arena-void"
+                    >
+                      {megaForm.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -424,61 +463,6 @@ export function PokemonPanel({
           </div>
         </div>
 
-        <div className="min-h-[56px]">
-          {speciesEntry?.megaForms.length ? (
-            <div className="flex flex-col gap-1.5 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
-              <label
-                htmlFor={ids.mega}
-                className={`flex items-center gap-3 transition ${
-                  combatant.megaActive ? 'text-white' : 'hover:text-white/90'
-                }`}
-              >
-                <input
-                  id={ids.mega}
-                  type="checkbox"
-                  className="arena-checkbox"
-                  checked={combatant.megaActive}
-                  onChange={(event) => handleMegaToggle(event.target.checked)}
-                />
-                <span className="arena-label text-arena-violet">
-                  Mega Evolution
-                </span>
-                <span className="ml-auto font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/55">
-                  mid-battle toggle
-                </span>
-              </label>
-              {speciesEntry.megaForms.length > 1 && combatant.megaActive ? (
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <label
-                    htmlFor={`${ids.mega}-variant`}
-                    className="arena-label text-arena-violet"
-                  >
-                    Mega Variant
-                  </label>
-                  <select
-                    id={`${ids.mega}-variant`}
-                    className="arena-select flex-1"
-                    value={activeMegaForm?.id ?? speciesEntry.megaForms[0].id}
-                    onChange={(event) =>
-                      handleMegaVariantChange(event.target.value)
-                    }
-                  >
-                    {speciesEntry.megaForms.map((megaForm) => (
-                      <option
-                        key={megaForm.id}
-                        value={megaForm.id}
-                        className="bg-arena-void"
-                      >
-                        {megaForm.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-
         <div className="arena-divider" />
 
         <StatTable
@@ -515,87 +499,6 @@ export function PokemonPanel({
         </div>
       </div>
     </article>
-  )
-}
-
-type SideResults = (DamageResult | null)[]
-
-function MoveSummaryStrip({
-  results,
-  accent,
-}: {
-  results: SideResults
-  accent: 'plasma' | 'cyan'
-}) {
-  const hasAny = results.some((r) => r !== null)
-  if (!hasAny) return null
-
-  const accentFill =
-    accent === 'cyan' ? 'rgba(34,211,238,0.85)' : 'rgba(255,43,142,0.85)'
-  const accentTrack =
-    accent === 'cyan' ? 'rgba(34,211,238,0.15)' : 'rgba(255,43,142,0.15)'
-
-  return (
-    <div className="flex items-center gap-1" aria-label="Move damage summary">
-      {results.map((result, i) => {
-        if (result === null) {
-          return (
-            <div
-              key={i}
-              className="h-[18px] w-[28px] rounded-[2px] bg-white/[0.06]"
-              title={`M${i + 1}: no result`}
-            />
-          )
-        }
-
-        const clampedMin = Math.min(100, Math.max(0, result.minPct))
-        const clampedMax = Math.min(100, Math.max(0, result.maxPct))
-        const isLethal = clampedMax >= 100
-
-        const trackColor = isLethal
-          ? 'rgba(255,80,80,0.18)'
-          : clampedMax >= 50
-            ? 'rgba(255,140,30,0.15)'
-            : accentTrack
-        const pinColor = isLethal
-          ? 'rgba(255,75,75,0.9)'
-          : clampedMax >= 50
-            ? 'rgba(255,122,26,0.88)'
-            : accentFill
-
-        return (
-          <div
-            key={i}
-            className="relative h-[18px] w-[28px] overflow-hidden rounded-[2px]"
-            style={{ background: 'rgba(255,255,255,0.07)' }}
-            title={`M${i + 1}: ${result.minPct.toFixed(1)}–${result.maxPct.toFixed(1)}%`}
-          >
-            <div
-              className="absolute inset-y-0"
-              style={{
-                left: `${clampedMin}%`,
-                width: `${Math.max(0, clampedMax - clampedMin)}%`,
-                background: trackColor,
-              }}
-            />
-            <div
-              className="absolute inset-y-0 w-[2px]"
-              style={{
-                left: `${Math.max(0.5, clampedMin)}%`,
-                background: pinColor,
-              }}
-            />
-            <div
-              className="absolute inset-y-0 w-[2px]"
-              style={{
-                left: `${Math.min(99.5, clampedMax)}%`,
-                background: pinColor,
-              }}
-            />
-          </div>
-        )
-      })}
-    </div>
   )
 }
 
