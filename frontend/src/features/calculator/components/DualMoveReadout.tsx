@@ -96,11 +96,11 @@ function MoveReadoutRow({
           onSelect()
         }
       }}
-      className={`flex flex-col gap-0.5 rounded-sm border px-2 py-1 transition-colors ${
+      className={`flex flex-col gap-1 rounded-sm border px-2 py-2 transition-colors ${
         hasResult ? 'cursor-pointer' : 'cursor-default opacity-50'
       } ${accentRing}`}
     >
-      <div className="grid grid-cols-[2ch_1fr_6ch_9ch] items-center gap-2">
+      <div className="grid grid-cols-[2.5ch_minmax(0,1fr)] items-center gap-x-2 gap-y-1 sm:grid-cols-[2ch_1fr_6ch_9ch] sm:gap-2">
         <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/35">
           M{index + 1}
         </span>
@@ -108,12 +108,12 @@ function MoveReadoutRow({
           {moveName ?? '—'}
         </span>
         <span
-          className={`arena-chip w-full justify-center overflow-hidden whitespace-nowrap text-[0.55rem] tracking-tight ${getTypeChipClasses(moveType ?? null)}`}
+          className={`arena-chip w-auto min-w-[5.5ch] justify-center overflow-hidden whitespace-nowrap text-[0.55rem] tracking-tight sm:w-full ${getTypeChipClasses(moveType ?? null)}`}
         >
           {moveType ?? '—'}
         </span>
         <span
-          className="text-right font-mono text-[0.72rem] tabular-nums"
+          className="col-start-2 text-right font-mono text-[0.72rem] tabular-nums sm:col-auto"
           style={{ color: readoutColor }}
           data-testid={`overview-readout-${side}-${index}`}
           data-ko-tier={tier === 'none' ? undefined : tier}
@@ -168,7 +168,7 @@ function DetailPanel({
       data-testid="move-detail-panel"
       className="flex flex-col gap-2 rounded-sm border border-white/10 bg-white/[0.04] px-3 py-2.5"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <p className="font-mono text-[0.78rem] leading-5 text-white/90">
             {summaryText}
@@ -187,7 +187,7 @@ function DetailPanel({
           type="button"
           aria-label="Copy damage report"
           onClick={() => void handleCopy()}
-          className="shrink-0 rounded-sm border border-white/15 bg-white/[0.06] px-2 py-1 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/50 transition hover:border-white/30 hover:bg-white/[0.1] hover:text-white/80 active:scale-95"
+          className="w-full shrink-0 rounded-sm border border-white/15 bg-white/[0.06] px-2 py-1.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/50 transition hover:border-white/30 hover:bg-white/[0.1] hover:text-white/80 active:scale-95 sm:w-auto"
         >
           Copy
         </button>
@@ -227,7 +227,7 @@ function SideColumn({
 
   return (
     <div
-      className={`flex flex-1 flex-col gap-2 rounded-sm border ${accentBorder} bg-white/[0.03] px-2 py-2`}
+      className={`flex min-w-0 flex-1 flex-col gap-2 rounded-sm border ${accentBorder} bg-white/[0.03] px-2 py-2`}
     >
       <p className={`arena-label px-1 ${accentText}`}>{label} · Moves</p>
       <div className="flex flex-col gap-1">
@@ -280,13 +280,13 @@ export function DualMoveReadout({
   }
 
   return (
-    <article className="arena-panel arena-panel--violet relative overflow-hidden px-3 py-2">
+    <article className="arena-panel arena-panel--violet relative overflow-hidden px-2.5 py-2.5 sm:px-3 sm:py-2">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05] [background-size:40px_40px]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-arena-plasma to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-arena-cyan to-transparent" />
 
       <div className="relative z-10 flex flex-col gap-2">
-        <header className="flex items-center gap-2">
+        <header className="flex flex-wrap items-center gap-2">
           <p className="arena-label text-arena-violet">Damage Overview</p>
           {!hasAny && (
             <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/30">
@@ -300,7 +300,10 @@ export function DualMoveReadout({
           )}
         </header>
 
-        <div className="flex gap-3">
+        <div
+          className="flex flex-col gap-3 xl:flex-row"
+          data-testid="damage-overview-columns"
+        >
           <SideColumn
             label={attackerName ?? 'Side A'}
             accentText="text-arena-plasma"

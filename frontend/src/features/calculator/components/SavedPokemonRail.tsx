@@ -30,6 +30,7 @@ export function SavedPokemonRail({
 
   const sideLabel = side === 'attacker' ? 'Attacker' : 'Defender'
   const canSave = currentBuild.speciesId !== null
+  const savedCount = saved.filter((pokemon) => pokemon !== null).length
 
   function handleSaveCurrent() {
     if (!canSave || currentBuild.speciesId === null) {
@@ -61,18 +62,26 @@ export function SavedPokemonRail({
 
   return (
     <aside
-      className="hidden lg:flex lg:flex-col lg:gap-3"
+      className="flex flex-col gap-2 xl:gap-3"
       aria-label={`${sideLabel} saved rail`}
     >
-      <button
-        type="button"
-        className="arena-button h-12 whitespace-nowrap px-3 text-[0.68rem] uppercase tracking-[0.24em] text-white/88 disabled:cursor-not-allowed disabled:opacity-40"
-        onClick={handleSaveCurrent}
-        disabled={!canSave}
-      >
-        Save
-      </button>
-      <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-3 xl:flex-col xl:items-stretch">
+        <div className="min-w-0">
+          <p className="arena-label text-white/55">{sideLabel} saved</p>
+          <p className="pt-1 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/35">
+            {savedCount}/6 loaded
+          </p>
+        </div>
+        <button
+          type="button"
+          className="arena-button h-11 min-w-[9rem] whitespace-nowrap px-3 text-[0.68rem] uppercase tracking-[0.24em] text-white/88 disabled:cursor-not-allowed disabled:opacity-40 xl:h-12 xl:min-w-0"
+          onClick={handleSaveCurrent}
+          disabled={!canSave}
+        >
+          Save
+        </button>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-1 xl:flex-col xl:gap-3 xl:overflow-visible xl:pb-0">
         {saved.map((pokemon, index) =>
           pokemon === null ? null : (
             <SavedPokemonCard

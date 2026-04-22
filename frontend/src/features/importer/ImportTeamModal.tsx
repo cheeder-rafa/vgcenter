@@ -84,7 +84,7 @@ export function ImportTeamModal({
     <>
       <button
         type="button"
-        className={`arena-button ${accentClassName}`}
+        className={`arena-button flex w-full items-center justify-center ${accentClassName} sm:w-auto`}
         onClick={() => setOpen(true)}
       >
         {triggerLabel}

@@ -210,7 +210,7 @@ export function CalculatorPage() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-arena-cyan via-arena-violet to-arena-plasma" />
 
       <div
-        className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-3 px-4 py-4 sm:px-6 sm:py-4"
+        className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 xl:gap-3 xl:px-6"
         data-testid="calculator-shell"
       >
         <CompactHeader
@@ -226,11 +226,11 @@ export function CalculatorPage() {
         />
 
         <section
-          className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
           data-testid="detailed-result-grid"
         >
           <div
-            className="lg:col-start-2 lg:col-end-5"
+            className="xl:col-start-2 xl:col-end-5"
             data-testid="detailed-result-span"
           >
             <DualMoveReadout
@@ -245,44 +245,54 @@ export function CalculatorPage() {
         </section>
 
         <section
-          className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
+          className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
           data-testid="calculator-main-grid"
         >
-          <SavedPokemonRail
-            side="attacker"
-            currentBuild={attacker}
-            speciesName={attackerEntry?.name ?? null}
-            spriteId={attacker.speciesId}
-            onLoadBuild={handleLoadSavedPokemon}
-          />
-          <PokemonPanel
-            side="attacker"
-            {...datasets}
-            focusedSide={focusedSide}
-            focusedMoveIndex={focusedMoveIndex}
-            onFocusSlot={handleFocusSlot}
-            onActivateSide={setFocusedSide}
-          />
-          <FieldPanel
-            focusedSide={focusedSide}
-            attackerName={attackerName}
-            defenderName={defenderName}
-          />
-          <PokemonPanel
-            side="defender"
-            {...datasets}
-            focusedSide={focusedSide}
-            focusedMoveIndex={focusedMoveIndex}
-            onFocusSlot={handleFocusSlot}
-            onActivateSide={setFocusedSide}
-          />
-          <SavedPokemonRail
-            side="defender"
-            currentBuild={defender}
-            speciesName={defenderEntry?.name ?? null}
-            spriteId={defender.speciesId}
-            onLoadBuild={handleLoadSavedPokemon}
-          />
+          <div className="order-2 xl:order-none">
+            <SavedPokemonRail
+              side="attacker"
+              currentBuild={attacker}
+              speciesName={attackerEntry?.name ?? null}
+              spriteId={attacker.speciesId}
+              onLoadBuild={handleLoadSavedPokemon}
+            />
+          </div>
+          <div className="order-1 xl:order-none">
+            <PokemonPanel
+              side="attacker"
+              {...datasets}
+              focusedSide={focusedSide}
+              focusedMoveIndex={focusedMoveIndex}
+              onFocusSlot={handleFocusSlot}
+              onActivateSide={setFocusedSide}
+            />
+          </div>
+          <div className="order-3 xl:order-none">
+            <FieldPanel
+              focusedSide={focusedSide}
+              attackerName={attackerName}
+              defenderName={defenderName}
+            />
+          </div>
+          <div className="order-4 xl:order-none">
+            <PokemonPanel
+              side="defender"
+              {...datasets}
+              focusedSide={focusedSide}
+              focusedMoveIndex={focusedMoveIndex}
+              onFocusSlot={handleFocusSlot}
+              onActivateSide={setFocusedSide}
+            />
+          </div>
+          <div className="order-5 xl:order-none">
+            <SavedPokemonRail
+              side="defender"
+              currentBuild={defender}
+              speciesName={defenderEntry?.name ?? null}
+              spriteId={defender.speciesId}
+              onLoadBuild={handleLoadSavedPokemon}
+            />
+          </div>
         </section>
 
         <footer className="pb-1 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
@@ -345,15 +355,15 @@ function CompactHeader({
 
   return (
     <header
-      className="grid gap-2 border-b border-white/10 pb-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+      className="grid gap-3 border-b border-white/10 pb-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center"
       data-testid="calculator-header"
     >
       <div
-        className="flex min-w-0 flex-wrap items-center gap-3"
+        className="flex min-w-0 flex-wrap items-center gap-2.5 sm:gap-3"
         data-testid="calculator-header-brand"
       >
         <span className="h-2 w-2 rounded-full bg-arena-plasma shadow-[0_0_12px_rgba(255,43,142,0.9)]" />
-        <h1 className="font-display text-xl font-extrabold tracking-tight text-white sm:text-2xl">
+        <h1 className="font-display text-lg font-extrabold tracking-tight text-white sm:text-2xl">
           {t('calculator.title')}
         </h1>
         <span className="arena-chip text-arena-plasma">
@@ -361,13 +371,13 @@ function CompactHeader({
         </span>
       </div>
       <div
-        className="flex flex-wrap items-center gap-2 lg:justify-self-end"
+        className="grid gap-2 sm:flex sm:flex-wrap sm:items-center xl:justify-self-end"
         data-testid="calculator-header-actions"
       >
-        <span className="font-display text-xs tracking-[0.3em] text-arena-violet">
+        <span className="hidden font-display text-xs tracking-[0.3em] text-arena-violet sm:inline">
           IMPORT ⟶
         </span>
-        <span className="arena-chip text-arena-cyan">
+        <span className="arena-chip justify-center text-arena-cyan sm:justify-start">
           Import Target: {activeSideLabel}
         </span>
         <ShowdownImportModal
@@ -382,7 +392,7 @@ function CompactHeader({
         />
         {feedbackUrl !== null ? (
           <a
-            className="arena-button shrink-0 whitespace-nowrap text-white/80"
+            className="arena-button flex w-full items-center justify-center whitespace-nowrap text-white/80 sm:w-auto"
             href={feedbackUrl}
             rel="noreferrer"
             target="_blank"

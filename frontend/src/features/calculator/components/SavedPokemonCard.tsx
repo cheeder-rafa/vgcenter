@@ -53,7 +53,7 @@ function SavedPokemonCardInner({
       : 'border-arena-cyan/45 shadow-[0_0_24px_rgba(34,211,238,0.18)]'
 
   return (
-    <div className="relative">
+    <div className="relative w-20 shrink-0 sm:w-24 xl:w-full xl:shrink">
       <button
         type="button"
         className={`group relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-sm border bg-arena-void/80 transition hover:-translate-y-0.5 hover:border-white/30 ${accentRing}`}
@@ -78,7 +78,7 @@ function SavedPokemonCardInner({
       </button>
       <button
         type="button"
-        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full border border-white/12 bg-arena-void/90 font-body text-xs text-white/72 transition hover:border-white/28 hover:text-white"
+        className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-white/12 bg-arena-void/90 font-body text-xs text-white/72 transition hover:border-white/28 hover:text-white"
         onClick={(event) => {
           event.stopPropagation()
           onRemove()

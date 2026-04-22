@@ -240,12 +240,12 @@ export function PokemonPanel({
 
   return (
     <article
-      className={`arena-panel ${panelVariant} p-4`}
+      className={`arena-panel ${panelVariant} p-3 sm:p-4`}
       onFocusCapture={() => onActivateSide?.(side)}
       onPointerDownCapture={() => onActivateSide?.(side)}
     >
       <div className="relative z-10 space-y-3">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <span
               className={`h-2 w-2 animate-pulse-glow rounded-full ${pulseColor}`}
@@ -255,7 +255,7 @@ export function PokemonPanel({
               {isAttacking ? 'Attacker' : 'Defender'}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <MoveSummaryStrip results={results} accent={accent} />
             <span className={`arena-chip ${accentText}`}>
               {isAttacking ? 'ATTACKER' : 'DEFENDER'}
@@ -263,7 +263,7 @@ export function PokemonPanel({
           </div>
         </header>
 
-        <div className="flex items-start gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
           <SpriteBadge
             speciesId={combatant.speciesId}
             speciesName={speciesName}
@@ -275,7 +275,7 @@ export function PokemonPanel({
           <div className="flex-1 space-y-2">
             <h2
               id={ids.heading}
-              className="font-display text-2xl font-bold tracking-wide text-white"
+              className="font-display text-xl font-bold tracking-wide text-white sm:text-2xl"
             >
               {displayName ?? (side === 'attacker' ? 'Attacker' : 'Defender')}
             </h2>
@@ -448,7 +448,7 @@ export function PokemonPanel({
                 </span>
               </label>
               {speciesEntry.megaForms.length > 1 && combatant.megaActive ? (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <label
                     htmlFor={`${ids.mega}-variant`}
                     className="arena-label text-arena-violet"

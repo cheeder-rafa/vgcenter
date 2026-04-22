@@ -182,9 +182,9 @@ describe('CalculatorPage', () => {
     const actionGroup = screen.getByTestId('calculator-header-actions')
     const feedbackLink = screen.getByRole('link', { name: /send feedback/i })
 
-    expect(header.className).toContain('lg:grid-cols-[minmax(0,1fr)_auto]')
+    expect(header.className).toContain('xl:grid-cols-[minmax(0,1fr)_auto]')
     expect(brandGroup.className).toContain('min-w-0')
-    expect(actionGroup.className).toContain('lg:justify-self-end')
+    expect(actionGroup.className).toContain('xl:justify-self-end')
     expect(feedbackLink).toHaveAttribute(
       'href',
       'https://tally.so/r/vgcenter-feedback',
@@ -224,11 +224,23 @@ describe('CalculatorPage', () => {
     const wrapper = screen.getByTestId('detailed-result-grid')
     const content = screen.getByTestId('detailed-result-span')
 
+    expect(wrapper.className).toContain('grid-cols-1')
     expect(wrapper.className).toContain(
-      'lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]',
+      'xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]',
     )
-    expect(content.className).toContain('lg:col-start-2')
-    expect(content.className).toContain('lg:col-end-5')
+    expect(content.className).toContain('xl:col-start-2')
+    expect(content.className).toContain('xl:col-end-5')
+  })
+
+  it('stacks the calculator shell into one column before the desktop breakpoint', () => {
+    render(<CalculatorPage />)
+
+    const mainGrid = screen.getByTestId('calculator-main-grid')
+
+    expect(mainGrid.className).toContain('grid-cols-1')
+    expect(mainGrid.className).toContain(
+      'xl:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]',
+    )
   })
 
   it('imports a Showdown team into the active side and saves all six members to the rail', async () => {

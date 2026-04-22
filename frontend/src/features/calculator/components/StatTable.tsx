@@ -60,7 +60,7 @@ export function StatTable({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <p id={headingId} className={`arena-label ${accentLabel}`}>
           Build · Base → SP → Stage → Final
         </p>
@@ -76,39 +76,41 @@ export function StatTable({
       <div
         role="table"
         aria-labelledby={headingId}
-        className="rounded-sm border border-white/10 bg-arena-void/50"
+        className="overflow-x-auto rounded-sm border border-white/10 bg-arena-void/50"
       >
-        <div
-          role="row"
-          className="grid grid-cols-[0.7fr_0.8fr_1.2fr_0.8fr_0.9fr] items-center gap-2 border-b border-white/10 px-3 py-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/50"
-        >
-          <span role="columnheader">Stat</span>
-          <span role="columnheader">Base</span>
-          <span role="columnheader">SP 0–32</span>
-          <span role="columnheader">Stage</span>
-          <span role="columnheader">Final</span>
+        <div className="min-w-[34rem]">
+          <div
+            role="row"
+            className="grid grid-cols-[0.7fr_0.8fr_1.2fr_0.8fr_0.9fr] items-center gap-2 border-b border-white/10 px-3 py-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/50"
+          >
+            <span role="columnheader">Stat</span>
+            <span role="columnheader">Base</span>
+            <span role="columnheader">SP 0–32</span>
+            <span role="columnheader">Stage</span>
+            <span role="columnheader">Final</span>
+          </div>
+          {ROWS.map((row) => (
+            <StatRow
+              key={row.key}
+              row={row}
+              sp={sp[row.key]}
+              base={baseStats?.[row.baseKey] ?? null}
+              final={resolveDisplayedFinalStat(
+                finalStats,
+                row.finalKey,
+                row.key === 'hp' ? null : stages[row.key],
+                status,
+              )}
+              stage={row.key === 'hp' ? null : stages[row.key]}
+              onChange={(value) => onSpChange({ [row.key]: clampSp(value) })}
+              onStageChange={
+                row.key === 'hp'
+                  ? undefined
+                  : (value) => onStageChange({ [row.key]: value })
+              }
+            />
+          ))}
         </div>
-        {ROWS.map((row) => (
-          <StatRow
-            key={row.key}
-            row={row}
-            sp={sp[row.key]}
-            base={baseStats?.[row.baseKey] ?? null}
-            final={resolveDisplayedFinalStat(
-              finalStats,
-              row.finalKey,
-              row.key === 'hp' ? null : stages[row.key],
-              status,
-            )}
-            stage={row.key === 'hp' ? null : stages[row.key]}
-            onChange={(value) => onSpChange({ [row.key]: clampSp(value) })}
-            onStageChange={
-              row.key === 'hp'
-                ? undefined
-                : (value) => onStageChange({ [row.key]: value })
-            }
-          />
-        ))}
       </div>
     </div>
   )
@@ -162,7 +164,7 @@ function StatRow({
         step={1}
         value={sp}
         aria-label={`${row.label} SP`}
-        className="arena-input h-9 w-full max-w-[100px] px-2 py-1 text-sm"
+        className="arena-input h-10 w-full max-w-[100px] px-2 py-1 text-sm"
         onChange={(event) => {
           const parsed = Number.parseInt(event.target.value, 10)
           onChange(Number.isFinite(parsed) ? parsed : 0)
@@ -221,7 +223,7 @@ function StageControl({
     >
       <button
         type="button"
-        className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
+        className="arena-chip min-h-8 min-w-8 justify-center px-1.5 text-[0.72rem] text-white/80"
         aria-label={`${label} stage down`}
         onClick={() => onChange(Math.max(-6, value - 1))}
       >
@@ -235,7 +237,7 @@ function StageControl({
       </span>
       <button
         type="button"
-        className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
+        className="arena-chip min-h-8 min-w-8 justify-center px-1.5 text-[0.72rem] text-white/80"
         aria-label={`${label} stage up`}
         onClick={() => onChange(Math.min(6, value + 1))}
       >

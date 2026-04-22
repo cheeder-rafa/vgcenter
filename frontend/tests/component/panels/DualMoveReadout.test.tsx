@@ -62,6 +62,26 @@ describe('DualMoveReadout', () => {
     expect(screen.getByText('64.6–75.4%')).toBeInTheDocument()
     expect(screen.getByText('Shadow Sneak')).toBeInTheDocument()
     expect(screen.getByText('Iron Head')).toBeInTheDocument()
+    const article = screen.getByText(/damage overview/i).closest('article')
+    expect(article?.className).toContain('px-2.5')
+    expect(article?.textContent).toContain(
+      'Damage Overview',
+    )
+  })
+
+  it('stacks both side columns until the extra-wide breakpoint', () => {
+    render(
+      <DualMoveReadout
+        attackerName="Aegislash-Shield"
+        defenderName="Aegislash-Shield"
+        attackerMoves={ATTACKER_MOVES}
+        defenderMoves={DEFENDER_MOVES}
+      />,
+    )
+
+    const row = screen.getByTestId('damage-overview-columns')
+    expect(row.className).toContain('flex-col')
+    expect(row.className).toContain('xl:flex-row')
   })
 
   it('does not show roll detail before any move is clicked', () => {
