@@ -183,14 +183,16 @@ describe('CalculatorPage', () => {
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 
-    const detailedResult = screen.getByText(/detailed readout/i).closest('article')
+    const detailedResult = screen
+      .getByText(/detailed readout/i)
+      .closest('article')
     const mainGrid = screen.getByTestId('calculator-main-grid')
 
     expect(detailedResult).not.toBeNull()
     expect(mainGrid).not.toBeNull()
-    expect(
-      detailedResult?.compareDocumentPosition(mainGrid as Node),
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(detailedResult?.compareDocumentPosition(mainGrid as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
   })
 
   it('detailedResultWidthMatchesMiddleColumns', async () => {
@@ -701,7 +703,9 @@ describe('CalculatorPage', () => {
     ).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /close/i }))
 
-    await user.click(screen.getByRole('heading', { name: /defender/i, level: 2 }))
+    await user.click(
+      screen.getByRole('heading', { name: /defender/i, level: 2 }),
+    )
     await user.click(screen.getByRole('button', { name: /import showdown/i }))
 
     expect(
@@ -760,8 +764,12 @@ describe('CalculatorPage', () => {
         megaForms: [],
       },
     ])
-    mocks.fetchAbilities.mockResolvedValue([{ id: 'unburden', name: 'Unburden' }])
-    mocks.fetchItems.mockResolvedValue([{ id: 'white-herb', name: 'White Herb' }])
+    mocks.fetchAbilities.mockResolvedValue([
+      { id: 'unburden', name: 'Unburden' },
+    ])
+    mocks.fetchItems.mockResolvedValue([
+      { id: 'white-herb', name: 'White Herb' },
+    ])
     mocks.fetchMoves.mockResolvedValue([{ id: 'protect', name: 'Protect' }])
     mocks.fetchNatures.mockResolvedValue([
       {
@@ -778,7 +786,10 @@ describe('CalculatorPage', () => {
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 
     await user.click(screen.getByRole('button', { name: /import showdown/i }))
-    await user.type(screen.getByLabelText(/showdown paste/i), 'Sneasler @ White Herb')
+    await user.type(
+      screen.getByLabelText(/showdown paste/i),
+      'Sneasler @ White Herb',
+    )
     await user.click(screen.getByRole('button', { name: /import team/i }))
 
     await waitFor(() =>

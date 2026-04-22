@@ -56,7 +56,10 @@ describe('DetailedResult', () => {
         defenderName="Aegislash-Shield"
         moveName="Poltergeist"
         result={{
-          rolls: [108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122, 122, 126, 126],
+          rolls: [
+            108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122,
+            122, 126, 126,
+          ],
           min: 108,
           max: 126,
           minPct: 64.6,
@@ -70,7 +73,9 @@ describe('DetailedResult', () => {
       />,
     )
 
-    await user.click(screen.getByRole('button', { name: /copy damage report/i }))
+    await user.click(
+      screen.getByRole('button', { name: /copy damage report/i }),
+    )
 
     await waitFor(() =>
       expect(mocks.copyDamageReport).toHaveBeenCalledWith(
@@ -102,7 +107,9 @@ describe('DetailedResult', () => {
         defenderName="Excadrill"
         moveName="Giga Impact"
         result={{
-          rolls: [17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20],
+          rolls: [
+            17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20,
+          ],
           min: 17,
           max: 20,
           minPct: 9.2,

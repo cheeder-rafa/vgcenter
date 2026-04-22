@@ -376,8 +376,12 @@ describe('PokemonPanel', () => {
     await user.click(screen.getByLabelText(/mega evolution/i))
 
     expect(screen.getByLabelText(/mega variant/i)).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /mega charizard x/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /mega charizard y/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /mega charizard x/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /mega charizard y/i }),
+    ).toBeInTheDocument()
   })
 
   it('selectsMegaCharizardXAndAutoFillsCharizarditeX', async () => {
@@ -389,9 +393,14 @@ describe('PokemonPanel', () => {
     await user.type(speciesInput, 'char')
     await user.keyboard('{ArrowDown}{Enter}')
     await user.click(screen.getByLabelText(/mega evolution/i))
-    await user.selectOptions(screen.getByLabelText(/mega variant/i), 'charizard-mega-x')
+    await user.selectOptions(
+      screen.getByLabelText(/mega variant/i),
+      'charizard-mega-x',
+    )
 
-    expect(useCalculatorStore.getState().attacker.megaFormId).toBe('charizard-mega-x')
+    expect(useCalculatorStore.getState().attacker.megaFormId).toBe(
+      'charizard-mega-x',
+    )
     expect(useCalculatorStore.getState().attacker.itemId).toBe('charizardite-x')
   })
 
@@ -404,10 +413,18 @@ describe('PokemonPanel', () => {
     await user.type(speciesInput, 'char')
     await user.keyboard('{ArrowDown}{Enter}')
     await user.click(screen.getByLabelText(/mega evolution/i))
-    await user.selectOptions(screen.getByLabelText(/mega variant/i), 'charizard-mega-x')
-    await user.selectOptions(screen.getByLabelText(/mega variant/i), 'charizard-mega-y')
+    await user.selectOptions(
+      screen.getByLabelText(/mega variant/i),
+      'charizard-mega-x',
+    )
+    await user.selectOptions(
+      screen.getByLabelText(/mega variant/i),
+      'charizard-mega-y',
+    )
 
-    expect(useCalculatorStore.getState().attacker.megaFormId).toBe('charizard-mega-y')
+    expect(useCalculatorStore.getState().attacker.megaFormId).toBe(
+      'charizard-mega-y',
+    )
     expect(useCalculatorStore.getState().attacker.itemId).toBe('charizardite-y')
   })
 

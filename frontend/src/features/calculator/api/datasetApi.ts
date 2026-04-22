@@ -27,9 +27,7 @@ export function fetchPokedex(regulation: Regulation): Promise<PokedexEntry[]> {
   )
 }
 
-export function fetchMoves(
-  regulation: Regulation,
-): Promise<MoveDefinition[]> {
+export function fetchMoves(regulation: Regulation): Promise<MoveDefinition[]> {
   return requestJson<MoveDefinition[]>(datasetUrl('moves', regulation), {
     method: 'GET',
   })

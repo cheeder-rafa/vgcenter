@@ -47,8 +47,9 @@ describe('StatTable', () => {
       />,
     )
 
-    expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent))
-      .toEqual(['Stat', 'Base', 'SP 0–32', 'Stage', 'Final'])
+    expect(
+      screen.getAllByRole('columnheader').map((cell) => cell.textContent),
+    ).toEqual(['Stat', 'Base', 'SP 0–32', 'Stage', 'Final'])
     expect(screen.getByTestId('stat-base-hp').textContent).toBe('78')
     expect(screen.getByTestId('stat-final-spa').textContent).toBe('200')
     expect(screen.getByTestId('stat-final-spe').textContent).toBe('145')

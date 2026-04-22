@@ -135,7 +135,9 @@ export function CalculatorPage() {
     importSavedTeam(
       side,
       team.map((pokemon) => {
-        const entry = pokedex.find((candidate) => candidate.id === pokemon.speciesId)
+        const entry = pokedex.find(
+          (candidate) => candidate.id === pokemon.speciesId,
+        )
         return toSavedPokemon(pokemon, entry)
       }),
     )

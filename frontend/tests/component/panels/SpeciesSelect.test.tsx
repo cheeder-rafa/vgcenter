@@ -79,8 +79,9 @@ describe('SpeciesSelect', () => {
 
     const listbox = screen.getByRole('listbox', { name: /species options/i })
     expect(within(listbox).getAllByRole('option')).toHaveLength(1)
-    expect(within(listbox).getByRole('option', { name: /charizard/i }))
-      .toBeInTheDocument()
+    expect(
+      within(listbox).getByRole('option', { name: /charizard/i }),
+    ).toBeInTheDocument()
 
     await user.keyboard('{ArrowDown}{Enter}')
 
@@ -125,8 +126,9 @@ describe('SpeciesSelect', () => {
 
     const combobox = screen.getByRole('combobox', { name: /^species$/i })
     await user.click(combobox)
-    expect(screen.getByRole('listbox', { name: /species options/i }))
-      .toBeInTheDocument()
+    expect(
+      screen.getByRole('listbox', { name: /species options/i }),
+    ).toBeInTheDocument()
 
     await user.keyboard('{Escape}')
 

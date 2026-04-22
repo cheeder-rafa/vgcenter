@@ -83,9 +83,8 @@ describe('useSavedTeamStore', () => {
     const localStorage = createLocalStorageStub()
     vi.stubGlobal('localStorage', localStorage)
 
-    const { useSavedTeamStore } = await import(
-      '../../../src/features/calculator/store/useSavedTeamStore'
-    )
+    const { useSavedTeamStore } =
+      await import('../../../src/features/calculator/store/useSavedTeamStore')
 
     useSavedTeamStore.getState().save('attacker', savedPokemonFactory())
 
@@ -111,9 +110,8 @@ describe('useSavedTeamStore', () => {
     const localStorage = createLocalStorageStub()
     vi.stubGlobal('localStorage', localStorage)
 
-    const { useSavedTeamStore } = await import(
-      '../../../src/features/calculator/store/useSavedTeamStore'
-    )
+    const { useSavedTeamStore } =
+      await import('../../../src/features/calculator/store/useSavedTeamStore')
 
     useSavedTeamStore.getState().save('defender', savedPokemonFactory())
     useSavedTeamStore.getState().remove('defender', 0)
@@ -176,9 +174,8 @@ describe('useSavedTeamStore', () => {
     )
     vi.stubGlobal('localStorage', localStorage)
 
-    const { useSavedTeamStore } = await import(
-      '../../../src/features/calculator/store/useSavedTeamStore'
-    )
+    const { useSavedTeamStore } =
+      await import('../../../src/features/calculator/store/useSavedTeamStore')
 
     expect(useSavedTeamStore.getState().attackerSaved[0]).toEqual(
       expect.objectContaining({
@@ -192,9 +189,8 @@ describe('useSavedTeamStore', () => {
     const localStorage = createLocalStorageStub()
     vi.stubGlobal('localStorage', localStorage)
 
-    const { useSavedTeamStore } = await import(
-      '../../../src/features/calculator/store/useSavedTeamStore'
-    )
+    const { useSavedTeamStore } =
+      await import('../../../src/features/calculator/store/useSavedTeamStore')
 
     useSavedTeamStore.getState().save(
       'attacker',
