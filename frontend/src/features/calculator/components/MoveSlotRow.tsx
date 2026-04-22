@@ -75,7 +75,7 @@ export function MoveSlotRow({
         }
       }}
       aria-pressed={focused}
-      className={`grid cursor-pointer grid-cols-[auto_minmax(0,1fr)_7.5ch_10ch] items-center gap-3 rounded-sm border bg-white/[0.04] px-3 py-2 transition hover:border-white/25 ${accentBorder} ${accentGlow}`}
+      className={`grid cursor-pointer grid-cols-[auto_minmax(0,1fr)_8ch_10ch] items-center gap-3 rounded-sm border bg-white/[0.04] px-3 py-2 transition hover:border-white/25 ${accentBorder} ${accentGlow}`}
       data-testid={`move-slot-${index}`}
     >
       <span className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/55">
@@ -102,7 +102,7 @@ export function MoveSlotRow({
         ))}
       </select>
       <span
-        className={`arena-chip min-w-[7.5ch] justify-center whitespace-nowrap ${getTypeChipClasses(
+        className={`arena-chip w-[8ch] justify-center overflow-hidden whitespace-nowrap text-[0.58rem] tracking-tight ${getTypeChipClasses(
           selectedMove?.type ?? null,
         )}`}
         data-testid={`move-slot-type-${index}`}
