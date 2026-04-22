@@ -40,6 +40,16 @@ public record Stats(int hp, int attack, int defense, int specialAttack, int spec
         };
     }
 
+    public static int applyStage(int stat, int stage) {
+        if (stage < -6 || stage > 6) {
+            throw new IllegalArgumentException("Stage must be between -6 and 6");
+        }
+        if (stage >= 0) {
+            return stat * (stage + 2) / 2;
+        }
+        return stat * 2 / (2 - stage);
+    }
+
     private static int calculateHp(int base, int sp) {
         return base + sp + 75;
     }

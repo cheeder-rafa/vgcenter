@@ -58,6 +58,7 @@ function cloneSavedPokemon(pokemon: SavedPokemon): SavedPokemon {
   return {
     ...pokemon,
     sp: { ...pokemon.sp },
+    stages: { ...pokemon.stages },
     moves: cloneMoves(pokemon.moves),
     baseStats: cloneStats(pokemon.baseStats),
     finalStats: cloneStats(pokemon.finalStats),
@@ -70,6 +71,7 @@ function toCombatantBuild(pokemon: SavedPokemon): CombatantBuild {
     speciesId: pokemon.speciesId,
     natureId: pokemon.natureId,
     sp: { ...pokemon.sp },
+    stages: { ...pokemon.stages },
     abilityId: pokemon.abilityId,
     itemId: pokemon.itemId,
     status: pokemon.status,

@@ -23,11 +23,8 @@ export const ROOM_OPTIONS = [
 export const STATUS_OPTIONS = [
   { value: 'NONE', label: 'Healthy' },
   { value: 'BURN', label: 'Burn' },
-  { value: 'POISON', label: 'Poison' },
-  { value: 'BADLY_POISONED', label: 'Toxic' },
+  { value: 'POISON', label: 'Poison (-1/8 HP/turn)' },
   { value: 'PARALYSIS', label: 'Paralysis' },
-  { value: 'SLEEP', label: 'Sleep' },
-  { value: 'FREEZE', label: 'Freeze' },
 ] as const
 
 export const TYPE_OPTIONS = [

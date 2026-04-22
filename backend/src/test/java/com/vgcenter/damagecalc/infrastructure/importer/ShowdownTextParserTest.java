@@ -307,6 +307,12 @@ class ShowdownTextParserTest {
         assertThat(team).hasSize(6);
         assertThat(team.getFirst().speciesId()).isEqualTo("sneasler");
         assertThat(team.getFirst().abilityId()).isEqualTo("unburden");
+        assertThat(team.getFirst().sp())
+                .isEqualTo(new com.vgcenter.damagecalc.application.usecase.StatsView(32, 1, 28, 0, 1, 4));
+        assertThat(team.get(1).sp())
+                .isEqualTo(new com.vgcenter.damagecalc.application.usecase.StatsView(8, 32, 1, 0, 0, 25));
+        assertThat(team.get(5).sp())
+                .isEqualTo(new com.vgcenter.damagecalc.application.usecase.StatsView(21, 32, 0, 0, 0, 13));
     }
 
     @Test

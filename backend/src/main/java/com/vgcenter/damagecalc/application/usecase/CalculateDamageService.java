@@ -12,11 +12,13 @@ import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Item;
 import com.vgcenter.damagecalc.domain.model.Move;
 import com.vgcenter.damagecalc.domain.model.MoveCategory;
+import com.vgcenter.damagecalc.domain.model.Stat;
 import com.vgcenter.damagecalc.domain.model.Stats;
 import com.vgcenter.damagecalc.domain.model.StatusCondition;
 import com.vgcenter.damagecalc.domain.model.Type;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public final class CalculateDamageService implements CalculateDamageUseCase {
 
@@ -49,16 +51,17 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
 
     private Combatant toCombatant(CombatantCommand command) {
         StatusCondition status = parseEnum(StatusCondition.class, command.status(), "status");
-        Stats adjustedStats = new Stats(
+        Stats inputStats = new Stats(
                 command.stats().hp(),
                 command.stats().attack(),
                 command.stats().defense(),
                 command.stats().specialAttack(),
                 command.stats().specialDefense(),
                 command.stats().speed());
+        Stats stagedStats = applyStages(inputStats, command.stages());
         return new Combatant(
                 command.level(),
-                adjustStatsForStatus(adjustedStats, status),
+                adjustStatsForStatus(stagedStats, status),
                 command.types().stream()
                         .map(type -> parseEnum(Type.class, type, "type"))
                         .toList(),
@@ -93,7 +96,8 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 command.lightScreen(),
                 command.auroraVeil(),
                 command.friendGuard(),
-                command.helpingHand());
+                command.helpingHand(),
+                command.protect());
     }
 
     private KoChanceResult toKoChance(int[] rolls, int defenderHp, Item defenderItem) {
@@ -199,6 +203,31 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 stats.specialAttack(),
                 stats.specialDefense(),
                 stats.speed() / 2);
+    }
+
+    private Stats applyStages(Stats stats, Map<String, Integer> stages) {
+        return new Stats(
+                stats.hp(),
+                applyStage(stats.attack(), stages, Stat.ATTACK),
+                applyStage(stats.defense(), stages, Stat.DEFENSE),
+                applyStage(stats.specialAttack(), stages, Stat.SPECIAL_ATTACK),
+                applyStage(stats.specialDefense(), stages, Stat.SPECIAL_DEFENSE),
+                applyStage(stats.speed(), stages, Stat.SPEED));
+    }
+
+    private int applyStage(int statValue, Map<String, Integer> stages, Stat stat) {
+        return Stats.applyStage(statValue, stages.getOrDefault(statKey(stat), 0));
+    }
+
+    private String statKey(Stat stat) {
+        return switch (stat) {
+            case ATTACK -> "atk";
+            case DEFENSE -> "def";
+            case SPECIAL_ATTACK -> "spa";
+            case SPECIAL_DEFENSE -> "spd";
+            case SPEED -> "spe";
+            case HP -> throw new IllegalArgumentException("HP stages are not supported");
+        };
     }
 
     private static <E extends Enum<E>> E parseEnum(Class<E> enumType, String rawValue, String label) {

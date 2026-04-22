@@ -11,15 +11,17 @@ import type {
   Regulation,
   SideConditions,
   Spread,
+  StatStages,
   Stats,
 } from '../types/api'
 
 export type CalculatorSide = 'attacker' | 'defender'
 
 type CombatantBuildPatch = Partial<
-  Omit<CombatantBuild, 'sp' | 'baseStats' | 'finalStats'>
+  Omit<CombatantBuild, 'sp' | 'stages' | 'baseStats' | 'finalStats'>
 > & {
   sp?: Partial<Spread>
+  stages?: Partial<StatStages>
   baseStats?: Partial<Stats> | null
   finalStats?: Partial<Stats> | null
 }
@@ -71,10 +73,19 @@ const defaultSide: SideConditions = {
   auroraVeil: false,
   friendGuard: false,
   helpingHand: false,
+  protect: false,
 }
 
 const defaultSpread: Spread = {
   hp: 0,
+  atk: 0,
+  def: 0,
+  spa: 0,
+  spd: 0,
+  spe: 0,
+}
+
+const defaultStages: StatStages = {
   atk: 0,
   def: 0,
   spa: 0,
@@ -94,6 +105,7 @@ function createDefaultCombatant(stats: Stats): CombatantBuild {
     speciesId: null,
     natureId: 'serious',
     sp: { ...defaultSpread },
+    stages: { ...defaultStages },
     abilityId: null,
     itemId: null,
     status: 'NONE',
@@ -150,6 +162,9 @@ function mergeCombatant(
     ...current,
     ...patch,
     sp: patch.sp ? { ...current.sp, ...patch.sp } : current.sp,
+    stages: patch.stages
+      ? { ...current.stages, ...patch.stages }
+      : current.stages,
     moves: patch.moves ? cloneMoveSlots(patch.moves) : current.moves,
     baseStats: mergeStats(current.baseStats, patch.baseStats),
     finalStats: mergeStats(current.finalStats, patch.finalStats),
@@ -331,6 +346,7 @@ export function selectDamageRequestFor(
       abilityId: attacker.abilityId,
       itemId: attacker.itemId,
       status: attacker.status,
+      stages: attacker.stages,
       grounded: attacker.grounded,
       fullHp: attacker.fullHp,
     },
@@ -341,6 +357,7 @@ export function selectDamageRequestFor(
       abilityId: defender.abilityId,
       itemId: defender.itemId,
       status: defender.status,
+      stages: defender.stages,
       grounded: defender.grounded,
       fullHp: defender.fullHp,
     },

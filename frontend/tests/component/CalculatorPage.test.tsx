@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -145,9 +145,9 @@ describe('CalculatorPage', () => {
       }),
     ).toBeInTheDocument()
     expect(screen.getAllByText(/regulation m-a/i).length).toBeGreaterThan(0)
-    // Field panel still in the middle
+    // Middle panel remains between both combatants
     expect(
-      screen.getByRole('heading', { name: /^field$/i }),
+      screen.getByRole('heading', { name: /^modifiers$/i }),
     ).toBeInTheDocument()
     // Both sides start with default headers (Attacker/Defender until species chosen)
     expect(
@@ -208,7 +208,7 @@ describe('CalculatorPage', () => {
     expect(content.className).toContain('lg:col-end-5')
   })
 
-  it('imports a Showdown team into the active side and saves the remaining members to the rail', async () => {
+  it('imports a Showdown team into the active side and saves all six members to the rail', async () => {
     mocks.importShowdown.mockResolvedValue({
       team: [
         {
@@ -382,6 +382,9 @@ describe('CalculatorPage', () => {
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 
     await user.click(screen.getByRole('button', { name: /import showdown/i }))
+    const importDialog = screen.getByRole('dialog')
+    expect(within(importDialog).getByText(/import target/i)).toBeInTheDocument()
+    expect(within(importDialog).getByText(/^left side$/i)).toBeInTheDocument()
     await user.type(
       screen.getByLabelText(/showdown paste/i),
       'Charizard @ Charizardite Y',
@@ -404,12 +407,18 @@ describe('CalculatorPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
     expect(
+      screen.getByRole('button', { name: /load charizard for attacker/i }),
+    ).toBeInTheDocument()
+    expect(
       screen.getByRole('button', { name: /load amoonguss for attacker/i }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /load incineroar for attacker/i }),
     ).toBeInTheDocument()
-    expect(useSavedTeamStore.getState().attackerSaved[4]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().attackerSaved[0]?.speciesId).toBe(
+      'charizard',
+    )
+    expect(useSavedTeamStore.getState().attackerSaved[5]?.speciesId).toBe(
       'pelipper',
     )
 
@@ -429,7 +438,7 @@ describe('CalculatorPage', () => {
     )
   })
 
-  it('all five pokemon appear on rail after import', async () => {
+  it('replaces the saved rail with all six imported pokemon in order', async () => {
     mocks.importShowdown.mockResolvedValue({
       team: [
         {
@@ -673,10 +682,119 @@ describe('CalculatorPage', () => {
       screen.queryByRole('button', { name: /load stale two for attacker/i }),
     ).not.toBeInTheDocument()
     expect(useSavedTeamStore.getState().attackerSaved[0]?.speciesId).toBe(
-      'amoonguss',
+      'charizard',
     )
-    expect(useSavedTeamStore.getState().attackerSaved[4]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().attackerSaved[5]?.speciesId).toBe(
       'pelipper',
+    )
+  })
+
+  it('updates the import target copy when the active side changes', async () => {
+    render(<CalculatorPage />)
+    const user = userEvent.setup()
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: /import showdown/i }))
+    expect(
+      within(screen.getByRole('dialog')).getByText(/^left side$/i),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /close/i }))
+
+    await user.click(screen.getByRole('heading', { name: /defender/i, level: 2 }))
+    await user.click(screen.getByRole('button', { name: /import showdown/i }))
+
+    expect(
+      within(screen.getByRole('dialog')).getByText(/^right side$/i),
+    ).toBeInTheDocument()
+  })
+
+  it('loads low SP import values into the editor exactly as imported', async () => {
+    mocks.importShowdown.mockResolvedValue({
+      team: [
+        {
+          speciesId: 'sneasler',
+          speciesName: 'Sneasler',
+          nickname: null,
+          level: 50,
+          gender: null,
+          abilityId: 'unburden',
+          itemId: 'white-herb',
+          natureId: 'adamant',
+          sp: {
+            hp: 32,
+            attack: 1,
+            defense: 28,
+            specialAttack: 0,
+            specialDefense: 1,
+            speed: 4,
+          },
+          stats: {
+            hp: 159,
+            attack: 165,
+            defense: 84,
+            specialAttack: 54,
+            specialDefense: 101,
+            speed: 141,
+          },
+          moveIds: ['protect'],
+        },
+      ],
+    })
+    mocks.fetchPokedex.mockResolvedValue([
+      {
+        id: 'sneasler',
+        name: 'Sneasler',
+        imageUrl: '/sprites/sneasler.png',
+        types: ['FIGHTING', 'POISON'],
+        baseStats: {
+          hp: 80,
+          attack: 130,
+          defense: 60,
+          specialAttack: 40,
+          specialDefense: 80,
+          speed: 120,
+        },
+        abilityIds: ['unburden'],
+        moveIds: ['protect'],
+        megaForms: [],
+      },
+    ])
+    mocks.fetchAbilities.mockResolvedValue([{ id: 'unburden', name: 'Unburden' }])
+    mocks.fetchItems.mockResolvedValue([{ id: 'white-herb', name: 'White Herb' }])
+    mocks.fetchMoves.mockResolvedValue([{ id: 'protect', name: 'Protect' }])
+    mocks.fetchNatures.mockResolvedValue([
+      {
+        id: 'adamant',
+        name: 'Adamant',
+        increasedStat: 'ATTACK',
+        decreasedStat: 'SPECIAL_ATTACK',
+      },
+    ])
+
+    render(<CalculatorPage />)
+    const user = userEvent.setup()
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: /import showdown/i }))
+    await user.type(screen.getByLabelText(/showdown paste/i), 'Sneasler @ White Herb')
+    await user.click(screen.getByRole('button', { name: /import team/i }))
+
+    await waitFor(() =>
+      expect(useCalculatorStore.getState().attacker).toEqual(
+        expect.objectContaining({
+          speciesId: 'sneasler',
+          sp: {
+            hp: 32,
+            atk: 1,
+            def: 28,
+            spa: 0,
+            spd: 1,
+            spe: 4,
+          },
+        }),
+      ),
     )
   })
 

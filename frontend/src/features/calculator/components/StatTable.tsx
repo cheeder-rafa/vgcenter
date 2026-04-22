@@ -1,6 +1,11 @@
 import { useId } from 'react'
 
-import type { Spread, Stats, StatusCondition } from '../types/api'
+import type {
+  Spread,
+  StatStages,
+  Stats,
+  StatusCondition,
+} from '../types/api'
 import { MAX_SP_PER_STAT, clampSp } from './statTableUtils'
 
 type StatKey = 'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe'
@@ -33,20 +38,24 @@ const ROWS: ReadonlyArray<Row> = [
 
 type Props = {
   sp: Spread
+  stages: StatStages
   baseStats: Stats | null
   finalStats: Stats | null
   status: StatusCondition
   accent?: 'plasma' | 'cyan'
   onSpChange: (patch: Partial<Spread>) => void
+  onStageChange: (patch: Partial<StatStages>) => void
 }
 
 export function StatTable({
   sp,
+  stages,
   baseStats,
   finalStats,
   status,
   accent = 'plasma',
   onSpChange,
+  onStageChange,
 }: Props) {
   const headingId = useId()
   const accentLabel =
@@ -58,7 +67,7 @@ export function StatTable({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p id={headingId} className={`arena-label ${accentLabel}`}>
-          Build · Base → SP → Final
+          Build · Base → SP → Stage → Final
         </p>
         <span
           data-testid="sp-remaining"
@@ -76,11 +85,12 @@ export function StatTable({
       >
         <div
           role="row"
-          className="grid grid-cols-[0.7fr_0.9fr_1.3fr_0.9fr] items-center gap-2 border-b border-white/10 px-3 py-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/50"
+          className="grid grid-cols-[0.7fr_0.8fr_1.2fr_0.8fr_0.9fr] items-center gap-2 border-b border-white/10 px-3 py-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/50"
         >
           <span role="columnheader">Stat</span>
           <span role="columnheader">Base</span>
           <span role="columnheader">SP 0–32</span>
+          <span role="columnheader">Stage</span>
           <span role="columnheader">Final</span>
         </div>
         {ROWS.map((row) => (
@@ -89,8 +99,19 @@ export function StatTable({
             row={row}
             sp={sp[row.key]}
             base={baseStats?.[row.baseKey] ?? null}
-            final={resolveDisplayedFinalStat(finalStats, row.finalKey, status)}
+            final={resolveDisplayedFinalStat(
+              finalStats,
+              row.finalKey,
+              row.key === 'hp' ? null : stages[row.key],
+              status,
+            )}
+            stage={row.key === 'hp' ? null : stages[row.key]}
             onChange={(value) => onSpChange({ [row.key]: clampSp(value) })}
+            onStageChange={
+              row.key === 'hp'
+                ? undefined
+                : (value) => onStageChange({ [row.key]: value })
+            }
           />
         ))}
       </div>
@@ -103,15 +124,25 @@ type RowProps = {
   sp: number
   base: number | null
   final: number | null
+  stage: number | null
   onChange: (value: number) => void
+  onStageChange?: (value: number) => void
 }
 
-function StatRow({ row, sp, base, final, onChange }: RowProps) {
+function StatRow({
+  row,
+  sp,
+  base,
+  final,
+  stage,
+  onChange,
+  onStageChange,
+}: RowProps) {
   const inputId = useId()
   return (
     <div
       role="row"
-      className="grid grid-cols-[0.7fr_0.9fr_1.3fr_0.9fr] items-center gap-2 border-b border-white/5 px-3 py-2 last:border-b-0"
+      className="grid grid-cols-[0.7fr_0.8fr_1.2fr_0.8fr_0.9fr] items-center gap-2 border-b border-white/5 px-3 py-2 last:border-b-0"
     >
       <label
         htmlFor={inputId}
@@ -142,10 +173,29 @@ function StatRow({ row, sp, base, final, onChange }: RowProps) {
           onChange(Number.isFinite(parsed) ? parsed : 0)
         }}
       />
+      {row.key === 'hp' || stage === null || onStageChange === undefined ? (
+        <div
+          role="cell"
+          data-testid={`stat-stage-${row.key}`}
+          className="flex items-center justify-end gap-1"
+        >
+          <span className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-transparent">
+            -
+          </span>
+          <span className="min-w-[3ch] text-center font-mono text-xs text-white/22">
+            —
+          </span>
+          <span className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-transparent">
+            +
+          </span>
+        </div>
+      ) : (
+        <StageControl statKey={row.key} value={stage} onChange={onStageChange} />
+      )}
       <span
         role="cell"
         data-testid={`stat-final-${row.key}`}
-        className="font-display text-base font-semibold text-white"
+        className="text-right font-display text-base font-semibold text-white"
       >
         {final ?? '—'}
       </span>
@@ -153,16 +203,79 @@ function StatRow({ row, sp, base, final, onChange }: RowProps) {
   )
 }
 
+function StageControl({
+  statKey,
+  value,
+  onChange,
+}: {
+  statKey: Exclude<StatKey, 'hp'>
+  value: number
+  onChange: (value: number) => void
+}) {
+  const label = statKey === 'spe' ? 'Speed' : statKey.toUpperCase()
+
+  return (
+    <div
+      role="cell"
+      className="flex items-center justify-end gap-1"
+      data-testid={`stage-control-${statKey}`}
+    >
+      <button
+        type="button"
+        className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
+        aria-label={`${label} stage down`}
+        onClick={() => onChange(Math.max(-6, value - 1))}
+      >
+        -
+      </button>
+      <span
+        className="min-w-[3ch] text-center font-mono text-xs text-white/78"
+        data-testid={`stage-value-${statKey}`}
+      >
+        {value > 0 ? `+${value}` : value}
+      </span>
+      <button
+        type="button"
+        className="arena-chip min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
+        aria-label={`${label} stage up`}
+        onClick={() => onChange(Math.min(6, value + 1))}
+      >
+        +
+      </button>
+    </div>
+  )
+}
+
 function resolveDisplayedFinalStat(
   finalStats: Stats | null,
   key: keyof Stats,
+  stage: number | null,
   status: StatusCondition,
 ) {
   if (finalStats === null) {
     return null
   }
-  if (key === 'speed' && status === 'PARALYSIS') {
-    return Math.floor(finalStats.speed / 2)
+
+  let value = finalStats[key]
+
+  if (stage !== null) {
+    value = applyStage(value, stage)
   }
-  return finalStats[key]
+
+  if (key === 'speed' && status === 'PARALYSIS') {
+    return Math.floor(value / 2)
+  }
+
+  return value
+}
+
+function applyStage(stat: number, stage: number) {
+  const normalizedStage = Math.max(-6, Math.min(6, stage))
+  if (normalizedStage === 0) {
+    return stat
+  }
+  if (normalizedStage > 0) {
+    return Math.floor((stat * (2 + normalizedStage)) / 2)
+  }
+  return Math.floor((stat * 2) / (2 + Math.abs(normalizedStage)))
 }

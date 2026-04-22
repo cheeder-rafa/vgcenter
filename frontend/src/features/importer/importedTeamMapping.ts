@@ -22,6 +22,13 @@ export function toCombatantBuild(
       spd: pokemon.sp.specialDefense,
       spe: pokemon.sp.speed,
     },
+    stages: {
+      atk: 0,
+      def: 0,
+      spa: 0,
+      spd: 0,
+      spe: 0,
+    },
     abilityId: pokemon.abilityId,
     itemId: pokemon.itemId,
     status: 'NONE',

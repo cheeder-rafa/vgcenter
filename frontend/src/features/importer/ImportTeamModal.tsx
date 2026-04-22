@@ -49,6 +49,7 @@ export function ImportTeamModal({
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [team, setTeam] = useState<ImportedPokemon[]>([])
+  const importTargetLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -115,6 +116,14 @@ export function ImportTeamModal({
                       <p className="max-w-[62ch] font-body text-sm leading-6 text-white/68">
                         {description}
                       </p>
+                      <div className="flex items-center gap-2">
+                        <span className="arena-label text-arena-cyan">
+                          Import Target
+                        </span>
+                        <span className="arena-chip text-arena-cyan">
+                          {importTargetLabel}
+                        </span>
+                      </div>
                     </div>
                     <button
                       type="button"

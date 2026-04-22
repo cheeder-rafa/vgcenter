@@ -6,6 +6,7 @@ type Props = {
   speciesId: string | null
   speciesName?: string | null
   megaActive?: boolean
+  megaFormId?: string | null
   accent?: 'plasma' | 'cyan'
   size?: 'sm' | 'md' | 'lg'
 }
@@ -18,7 +19,7 @@ const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
 
 export function SpriteBadge(props: Props) {
   // Re-mount inner sprite when speciesId changes so local fallback state resets.
-  const key = `${props.speciesId ?? '__empty__'}:${props.megaActive ? 'mega' : 'base'}`
+  const key = `${props.speciesId ?? '__empty__'}:${props.megaActive ? 'mega' : 'base'}:${props.megaFormId ?? '__none__'}`
   return <SpriteBadgeInner key={key} {...props} />
 }
 
@@ -26,10 +27,11 @@ function SpriteBadgeInner({
   speciesId,
   speciesName = null,
   megaActive = false,
+  megaFormId = null,
   accent = 'plasma',
   size = 'md',
 }: Props) {
-  const sources = resolveSpriteSources(speciesId, megaActive)
+  const sources = resolveSpriteSources(speciesId, megaActive, megaFormId)
   const [srcIndex, setSrcIndex] = useState(0)
   const src = sources[srcIndex] ?? FALLBACK_SRC
 

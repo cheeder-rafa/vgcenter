@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Item;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class CalculateDamageServiceTest {
@@ -24,8 +25,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 move(),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false),
                 false,
                 1));
 
@@ -45,8 +46,8 @@ class CalculateDamageServiceTest {
                 defender(),
                 new MoveCommand("not-a-type", "SPECIAL", 90, false, false, false, false),
                 new FieldCommand("CLEAR", "NONE", "NONE"),
-                new SideConditionsCommand(false, false, false, false, false),
-                new SideConditionsCommand(false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false),
                 false,
                 1);
 
@@ -64,10 +65,98 @@ class CalculateDamageServiceTest {
                 "none",
                 "none",
                 "PARALYSIS",
+                Map.of(),
                 true,
                 true));
 
         assertThat(combatant.stats().speed()).isEqualTo(61);
+    }
+
+    @Test
+    void appliesRequestedStatStagesBeforeCombatantCreation() {
+        Combatant combatant = invokeToCombatant(new CombatantCommand(
+                50,
+                new StatsCommand(140, 76, 70, 158, 95, 123),
+                List.of("FIRE"),
+                "none",
+                "none",
+                "NONE",
+                Map.of("atk", 2, "spe", -1),
+                true,
+                true));
+
+        assertThat(combatant.stats().attack()).isEqualTo(152);
+        assertThat(combatant.stats().speed()).isEqualTo(82);
+    }
+
+    @Test
+    void returnsZeroDamageWhenProtectBlocksTheMove() {
+        CalculateDamageResult result = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attacker(),
+                defender(),
+                new MoveCommand("NORMAL", "PHYSICAL", 80, false, true, false, false),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, true),
+                false,
+                1));
+
+        assertThat(result.rolls()).containsOnly(0);
+        assertThat(result.koChance()).isEqualTo(new KoChanceResult("no 5HKO", 0.0d, 5));
+    }
+
+    @Test
+    void unseenFistBypassesProtectForQuarterDamageOnContactMoves() {
+        CalculateDamageResult unprotected = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attackerWithAbility("unseen-fist"),
+                defender(),
+                new MoveCommand("NORMAL", "PHYSICAL", 80, false, true, false, false),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                false,
+                1));
+        CalculateDamageResult protectedResult = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attackerWithAbility("unseen-fist"),
+                defender(),
+                new MoveCommand("NORMAL", "PHYSICAL", 80, false, true, false, false),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, true),
+                false,
+                1));
+
+        assertThat(protectedResult.rolls()[0]).isEqualTo(unprotected.rolls()[0] / 4);
+        assertThat(protectedResult.rolls()[15]).isEqualTo(unprotected.rolls()[15] / 4);
+    }
+
+    @Test
+    void piercingDrillIgnoresProtectCompletely() {
+        CalculateDamageResult unprotected = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attackerWithAbility("piercing-drill"),
+                defender(),
+                move(),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                false,
+                1));
+        CalculateDamageResult protectedResult = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attackerWithAbility("piercing-drill"),
+                defender(),
+                move(),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, true),
+                false,
+                1));
+
+        assertThat(protectedResult.rolls()).containsExactly(unprotected.rolls());
     }
 
     @Test
@@ -136,7 +225,15 @@ class CalculateDamageServiceTest {
 
     private static CombatantCommand attacker() {
         return new CombatantCommand(
-                50, new StatsCommand(140, 76, 70, 158, 95, 123), List.of("FIRE"), "none", "none", "NONE", true, true);
+                50,
+                new StatsCommand(140, 76, 70, 158, 95, 123),
+                List.of("FIRE"),
+                "none",
+                "none",
+                "NONE",
+                Map.of(),
+                true,
+                true);
     }
 
     private static CombatantCommand defender() {
@@ -147,6 +244,20 @@ class CalculateDamageServiceTest {
                 "none",
                 "none",
                 "NONE",
+                Map.of(),
+                true,
+                true);
+    }
+
+    private static CombatantCommand attackerWithAbility(String abilityId) {
+        return new CombatantCommand(
+                50,
+                new StatsCommand(140, 76, 70, 158, 95, 123),
+                List.of("FIRE"),
+                abilityId,
+                "none",
+                "NONE",
+                Map.of(),
                 true,
                 true);
     }

@@ -1,9 +1,10 @@
 import { useMemo, type KeyboardEvent } from 'react'
 
-import type { CalculatorSide } from '../store/useCalculatorStore'
+import { useCalculatorStore, type CalculatorSide } from '../store/useCalculatorStore'
+import { useToastStore } from '../store/useToastStore'
 import type { DamageResult } from '../types/api'
 import { copyDamageReport } from './copyDamageReport'
-import { formatReadoutText } from './formatReadoutText'
+import { formatReadoutText, formatSummaryText } from './formatReadoutText'
 
 type Props = {
   focusedSide: CalculatorSide
@@ -28,18 +29,37 @@ export function DetailedResult({
 }: Props) {
   const attackerLabel = focusedSide === 'attacker' ? attackerName : defenderName
   const defenderLabel = focusedSide === 'attacker' ? defenderName : attackerName
+  const attackingCombatant = useCalculatorStore((state) => state[focusedSide])
+  const defendingSide = useCalculatorStore((state) =>
+    focusedSide === 'attacker' ? state.defenderSide : state.attackerSide,
+  )
+  const moveId = useCalculatorStore(
+    (state) => state[focusedSide].moves[focusedIndex]?.moveId ?? null,
+  )
+  const move = useCalculatorStore((state) =>
+    moveId === null
+      ? null
+      : state.moveCatalog.find((entry) => entry.id === moveId) ?? null,
+  )
+  const throughProtect =
+    result !== null &&
+    result.max > 0 &&
+    defendingSide.protect &&
+    (attackingCombatant.abilityId === 'piercing-drill' ||
+      (attackingCombatant.abilityId === 'unseen-fist' && move?.contact === true))
 
   const copyText = useMemo(
     () =>
       result === null
         ? null
-        : formatReadoutText({
+        : formatSummaryText({
             attackerName: attackerLabel,
             defenderName: defenderLabel,
             moveName,
             result,
+            throughProtect,
           }),
-    [attackerLabel, defenderLabel, moveName, result],
+    [attackerLabel, defenderLabel, moveName, result, throughProtect],
   )
 
   async function handleCopy() {
@@ -48,6 +68,7 @@ export function DetailedResult({
     }
 
     await copyDamageReport(copyText)
+    useToastStore.getState().push('Copied to clipboard')
   }
 
   const buttonProps =
@@ -104,16 +125,7 @@ export function DetailedResult({
                   : 'text-arena-cyan'
               }`}
             >
-              {focusedSide === 'attacker' ? 'OFFENSE' : 'COUNTER'}
-            </span>
-            <span className="arena-chip text-[0.62rem] tracking-[0.2em] text-arena-violet/90">
-              {status === 'loading'
-                ? 'RUNNING'
-                : status === 'error'
-                  ? 'ERROR'
-                  : result !== null
-                    ? 'LIVE'
-                    : 'STANDBY'}
+              ATTACKER
             </span>
           </div>
         </header>
@@ -128,6 +140,7 @@ export function DetailedResult({
             defenderName={defenderLabel}
             moveName={moveName}
             result={result}
+            throughProtect={throughProtect}
           />
         )}
       </div>
@@ -163,17 +176,20 @@ function LiveBlock({
   defenderName,
   moveName,
   result,
+  throughProtect,
 }: {
   attackerName: string | null
   defenderName: string | null
   moveName: string | null
   result: DamageResult
+  throughProtect: boolean
 }) {
   const readout = formatReadoutText({
     attackerName,
     defenderName,
     moveName,
     result,
+    throughProtect,
   })
   const [summary, rolls] = readout.split('\n')
 

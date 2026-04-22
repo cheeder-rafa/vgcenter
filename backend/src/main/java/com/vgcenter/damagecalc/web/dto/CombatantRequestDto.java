@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.Map;
 
 public record CombatantRequestDto(
         @Min(1) @Max(100) int level,
@@ -16,5 +17,6 @@ public record CombatantRequestDto(
         String abilityId,
         String itemId,
         @NotBlank String status,
+        Map<@NotBlank String, @NotNull @Min(-6) @Max(6) Integer> stages,
         boolean grounded,
         boolean fullHp) {}

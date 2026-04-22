@@ -5,6 +5,7 @@ type ReadoutContext = {
   defenderName: string | null
   moveName: string | null
   result: DamageResult
+  throughProtect?: boolean
 }
 
 export function formatReadoutText({
@@ -12,15 +13,36 @@ export function formatReadoutText({
   defenderName,
   moveName,
   result,
+  throughProtect = false,
+}: ReadoutContext): string {
+  const summary = formatSummaryText({
+    attackerName,
+    defenderName,
+    moveName,
+    result,
+    throughProtect,
+  })
+  return `${summary}\n${formatRollsText(result)}`
+}
+
+export function formatSummaryText({
+  attackerName,
+  defenderName,
+  moveName,
+  result,
+  throughProtect = false,
 }: ReadoutContext): string {
   const attacker = attackerName ?? '—'
   const defender = defenderName ?? '—'
   const move = moveName ?? '—'
+  const defenderSuffix = throughProtect ? ' through Protect' : ''
   const percentRange = `${result.minPct.toFixed(1)} - ${result.maxPct.toFixed(1)}%`
   const koChanceText = formatKoChance(result)
-  const summary = `${attacker} ${move} vs. ${defender}: ${result.min}-${result.max} (${percentRange}) -- ${koChanceText}`
-  const rolls = `(${result.rolls.join(', ')})`
-  return `${summary}\n${rolls}`
+  return `${attacker} ${move} vs. ${defender}${defenderSuffix}: ${result.min}-${result.max} (${percentRange}) -- ${koChanceText}`
+}
+
+export function formatRollsText(result: DamageResult): string {
+  return `(${result.rolls.join(', ')})`
 }
 
 function formatKoChance(result: DamageResult): string {

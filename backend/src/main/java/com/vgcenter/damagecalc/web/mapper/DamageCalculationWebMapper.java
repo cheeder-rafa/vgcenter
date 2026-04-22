@@ -25,6 +25,7 @@ public class DamageCalculationWebMapper {
                         request.attacker().abilityId(),
                         request.attacker().itemId(),
                         request.attacker().status(),
+                        request.attacker().stages(),
                         request.attacker().grounded(),
                         request.attacker().fullHp()),
                 new CombatantCommand(
@@ -34,6 +35,7 @@ public class DamageCalculationWebMapper {
                         request.defender().abilityId(),
                         request.defender().itemId(),
                         request.defender().status(),
+                        request.defender().stages(),
                         request.defender().grounded(),
                         request.defender().fullHp()),
                 new MoveCommand(
@@ -53,13 +55,15 @@ public class DamageCalculationWebMapper {
                         request.attackerSide().lightScreen(),
                         request.attackerSide().auroraVeil(),
                         request.attackerSide().friendGuard(),
-                        request.attackerSide().helpingHand()),
+                        request.attackerSide().helpingHand(),
+                        request.attackerSide().protect()),
                 new SideConditionsCommand(
                         request.defenderSide().reflect(),
                         request.defenderSide().lightScreen(),
                         request.defenderSide().auroraVeil(),
                         request.defenderSide().friendGuard(),
-                        request.defenderSide().helpingHand()),
+                        request.defenderSide().helpingHand(),
+                        request.defenderSide().protect()),
                 request.criticalHit(),
                 request.targets());
     }

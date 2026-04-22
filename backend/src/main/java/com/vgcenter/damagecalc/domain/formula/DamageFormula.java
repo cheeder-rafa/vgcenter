@@ -162,6 +162,7 @@ public final class DamageFormula {
 
     private List<Modifier> otherModifiers() {
         return List.of(
+                new ProtectModifier(),
                 new TerrainModifier(),
                 new HelpingHandModifier(),
                 new ScreenModifier(),
@@ -169,6 +170,26 @@ public final class DamageFormula {
                 new AttackerItemModifier(),
                 new AttackerAbilityModifier(),
                 new DefenderAbilityModifier());
+    }
+
+    private final class ProtectModifier implements Modifier {
+
+        @Override
+        public boolean applies(DamageContext context) {
+            return context.defenderSide().protect();
+        }
+
+        @Override
+        public long apply(long damage, DamageContext context) {
+            if (context.attacker().ability() == Ability.PIERCING_DRILL) {
+                return damage;
+            }
+            if (context.attacker().ability() == Ability.UNSEEN_FIST
+                    && context.move().contact()) {
+                return applyMultiplier(damage, 1, 4);
+            }
+            return 0L;
+        }
     }
 
     private long applyTerrainBoost(long damage, DamageContext context) {
@@ -287,6 +308,7 @@ public final class DamageFormula {
             return switch (context.attacker().ability()) {
                 case GUTS -> gutsAdjustment(damage, context);
                 case NEUROFORCE -> context.superEffective() ? applyMultiplier(damage, 5, 4) : damage;
+                case PIERCING_DRILL, UNSEEN_FIST -> damage;
                 case SNIPER -> context.criticalHit() ? applyMultiplier(damage, 3, 2) : damage;
                 case TINTED_LENS -> context.resisted() ? applyMultiplier(damage, 2, 1) : damage;
                 case NONE, ADAPTABILITY, FILTER, FLUFFY, MULTISCALE, SOLID_ROCK -> damage;
@@ -315,7 +337,7 @@ public final class DamageFormula {
                 case FILTER, SOLID_ROCK -> context.superEffective() ? applyMultiplier(damage, 3, 4) : damage;
                 case FLUFFY -> fluffyAdjustment(damage, context);
                 case MULTISCALE -> context.defender().fullHp() ? applyMultiplier(damage, 1, 2) : damage;
-                case NONE, ADAPTABILITY, GUTS, NEUROFORCE, SNIPER, TINTED_LENS -> damage;
+                case NONE, ADAPTABILITY, GUTS, NEUROFORCE, PIERCING_DRILL, SNIPER, TINTED_LENS, UNSEEN_FIST -> damage;
             };
         }
 

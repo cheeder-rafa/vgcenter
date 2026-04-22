@@ -6,10 +6,7 @@ export type StatusCondition =
   | 'NONE'
   | 'BURN'
   | 'POISON'
-  | 'BADLY_POISONED'
   | 'PARALYSIS'
-  | 'SLEEP'
-  | 'FREEZE'
 
 export type Weather = 'CLEAR' | 'SUN' | 'RAIN' | 'SAND' | 'SNOW'
 export type Terrain = 'NONE' | 'GRASSY' | 'ELECTRIC' | 'MISTY' | 'PSYCHIC'
@@ -28,6 +25,14 @@ export type Stats = {
 
 export type StatsRequest = Stats
 
+export type StatStages = {
+  atk: number
+  def: number
+  spa: number
+  spd: number
+  spe: number
+}
+
 export type CombatantRequest = {
   level: number
   stats: StatsRequest
@@ -35,6 +40,7 @@ export type CombatantRequest = {
   abilityId: string | null
   itemId: string | null
   status: StatusCondition
+  stages: StatStages
   grounded: boolean
   fullHp: boolean
 }
@@ -61,6 +67,7 @@ export type SideConditions = {
   auroraVeil: boolean
   friendGuard: boolean
   helpingHand: boolean
+  protect: boolean
 }
 
 export type DamageCalculationRequest = {
@@ -136,6 +143,7 @@ export type CombatantBuild = {
   speciesId: string | null
   natureId: string
   sp: Spread
+  stages: StatStages
   abilityId: string | null
   itemId: string | null
   status: StatusCondition
