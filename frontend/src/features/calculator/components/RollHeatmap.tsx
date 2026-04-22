@@ -212,7 +212,9 @@ export function RollHeatmap({
 
       <div className="flex items-center justify-between font-mono text-[0.6rem] text-white/38">
         <span>{minRoll ?? '—'}</span>
-        <span className="text-white/22">{hpLabel}</span>
+        <span className="text-white/22" data-testid="heatmap-hp-label">
+          {hpLabel}
+        </span>
         <span>{maxRoll ?? '—'}</span>
       </div>
     </div>
