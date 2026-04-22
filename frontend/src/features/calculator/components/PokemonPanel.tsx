@@ -64,13 +64,13 @@ export function PokemonPanel({
     heading: useId(),
   }
 
-  const accent: 'plasma' | 'cyan' = side === 'attacker' ? 'plasma' : 'cyan'
+  const isAttacking = side === focusedSide
+  const accent: 'plasma' | 'cyan' = isAttacking ? 'plasma' : 'cyan'
   const panelVariant =
-    side === 'attacker' ? 'arena-panel--plasma' : 'arena-panel--cyan'
-  const accentText =
-    side === 'attacker' ? 'text-arena-plasma' : 'text-arena-cyan'
+    isAttacking ? 'arena-panel--plasma' : 'arena-panel--cyan'
+  const accentText = isAttacking ? 'text-arena-plasma' : 'text-arena-cyan'
   const pulseColor =
-    side === 'attacker'
+    isAttacking
       ? 'bg-arena-plasma shadow-[0_0_14px_rgba(255,43,142,0.9)]'
       : 'bg-arena-cyan shadow-[0_0_14px_rgba(34,211,238,0.9)]'
 
@@ -202,11 +202,12 @@ export function PokemonPanel({
               className={`h-2 w-2 animate-pulse-glow rounded-full ${pulseColor}`}
             />
             <p className={`arena-label ${accentText}`}>
-              {side === 'attacker' ? 'Side A · Offense' : 'Side B · Counter'}
+              {side === 'attacker' ? 'Side A -' : 'Side B -'}{' '}
+              {isAttacking ? 'Attacker' : 'Defender'}
             </p>
           </div>
           <span className={`arena-chip ${accentText}`}>
-            {side === 'attacker' ? 'STRIKE' : 'SHIELD'}
+            {isAttacking ? 'ATTACKER' : 'DEFENDER'}
           </span>
         </header>
 
@@ -215,6 +216,7 @@ export function PokemonPanel({
             speciesId={combatant.speciesId}
             speciesName={speciesName}
             megaActive={combatant.megaActive}
+            megaFormId={combatant.megaFormId}
             accent={accent}
             size="lg"
           />
@@ -370,8 +372,9 @@ export function PokemonPanel({
           </div>
         </div>
 
-        {speciesEntry?.megaForms.length ? (
-          <div className="flex flex-col gap-1.5 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
+        <div className="min-h-[56px]">
+          {speciesEntry?.megaForms.length ? (
+            <div className="flex flex-col gap-1.5 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
             <label
               htmlFor={ids.mega}
               className={`flex items-center gap-3 transition ${
@@ -413,18 +416,21 @@ export function PokemonPanel({
                 </select>
               </div>
             ) : null}
-          </div>
-        ) : null}
+            </div>
+          ) : null}
+        </div>
 
         <div className="arena-divider" />
 
         <StatTable
           sp={combatant.sp}
+          stages={combatant.stages}
           baseStats={combatant.baseStats}
           finalStats={combatant.finalStats}
           status={combatant.status}
           accent={accent}
           onSpChange={(patch) => setCombatant({ sp: patch, finalStats: null })}
+          onStageChange={(patch) => setCombatant({ stages: patch })}
         />
 
         <div className="arena-divider" />
