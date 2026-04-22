@@ -85,6 +85,25 @@ class StatsTest {
     }
 
     @Test
+    void appliesPositiveStatStages() {
+        assertThat(Stats.applyStage(100, 2)).isEqualTo(200);
+        assertThat(Stats.applyStage(100, 1)).isEqualTo(150);
+    }
+
+    @Test
+    void appliesNegativeStatStages() {
+        assertThat(Stats.applyStage(100, -1)).isEqualTo(66);
+        assertThat(Stats.applyStage(100, -6)).isEqualTo(25);
+    }
+
+    @Test
+    void rejectsStagesOutsideCompetitiveBounds() {
+        assertThatThrownBy(() -> Stats.applyStage(100, 7))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("between -6 and 6");
+    }
+
+    @Test
     void natureDoesNotModifyHp() {
         assertThat(Nature.ADAMANT.applyTo(Stat.HP, 173)).isEqualTo(173);
     }
