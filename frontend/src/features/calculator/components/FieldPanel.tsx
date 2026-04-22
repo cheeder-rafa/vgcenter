@@ -86,11 +86,11 @@ export function FieldPanel({
 
   return (
     <article
-      className="arena-panel arena-panel--ember p-4"
+      className="arena-panel arena-panel--ember p-3 sm:p-4"
       data-testid="field-panel"
     >
       <div className="relative z-10 space-y-4">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 animate-pulse-glow rounded-full bg-arena-ember shadow-[0_0_14px_rgba(255,122,26,0.9)]" />
             <p className="arena-label text-arena-ember">Field</p>
@@ -108,7 +108,7 @@ export function FieldPanel({
           Modifiers
         </h2>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
           <Select
             id={ids.weather}
             label="Weather"
@@ -160,62 +160,66 @@ export function FieldPanel({
 
         <div className="space-y-3">
           <p className="arena-label text-arena-cyan">Defender Side</p>
-          <ToggleRow
-            id={ids.reflect}
-            label="Reflect"
-            checked={defendingConditions.reflect}
-            onChange={(v) => setDefendingConditions({ reflect: v })}
-          />
-          <ToggleRow
-            id={ids.lightScreen}
-            label="Light Screen"
-            checked={defendingConditions.lightScreen}
-            onChange={(v) => setDefendingConditions({ lightScreen: v })}
-          />
-          <ToggleRow
-            id={ids.auroraVeil}
-            label="Aurora Veil"
-            checked={defendingConditions.auroraVeil}
-            onChange={(v) => setDefendingConditions({ auroraVeil: v })}
-          />
-          <ToggleRow
-            id={ids.friendGuard}
-            label="Friend Guard"
-            checked={defendingConditions.friendGuard}
-            onChange={(v) => setDefendingConditions({ friendGuard: v })}
-          />
-          <ToggleRow
-            id={ids.defendingTailwind}
-            label="Tailwind"
-            ariaLabel="Defender Tailwind"
-            checked={defendingConditions.tailwind}
-            onChange={(v) => setDefendingConditions({ tailwind: v })}
-          />
-          <ToggleRow
-            id={ids.protect}
-            label="Protect"
-            checked={defendingConditions.protect}
-            onChange={(v) => setDefendingConditions({ protect: v })}
-          />
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+            <ToggleRow
+              id={ids.reflect}
+              label="Reflect"
+              checked={defendingConditions.reflect}
+              onChange={(v) => setDefendingConditions({ reflect: v })}
+            />
+            <ToggleRow
+              id={ids.lightScreen}
+              label="Light Screen"
+              checked={defendingConditions.lightScreen}
+              onChange={(v) => setDefendingConditions({ lightScreen: v })}
+            />
+            <ToggleRow
+              id={ids.auroraVeil}
+              label="Aurora Veil"
+              checked={defendingConditions.auroraVeil}
+              onChange={(v) => setDefendingConditions({ auroraVeil: v })}
+            />
+            <ToggleRow
+              id={ids.friendGuard}
+              label="Friend Guard"
+              checked={defendingConditions.friendGuard}
+              onChange={(v) => setDefendingConditions({ friendGuard: v })}
+            />
+            <ToggleRow
+              id={ids.defendingTailwind}
+              label="Tailwind"
+              ariaLabel="Defender Tailwind"
+              checked={defendingConditions.tailwind}
+              onChange={(v) => setDefendingConditions({ tailwind: v })}
+            />
+            <ToggleRow
+              id={ids.protect}
+              label="Protect"
+              checked={defendingConditions.protect}
+              onChange={(v) => setDefendingConditions({ protect: v })}
+            />
+          </div>
         </div>
 
         <div className="arena-divider" />
 
         <div className="space-y-3">
           <p className="arena-label text-arena-plasma">Attacker Side</p>
-          <ToggleRow
-            id={ids.helpingHand}
-            label="Helping Hand"
-            checked={attackingConditions.helpingHand}
-            onChange={(v) => setAttackingConditions({ helpingHand: v })}
-          />
-          <ToggleRow
-            id={ids.attackingTailwind}
-            label="Tailwind"
-            ariaLabel="Attacker Tailwind"
-            checked={attackingConditions.tailwind}
-            onChange={(v) => setAttackingConditions({ tailwind: v })}
-          />
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+            <ToggleRow
+              id={ids.helpingHand}
+              label="Helping Hand"
+              checked={attackingConditions.helpingHand}
+              onChange={(v) => setAttackingConditions({ helpingHand: v })}
+            />
+            <ToggleRow
+              id={ids.attackingTailwind}
+              label="Tailwind"
+              ariaLabel="Attacker Tailwind"
+              checked={attackingConditions.tailwind}
+              onChange={(v) => setAttackingConditions({ tailwind: v })}
+            />
+          </div>
         </div>
       </div>
     </article>
@@ -268,7 +272,7 @@ function ToggleRow({
   return (
     <label
       htmlFor={id}
-      className="flex items-center gap-3 rounded-sm border border-white/10 bg-white/5 px-3 py-2 transition hover:border-arena-violet/50"
+      className="flex min-h-11 items-center gap-3 rounded-sm border border-white/10 bg-white/5 px-3 py-2.5 transition hover:border-arena-violet/50"
     >
       <input
         id={id}

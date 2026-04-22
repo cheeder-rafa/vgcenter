@@ -166,4 +166,14 @@ describe('SavedPokemonRail', () => {
     expect(button).toHaveTextContent(/^save$/i)
     expect(button.className).toContain('whitespace-nowrap')
   })
+
+  it('keeps saved rails visible as a horizontal tray on mobile', () => {
+    render(<CalculatorPage />)
+
+    const attackerRail = screen.getByLabelText(/attacker saved rail/i)
+
+    expect(attackerRail.className).not.toContain('hidden')
+    expect(attackerRail.className).toContain('flex')
+    expect(attackerRail.className).toContain('gap-2')
+  })
 })

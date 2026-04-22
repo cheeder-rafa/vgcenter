@@ -231,4 +231,22 @@ describe('StatTable', () => {
       'text-red-400',
     )
   })
+
+  it('uses a horizontal overflow wrapper instead of forcing the page width', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const table = screen.getByRole('table')
+    expect(table.className).toContain('overflow-x-auto')
+    expect(table.firstElementChild?.className).toContain('min-w-[34rem]')
+  })
 })

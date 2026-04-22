@@ -62,6 +62,49 @@ describe('DualMoveReadout', () => {
     expect(screen.getByText('64.6–75.4%')).toBeInTheDocument()
     expect(screen.getByText('Shadow Sneak')).toBeInTheDocument()
     expect(screen.getByText('Iron Head')).toBeInTheDocument()
+    const article = screen.getByText(/damage overview/i).closest('article')
+    expect(article?.className).toContain('px-2.5')
+    expect(article?.textContent).toContain(
+      'Damage Overview',
+    )
+  })
+
+  it('keeps the overview stacked until desktop, then aligns to editor columns', () => {
+    render(
+      <DualMoveReadout
+        attackerName="Aegislash-Shield"
+        defenderName="Aegislash-Shield"
+        attackerMoves={ATTACKER_MOVES}
+        defenderMoves={DEFENDER_MOVES}
+      />,
+    )
+
+    const row = screen.getByTestId('damage-overview-columns')
+    expect(row.className).toContain('grid')
+    expect(row.className).toContain(
+      'xl:grid-cols-[minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)]',
+    )
+  })
+
+  it('renders a dedicated focus lane for desktop alignment and selected-roll detail', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <DualMoveReadout
+        attackerName="Aegislash-Shield"
+        defenderName="Aegislash-Shield"
+        attackerMoves={ATTACKER_MOVES}
+        defenderMoves={DEFENDER_MOVES}
+      />,
+    )
+
+    const focusLane = screen.getByTestId('overview-focus-lane')
+
+    expect(focusLane).toHaveTextContent(/select a move/i)
+
+    await user.click(screen.getByTestId('overview-move-attacker-0'))
+
+    expect(focusLane).toContainElement(screen.getByTestId('move-detail-panel'))
   })
 
   it('does not show roll detail before any move is clicked', () => {

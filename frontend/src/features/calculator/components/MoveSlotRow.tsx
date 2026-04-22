@@ -76,17 +76,17 @@ export function MoveSlotRow({
         }
       }}
       aria-pressed={focused}
-      className={`flex cursor-pointer flex-col gap-1.5 rounded-sm border bg-white/[0.04] px-3 py-2 transition hover:border-white/25 ${accentBorder} ${accentGlow}`}
+      className={`flex cursor-pointer flex-col gap-1.5 rounded-sm border bg-white/[0.04] px-2.5 py-2 transition hover:border-white/25 sm:px-3 ${accentBorder} ${accentGlow}`}
       data-testid={`move-slot-${index}`}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_8ch_10ch] items-center gap-3">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1.5 sm:grid-cols-[auto_minmax(0,1fr)_8ch_10ch] sm:gap-3">
         <span className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/55">
           M{index + 1}
         </span>
         <select
           id={selectId}
           aria-label={`Move slot ${index + 1}`}
-          className="arena-select h-9 py-1"
+          className="arena-select col-span-full h-10 py-2 sm:col-auto sm:h-9 sm:py-1"
           value={moveId ?? ''}
           onClick={(event) => event.stopPropagation()}
           onChange={(event) => {
@@ -104,7 +104,7 @@ export function MoveSlotRow({
           ))}
         </select>
         <span
-          className={`arena-chip w-[8ch] justify-center overflow-hidden whitespace-nowrap text-[0.58rem] tracking-tight ${getTypeChipClasses(
+          className={`arena-chip w-auto min-w-[6ch] justify-center overflow-hidden whitespace-nowrap text-[0.58rem] tracking-tight sm:w-[8ch] ${getTypeChipClasses(
             selectedMove?.type ?? null,
           )}`}
           data-testid={`move-slot-type-${index}`}
@@ -112,7 +112,7 @@ export function MoveSlotRow({
           {selectedMove?.type ?? '—'}
         </span>
         <span
-          className="min-w-[10ch] whitespace-nowrap text-right font-mono text-xs text-white/80"
+          className="col-start-2 whitespace-nowrap text-right font-mono text-xs text-white/80 sm:col-auto sm:min-w-[10ch]"
           data-testid={`move-slot-readout-${index}`}
         >
           {readout}
