@@ -7,7 +7,7 @@ import {
   fetchNatures,
   fetchPokedex,
 } from '../features/calculator/api/datasetApi'
-import { DetailedResult } from '../features/calculator/components/DetailedResult'
+import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { PokemonPanel } from '../features/calculator/components/PokemonPanel'
@@ -40,7 +40,6 @@ export function CalculatorPage() {
   const setDefender = useCalculatorStore((s) => s.setDefender)
   const setMoveCatalog = useCalculatorStore((s) => s.setMoveCatalog)
   const results = useCalculatorStore((s) => s.results)
-  const resultsStatus = useCalculatorStore((s) => s.resultsStatus)
   const importSavedTeam = useSavedTeamStore((s) => s.importTeam)
 
   const [pokedex, setPokedex] = useState<PokedexEntry[]>([])
@@ -90,16 +89,8 @@ export function CalculatorPage() {
   const attackerName = attackerEntry?.name ?? null
   const defenderName = defenderEntry?.name ?? null
 
-  const focusedResult =
-    focusedSide === 'attacker'
-      ? (results.attackerMoves[focusedMoveIndex] ?? null)
-      : (results.defenderMoves[focusedMoveIndex] ?? null)
-
-  const focusedMoveName = useMoveNameForSlot(
-    focusedSide,
-    focusedMoveIndex,
-    moves,
-  )
+  const attackerMoveEntries = useAllMoveEntries('attacker', moves, results.attackerMoves)
+  const defenderMoveEntries = useAllMoveEntries('defender', moves, results.defenderMoves)
 
   function handleFocusSlot(side: CalculatorSide, index: number) {
     setFocusedSide(side)
@@ -187,14 +178,11 @@ export function CalculatorPage() {
             className="lg:col-start-2 lg:col-end-5"
             data-testid="detailed-result-span"
           >
-            <DetailedResult
-              focusedSide={focusedSide}
-              focusedIndex={focusedMoveIndex}
-              result={focusedResult}
-              status={resultsStatus}
+            <DualMoveReadout
               attackerName={attackerName}
               defenderName={defenderName}
-              moveName={focusedMoveName}
+              attackerMoves={attackerMoveEntries}
+              defenderMoves={defenderMoveEntries}
             />
           </div>
         </section>
@@ -256,16 +244,21 @@ function usePokedexEntryForSide(
   return pokedex.find((entry) => entry.id === speciesId) ?? null
 }
 
-function useMoveNameForSlot(
+function useAllMoveEntries(
   side: CalculatorSide,
-  index: number,
   moves: MoveDefinition[],
-): string | null {
-  const moveId = useCalculatorStore((s) => s[side].moves[index]?.moveId ?? null)
-  if (moveId === null) {
-    return null
-  }
-  return moves.find((entry) => entry.id === moveId)?.name ?? moveId
+  results: (ReturnType<typeof useCalculatorStore.getState>['results']['attackerMoves'][number])[],
+): { moveName: string | null; moveType: string | null; result: import('../features/calculator/types/api').DamageResult | null }[] {
+  const slots = useCalculatorStore((s) => s[side].moves)
+  return slots.map((slot, i) => {
+    const moveId = slot.moveId
+    const move = moveId !== null ? moves.find((m) => m.id === moveId) ?? null : null
+    return {
+      moveName: move?.name ?? null,
+      moveType: move?.type ?? null,
+      result: results[i] ?? null,
+    }
+  })
 }
 
 function CompactHeader({
