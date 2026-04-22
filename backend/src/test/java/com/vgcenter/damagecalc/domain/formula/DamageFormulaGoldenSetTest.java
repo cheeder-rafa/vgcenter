@@ -291,7 +291,7 @@ class DamageFormulaGoldenSetTest {
                                 1),
                         scaled(PHYSICAL_STAB, 1, 4)),
                 Arguments.of(
-                        "piercing drill ignores protect",
+                        "piercing drill pierces protect for quarter damage",
                         context(
                                 specialAttacker.withAbility(Ability.PIERCING_DRILL),
                                 grassDefender,
@@ -301,7 +301,7 @@ class DamageFormulaGoldenSetTest {
                                 new SideConditions(false, false, false, false, false, true),
                                 false,
                                 1),
-                        SPECIAL_STAB),
+                        scaled(SPECIAL_STAB, 1, 4)),
                 Arguments.of(
                         "life orb boosts damage",
                         context(physicalAttacker.withItem(Item.LIFE_ORB), bulkyDefender, physicalStab),

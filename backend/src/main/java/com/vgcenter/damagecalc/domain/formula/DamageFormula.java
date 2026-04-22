@@ -182,7 +182,7 @@ public final class DamageFormula {
         @Override
         public long apply(long damage, DamageContext context) {
             if (context.attacker().ability() == Ability.PIERCING_DRILL) {
-                return damage;
+                return applyMultiplier(damage, 1, 4);
             }
             if (context.attacker().ability() == Ability.UNSEEN_FIST
                     && context.move().contact()) {
