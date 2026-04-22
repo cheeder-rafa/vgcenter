@@ -164,7 +164,7 @@ function StatRow({
         step={1}
         value={sp}
         aria-label={`${row.label} SP`}
-        className="arena-input h-10 w-full max-w-[100px] px-2 py-1 text-sm"
+        className="arena-input h-10 w-full max-w-[80px] px-1.5 py-1 text-sm"
         onChange={(event) => {
           const parsed = Number.parseInt(event.target.value, 10)
           onChange(Number.isFinite(parsed) ? parsed : 0)
@@ -223,7 +223,7 @@ function StageControl({
     >
       <button
         type="button"
-        className="arena-chip min-h-8 min-w-8 justify-center px-1.5 text-[0.72rem] text-white/80"
+        className="arena-chip min-h-7 min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
         aria-label={`${label} stage down`}
         onClick={() => onChange(Math.max(-6, value - 1))}
       >
@@ -237,7 +237,7 @@ function StageControl({
       </span>
       <button
         type="button"
-        className="arena-chip min-h-8 min-w-8 justify-center px-1.5 text-[0.72rem] text-white/80"
+        className="arena-chip min-h-7 min-w-7 justify-center px-1.5 text-[0.72rem] text-white/80"
         aria-label={`${label} stage up`}
         onClick={() => onChange(Math.min(6, value + 1))}
       >

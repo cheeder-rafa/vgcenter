@@ -249,4 +249,46 @@ describe('StatTable', () => {
     expect(table.className).toContain('overflow-x-auto')
     expect(table.firstElementChild?.className).toContain('min-w-[34rem]')
   })
+
+  it('SP input has a compact max-w class no wider than max-w-[80px]', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const spInput = screen.getByLabelText(/HP SP/i)
+    expect(spInput.className).not.toContain('max-w-[100px]')
+    expect(spInput.className).toMatch(/max-w-\[(?:6\d|7\d|80)px\]/)
+  })
+
+  it('stage control buttons use min-w-7, not the wider min-w-8', () => {
+    render(
+      <StatTable
+        sp={ZERO_SPREAD}
+        stages={ZERO_STAGES}
+        baseStats={BASE}
+        finalStats={FINAL}
+        status="NONE"
+        onSpChange={() => {}}
+        onStageChange={() => {}}
+      />,
+    )
+
+    const stageControls = document
+      .querySelectorAll('[data-testid^="stage-control-"]')
+    const buttons = Array.from(stageControls).flatMap((cell) =>
+      Array.from(cell.querySelectorAll('button')),
+    )
+    expect(buttons.length).toBeGreaterThan(0)
+    for (const btn of buttons) {
+      expect(btn.className).not.toContain('min-w-8')
+    }
+  })
 })
