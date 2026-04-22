@@ -134,7 +134,7 @@ class CalculateDamageServiceTest {
     }
 
     @Test
-    void piercingDrillIgnoresProtectCompletely() {
+    void piercingDrillBypassesProtectForQuarterDamage() {
         CalculateDamageResult unprotected = service.calculate(new CalculateDamageCommand(
                 "M-A",
                 attackerWithAbility("piercing-drill"),
@@ -156,7 +156,8 @@ class CalculateDamageServiceTest {
                 false,
                 1));
 
-        assertThat(protectedResult.rolls()).containsExactly(unprotected.rolls());
+        assertThat(protectedResult.rolls()[0]).isEqualTo(unprotected.rolls()[0] / 4);
+        assertThat(protectedResult.rolls()[15]).isEqualTo(unprotected.rolls()[15] / 4);
     }
 
     @Test
