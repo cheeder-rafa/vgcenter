@@ -113,6 +113,18 @@ Endpoints:
 
 The frontend container serves the built SPA through nginx and proxies `/api/*` traffic to the backend service inside Compose.
 
+## Public Beta Hosting
+
+For a simple hosted beta where friends can try the calculator and send feedback:
+
+- deploy the backend as a Render web service
+- deploy the frontend as a Render static site
+- set `VITE_API_BASE_URL` for the frontend build
+- set `VGCENTER_CORS_ALLOWED_ORIGINS` on the backend
+- set `VITE_FEEDBACK_URL` to your Tally or Google Form
+
+Detailed steps live in [docs/hosting-beta.md](docs/hosting-beta.md).
+
 ## API Surface
 
 - `POST /api/v1/damage/calculate`

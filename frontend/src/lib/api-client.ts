@@ -1,12 +1,11 @@
 import type { ProblemDetails } from '../features/calculator/types/api'
-
-export const apiBaseUrl = '/api/v1'
+import { getApiBaseUrl } from './app-config'
 
 export async function requestJson<TResponse>(
   path: string,
   init: RequestInit = {},
 ): Promise<TResponse> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...init,
     headers: {
       Accept: 'application/json',
