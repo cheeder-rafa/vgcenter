@@ -1,10 +1,11 @@
 import { useId } from 'react'
 
+import type { CalculatorSide } from '../store/useCalculatorStore'
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import { ROOM_OPTIONS, TERRAIN_OPTIONS, WEATHER_OPTIONS } from './shared'
 import type { Room, Terrain, Weather } from '../types/api'
 
-export function FieldPanel() {
+export function FieldPanel({ focusedSide }: { focusedSide: CalculatorSide }) {
   const field = useCalculatorStore((s) => s.field)
   const targets = useCalculatorStore((s) => s.targets)
   const attackerSide = useCalculatorStore((s) => s.attackerSide)
@@ -24,9 +25,18 @@ export function FieldPanel() {
     auroraVeil: useId(),
     helpingHand: useId(),
     friendGuard: useId(),
+    protect: useId(),
   }
 
   const spread = targets > 1
+  const attackingConditions =
+    focusedSide === 'attacker' ? attackerSide : defenderSide
+  const defendingConditions =
+    focusedSide === 'attacker' ? defenderSide : attackerSide
+  const setAttackingConditions =
+    focusedSide === 'attacker' ? setAttackerSide : setDefenderSide
+  const setDefendingConditions =
+    focusedSide === 'attacker' ? setDefenderSide : setAttackerSide
 
   return (
     <article
@@ -37,13 +47,13 @@ export function FieldPanel() {
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="h-2 w-2 animate-pulse-glow rounded-full bg-arena-ember shadow-[0_0_14px_rgba(255,122,26,0.9)]" />
-            <p className="arena-label text-arena-ember">Arena State · Live</p>
+            <p className="arena-label text-arena-ember">Field</p>
           </div>
           <span className="arena-chip text-arena-sun/90">BATTLE</span>
         </header>
 
         <h2 className="font-display text-2xl font-bold tracking-wide text-white">
-          Field
+          Modifiers
         </h2>
 
         <div className="grid gap-3">
@@ -101,26 +111,32 @@ export function FieldPanel() {
           <ToggleRow
             id={ids.reflect}
             label="Reflect"
-            checked={defenderSide.reflect}
-            onChange={(v) => setDefenderSide({ reflect: v })}
+            checked={defendingConditions.reflect}
+            onChange={(v) => setDefendingConditions({ reflect: v })}
           />
           <ToggleRow
             id={ids.lightScreen}
             label="Light Screen"
-            checked={defenderSide.lightScreen}
-            onChange={(v) => setDefenderSide({ lightScreen: v })}
+            checked={defendingConditions.lightScreen}
+            onChange={(v) => setDefendingConditions({ lightScreen: v })}
           />
           <ToggleRow
             id={ids.auroraVeil}
             label="Aurora Veil"
-            checked={defenderSide.auroraVeil}
-            onChange={(v) => setDefenderSide({ auroraVeil: v })}
+            checked={defendingConditions.auroraVeil}
+            onChange={(v) => setDefendingConditions({ auroraVeil: v })}
           />
           <ToggleRow
             id={ids.friendGuard}
             label="Friend Guard"
-            checked={defenderSide.friendGuard}
-            onChange={(v) => setDefenderSide({ friendGuard: v })}
+            checked={defendingConditions.friendGuard}
+            onChange={(v) => setDefendingConditions({ friendGuard: v })}
+          />
+          <ToggleRow
+            id={ids.protect}
+            label="Protect"
+            checked={defendingConditions.protect}
+            onChange={(v) => setDefendingConditions({ protect: v })}
           />
         </div>
 
@@ -131,8 +147,8 @@ export function FieldPanel() {
           <ToggleRow
             id={ids.helpingHand}
             label="Helping Hand"
-            checked={attackerSide.helpingHand}
-            onChange={(v) => setAttackerSide({ helpingHand: v })}
+            checked={attackingConditions.helpingHand}
+            onChange={(v) => setAttackingConditions({ helpingHand: v })}
           />
         </div>
       </div>

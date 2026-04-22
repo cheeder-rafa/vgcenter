@@ -1,9 +1,10 @@
 import { useMemo, type KeyboardEvent } from 'react'
 
 import type { CalculatorSide } from '../store/useCalculatorStore'
+import { useToastStore } from '../store/useToastStore'
 import type { DamageResult } from '../types/api'
 import { copyDamageReport } from './copyDamageReport'
-import { formatReadoutText } from './formatReadoutText'
+import { formatReadoutText, formatSummaryText } from './formatReadoutText'
 
 type Props = {
   focusedSide: CalculatorSide
@@ -33,7 +34,7 @@ export function DetailedResult({
     () =>
       result === null
         ? null
-        : formatReadoutText({
+        : formatSummaryText({
             attackerName: attackerLabel,
             defenderName: defenderLabel,
             moveName,
@@ -48,6 +49,7 @@ export function DetailedResult({
     }
 
     await copyDamageReport(copyText)
+    useToastStore.getState().push('Copied to clipboard')
   }
 
   const buttonProps =
@@ -104,16 +106,7 @@ export function DetailedResult({
                   : 'text-arena-cyan'
               }`}
             >
-              {focusedSide === 'attacker' ? 'OFFENSE' : 'COUNTER'}
-            </span>
-            <span className="arena-chip text-[0.62rem] tracking-[0.2em] text-arena-violet/90">
-              {status === 'loading'
-                ? 'RUNNING'
-                : status === 'error'
-                  ? 'ERROR'
-                  : result !== null
-                    ? 'LIVE'
-                    : 'STANDBY'}
+              ATTACKER
             </span>
           </div>
         </header>

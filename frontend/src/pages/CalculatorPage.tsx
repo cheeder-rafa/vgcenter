@@ -125,7 +125,7 @@ export function CalculatorPage() {
   }
 
   function handleImportTeam(side: CalculatorSide, team: ImportedPokemon[]) {
-    const [activePokemon, ...savedPokemon] = team
+    const [activePokemon] = team
     if (activePokemon === undefined) {
       return
     }
@@ -134,7 +134,7 @@ export function CalculatorPage() {
 
     importSavedTeam(
       side,
-      savedPokemon.map((pokemon) => {
+      team.map((pokemon) => {
         const entry = pokedex.find((candidate) => candidate.id === pokemon.speciesId)
         return toSavedPokemon(pokemon, entry)
       }),
@@ -216,7 +216,7 @@ export function CalculatorPage() {
             onFocusSlot={handleFocusSlot}
             onActivateSide={setFocusedSide}
           />
-          <FieldPanel />
+          <FieldPanel focusedSide={focusedSide} />
           <PokemonPanel
             side="defender"
             {...datasets}
@@ -277,6 +277,8 @@ function CompactHeader({
   onImportTeam: (side: CalculatorSide, team: ImportedPokemon[]) => void
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
 }) {
+  const activeSideLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
+
   return (
     <header
       className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2"
@@ -294,6 +296,9 @@ function CompactHeader({
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-display text-xs tracking-[0.3em] text-arena-violet">
           IMPORT ⟶
+        </span>
+        <span className="arena-chip text-arena-cyan">
+          Import Target: {activeSideLabel}
         </span>
         <ShowdownImportModal
           activeSide={activeSide}
