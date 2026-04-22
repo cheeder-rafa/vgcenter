@@ -76,4 +76,16 @@ describe('formatReadoutText', () => {
       }),
     ).toContain('— — vs. —:')
   })
+
+  it('inserts through Protect after the defender name when flagged', () => {
+    expect(
+      formatReadoutText({
+        attackerName: 'Golurk',
+        defenderName: 'Excadrill',
+        moveName: 'Giga Impact',
+        result,
+        throughProtect: true,
+      }),
+    ).toContain('Golurk Giga Impact vs. Excadrill through Protect:')
+  })
 })

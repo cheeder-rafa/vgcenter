@@ -11,9 +11,35 @@ vi.mock('../../src/features/calculator/components/copyDamageReport', () => ({
 }))
 
 import { DetailedResult } from '../../src/features/calculator/components/DetailedResult'
+import { useCalculatorStore } from '../../src/features/calculator/store/useCalculatorStore'
 
 describe('DetailedResult', () => {
   beforeEach(() => {
+    useCalculatorStore.getState().reset()
+    useCalculatorStore.getState().setMoveCatalog([
+      {
+        id: 'giga-impact',
+        name: 'Giga Impact',
+        type: 'NORMAL',
+        category: 'PHYSICAL',
+        basePower: 150,
+        spread: false,
+        contact: false,
+        doublePowerWhenUserStatused: false,
+        ignoreBurnPenaltyWhenUserStatused: false,
+      },
+      {
+        id: 'surging-strikes',
+        name: 'Surging Strikes',
+        type: 'WATER',
+        category: 'PHYSICAL',
+        basePower: 25,
+        spread: false,
+        contact: true,
+        doublePowerWhenUserStatused: false,
+        ignoreBurnPenaltyWhenUserStatused: false,
+      },
+    ])
     mocks.copyDamageReport.mockReset()
     mocks.copyDamageReport.mockResolvedValue(undefined)
   })
@@ -53,5 +79,45 @@ describe('DetailedResult', () => {
     )
     expect(screen.queryByText(/copied damage report/i)).not.toBeInTheDocument()
     expect(screen.getByText(/guaranteed 2hko/i)).toBeInTheDocument()
+  })
+
+  it('shows through Protect for protect-piercing abilities', () => {
+    useCalculatorStore.getState().setAttacker({
+      abilityId: 'piercing-drill',
+      moves: [
+        { moveId: 'giga-impact' },
+        { moveId: null },
+        { moveId: null },
+        { moveId: null },
+      ],
+    })
+    useCalculatorStore.getState().setDefenderSide({ protect: true })
+
+    render(
+      <DetailedResult
+        focusedSide="attacker"
+        focusedIndex={0}
+        status="success"
+        attackerName="Golurk"
+        defenderName="Excadrill"
+        moveName="Giga Impact"
+        result={{
+          rolls: [17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20],
+          min: 17,
+          max: 20,
+          minPct: 9.2,
+          maxPct: 10.8,
+          koChance: {
+            description: 'no 5HKO',
+            probability: 0,
+            hits: 5,
+          },
+        }}
+      />,
+    )
+
+    expect(
+      screen.getByText(/golurk giga impact vs\. excadrill through protect/i),
+    ).toBeInTheDocument()
   })
 })

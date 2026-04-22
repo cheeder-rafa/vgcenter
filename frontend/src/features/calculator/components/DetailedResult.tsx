@@ -1,6 +1,6 @@
 import { useMemo, type KeyboardEvent } from 'react'
 
-import type { CalculatorSide } from '../store/useCalculatorStore'
+import { useCalculatorStore, type CalculatorSide } from '../store/useCalculatorStore'
 import { useToastStore } from '../store/useToastStore'
 import type { DamageResult } from '../types/api'
 import { copyDamageReport } from './copyDamageReport'
@@ -29,6 +29,24 @@ export function DetailedResult({
 }: Props) {
   const attackerLabel = focusedSide === 'attacker' ? attackerName : defenderName
   const defenderLabel = focusedSide === 'attacker' ? defenderName : attackerName
+  const attackingCombatant = useCalculatorStore((state) => state[focusedSide])
+  const defendingSide = useCalculatorStore((state) =>
+    focusedSide === 'attacker' ? state.defenderSide : state.attackerSide,
+  )
+  const moveId = useCalculatorStore(
+    (state) => state[focusedSide].moves[focusedIndex]?.moveId ?? null,
+  )
+  const move = useCalculatorStore((state) =>
+    moveId === null
+      ? null
+      : state.moveCatalog.find((entry) => entry.id === moveId) ?? null,
+  )
+  const throughProtect =
+    result !== null &&
+    result.max > 0 &&
+    defendingSide.protect &&
+    (attackingCombatant.abilityId === 'piercing-drill' ||
+      (attackingCombatant.abilityId === 'unseen-fist' && move?.contact === true))
 
   const copyText = useMemo(
     () =>
@@ -39,8 +57,9 @@ export function DetailedResult({
             defenderName: defenderLabel,
             moveName,
             result,
+            throughProtect,
           }),
-    [attackerLabel, defenderLabel, moveName, result],
+    [attackerLabel, defenderLabel, moveName, result, throughProtect],
   )
 
   async function handleCopy() {
@@ -121,6 +140,7 @@ export function DetailedResult({
             defenderName={defenderLabel}
             moveName={moveName}
             result={result}
+            throughProtect={throughProtect}
           />
         )}
       </div>
@@ -156,17 +176,20 @@ function LiveBlock({
   defenderName,
   moveName,
   result,
+  throughProtect,
 }: {
   attackerName: string | null
   defenderName: string | null
   moveName: string | null
   result: DamageResult
+  throughProtect: boolean
 }) {
   const readout = formatReadoutText({
     attackerName,
     defenderName,
     moveName,
     result,
+    throughProtect,
   })
   const [summary, rolls] = readout.split('\n')
 
