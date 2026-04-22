@@ -15,6 +15,7 @@ type ReactiveCombatantInputs = Pick<
   | 'speciesId'
   | 'natureId'
   | 'sp'
+  | 'stages'
   | 'abilityId'
   | 'itemId'
   | 'status'
@@ -55,6 +56,7 @@ function selectCombatantInputs(
     speciesId: combatant.speciesId,
     natureId: combatant.natureId,
     sp: combatant.sp,
+    stages: combatant.stages,
     abilityId: combatant.abilityId,
     itemId: combatant.itemId,
     status: combatant.status,

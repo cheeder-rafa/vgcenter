@@ -709,6 +709,95 @@ describe('CalculatorPage', () => {
     ).toBeInTheDocument()
   })
 
+  it('loads low SP import values into the editor exactly as imported', async () => {
+    mocks.importShowdown.mockResolvedValue({
+      team: [
+        {
+          speciesId: 'sneasler',
+          speciesName: 'Sneasler',
+          nickname: null,
+          level: 50,
+          gender: null,
+          abilityId: 'unburden',
+          itemId: 'white-herb',
+          natureId: 'adamant',
+          sp: {
+            hp: 32,
+            attack: 1,
+            defense: 28,
+            specialAttack: 0,
+            specialDefense: 1,
+            speed: 4,
+          },
+          stats: {
+            hp: 159,
+            attack: 165,
+            defense: 84,
+            specialAttack: 54,
+            specialDefense: 101,
+            speed: 141,
+          },
+          moveIds: ['protect'],
+        },
+      ],
+    })
+    mocks.fetchPokedex.mockResolvedValue([
+      {
+        id: 'sneasler',
+        name: 'Sneasler',
+        imageUrl: '/sprites/sneasler.png',
+        types: ['FIGHTING', 'POISON'],
+        baseStats: {
+          hp: 80,
+          attack: 130,
+          defense: 60,
+          specialAttack: 40,
+          specialDefense: 80,
+          speed: 120,
+        },
+        abilityIds: ['unburden'],
+        moveIds: ['protect'],
+        megaForms: [],
+      },
+    ])
+    mocks.fetchAbilities.mockResolvedValue([{ id: 'unburden', name: 'Unburden' }])
+    mocks.fetchItems.mockResolvedValue([{ id: 'white-herb', name: 'White Herb' }])
+    mocks.fetchMoves.mockResolvedValue([{ id: 'protect', name: 'Protect' }])
+    mocks.fetchNatures.mockResolvedValue([
+      {
+        id: 'adamant',
+        name: 'Adamant',
+        increasedStat: 'ATTACK',
+        decreasedStat: 'SPECIAL_ATTACK',
+      },
+    ])
+
+    render(<CalculatorPage />)
+    const user = userEvent.setup()
+
+    await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: /import showdown/i }))
+    await user.type(screen.getByLabelText(/showdown paste/i), 'Sneasler @ White Herb')
+    await user.click(screen.getByRole('button', { name: /import team/i }))
+
+    await waitFor(() =>
+      expect(useCalculatorStore.getState().attacker).toEqual(
+        expect.objectContaining({
+          speciesId: 'sneasler',
+          sp: {
+            hp: 32,
+            atk: 1,
+            def: 28,
+            spa: 0,
+            spd: 1,
+            spe: 4,
+          },
+        }),
+      ),
+    )
+  })
+
   it('fitsWithin1080pViewportHeight', async () => {
     render(<CalculatorPage />)
 

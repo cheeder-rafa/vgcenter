@@ -359,4 +359,92 @@ describe('useReactiveDamage', () => {
       }),
     )
   })
+
+  it('recalculates damage when stat stages change', async () => {
+    mocks.calculateDamage
+      .mockResolvedValueOnce({
+        rolls: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+        min: 20,
+        max: 20,
+        minPct: 20,
+        maxPct: 20,
+        koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+      })
+      .mockResolvedValueOnce({
+        rolls: [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30],
+        min: 30,
+        max: 30,
+        minPct: 30,
+        maxPct: 30,
+        koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+      })
+
+    render(<Harness />)
+
+    act(() => {
+      const store = useCalculatorStore.getState()
+      store.setAttacker({
+        speciesId: 'charizard',
+        natureId: 'timid',
+        sp: { hp: 0, atk: 0, def: 4, spa: 32, spd: 0, spe: 32 },
+        finalStats: null,
+        moves: [
+          { moveId: 'heat-wave' },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+      store.setDefender({
+        speciesId: 'amoonguss',
+        natureId: 'bold',
+        sp: { hp: 32, atk: 0, def: 32, spa: 0, spd: 32, spe: 0 },
+        finalStats: null,
+        moves: [
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+    })
+
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
+    expect(mocks.calculateDamage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        attacker: expect.objectContaining({
+          stages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+        }),
+      }),
+    )
+
+    act(() => {
+      useCalculatorStore.getState().setAttacker({
+        stages: { atk: 1 },
+      })
+    })
+
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(2)
+    expect(mocks.calculateDamage).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        attacker: expect.objectContaining({
+          stages: { atk: 1, def: 0, spa: 0, spd: 0, spe: 0 },
+        }),
+      }),
+    )
+    expect(useCalculatorStore.getState().results.attackerMoves[0]).toEqual(
+      expect.objectContaining({
+        min: 30,
+        max: 30,
+      }),
+    )
+  })
 })
