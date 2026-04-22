@@ -45,11 +45,13 @@ export function SavedPokemonRail({
       baseStats:
         currentBuild.baseStats === null ? null : { ...currentBuild.baseStats },
       finalStats:
-        currentBuild.finalStats === null ? null : { ...currentBuild.finalStats },
+        currentBuild.finalStats === null
+          ? null
+          : { ...currentBuild.finalStats },
       types:
         currentBuild.types === null
           ? null
-          : [...currentBuild.types] as CombatantBuild['types'],
+          : ([...currentBuild.types] as CombatantBuild['types']),
       speciesName: speciesName ?? currentBuild.speciesId,
       spriteId: spriteId ?? currentBuild.speciesId,
     }

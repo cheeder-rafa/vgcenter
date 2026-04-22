@@ -18,10 +18,7 @@ type Props = {
   triggerLabel: string
   multiline?: boolean
   onImport: (value: string) => Promise<ImportedTeamResponse>
-  onImportTeam: (
-    side: 'attacker' | 'defender',
-    team: ImportedPokemon[],
-  ) => void
+  onImportTeam: (side: 'attacker' | 'defender', team: ImportedPokemon[]) => void
   onLoadPokemon: (
     side: 'attacker' | 'defender',
     pokemon: ImportedPokemon,
@@ -49,7 +46,8 @@ export function ImportTeamModal({
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [team, setTeam] = useState<ImportedPokemon[]>([])
-  const importTargetLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
+  const importTargetLabel =
+    activeSide === 'attacker' ? 'Left Side' : 'Right Side'
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

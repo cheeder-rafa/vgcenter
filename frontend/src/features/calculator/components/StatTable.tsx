@@ -1,11 +1,6 @@
 import { useId } from 'react'
 
-import type {
-  Spread,
-  StatStages,
-  Stats,
-  StatusCondition,
-} from '../types/api'
+import type { Spread, StatStages, Stats, StatusCondition } from '../types/api'
 import { MAX_SP_PER_STAT, clampSp } from './statTableUtils'
 
 type StatKey = 'hp' | 'atk' | 'def' | 'spa' | 'spd' | 'spe'
@@ -190,7 +185,11 @@ function StatRow({
           </span>
         </div>
       ) : (
-        <StageControl statKey={row.key} value={stage} onChange={onStageChange} />
+        <StageControl
+          statKey={row.key}
+          value={stage}
+          onChange={onStageChange}
+        />
       )}
       <span
         role="cell"

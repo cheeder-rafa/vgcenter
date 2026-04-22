@@ -2,11 +2,7 @@ export type Regulation = 'M-A'
 
 export type MoveCategory = 'PHYSICAL' | 'SPECIAL' | 'STATUS'
 
-export type StatusCondition =
-  | 'NONE'
-  | 'BURN'
-  | 'POISON'
-  | 'PARALYSIS'
+export type StatusCondition = 'NONE' | 'BURN' | 'POISON' | 'PARALYSIS'
 
 export type Weather = 'CLEAR' | 'SUN' | 'RAIN' | 'SAND' | 'SNOW'
 export type Terrain = 'NONE' | 'GRASSY' | 'ELECTRIC' | 'MISTY' | 'PSYCHIC'

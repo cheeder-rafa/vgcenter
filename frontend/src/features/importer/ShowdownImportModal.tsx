@@ -4,10 +4,7 @@ import { ImportTeamModal } from './ImportTeamModal'
 
 type Props = {
   activeSide: 'attacker' | 'defender'
-  onImportTeam: (
-    side: 'attacker' | 'defender',
-    team: ImportedPokemon[],
-  ) => void
+  onImportTeam: (side: 'attacker' | 'defender', team: ImportedPokemon[]) => void
   onLoadPokemon: (
     side: 'attacker' | 'defender',
     pokemon: ImportedPokemon,

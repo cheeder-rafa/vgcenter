@@ -92,7 +92,11 @@ export function SpeciesSelect({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label id={labelId} htmlFor={inputId} className={`arena-label ${accentLabel}`}>
+      <label
+        id={labelId}
+        htmlFor={inputId}
+        className={`arena-label ${accentLabel}`}
+      >
         Species
       </label>
       <div
@@ -211,7 +215,9 @@ export function SpeciesSelect({
                 })}
               </ul>
             ) : (
-              <p className="px-3 py-3 text-sm text-white/62">No matching species.</p>
+              <p className="px-3 py-3 text-sm text-white/62">
+                No matching species.
+              </p>
             )}
           </div>
         ) : null}

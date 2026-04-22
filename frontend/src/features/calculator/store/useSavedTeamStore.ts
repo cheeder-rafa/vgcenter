@@ -48,10 +48,8 @@ function cloneMoves(moves: CombatantBuild['moves']): CombatantBuild['moves'] {
   return moves.map((move) => ({ ...move })) as CombatantBuild['moves']
 }
 
-function cloneTypes(
-  types: CombatantBuild['types'],
-): CombatantBuild['types'] {
-  return types === null ? null : [...types] as CombatantBuild['types']
+function cloneTypes(types: CombatantBuild['types']): CombatantBuild['types'] {
+  return types === null ? null : ([...types] as CombatantBuild['types'])
 }
 
 function cloneSavedPokemon(pokemon: SavedPokemon): SavedPokemon {

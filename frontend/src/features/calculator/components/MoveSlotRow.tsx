@@ -1,6 +1,7 @@
 import { useId, useMemo } from 'react'
 
 import type { DamageResult, MoveDefinition } from '../types/api'
+import { DamageBar } from './DamageBar'
 import { getTypeChipClasses } from './typeColors'
 
 type Props = {
@@ -75,46 +76,51 @@ export function MoveSlotRow({
         }
       }}
       aria-pressed={focused}
-      className={`grid cursor-pointer grid-cols-[auto_minmax(0,1fr)_8ch_10ch] items-center gap-3 rounded-sm border bg-white/[0.04] px-3 py-2 transition hover:border-white/25 ${accentBorder} ${accentGlow}`}
+      className={`flex cursor-pointer flex-col gap-1.5 rounded-sm border bg-white/[0.04] px-3 py-2 transition hover:border-white/25 ${accentBorder} ${accentGlow}`}
       data-testid={`move-slot-${index}`}
     >
-      <span className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/55">
-        M{index + 1}
-      </span>
-      <select
-        id={selectId}
-        aria-label={`Move slot ${index + 1}`}
-        className="arena-select h-9 py-1"
-        value={moveId ?? ''}
-        onClick={(event) => event.stopPropagation()}
-        onChange={(event) => {
-          const next = event.target.value
-          onMoveChange(next === '' ? null : next)
-        }}
-      >
-        <option value="" className="bg-arena-void">
-          — Empty —
-        </option>
-        {options.map((move) => (
-          <option key={move.id} value={move.id} className="bg-arena-void">
-            {move.name}
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_8ch_10ch] items-center gap-3">
+        <span className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/55">
+          M{index + 1}
+        </span>
+        <select
+          id={selectId}
+          aria-label={`Move slot ${index + 1}`}
+          className="arena-select h-9 py-1"
+          value={moveId ?? ''}
+          onClick={(event) => event.stopPropagation()}
+          onChange={(event) => {
+            const next = event.target.value
+            onMoveChange(next === '' ? null : next)
+          }}
+        >
+          <option value="" className="bg-arena-void">
+            — Empty —
           </option>
-        ))}
-      </select>
-      <span
-        className={`arena-chip w-[8ch] justify-center overflow-hidden whitespace-nowrap text-[0.58rem] tracking-tight ${getTypeChipClasses(
-          selectedMove?.type ?? null,
-        )}`}
-        data-testid={`move-slot-type-${index}`}
-      >
-        {selectedMove?.type ?? '—'}
-      </span>
-      <span
-        className="min-w-[10ch] whitespace-nowrap text-right font-mono text-xs text-white/80"
-        data-testid={`move-slot-readout-${index}`}
-      >
-        {readout}
-      </span>
+          {options.map((move) => (
+            <option key={move.id} value={move.id} className="bg-arena-void">
+              {move.name}
+            </option>
+          ))}
+        </select>
+        <span
+          className={`arena-chip w-[8ch] justify-center overflow-hidden whitespace-nowrap text-[0.58rem] tracking-tight ${getTypeChipClasses(
+            selectedMove?.type ?? null,
+          )}`}
+          data-testid={`move-slot-type-${index}`}
+        >
+          {selectedMove?.type ?? '—'}
+        </span>
+        <span
+          className="min-w-[10ch] whitespace-nowrap text-right font-mono text-xs text-white/80"
+          data-testid={`move-slot-readout-${index}`}
+        >
+          {readout}
+        </span>
+      </div>
+      {result !== null && (
+        <DamageBar minPct={result.minPct} maxPct={result.maxPct} />
+      )}
     </div>
   )
 }

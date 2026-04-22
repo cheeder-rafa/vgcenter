@@ -4,7 +4,10 @@ import { formatReadoutText } from '../../src/features/calculator/components/form
 import type { DamageResult } from '../../src/features/calculator/types/api'
 
 const result: DamageResult = {
-  rolls: [108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122, 122, 126, 126],
+  rolls: [
+    108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122, 122, 126,
+    126,
+  ],
   min: 108,
   max: 126,
   minPct: 64.6,

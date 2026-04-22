@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react'
 
 import { buildStats } from '../api/datasetApi'
-import { useCalculatorStore, type CalculatorSide } from '../store/useCalculatorStore'
+import {
+  useCalculatorStore,
+  type CalculatorSide,
+} from '../store/useCalculatorStore'
 import type { CombatantBuild, PokedexEntry } from '../types/api'
 
 const RECOMPUTE_DEBOUNCE_MS = 200
@@ -39,15 +42,18 @@ function resolveCombatantTypes(
     return combatant.types
   }
 
-  const entry = pokedex.find((candidate) => candidate.id === combatant.speciesId)
+  const entry = pokedex.find(
+    (candidate) => candidate.id === combatant.speciesId,
+  )
   if (!entry) {
     return combatant.types
   }
 
   if (combatant.megaActive && entry.megaForms.length > 0) {
     const megaForm =
-      entry.megaForms.find((candidate) => candidate.id === combatant.megaFormId) ??
-      entry.megaForms[0]
+      entry.megaForms.find(
+        (candidate) => candidate.id === combatant.megaFormId,
+      ) ?? entry.megaForms[0]
     const [primary, secondary] = megaForm.types
     return [primary, secondary ?? null]
   }
@@ -56,7 +62,10 @@ function resolveCombatantTypes(
   return [primary, secondary ?? null]
 }
 
-export function useBuildStatsSync(side: CalculatorSide, pokedex: PokedexEntry[]) {
+export function useBuildStatsSync(
+  side: CalculatorSide,
+  pokedex: PokedexEntry[],
+) {
   const pokedexRef = useRef(pokedex)
   const requestIdRef = useRef(0)
   const buildKeyRef = useRef<string | null>(null)

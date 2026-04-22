@@ -66,13 +66,11 @@ export function PokemonPanel({
 
   const isAttacking = side === focusedSide
   const accent: 'plasma' | 'cyan' = isAttacking ? 'plasma' : 'cyan'
-  const panelVariant =
-    isAttacking ? 'arena-panel--plasma' : 'arena-panel--cyan'
+  const panelVariant = isAttacking ? 'arena-panel--plasma' : 'arena-panel--cyan'
   const accentText = isAttacking ? 'text-arena-plasma' : 'text-arena-cyan'
-  const pulseColor =
-    isAttacking
-      ? 'bg-arena-plasma shadow-[0_0_14px_rgba(255,43,142,0.9)]'
-      : 'bg-arena-cyan shadow-[0_0_14px_rgba(34,211,238,0.9)]'
+  const pulseColor = isAttacking
+    ? 'bg-arena-plasma shadow-[0_0_14px_rgba(255,43,142,0.9)]'
+    : 'bg-arena-cyan shadow-[0_0_14px_rgba(34,211,238,0.9)]'
 
   const speciesEntry = useMemo(
     () =>
@@ -83,12 +81,17 @@ export function PokemonPanel({
   )
 
   const activeMegaForm = useMemo(() => {
-    if (speciesEntry === null || !combatant.megaActive || speciesEntry.megaForms.length === 0) {
+    if (
+      speciesEntry === null ||
+      !combatant.megaActive ||
+      speciesEntry.megaForms.length === 0
+    ) {
       return null
     }
     return (
-      speciesEntry.megaForms.find((candidate) => candidate.id === combatant.megaFormId) ??
-      speciesEntry.megaForms[0]
+      speciesEntry.megaForms.find(
+        (candidate) => candidate.id === combatant.megaFormId,
+      ) ?? speciesEntry.megaForms[0]
     )
   }, [speciesEntry, combatant.megaActive, combatant.megaFormId])
 
@@ -151,8 +154,9 @@ export function PokemonPanel({
       return
     }
     const megaForm =
-      speciesEntry.megaForms.find((candidate) => candidate.id === combatant.megaFormId) ??
-      speciesEntry.megaForms[0]
+      speciesEntry.megaForms.find(
+        (candidate) => candidate.id === combatant.megaFormId,
+      ) ?? speciesEntry.megaForms[0]
     const [primary, secondary] = next ? megaForm.types : speciesEntry.types
     setCombatant({
       megaActive: next,
@@ -160,7 +164,9 @@ export function PokemonPanel({
       abilityId: next
         ? megaForm.abilityId
         : (speciesEntry.abilityIds[0] ?? combatant.abilityId),
-      itemId: next ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId) : combatant.itemId,
+      itemId: next
+        ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId)
+        : combatant.itemId,
       baseStats: next ? megaForm.baseStats : speciesEntry.baseStats,
       finalStats: null,
       types: [primary, secondary ?? null],
@@ -172,7 +178,9 @@ export function PokemonPanel({
     if (speciesEntry === null) {
       return
     }
-    const megaForm = speciesEntry.megaForms.find((candidate) => candidate.id === nextMegaFormId)
+    const megaForm = speciesEntry.megaForms.find(
+      (candidate) => candidate.id === nextMegaFormId,
+    )
     if (!megaForm) {
       return
     }
@@ -375,47 +383,54 @@ export function PokemonPanel({
         <div className="min-h-[56px]">
           {speciesEntry?.megaForms.length ? (
             <div className="flex flex-col gap-1.5 rounded-sm border border-white/10 bg-white/5 px-3 py-2">
-            <label
-              htmlFor={ids.mega}
-              className={`flex items-center gap-3 transition ${
-                combatant.megaActive
-                  ? 'text-white'
-                  : 'hover:text-white/90'
-              }`}
-            >
-              <input
-                id={ids.mega}
-                type="checkbox"
-                className="arena-checkbox"
-                checked={combatant.megaActive}
-                onChange={(event) => handleMegaToggle(event.target.checked)}
-              />
-              <span className="arena-label text-arena-violet">
-                Mega Evolution
-              </span>
-              <span className="ml-auto font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/55">
-                mid-battle toggle
-              </span>
-            </label>
-            {speciesEntry.megaForms.length > 1 && combatant.megaActive ? (
-              <div className="flex items-center gap-2">
-                <label htmlFor={`${ids.mega}-variant`} className="arena-label text-arena-violet">
-                  Mega Variant
-                </label>
-                <select
-                  id={`${ids.mega}-variant`}
-                  className="arena-select flex-1"
-                  value={activeMegaForm?.id ?? speciesEntry.megaForms[0].id}
-                  onChange={(event) => handleMegaVariantChange(event.target.value)}
-                >
-                  {speciesEntry.megaForms.map((megaForm) => (
-                    <option key={megaForm.id} value={megaForm.id} className="bg-arena-void">
-                      {megaForm.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : null}
+              <label
+                htmlFor={ids.mega}
+                className={`flex items-center gap-3 transition ${
+                  combatant.megaActive ? 'text-white' : 'hover:text-white/90'
+                }`}
+              >
+                <input
+                  id={ids.mega}
+                  type="checkbox"
+                  className="arena-checkbox"
+                  checked={combatant.megaActive}
+                  onChange={(event) => handleMegaToggle(event.target.checked)}
+                />
+                <span className="arena-label text-arena-violet">
+                  Mega Evolution
+                </span>
+                <span className="ml-auto font-mono text-[0.65rem] uppercase tracking-[0.2em] text-white/55">
+                  mid-battle toggle
+                </span>
+              </label>
+              {speciesEntry.megaForms.length > 1 && combatant.megaActive ? (
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor={`${ids.mega}-variant`}
+                    className="arena-label text-arena-violet"
+                  >
+                    Mega Variant
+                  </label>
+                  <select
+                    id={`${ids.mega}-variant`}
+                    className="arena-select flex-1"
+                    value={activeMegaForm?.id ?? speciesEntry.megaForms[0].id}
+                    onChange={(event) =>
+                      handleMegaVariantChange(event.target.value)
+                    }
+                  >
+                    {speciesEntry.megaForms.map((megaForm) => (
+                      <option
+                        key={megaForm.id}
+                        value={megaForm.id}
+                        className="bg-arena-void"
+                      >
+                        {megaForm.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>

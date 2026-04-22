@@ -329,11 +329,7 @@ export function selectDamageRequestFor(
   }
 
   const move = state.moveCatalog.find((entry) => entry.id === moveId)
-  if (
-    move === undefined ||
-    move.category === 'STATUS' ||
-    move.basePower <= 0
-  ) {
+  if (move === undefined || move.category === 'STATUS' || move.basePower <= 0) {
     return null
   }
 
