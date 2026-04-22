@@ -10,9 +10,11 @@ public enum Ability {
     GUTS,
     MULTISCALE,
     NEUROFORCE,
+    PIERCING_DRILL,
     SNIPER,
     SOLID_ROCK,
-    TINTED_LENS;
+    TINTED_LENS,
+    UNSEEN_FIST;
 
     public static Ability fromId(String id) {
         if (id == null || id.isBlank()) {
