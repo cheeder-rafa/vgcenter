@@ -329,17 +329,22 @@ public class ShowdownTextParser implements TeamParser {
     }
 
     private Sp toSp(Map<Stat, Integer> evs) {
+        boolean usesLegacyEvScale =
+                evs.values().stream().filter(Objects::nonNull).anyMatch(value -> value > 32);
         return new Sp(
-                toSpValue(evs.get(Stat.HP)),
-                toSpValue(evs.get(Stat.ATTACK)),
-                toSpValue(evs.get(Stat.DEFENSE)),
-                toSpValue(evs.get(Stat.SPECIAL_ATTACK)),
-                toSpValue(evs.get(Stat.SPECIAL_DEFENSE)),
-                toSpValue(evs.get(Stat.SPEED)));
+                toSpValue(evs.get(Stat.HP), usesLegacyEvScale),
+                toSpValue(evs.get(Stat.ATTACK), usesLegacyEvScale),
+                toSpValue(evs.get(Stat.DEFENSE), usesLegacyEvScale),
+                toSpValue(evs.get(Stat.SPECIAL_ATTACK), usesLegacyEvScale),
+                toSpValue(evs.get(Stat.SPECIAL_DEFENSE), usesLegacyEvScale),
+                toSpValue(evs.get(Stat.SPEED), usesLegacyEvScale));
     }
 
-    private int toSpValue(Integer effortValue) {
+    private int toSpValue(Integer effortValue, boolean usesLegacyEvScale) {
         int normalizedValue = Objects.requireNonNullElse(effortValue, 0);
+        if (!usesLegacyEvScale) {
+            return Math.max(0, normalizedValue);
+        }
         int converted = (int) Math.round(normalizedValue * 32.0d / 252.0d);
         return Math.max(0, Math.min(32, converted));
     }
