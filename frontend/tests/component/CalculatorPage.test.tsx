@@ -39,6 +39,7 @@ import { useToastStore } from '../../src/features/calculator/store/useToastStore
 
 describe('CalculatorPage', () => {
   beforeEach(() => {
+    vi.unstubAllEnvs()
     useCalculatorStore.getState().reset()
     useSavedTeamStore.getState().reset()
     useSavedTeamStore.persist.clearStorage()
@@ -169,6 +170,17 @@ describe('CalculatorPage', () => {
     expect(
       screen.getByRole('button', { name: /pokepaste/i }),
     ).toBeInTheDocument()
+  })
+
+  it('renders a feedback link when VITE_FEEDBACK_URL is configured', () => {
+    vi.stubEnv('VITE_FEEDBACK_URL', 'https://tally.so/r/vgcenter-feedback')
+
+    render(<CalculatorPage />)
+
+    expect(screen.getByRole('link', { name: /send feedback/i })).toHaveAttribute(
+      'href',
+      'https://tally.so/r/vgcenter-feedback',
+    )
   })
 
   it('does not render the obsolete Calculate Damage button', () => {
