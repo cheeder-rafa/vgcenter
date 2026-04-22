@@ -184,7 +184,7 @@ describe('CalculatorPage', () => {
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 
     const detailedResult = screen
-      .getByText(/detailed readout/i)
+      .getByText(/damage overview/i)
       .closest('article')
     const mainGrid = screen.getByTestId('calculator-main-grid')
 
@@ -818,7 +818,7 @@ describe('CalculatorPage', () => {
     const header = screen.getByTestId('calculator-header')
     const mainGrid = screen.getByTestId('calculator-main-grid')
     const fieldPanel = screen.getByTestId('field-panel')
-    const readout = screen.getByText(/detailed readout/i).closest('article')
+    const readout = screen.getByText(/damage overview/i).closest('article')
     const sidePanels = screen
       .getAllByRole('heading', { level: 2 })
       .filter((heading) => /attacker|defender/i.test(heading.textContent ?? ''))

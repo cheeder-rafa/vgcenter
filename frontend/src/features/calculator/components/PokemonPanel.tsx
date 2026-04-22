@@ -4,6 +4,7 @@ import type { CalculatorSide } from '../store/useCalculatorStore'
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import type {
   CombatantBuild,
+  DamageResult,
   MoveDefinition,
   NamedDatasetEntry,
   NatureResponse,
@@ -214,9 +215,12 @@ export function PokemonPanel({
               {isAttacking ? 'Attacker' : 'Defender'}
             </p>
           </div>
-          <span className={`arena-chip ${accentText}`}>
-            {isAttacking ? 'ATTACKER' : 'DEFENDER'}
-          </span>
+          <div className="flex items-center gap-2">
+            <MoveSummaryStrip results={results} accent={accent} />
+            <span className={`arena-chip ${accentText}`}>
+              {isAttacking ? 'ATTACKER' : 'DEFENDER'}
+            </span>
+          </div>
         </header>
 
         <div className="flex items-start gap-3">
@@ -471,6 +475,84 @@ export function PokemonPanel({
         </div>
       </div>
     </article>
+  )
+}
+
+type SideResults = (DamageResult | null)[]
+
+function MoveSummaryStrip({
+  results,
+  accent,
+}: {
+  results: SideResults
+  accent: 'plasma' | 'cyan'
+}) {
+  const hasAny = results.some((r) => r !== null)
+  if (!hasAny) return null
+
+  const accentFill =
+    accent === 'cyan' ? 'rgba(34,211,238,0.85)' : 'rgba(255,43,142,0.85)'
+  const accentTrack =
+    accent === 'cyan' ? 'rgba(34,211,238,0.15)' : 'rgba(255,43,142,0.15)'
+
+  return (
+    <div
+      className="flex items-center gap-1"
+      aria-label="Move damage summary"
+    >
+      {results.map((result, i) => {
+        if (result === null) {
+          return (
+            <div
+              key={i}
+              className="h-[18px] w-[28px] rounded-[2px] bg-white/[0.06]"
+              title={`M${i + 1}: no result`}
+            />
+          )
+        }
+
+        const clampedMin = Math.min(100, Math.max(0, result.minPct))
+        const clampedMax = Math.min(100, Math.max(0, result.maxPct))
+        const isLethal = clampedMax >= 100
+
+        const trackColor = isLethal
+          ? 'rgba(255,80,80,0.18)'
+          : clampedMax >= 50
+            ? 'rgba(255,140,30,0.15)'
+            : accentTrack
+        const pinColor = isLethal
+          ? 'rgba(255,75,75,0.9)'
+          : clampedMax >= 50
+            ? 'rgba(255,122,26,0.88)'
+            : accentFill
+
+        return (
+          <div
+            key={i}
+            className="relative h-[18px] w-[28px] overflow-hidden rounded-[2px]"
+            style={{ background: 'rgba(255,255,255,0.07)' }}
+            title={`M${i + 1}: ${result.minPct.toFixed(1)}–${result.maxPct.toFixed(1)}%`}
+          >
+            <div
+              className="absolute inset-y-0"
+              style={{
+                left: `${clampedMin}%`,
+                width: `${Math.max(0, clampedMax - clampedMin)}%`,
+                background: trackColor,
+              }}
+            />
+            <div
+              className="absolute inset-y-0 w-[2px]"
+              style={{ left: `${Math.max(0.5, clampedMin)}%`, background: pinColor }}
+            />
+            <div
+              className="absolute inset-y-0 w-[2px]"
+              style={{ left: `${Math.min(99.5, clampedMax)}%`, background: pinColor }}
+            />
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
