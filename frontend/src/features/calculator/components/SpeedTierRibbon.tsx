@@ -46,7 +46,6 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
   const winner = isTie ? null : atkWins ? attacker : defender
   const loser = isTie ? null : atkWins ? defender : attacker
 
-  // plasma = attacker/left side, cyan = defender/right side
   const winnerColor = atkWins ? 'rgba(255,43,142,0.9)' : 'rgba(34,211,238,0.9)'
   const loserColor = 'rgba(255,255,255,0.28)'
 
@@ -55,7 +54,6 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
       data-testid="speed-ribbon"
       className="flex items-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.03] px-3 py-1"
     >
-      {/* Left speed value — always the attacker (plasma side) */}
       <span
         data-testid="speed-attacker-effective"
         className="w-[3ch] shrink-0 text-right font-mono text-[0.7rem] tabular-nums"
@@ -81,16 +79,15 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
           </span>
         ) : (
           <>
-            {/* Slower (loser) — dimmed */}
             <span
               className="truncate font-mono text-[0.65rem]"
               style={{ color: loserColor }}
             >
               {loser?.name}
             </span>
-            {/* Arrow pointing from loser to winner (faster = moves first) */}
             <svg
               aria-hidden="true"
+              focusable="false"
               width="28"
               height="10"
               viewBox="0 0 28 10"
@@ -113,7 +110,6 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
                 strokeLinejoin="round"
               />
             </svg>
-            {/* Winner (faster = moves first) */}
             <span
               data-testid="speed-winner"
               className="truncate font-mono text-[0.65rem] font-semibold"
@@ -121,7 +117,7 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
             >
               {winner?.name}
             </span>
-            <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-white/30">
+            <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-white/45">
               moves first
             </span>
           </>
@@ -136,7 +132,6 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
         )}
       </div>
 
-      {/* Right speed value — always the defender (cyan side) */}
       <span
         data-testid="speed-defender-effective"
         className="w-[3ch] shrink-0 font-mono text-[0.7rem] tabular-nums"

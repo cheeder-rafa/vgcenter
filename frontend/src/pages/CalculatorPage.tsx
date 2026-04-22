@@ -28,8 +28,10 @@ import type {
 } from '../features/calculator/types/api'
 import { PokepasteImportModal } from '../features/importer/PokepasteImportModal'
 import { ShowdownImportModal } from '../features/importer/ShowdownImportModal'
-import { toCombatantBuild } from '../features/importer/importedTeamMapping'
-import { toSavedPokemon } from '../features/importer/importedTeamMapping'
+import {
+  toCombatantBuild,
+  toSavedPokemon,
+} from '../features/importer/importedTeamMapping'
 import { t } from '../lib/i18n'
 import { useSavedTeamStore } from '../features/calculator/store/useSavedTeamStore'
 import {
@@ -191,11 +193,8 @@ export function CalculatorPage() {
     addPin(pin)
   }
 
-  function handleLoadPin(pin: MatchupPin) {
-    // Pin only stores display info; no full state restoration without stored combatant builds
-    // For now: no-op restore (pin is purely a visual bookmark)
-    void pin
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  function handleLoadPin(_pin: MatchupPin) {}
 
   const datasets = useMemo(
     () => ({ pokedex, abilities, items, moves, natures }),

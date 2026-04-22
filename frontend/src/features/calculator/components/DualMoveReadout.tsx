@@ -35,7 +35,6 @@ function koTier(
 ): 'ohko' | '2hko' | 'partial' | 'safe' | 'none' {
   if (result === null) return 'none'
   const { probability, hits } = result.koChance
-  if (probability >= 1 && hits === 1) return 'ohko'
   if (probability > 0 && hits === 1) return 'ohko'
   if (probability >= 1 && hits === 2) return '2hko'
   if (probability > 0 && hits <= 2) return 'partial'
@@ -149,9 +148,6 @@ function DetailPanel({
 
   const effectiveAttacker = side === 'attacker' ? attackerName : defenderName
   const effectiveDefender = side === 'attacker' ? defenderName : attackerName
-  // The heatmap needs the *defender's* HP from the perspective of this attack:
-  // when attacker-side moves fire, the defender is the right-side Pokémon (defenderHp).
-  // when defender-side moves fire, the defender is the left-side Pokémon (attackerHp).
   const effectiveDefenderHp = side === 'attacker' ? defenderHp : attackerHp
 
   const summaryText = formatSummaryText({
@@ -161,7 +157,6 @@ function DetailPanel({
     result,
   })
   const rollsText = formatRollsText(result)
-  // Use actual HP; fall back to result.max+1 only if HP is genuinely unknown
   const hp = effectiveDefenderHp ?? result.max + 1
   const koChancePct = result.koChance.probability * 100
   const accent = side === 'attacker' ? 'plasma' : 'cyan'
@@ -255,7 +250,6 @@ function SideColumn({
         ))}
       </div>
 
-      {/* Inline roll detail — expands when a move is selected in this column */}
       {expandedEntry !== null && expandedEntry.result !== null && (
         <DetailPanel
           entry={expandedEntry}
