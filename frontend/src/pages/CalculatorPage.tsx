@@ -10,6 +10,7 @@ import {
 import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
+import { MatchupPinStrip } from '../features/calculator/components/MatchupPinStrip'
 import { PokemonPanel } from '../features/calculator/components/PokemonPanel'
 import { SavedPokemonRail } from '../features/calculator/components/SavedPokemonRail'
 import { ToastViewport } from '../features/calculator/components/ToastViewport'
@@ -31,6 +32,10 @@ import { toCombatantBuild } from '../features/importer/importedTeamMapping'
 import { toSavedPokemon } from '../features/importer/importedTeamMapping'
 import { t } from '../lib/i18n'
 import { useSavedTeamStore } from '../features/calculator/store/useSavedTeamStore'
+import {
+  usePinStore,
+  type MatchupPin,
+} from '../features/calculator/store/usePinStore'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
@@ -89,8 +94,22 @@ export function CalculatorPage() {
   const attackerName = attackerEntry?.name ?? null
   const defenderName = defenderEntry?.name ?? null
 
-  const attackerMoveEntries = useAllMoveEntries('attacker', moves, results.attackerMoves)
-  const defenderMoveEntries = useAllMoveEntries('defender', moves, results.defenderMoves)
+  const attackerMoveEntries = useAllMoveEntries(
+    'attacker',
+    moves,
+    results.attackerMoves,
+  )
+  const defenderMoveEntries = useAllMoveEntries(
+    'defender',
+    moves,
+    results.defenderMoves,
+  )
+  const attackerHp = useCalculatorStore(
+    (s) => s.attacker.finalStats?.hp ?? null,
+  )
+  const defenderHp = useCalculatorStore(
+    (s) => s.defender.finalStats?.hp ?? null,
+  )
 
   function handleFocusSlot(side: CalculatorSide, index: number) {
     setFocusedSide(side)
@@ -147,6 +166,37 @@ export function CalculatorPage() {
     setFocusedSide(side)
   }
 
+  const addPin = usePinStore((s) => s.addPin)
+
+  function handleCurrentPin() {
+    if (attackerName === null || defenderName === null) return
+    const firstAttackerResult = results.attackerMoves[0]
+    const firstDefenderResult = results.defenderMoves[0]
+    const atkSummary =
+      firstAttackerResult !== null && firstAttackerResult !== undefined
+        ? `${firstAttackerResult.minPct.toFixed(1)}–${firstAttackerResult.maxPct.toFixed(1)}%`
+        : '—'
+    const defSummary =
+      firstDefenderResult !== null && firstDefenderResult !== undefined
+        ? `${firstDefenderResult.minPct.toFixed(1)}–${firstDefenderResult.maxPct.toFixed(1)}%`
+        : '—'
+    const pin: MatchupPin = {
+      id: `${attacker.speciesId ?? 'atk'}-${defender.speciesId ?? 'def'}-${Date.now()}`,
+      attackerName,
+      defenderName,
+      label: `${attackerName} → ${defenderName}`,
+      attackerSummary: atkSummary,
+      defenderSummary: defSummary,
+    }
+    addPin(pin)
+  }
+
+  function handleLoadPin(pin: MatchupPin) {
+    // Pin only stores display info; no full state restoration without stored combatant builds
+    // For now: no-op restore (pin is purely a visual bookmark)
+    void pin
+  }
+
   const datasets = useMemo(
     () => ({ pokedex, abilities, items, moves, natures }),
     [pokedex, abilities, items, moves, natures],
@@ -170,6 +220,11 @@ export function CalculatorPage() {
           onLoadPokemon={handleLoadImportedPokemon}
         />
 
+        <MatchupPinStrip
+          onLoadPin={handleLoadPin}
+          onCurrentPin={handleCurrentPin}
+        />
+
         <section
           className="grid gap-3 lg:grid-cols-[90px_1.1fr_0.7fr_1.1fr_90px]"
           data-testid="detailed-result-grid"
@@ -183,6 +238,8 @@ export function CalculatorPage() {
               defenderName={defenderName}
               attackerMoves={attackerMoveEntries}
               defenderMoves={defenderMoveEntries}
+              attackerHp={attackerHp}
+              defenderHp={defenderHp}
             />
           </div>
         </section>
@@ -206,7 +263,11 @@ export function CalculatorPage() {
             onFocusSlot={handleFocusSlot}
             onActivateSide={setFocusedSide}
           />
-          <FieldPanel focusedSide={focusedSide} />
+          <FieldPanel
+            focusedSide={focusedSide}
+            attackerName={attackerName}
+            defenderName={defenderName}
+          />
           <PokemonPanel
             side="defender"
             {...datasets}
@@ -247,12 +308,19 @@ function usePokedexEntryForSide(
 function useAllMoveEntries(
   side: CalculatorSide,
   moves: MoveDefinition[],
-  results: (ReturnType<typeof useCalculatorStore.getState>['results']['attackerMoves'][number])[],
-): { moveName: string | null; moveType: string | null; result: import('../features/calculator/types/api').DamageResult | null }[] {
+  results: ReturnType<
+    typeof useCalculatorStore.getState
+  >['results']['attackerMoves'][number][],
+): {
+  moveName: string | null
+  moveType: string | null
+  result: import('../features/calculator/types/api').DamageResult | null
+}[] {
   const slots = useCalculatorStore((s) => s[side].moves)
   return slots.map((slot, i) => {
     const moveId = slot.moveId
-    const move = moveId !== null ? moves.find((m) => m.id === moveId) ?? null : null
+    const move =
+      moveId !== null ? (moves.find((m) => m.id === moveId) ?? null) : null
     return {
       moveName: move?.name ?? null,
       moveType: move?.type ?? null,
