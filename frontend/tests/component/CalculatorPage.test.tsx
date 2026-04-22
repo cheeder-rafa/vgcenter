@@ -172,15 +172,24 @@ describe('CalculatorPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('renders a feedback link when VITE_FEEDBACK_URL is configured', () => {
+  it('keeps the header layout stable when VITE_FEEDBACK_URL is configured', () => {
     vi.stubEnv('VITE_FEEDBACK_URL', 'https://tally.so/r/vgcenter-feedback')
 
     render(<CalculatorPage />)
 
-    expect(screen.getByRole('link', { name: /send feedback/i })).toHaveAttribute(
+    const header = screen.getByTestId('calculator-header')
+    const brandGroup = screen.getByTestId('calculator-header-brand')
+    const actionGroup = screen.getByTestId('calculator-header-actions')
+    const feedbackLink = screen.getByRole('link', { name: /send feedback/i })
+
+    expect(header.className).toContain('lg:grid-cols-[minmax(0,1fr)_auto]')
+    expect(brandGroup.className).toContain('min-w-0')
+    expect(actionGroup.className).toContain('lg:justify-self-end')
+    expect(feedbackLink).toHaveAttribute(
       'href',
       'https://tally.so/r/vgcenter-feedback',
     )
+    expect(feedbackLink.className).toContain('whitespace-nowrap')
   })
 
   it('does not render the obsolete Calculate Damage button', () => {
