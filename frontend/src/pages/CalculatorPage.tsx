@@ -345,10 +345,13 @@ function CompactHeader({
 
   return (
     <header
-      className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2"
+      className="grid gap-2 border-b border-white/10 pb-2 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
       data-testid="calculator-header"
     >
-      <div className="flex items-center gap-3">
+      <div
+        className="flex min-w-0 flex-wrap items-center gap-3"
+        data-testid="calculator-header-brand"
+      >
         <span className="h-2 w-2 rounded-full bg-arena-plasma shadow-[0_0_12px_rgba(255,43,142,0.9)]" />
         <h1 className="font-display text-xl font-extrabold tracking-tight text-white sm:text-2xl">
           {t('calculator.title')}
@@ -357,7 +360,10 @@ function CompactHeader({
           Regulation {regulation}
         </span>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div
+        className="flex flex-wrap items-center gap-2 lg:justify-self-end"
+        data-testid="calculator-header-actions"
+      >
         <span className="font-display text-xs tracking-[0.3em] text-arena-violet">
           IMPORT ⟶
         </span>
@@ -376,7 +382,7 @@ function CompactHeader({
         />
         {feedbackUrl !== null ? (
           <a
-            className="arena-button text-white/80"
+            className="arena-button shrink-0 whitespace-nowrap text-white/80"
             href={feedbackUrl}
             rel="noreferrer"
             target="_blank"
