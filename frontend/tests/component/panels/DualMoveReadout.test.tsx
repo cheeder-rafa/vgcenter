@@ -146,7 +146,9 @@ describe('DualMoveReadout', () => {
     )
 
     await user.click(screen.getByTestId('overview-move-attacker-0'))
-    await user.click(screen.getByRole('button', { name: /copy damage report/i }))
+    await user.click(
+      screen.getByRole('button', { name: /copy damage report/i }),
+    )
 
     await waitFor(() =>
       expect(mocks.copyDamageReport).toHaveBeenCalledWith(
@@ -226,5 +228,107 @@ describe('DualMoveReadout', () => {
     await user.click(screen.getByTestId('overview-move-attacker-1'))
 
     expect(screen.queryByTestId('move-detail-panel')).not.toBeInTheDocument()
+  })
+
+  it('colors the damage readout based on KO category', () => {
+    const OHKO_RESULT = {
+      rolls: [
+        324, 324, 336, 336, 348, 348, 348, 348, 352, 360, 368, 360, 368, 372,
+        376, 384,
+      ],
+      min: 324,
+      max: 384,
+      minPct: 177.0,
+      maxPct: 209.8,
+      koChance: { description: 'guaranteed OHKO', probability: 1, hits: 1 },
+    }
+    const TWOHKO_RESULT = {
+      rolls: [
+        108, 108, 108, 110, 110, 114, 114, 116, 116, 116, 120, 120, 122, 122,
+        126, 126,
+      ],
+      min: 108,
+      max: 126,
+      minPct: 64.6,
+      maxPct: 75.4,
+      koChance: { description: 'guaranteed 2HKO', probability: 1, hits: 2 },
+    }
+    const SAFE_RESULT = {
+      rolls: [40, 40, 42, 42, 44, 44, 44, 44, 46, 46, 48, 48, 48, 50, 50, 52],
+      min: 40,
+      max: 52,
+      minPct: 22.0,
+      maxPct: 28.4,
+      koChance: { description: 'no 5HKO', probability: 0, hits: 5 },
+    }
+    const MOVES_MIXED = [
+      { moveName: 'Close Combat', moveType: 'FIGHTING', result: OHKO_RESULT },
+      { moveName: 'Poltergeist', moveType: 'GHOST', result: TWOHKO_RESULT },
+      { moveName: 'Shadow Sneak', moveType: 'GHOST', result: SAFE_RESULT },
+      { moveName: null, moveType: null, result: null },
+    ]
+
+    render(
+      <DualMoveReadout
+        attackerName="Sneasler"
+        defenderName="Kingambit"
+        attackerMoves={MOVES_MIXED}
+        defenderMoves={DEFENDER_MOVES}
+      />,
+    )
+
+    const ohkoReadout = screen.getByTestId('overview-readout-attacker-0')
+    const twohkoReadout = screen.getByTestId('overview-readout-attacker-1')
+    const safeReadout = screen.getByTestId('overview-readout-attacker-2')
+
+    // OHKO guaranteed → red
+    expect(ohkoReadout).toHaveAttribute('data-ko-tier', 'ohko')
+    // 2HKO guaranteed → amber
+    expect(twohkoReadout).toHaveAttribute('data-ko-tier', '2hko')
+    // no KO → safe
+    expect(safeReadout).toHaveAttribute('data-ko-tier', 'safe')
+  })
+
+  it('shows actual defender HP label (not roll max) in detail panel heatmap', async () => {
+    // The bug: Close Combat does 324-384 damage, but defenderHp was set to
+    // result.max + 1 (385) instead of the actual defender finalStats.hp.
+    // This caused all rolls to read as "safe" even on a guaranteed OHKO.
+    const user = userEvent.setup()
+    const OHKO_RESULT = {
+      rolls: [
+        324, 324, 336, 336, 348, 348, 348, 348, 352, 360, 368, 360, 368, 372,
+        376, 384,
+      ],
+      min: 324,
+      max: 384,
+      minPct: 177.0,
+      maxPct: 209.8,
+      koChance: {
+        description: 'guaranteed OHKO',
+        probability: 1,
+        hits: 1,
+      },
+    }
+    const ATTACKER_MOVES_OHKO = [
+      { moveName: 'Close Combat', moveType: 'FIGHTING', result: OHKO_RESULT },
+      { moveName: null, moveType: null, result: null },
+      { moveName: null, moveType: null, result: null },
+      { moveName: null, moveType: null, result: null },
+    ]
+
+    render(
+      <DualMoveReadout
+        attackerName="Sneasler"
+        defenderName="Kingambit"
+        attackerMoves={ATTACKER_MOVES_OHKO}
+        defenderMoves={DEFENDER_MOVES}
+        defenderHp={183}
+      />,
+    )
+
+    await user.click(screen.getByTestId('overview-move-attacker-0'))
+
+    // The heatmap label should show the actual HP, not 384+1=385
+    expect(screen.getByTestId('heatmap-hp-label')).toHaveTextContent('183')
   })
 })

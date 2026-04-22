@@ -1,11 +1,26 @@
-import { useId } from 'react'
+import { useId, useMemo } from 'react'
 
 import type { CalculatorSide } from '../store/useCalculatorStore'
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import { ROOM_OPTIONS, TERRAIN_OPTIONS, WEATHER_OPTIONS } from './shared'
 import type { Room, Terrain, Weather } from '../types/api'
+import { SpeedTierRibbon, type SpeedCombatant } from './SpeedTierRibbon'
 
-export function FieldPanel({ focusedSide }: { focusedSide: CalculatorSide }) {
+function stagedSpeed(baseSpeed: number, spe: number): number {
+  if (spe === 0) return baseSpeed
+  const mult = spe > 0 ? (2 + spe) / 2 : 2 / (2 - spe)
+  return Math.floor(baseSpeed * mult)
+}
+
+export function FieldPanel({
+  focusedSide,
+  attackerName = null,
+  defenderName = null,
+}: {
+  focusedSide: CalculatorSide
+  attackerName?: string | null
+  defenderName?: string | null
+}) {
   const field = useCalculatorStore((s) => s.field)
   const targets = useCalculatorStore((s) => s.targets)
   const attackerSide = useCalculatorStore((s) => s.attackerSide)
@@ -14,6 +29,33 @@ export function FieldPanel({ focusedSide }: { focusedSide: CalculatorSide }) {
   const setAttackerSide = useCalculatorStore((s) => s.setAttackerSide)
   const setDefenderSide = useCalculatorStore((s) => s.setDefenderSide)
   const setTargets = useCalculatorStore((s) => s.setTargets)
+
+  const attackerRaw = useCalculatorStore((s) => s.attacker)
+  const defenderRaw = useCalculatorStore((s) => s.defender)
+
+  const attackerCombatant = useMemo((): SpeedCombatant | null => {
+    const spd = attackerRaw.finalStats?.speed ?? null
+    if (spd === null) return null
+    return {
+      name: attackerName ?? attackerRaw.speciesId ?? 'Attacker',
+      baseSpeed: spd,
+      stagedSpeed: stagedSpeed(spd, attackerRaw.stages.spe),
+      itemId: attackerRaw.itemId ?? null,
+      status: attackerRaw.status,
+    }
+  }, [attackerRaw, attackerName])
+
+  const defenderCombatant = useMemo((): SpeedCombatant | null => {
+    const spd = defenderRaw.finalStats?.speed ?? null
+    if (spd === null) return null
+    return {
+      name: defenderName ?? defenderRaw.speciesId ?? 'Defender',
+      baseSpeed: spd,
+      stagedSpeed: stagedSpeed(spd, defenderRaw.stages.spe),
+      itemId: defenderRaw.itemId ?? null,
+      status: defenderRaw.status,
+    }
+  }, [defenderRaw, defenderName])
 
   const ids = {
     weather: useId(),
@@ -51,6 +93,12 @@ export function FieldPanel({ focusedSide }: { focusedSide: CalculatorSide }) {
           </div>
           <span className="arena-chip text-arena-sun/90">BATTLE</span>
         </header>
+
+        <SpeedTierRibbon
+          attacker={attackerCombatant}
+          defender={defenderCombatant}
+          trickRoom={field.room === 'TRICK'}
+        />
 
         <h2 className="font-display text-2xl font-bold tracking-wide text-white">
           Modifiers

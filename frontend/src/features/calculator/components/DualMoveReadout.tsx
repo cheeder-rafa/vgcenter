@@ -24,6 +24,29 @@ type Props = {
   defenderName: string | null
   attackerMoves: MoveEntry[]
   defenderMoves: MoveEntry[]
+  /** Actual finalStats.hp of the attacker (needed for defender-side roll heatmap) */
+  attackerHp?: number | null
+  /** Actual finalStats.hp of the defender (needed for attacker-side roll heatmap) */
+  defenderHp?: number | null
+}
+
+function koTier(
+  result: DamageResult | null,
+): 'ohko' | '2hko' | 'partial' | 'safe' | 'none' {
+  if (result === null) return 'none'
+  const { probability, hits } = result.koChance
+  if (probability > 0 && hits === 1) return 'ohko'
+  if (probability >= 1 && hits === 2) return '2hko'
+  if (probability > 0 && hits <= 2) return 'partial'
+  return 'safe'
+}
+
+const KO_TIER_COLOR: Record<ReturnType<typeof koTier>, string> = {
+  ohko: 'rgba(255, 75, 75, 0.92)',
+  '2hko': 'rgba(255, 145, 30, 0.90)',
+  partial: 'rgba(255, 210, 74, 0.85)',
+  safe: 'rgba(255,255,255,0.5)',
+  none: 'rgba(255,255,255,0.25)',
 }
 
 function MoveReadoutRow({
@@ -46,6 +69,9 @@ function MoveReadoutRow({
       : '— %'
 
   const hasResult = result !== null
+  const tier = koTier(result)
+  const readoutColor = KO_TIER_COLOR[tier]
+
   const accentRing = selected
     ? side === 'attacker'
       ? 'border-arena-plasma/60 bg-arena-plasma/[0.06]'
@@ -57,7 +83,9 @@ function MoveReadoutRow({
       role="button"
       tabIndex={hasResult ? 0 : -1}
       aria-pressed={selected}
-      aria-label={hasResult ? `${moveName ?? 'Move'} — click to see rolls` : undefined}
+      aria-label={
+        hasResult ? `${moveName ?? 'Move'} — click to see rolls` : undefined
+      }
       data-testid={`overview-move-${side}-${index}`}
       onClick={() => {
         if (hasResult) onSelect()
@@ -84,7 +112,12 @@ function MoveReadoutRow({
         >
           {moveType ?? '—'}
         </span>
-        <span className="text-right font-mono text-[0.72rem] tabular-nums text-white/80">
+        <span
+          className="text-right font-mono text-[0.72rem] tabular-nums"
+          style={{ color: readoutColor }}
+          data-testid={`overview-readout-${side}-${index}`}
+          data-ko-tier={tier === 'none' ? undefined : tier}
+        >
           {readout}
         </span>
       </div>
@@ -100,17 +133,22 @@ function DetailPanel({
   attackerName,
   defenderName,
   side,
+  attackerHp,
+  defenderHp,
 }: {
   entry: MoveEntry
   attackerName: string | null
   defenderName: string | null
   side: 'attacker' | 'defender'
+  attackerHp: number | null
+  defenderHp: number | null
 }) {
   const { moveName, result } = entry
   if (result === null) return null
 
   const effectiveAttacker = side === 'attacker' ? attackerName : defenderName
   const effectiveDefender = side === 'attacker' ? defenderName : attackerName
+  const effectiveDefenderHp = side === 'attacker' ? defenderHp : attackerHp
 
   const summaryText = formatSummaryText({
     attackerName: effectiveAttacker,
@@ -119,7 +157,7 @@ function DetailPanel({
     result,
   })
   const rollsText = formatRollsText(result)
-  const hp = result.max + 1
+  const hp = effectiveDefenderHp ?? result.max + 1
   const koChancePct = result.koChance.probability * 100
   const accent = side === 'attacker' ? 'plasma' : 'cyan'
 
@@ -175,6 +213,8 @@ function SideColumn({
   onSelect,
   attackerName,
   defenderName,
+  attackerHp,
+  defenderHp,
 }: {
   label: string
   accentText: string
@@ -185,9 +225,10 @@ function SideColumn({
   onSelect: (index: number) => void
   attackerName: string | null
   defenderName: string | null
+  attackerHp: number | null
+  defenderHp: number | null
 }) {
-  const expandedIndex =
-    selected?.side === side ? selected.index : null
+  const expandedIndex = selected?.side === side ? selected.index : null
   const expandedEntry =
     expandedIndex !== null ? (moves[expandedIndex] ?? null) : null
 
@@ -209,13 +250,14 @@ function SideColumn({
         ))}
       </div>
 
-      {/* Inline roll detail — expands when a move is selected in this column */}
       {expandedEntry !== null && expandedEntry.result !== null && (
         <DetailPanel
           entry={expandedEntry}
           attackerName={attackerName}
           defenderName={defenderName}
           side={side}
+          attackerHp={attackerHp}
+          defenderHp={defenderHp}
         />
       )}
     </div>
@@ -227,6 +269,8 @@ export function DualMoveReadout({
   defenderName,
   attackerMoves,
   defenderMoves,
+  attackerHp = null,
+  defenderHp = null,
 }: Props) {
   const [selected, setSelected] = useState<SelectedMove | null>(null)
 
@@ -274,6 +318,8 @@ export function DualMoveReadout({
             onSelect={(i) => handleSelect('attacker', i)}
             attackerName={attackerName}
             defenderName={defenderName}
+            attackerHp={attackerHp}
+            defenderHp={defenderHp}
           />
           <SideColumn
             label={defenderName ?? 'Side B'}
@@ -285,6 +331,8 @@ export function DualMoveReadout({
             onSelect={(i) => handleSelect('defender', i)}
             attackerName={attackerName}
             defenderName={defenderName}
+            attackerHp={attackerHp}
+            defenderHp={defenderHp}
           />
         </div>
       </div>

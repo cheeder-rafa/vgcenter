@@ -496,10 +496,7 @@ function MoveSummaryStrip({
     accent === 'cyan' ? 'rgba(34,211,238,0.15)' : 'rgba(255,43,142,0.15)'
 
   return (
-    <div
-      className="flex items-center gap-1"
-      aria-label="Move damage summary"
-    >
+    <div className="flex items-center gap-1" aria-label="Move damage summary">
       {results.map((result, i) => {
         if (result === null) {
           return (
@@ -543,11 +540,17 @@ function MoveSummaryStrip({
             />
             <div
               className="absolute inset-y-0 w-[2px]"
-              style={{ left: `${Math.max(0.5, clampedMin)}%`, background: pinColor }}
+              style={{
+                left: `${Math.max(0.5, clampedMin)}%`,
+                background: pinColor,
+              }}
             />
             <div
               className="absolute inset-y-0 w-[2px]"
-              style={{ left: `${Math.min(99.5, clampedMax)}%`, background: pinColor }}
+              style={{
+                left: `${Math.min(99.5, clampedMax)}%`,
+                background: pinColor,
+              }}
             />
           </div>
         )
