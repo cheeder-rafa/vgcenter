@@ -40,20 +40,19 @@ export function PatchNotesModal({ isOpen, onClose, regulation }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
-              <span className="font-mono text-[0.65rem] tracking-widest text-white/35 mr-2">#29</span>
-              Mobile layout adaptation — calculator now stacks correctly on narrow screens; header collapses import controls cleanly.
+              The calculator is easier to use on phones and smaller screens.
             </li>
             <li>
-              <span className="font-mono text-[0.65rem] tracking-widest text-white/35 mr-2">#28</span>
-              Feedback header layout regression fixed — brand and action rows no longer overlap on mid-width viewports.
+              The header stays cleaner, so the branding and quick actions no
+              longer crowd each other on mid-sized screens.
             </li>
             <li>
-              <span className="font-mono text-[0.65rem] tracking-widest text-white/35 mr-2">#25</span>
-              HP heatmap fix, speed tier ribbon, KO coloring, and matchup pin strip added.
+              Damage details are easier to scan during quick comparisons,
+              including clearer KO coloring and matchup pins.
             </li>
             <li>
-              <span className="font-mono text-[0.65rem] tracking-widest text-white/35 mr-2">#24</span>
-              Dual damage overview with click-to-expand rolls per move slot.
+              Move-by-move damage breakdowns are easier to inspect without
+              losing your place in the matchup.
             </li>
           </ul>
         </section>
@@ -61,7 +60,15 @@ export function PatchNotesModal({ isOpen, onClose, regulation }: Props) {
         <section>
           <h3 className="arena-label mb-3 text-arena-violet">Known Issues</h3>
           <ul className="space-y-2 text-sm text-white/50">
-            <li className="italic">— No known issues at this time. —</li>
+            <li>
+              Some items, abilities, and damage calculations are still under
+              correction, so a few matchups may read incorrectly while this pass
+              is being cleaned up.
+            </li>
+            <li>
+              If a result looks off, treat it as provisional and send feedback
+              so it can be checked against the current corrections list.
+            </li>
           </ul>
         </section>
       </div>

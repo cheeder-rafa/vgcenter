@@ -11,6 +11,7 @@ vi.mock('../../../src/features/calculator/components/copyDamageReport', () => ({
 }))
 
 import { DualMoveReadout } from '../../../src/features/calculator/components/DualMoveReadout'
+import { useCalculatorStore } from '../../../src/features/calculator/store/useCalculatorStore'
 
 const RESULT = {
   rolls: [
@@ -44,6 +45,7 @@ const DEFENDER_MOVES = [
 
 describe('DualMoveReadout', () => {
   beforeEach(() => {
+    useCalculatorStore.getState().reset()
     mocks.copyDamageReport.mockReset()
     mocks.copyDamageReport.mockResolvedValue(undefined)
   })
@@ -64,9 +66,7 @@ describe('DualMoveReadout', () => {
     expect(screen.getByText('Iron Head')).toBeInTheDocument()
     const article = screen.getByText(/damage overview/i).closest('article')
     expect(article?.className).toContain('px-2.5')
-    expect(article?.textContent).toContain(
-      'Damage Overview',
-    )
+    expect(article?.textContent).toContain('Damage Overview')
   })
 
   it('keeps the overview stacked until desktop, then aligns to editor columns', () => {
@@ -421,5 +421,88 @@ describe('DualMoveReadout', () => {
       '9 safe',
     )
     expect(screen.queryByTestId('heatmap-hp-label')).not.toBeInTheDocument()
+  })
+
+  it('shows Mega species names in the damage detail text when mega evolution is active', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <DualMoveReadout
+        attackerName="Charizard"
+        defenderName="Venusaur"
+        attackerMoves={[
+          {
+            moveName: 'Flamethrower',
+            moveType: 'FIRE',
+            moveCategory: 'SPECIAL',
+            result: RESULT,
+          },
+          { moveName: null, moveType: null, result: null },
+          { moveName: null, moveType: null, result: null },
+          { moveName: null, moveType: null, result: null },
+        ]}
+        defenderMoves={DEFENDER_MOVES}
+      />,
+    )
+
+    useCalculatorStore.getState().setAttacker({ megaActive: true })
+
+    await user.click(screen.getByTestId('overview-move-attacker-0'))
+
+    expect(screen.getByTestId('move-detail-panel')).toHaveTextContent(
+      'Mega Charizard Flamethrower vs. Venusaur',
+    )
+  })
+
+  it('adds stage and SP context to the detail text when modifiers are active', async () => {
+    const user = userEvent.setup()
+
+    useCalculatorStore.getState().setAttacker({
+      sp: { hp: 0, atk: 32, def: 0, spa: 0, spd: 0, spe: 0 },
+      stages: { atk: 1, def: 0, spa: 0, spd: 0, spe: 0 },
+    })
+    useCalculatorStore.getState().setDefender({
+      sp: { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+      stages: { atk: 0, def: -1, spa: 0, spd: 0, spe: 0 },
+    })
+
+    render(
+      <DualMoveReadout
+        attackerName="Sneasler"
+        defenderName="Absol"
+        attackerMoves={[
+          {
+            moveName: 'Close Combat',
+            moveType: 'FIGHTING',
+            moveCategory: 'PHYSICAL',
+            result: {
+              rolls: [
+                702, 702, 702, 710, 710, 718, 718, 726, 726, 726, 734, 734, 742,
+                742, 818, 818,
+              ],
+              min: 702,
+              max: 818,
+              minPct: 501.4,
+              maxPct: 584.2,
+              koChance: {
+                description: 'guaranteed OHKO',
+                probability: 1,
+                hits: 1,
+              },
+            },
+          },
+          { moveName: null, moveType: null, result: null },
+          { moveName: null, moveType: null, result: null },
+          { moveName: null, moveType: null, result: null },
+        ]}
+        defenderMoves={DEFENDER_MOVES}
+      />,
+    )
+
+    await user.click(screen.getByTestId('overview-move-attacker-0'))
+
+    expect(screen.getByTestId('move-detail-panel')).toHaveTextContent(
+      '+1 32 Atk Sneasler Close Combat vs. -1 0 HP / 0 Def Absol',
+    )
   })
 })

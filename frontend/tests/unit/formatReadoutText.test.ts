@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatReadoutText } from '../../src/features/calculator/components/formatReadoutText'
-import type { DamageResult } from '../../src/features/calculator/types/api'
+import {
+  formatReadoutText,
+  formatSummaryText,
+} from '../../src/features/calculator/components/formatReadoutText'
+import type {
+  DamageResult,
+  Spread,
+  StatStages,
+} from '../../src/features/calculator/types/api'
 
 const result: DamageResult = {
   rolls: [
@@ -17,6 +24,23 @@ const result: DamageResult = {
     probability: 1,
     hits: 2,
   },
+}
+
+const zeroSpread: Spread = {
+  hp: 0,
+  atk: 0,
+  def: 0,
+  spa: 0,
+  spd: 0,
+  spe: 0,
+}
+
+const zeroStages: StatStages = {
+  atk: 0,
+  def: 0,
+  spa: 0,
+  spd: 0,
+  spe: 0,
 }
 
 describe('formatReadoutText', () => {
@@ -90,5 +114,87 @@ describe('formatReadoutText', () => {
         throughProtect: true,
       }),
     ).toContain('Golurk Giga Impact vs. Excadrill through Protect:')
+  })
+
+  it('uses the Mega species prefix in the summary text when mega evolution is active', () => {
+    expect(
+      formatReadoutText({
+        attackerName: 'Charizard',
+        defenderName: 'Venusaur',
+        moveName: 'Flamethrower',
+        result,
+        attackerMegaActive: true,
+      }),
+    ).toContain('Mega Charizard Flamethrower vs. Venusaur:')
+  })
+})
+
+describe('formatSummaryText', () => {
+  it('includes stage and relevant SP context when physical modifiers are active', () => {
+    expect(
+      formatSummaryText({
+        attackerName: 'Sneasler',
+        defenderName: 'Absol',
+        moveName: 'Close Combat',
+        result: {
+          rolls: [
+            702, 702, 702, 710, 710, 718, 718, 726, 726, 726, 734, 734, 742,
+            742, 818, 818,
+          ],
+          min: 702,
+          max: 818,
+          minPct: 501.4,
+          maxPct: 584.2,
+          koChance: {
+            description: 'guaranteed OHKO',
+            probability: 1,
+            hits: 1,
+          },
+        },
+        moveCategory: 'PHYSICAL',
+        attackerSp: { ...zeroSpread, atk: 32 },
+        defenderSp: zeroSpread,
+        attackerStages: { ...zeroStages, atk: 1 },
+        defenderStages: { ...zeroStages, def: -1 },
+      }),
+    ).toBe(
+      '+1 32 Atk Sneasler Close Combat vs. -1 0 HP / 0 Def Absol: 702-818 (501.4 - 584.2%) -- guaranteed OHKO',
+    )
+  })
+
+  it('includes special attack and special defense context for special moves', () => {
+    expect(
+      formatSummaryText({
+        attackerName: 'Flutter Mane',
+        defenderName: 'Goodra',
+        moveName: 'Moonblast',
+        result,
+        moveCategory: 'SPECIAL',
+        attackerSp: { ...zeroSpread, spa: 24 },
+        defenderSp: { ...zeroSpread, hp: 12, spd: 20 },
+        attackerStages: { ...zeroStages, spa: 2 },
+        defenderStages: { ...zeroStages, spd: 1 },
+      }),
+    ).toContain(
+      '+2 24 SpA Flutter Mane Moonblast vs. +1 12 HP / 20 SpD Goodra:',
+    )
+  })
+
+  it('keeps the terse summary when no relevant modifiers are active', () => {
+    expect(
+      formatSummaryText({
+        attackerName: 'Sneasler',
+        defenderName: 'Absol',
+        moveName: 'Close Combat',
+        result,
+        moveCategory: 'PHYSICAL',
+        attackerSp: { ...zeroSpread, atk: 32 },
+        defenderSp: zeroSpread,
+        attackerStages: zeroStages,
+        defenderStages: zeroStages,
+      }),
+    ).toBe(
+      'Sneasler Close Combat vs. Absol: 108-126 (64.6 - 75.4%) -- guaranteed 2HKO',
+    )
   })
 })
