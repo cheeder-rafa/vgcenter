@@ -13,6 +13,10 @@ import com.vgcenter.damagecalc.application.usecase.EvaluateMatchupResult;
 import com.vgcenter.damagecalc.application.usecase.EvaluateMatchupUseCase;
 import com.vgcenter.damagecalc.application.usecase.KoChanceResult;
 import com.vgcenter.damagecalc.application.usecase.MatchupCellResult;
+import com.vgcenter.damagecalc.application.usecase.RecommendLineupCommand;
+import com.vgcenter.damagecalc.application.usecase.RecommendLineupResult;
+import com.vgcenter.damagecalc.application.usecase.RecommendLineupUseCase;
+import com.vgcenter.damagecalc.application.usecase.RecommendationResult;
 import com.vgcenter.damagecalc.domain.gameplan.MatchupScore;
 import com.vgcenter.damagecalc.domain.gameplan.TurnOneFlags;
 import com.vgcenter.damagecalc.web.error.ApiExceptionHandler;
@@ -26,6 +30,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 class GameplanControllerTest {
 
     private final StubEvaluateMatchupUseCase evaluateMatchupUseCase = new StubEvaluateMatchupUseCase();
+    private final StubRecommendLineupUseCase recommendLineupUseCase = new StubRecommendLineupUseCase();
 
     private MockMvc mockMvc;
 
@@ -34,7 +39,8 @@ class GameplanControllerTest {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.afterPropertiesSet();
 
-        GameplanController controller = new GameplanController(evaluateMatchupUseCase, new GameplanWebMapper());
+        GameplanController controller =
+                new GameplanController(evaluateMatchupUseCase, recommendLineupUseCase, new GameplanWebMapper());
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ApiExceptionHandler())
                 .setValidator(validator)
@@ -75,6 +81,39 @@ class GameplanControllerTest {
                 .andExpect(jsonPath("$.cells[0].outgoing[0].moveId").value("heat-wave"))
                 .andExpect(jsonPath("$.cells[0].outgoing[0].damage.koChance.description")
                         .value("guaranteed 3HKO"));
+    }
+
+    @Test
+    void recommendsLineupsThroughTheGameplanEndpoint() throws Exception {
+        MatchupCellResult cell = new MatchupCellResult(
+                0,
+                1,
+                java.util.List.of("blastoise", "venusaur"),
+                new MatchupScore(18, 20, -8, 2, 4),
+                new TurnOneFlags(false, true, false, false, TurnOneFlags.SpeedControl.NONE),
+                new TurnOneFlags(true, false, true, true, TurnOneFlags.SpeedControl.TRICK_ROOM),
+                java.util.List.of(),
+                java.util.List.of());
+        recommendLineupUseCase.nextResult = new RecommendLineupResult(
+                45,
+                java.util.List.of(new RecommendationResult(
+                        java.util.List.of(2, 3, 4, 5),
+                        java.util.List.of("tyranitar", "pikachu", "farigiraf", "pelipper"),
+                        2,
+                        18.0d,
+                        java.util.List.of(cell))));
+
+        mockMvc.perform(post("/api/v1/gameplan/recommend")
+                        .contentType(APPLICATION_JSON)
+                        .content(validRecommendRequestBody()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.evaluatedLineups").value(45))
+                .andExpect(jsonPath("$.recommendations[0].lineupIndices[0]").value(2))
+                .andExpect(jsonPath("$.recommendations[0].lineupSpeciesIds[2]").value("farigiraf"))
+                .andExpect(jsonPath("$.recommendations[0].averageScore").value(18.0d))
+                .andExpect(jsonPath("$.recommendations[0].cells[0].opponentFlags.speedControl")
+                        .value("TRICK_ROOM"));
     }
 
     private static String validRequestBody() {
@@ -322,12 +361,87 @@ class GameplanControllerTest {
                 """;
     }
 
+    private static String validRecommendRequestBody() {
+        return """
+                {
+                  "regulation": "M-A",
+                  "mine": [
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                  ],
+                  "winConditionIndex": 4,
+                  "opponent": [
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s,
+                    %s
+                  ]
+                }
+                """.formatted(
+                        pokemonJson("charizard"),
+                        pokemonJson("lucario"),
+                        pokemonJson("tyranitar"),
+                        pokemonJson("pikachu"),
+                        pokemonJson("farigiraf"),
+                        pokemonJson("pelipper"),
+                        pokemonJson("blastoise"),
+                        pokemonJson("venusaur"),
+                        pokemonJson("tyranitar"),
+                        pokemonJson("pikachu"),
+                        pokemonJson("farigiraf"),
+                        pokemonJson("pelipper"));
+    }
+
+    private static String pokemonJson(String speciesId) {
+        return """
+                {
+                  "speciesId": "%s",
+                  "combatant": {
+                    "level": 50,
+                    "stats": {
+                      "hp": 150,
+                      "attack": 100,
+                      "defense": 100,
+                      "specialAttack": 100,
+                      "specialDefense": 100,
+                      "speed": 100
+                    },
+                    "types": ["NORMAL"],
+                    "abilityId": "ability",
+                    "itemId": "item",
+                    "status": "NONE",
+                    "stages": {},
+                    "grounded": true,
+                    "currentHp": 150
+                  },
+                  "moveIds": ["move-a", "move-b", "move-c", "move-d"],
+                  "assumedForms": []
+                }
+                """.formatted(speciesId);
+    }
+
     private static final class StubEvaluateMatchupUseCase implements EvaluateMatchupUseCase {
 
         private EvaluateMatchupResult nextResult;
 
         @Override
         public EvaluateMatchupResult evaluate(EvaluateMatchupCommand command) {
+            return nextResult;
+        }
+    }
+
+    private static final class StubRecommendLineupUseCase implements RecommendLineupUseCase {
+
+        private RecommendLineupResult nextResult;
+
+        @Override
+        public RecommendLineupResult recommend(RecommendLineupCommand command) {
             return nextResult;
         }
     }
