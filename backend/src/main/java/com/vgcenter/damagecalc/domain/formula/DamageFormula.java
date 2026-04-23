@@ -135,7 +135,16 @@ public final class DamageFormula {
 
     private long attackingStat(DamageContext context) {
         Stat attackingStat = context.move().category() == MoveCategory.PHYSICAL ? Stat.ATTACK : Stat.SPECIAL_ATTACK;
-        return context.attacker().stats().valueFor(attackingStat);
+        long value = context.attacker().stats().valueFor(attackingStat);
+        return switch (context.attacker().ability()) {
+            case HUGE_POWER, PURE_POWER -> context.move().category() == MoveCategory.PHYSICAL ? value * 2 : value;
+            case HUSTLE -> context.move().category() == MoveCategory.PHYSICAL ? value * 3 / 2 : value;
+            case SOLAR_POWER ->
+                context.move().category() == MoveCategory.SPECIAL && context.weather() == Weather.SUN
+                        ? value * 3 / 2
+                        : value;
+            default -> value;
+        };
     }
 
     private long defendingStat(DamageContext context) {
@@ -146,7 +155,14 @@ public final class DamageFormula {
                     case NONE, MAGIC, TRICK ->
                         context.move().category() == MoveCategory.PHYSICAL ? Stat.DEFENSE : Stat.SPECIAL_DEFENSE;
                 };
-        return context.defender().stats().valueFor(defendingStat);
+        long value = context.defender().stats().valueFor(defendingStat);
+        if (context.defender().ability() == Ability.FUR_COAT
+                && !context.ignoresDefenderAbility()
+                && context.move().category() == MoveCategory.PHYSICAL
+                && defendingStat == Stat.DEFENSE) {
+            return value * 2;
+        }
+        return value;
     }
 
     private long applyMultiplier(long damage, int numerator, int denominator) {
@@ -154,10 +170,21 @@ public final class DamageFormula {
     }
 
     private int effectiveBasePower(DamageContext context) {
+        int basePower = context.move().basePower();
         if (context.move().doublePowerWhenUserStatused() && context.attacker().status() != StatusCondition.NONE) {
-            return context.move().basePower() * 2;
+            basePower *= 2;
         }
-        return context.move().basePower();
+        if (boostAbilityMatchesTypeThreshold(context)) {
+            basePower = basePower * 3 / 2;
+        }
+        if (context.attacker().ability() == Ability.TECHNICIAN && context.move().basePower() <= 60) {
+            basePower = basePower * 3 / 2;
+        }
+        if (context.attacker().ability() == Ability.WATER_BUBBLE
+                && context.move().type() == Type.WATER) {
+            basePower *= 2;
+        }
+        return basePower;
     }
 
     private List<Modifier> otherModifiers() {
@@ -169,8 +196,22 @@ public final class DamageFormula {
                 new ScreenModifier(),
                 new FriendGuardModifier(),
                 new AttackerItemModifier(),
+                new DefenderItemModifier(),
                 new AttackerAbilityModifier(),
                 new DefenderAbilityModifier());
+    }
+
+    private boolean boostAbilityMatchesTypeThreshold(DamageContext context) {
+        if (!context.attacker().atOrBelowThirdHp()) {
+            return false;
+        }
+        return switch (context.attacker().ability()) {
+            case BLAZE -> context.move().type() == Type.FIRE;
+            case TORRENT -> context.move().type() == Type.WATER;
+            case OVERGROW -> context.move().type() == Type.GRASS;
+            case SWARM -> context.move().type() == Type.BUG;
+            default -> false;
+        };
     }
 
     private final class ProtectModifier implements Modifier {
@@ -307,11 +348,32 @@ public final class DamageFormula {
 
         @Override
         public long apply(long damage, DamageContext context) {
-            return switch (context.attacker().item()) {
-                case LIFE_ORB -> applyMultiplier(damage, 13, 10);
-                case EXPERT_BELT -> context.superEffective() ? applyMultiplier(damage, 6, 5) : damage;
-                case NONE, LEFTOVERS, SITRUS_BERRY -> damage;
-            };
+            if (context.attacker().item() == Item.LIFE_ORB) {
+                return applyMultiplier(damage, 13, 10);
+            }
+            if (context.attacker().item() == Item.EXPERT_BELT && context.superEffective()) {
+                return applyMultiplier(damage, 6, 5);
+            }
+            if (boostedTypeFor(context.attacker().item()) == context.move().type()) {
+                return applyMultiplier(damage, 6, 5);
+            }
+            return damage;
+        }
+    }
+
+    private final class DefenderItemModifier implements Modifier {
+
+        @Override
+        public boolean applies(DamageContext context) {
+            return !context.itemsSuppressed() && context.defender().item() != Item.NONE;
+        }
+
+        @Override
+        public long apply(long damage, DamageContext context) {
+            if (berryReducesDamage(context.defender().item(), context)) {
+                return applyMultiplier(damage, 1, 2);
+            }
+            return damage;
         }
     }
 
@@ -330,8 +392,9 @@ public final class DamageFormula {
                 case NEUROFORCE -> context.superEffective() ? applyMultiplier(damage, 5, 4) : damage;
                 case PIERCING_DRILL, UNSEEN_FIST -> damage;
                 case SNIPER -> context.criticalHit() ? applyMultiplier(damage, 3, 2) : damage;
+                case TOUGH_CLAWS -> context.move().contact() ? applyMultiplier(damage, 13, 10) : damage;
                 case TINTED_LENS -> context.resisted() ? applyMultiplier(damage, 2, 1) : damage;
-                case NONE, ADAPTABILITY, FILTER, FLUFFY, MULTISCALE, SOLID_ROCK -> damage;
+                default -> damage;
             };
         }
 
@@ -348,17 +411,24 @@ public final class DamageFormula {
 
         @Override
         public boolean applies(DamageContext context) {
-            return context.defender().ability() != Ability.NONE;
+            return context.defender().ability() != Ability.NONE && !abilitySuppressedByMoldBreaker(context);
         }
 
         @Override
         public long apply(long damage, DamageContext context) {
             return switch (context.defender().ability()) {
                 case FAIRY_AURA -> damage;
+                case DRY_SKIN -> context.move().type() == Type.FIRE ? applyMultiplier(damage, 5, 4) : damage;
                 case FILTER, SOLID_ROCK -> context.superEffective() ? applyMultiplier(damage, 3, 4) : damage;
                 case FLUFFY -> fluffyAdjustment(damage, context);
+                case HEATPROOF -> context.move().type() == Type.FIRE ? applyMultiplier(damage, 1, 2) : damage;
                 case MULTISCALE -> context.defender().fullHp() ? applyMultiplier(damage, 1, 2) : damage;
-                case NONE, ADAPTABILITY, GUTS, NEUROFORCE, PIERCING_DRILL, SNIPER, TINTED_LENS, UNSEEN_FIST -> damage;
+                case THICK_FAT ->
+                    context.move().type() == Type.FIRE || context.move().type() == Type.ICE
+                            ? applyMultiplier(damage, 1, 2)
+                            : damage;
+                case WATER_BUBBLE -> context.move().type() == Type.FIRE ? applyMultiplier(damage, 1, 2) : damage;
+                default -> damage;
             };
         }
 
@@ -374,5 +444,86 @@ public final class DamageFormula {
             }
             return damage;
         }
+    }
+
+    private boolean abilitySuppressedByMoldBreaker(DamageContext context) {
+        if (!context.ignoresDefenderAbility()) {
+            return false;
+        }
+        return switch (context.defender().ability()) {
+            case DRY_SKIN,
+                    EARTH_EATER,
+                    FILTER,
+                    FLASH_FIRE,
+                    FLUFFY,
+                    FUR_COAT,
+                    HEATPROOF,
+                    LEVITATE,
+                    LIGHTNING_ROD,
+                    MULTISCALE,
+                    SAP_SIPPER,
+                    SOLID_ROCK,
+                    THICK_FAT,
+                    VOLT_ABSORB,
+                    WATER_ABSORB,
+                    WATER_BUBBLE -> true;
+            default -> false;
+        };
+    }
+
+    private Type boostedTypeFor(Item item) {
+        return switch (item) {
+            case BLACK_BELT -> Type.FIGHTING;
+            case BLACK_GLASSES -> Type.DARK;
+            case CHARCOAL -> Type.FIRE;
+            case DRAGON_FANG -> Type.DRAGON;
+            case FAIRY_FEATHER -> Type.FAIRY;
+            case HARD_STONE -> Type.ROCK;
+            case MAGNET -> Type.ELECTRIC;
+            case METAL_COAT -> Type.STEEL;
+            case MIRACLE_SEED -> Type.GRASS;
+            case MYSTIC_WATER -> Type.WATER;
+            case NEVER_MELT_ICE -> Type.ICE;
+            case POISON_BARB -> Type.POISON;
+            case SHARP_BEAK -> Type.FLYING;
+            case SILK_SCARF -> Type.NORMAL;
+            case SILVER_POWDER -> Type.BUG;
+            case SOFT_SAND -> Type.GROUND;
+            case SPELL_TAG -> Type.GHOST;
+            case TWISTED_SPOON -> Type.PSYCHIC;
+            default -> null;
+        };
+    }
+
+    private Type resistedTypeFor(Item item) {
+        return switch (item) {
+            case BABIRI_BERRY -> Type.STEEL;
+            case CHARTI_BERRY -> Type.ROCK;
+            case CHILAN_BERRY -> Type.NORMAL;
+            case CHOPLE_BERRY -> Type.FIGHTING;
+            case COBA_BERRY -> Type.FLYING;
+            case COLBUR_BERRY -> Type.DARK;
+            case HABAN_BERRY -> Type.DRAGON;
+            case KASIB_BERRY -> Type.GHOST;
+            case KEBIA_BERRY -> Type.POISON;
+            case OCCA_BERRY -> Type.FIRE;
+            case PASSHO_BERRY -> Type.WATER;
+            case PAYAPA_BERRY -> Type.PSYCHIC;
+            case RINDO_BERRY -> Type.GRASS;
+            case ROSELI_BERRY -> Type.FAIRY;
+            case SHUCA_BERRY -> Type.GROUND;
+            case TANGA_BERRY -> Type.BUG;
+            case WACAN_BERRY -> Type.ELECTRIC;
+            case YACHE_BERRY -> Type.ICE;
+            default -> null;
+        };
+    }
+
+    private boolean berryReducesDamage(Item item, DamageContext context) {
+        if (item == Item.CHILAN_BERRY) {
+            return context.move().type() == Type.NORMAL;
+        }
+        Type resistedType = resistedTypeFor(item);
+        return resistedType != null && context.move().type() == resistedType && context.superEffective();
     }
 }

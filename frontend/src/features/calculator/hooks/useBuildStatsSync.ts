@@ -108,10 +108,17 @@ export function useBuildStatsSync(
       }
 
       const latestCombatant = useCalculatorStore.getState()[side]
+      const nextCurrentHp =
+        latestCombatant.finalStats === null ||
+        latestCombatant.currentHp >= latestCombatant.finalStats.hp
+          ? buildResponse.finalStats.hp
+          : Math.min(latestCombatant.currentHp, buildResponse.finalStats.hp)
+
       useCalculatorStore.getState().setCombatantDerived(side, {
         baseStats: buildResponse.baseStats,
         finalStats: buildResponse.finalStats,
         types: resolveCombatantTypes(latestCombatant, pokedexRef.current),
+        currentHp: nextCurrentHp,
       })
       buildKeyRef.current = currentBuildKey
     }

@@ -38,8 +38,8 @@ export function toCombatantBuild(
     baseStats: pokedexEntry?.baseStats ?? pokemon.stats,
     finalStats: pokemon.stats,
     types,
-    grounded: !types.includes('FLYING'),
-    fullHp: true,
+    grounded: isGrounded(types, pokemon.abilityId),
+    currentHp: pokemon.stats.hp,
   }
 }
 
@@ -63,6 +63,13 @@ function normalizeTypes(types: string[] | undefined): [string, string | null] {
 
   const [primary, secondary] = types
   return [primary, secondary ?? null]
+}
+
+function isGrounded(
+  types: [string, string | null],
+  abilityId: string | null,
+): boolean {
+  return !types.includes('FLYING') && abilityId !== 'levitate'
 }
 
 function toMoveSlots(moveIds: string[]): CombatantBuild['moves'] {

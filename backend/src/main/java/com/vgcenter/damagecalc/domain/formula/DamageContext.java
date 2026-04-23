@@ -1,7 +1,9 @@
 package com.vgcenter.damagecalc.domain.formula;
 
+import com.vgcenter.damagecalc.domain.model.Ability;
 import com.vgcenter.damagecalc.domain.model.Combatant;
 import com.vgcenter.damagecalc.domain.model.Move;
+import com.vgcenter.damagecalc.domain.model.Type;
 import java.util.Objects;
 
 public record DamageContext(
@@ -56,6 +58,9 @@ public record DamageContext(
     }
 
     public int typeEffectivenessScale() {
+        if (abilityGrantsImmunity()) {
+            return 0;
+        }
         int scale = 4;
         for (var defenderType : defender.types()) {
             scale = scale * move.type().damageScaleAgainst(defenderType) / 4;
@@ -73,5 +78,25 @@ public record DamageContext(
     public boolean resisted() {
         int scale = typeEffectivenessScale();
         return scale > 0 && scale < 4;
+    }
+
+    public boolean ignoresDefenderAbility() {
+        return attacker.ability() == Ability.MOLD_BREAKER;
+    }
+
+    private boolean abilityGrantsImmunity() {
+        if (ignoresDefenderAbility()) {
+            return false;
+        }
+
+        return switch (defender.ability()) {
+            case LEVITATE -> move.type() == Type.GROUND;
+            case FLASH_FIRE -> move.type() == Type.FIRE;
+            case WATER_ABSORB -> move.type() == Type.WATER;
+            case VOLT_ABSORB, LIGHTNING_ROD -> move.type() == Type.ELECTRIC;
+            case SAP_SIPPER -> move.type() == Type.GRASS;
+            case EARTH_EATER -> move.type() == Type.GROUND;
+            default -> false;
+        };
     }
 }

@@ -36,7 +36,7 @@ class DamageApiEndToEndTest {
                                     "itemId": "none",
                                     "status": "NONE",
                                     "grounded": true,
-                                    "fullHp": true
+                                    "currentHp": 140
                                   },
                                   "defender": {
                                     "level": 50,
@@ -46,7 +46,7 @@ class DamageApiEndToEndTest {
                                     "itemId": "none",
                                     "status": "NONE",
                                     "grounded": true,
-                                    "fullHp": true
+                                    "currentHp": 160
                                   },
                                   "move": {
                                     "type": "FIRE",

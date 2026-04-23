@@ -26,7 +26,6 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
 
     @Override
     public CalculateDamageResult calculate(CalculateDamageCommand command) {
-        Item defenderItem = Item.fromId(command.defender().itemId());
         DamageContext context = new DamageContext(
                 toCombatant(command.attacker()),
                 toCombatant(command.defender()),
@@ -41,12 +40,7 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
         int max = rolls[rolls.length - 1];
         int defenderHp = context.defender().stats().hp();
         return new CalculateDamageResult(
-                rolls,
-                min,
-                max,
-                min * 100.0d / defenderHp,
-                max * 100.0d / defenderHp,
-                toKoChance(rolls, defenderHp, defenderItem));
+                rolls, min, max, min * 100.0d / defenderHp, max * 100.0d / defenderHp, toKoChance(context, rolls));
     }
 
     private Combatant toCombatant(CombatantCommand command) {
@@ -69,7 +63,7 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 Item.fromId(command.itemId()),
                 status,
                 command.grounded(),
-                command.fullHp());
+                command.currentHp());
     }
 
     private Move toMove(MoveCommand command) {
@@ -101,9 +95,12 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 command.protect());
     }
 
-    private KoChanceResult toKoChance(int[] rolls, int defenderHp, Item defenderItem) {
-        KoChanceResult baseline = evaluateKoChance(rolls, defenderHp, Item.NONE);
-        KoChanceResult actual = evaluateKoChance(rolls, defenderHp, defenderItem);
+    private KoChanceResult toKoChance(DamageContext context, int[] firstHitRolls) {
+        int[] followUpRolls = followUpRolls(context, firstHitRolls);
+        int defenderHp = context.defender().stats().hp();
+        Item defenderItem = context.defender().item();
+        KoChanceResult baseline = evaluateKoChance(firstHitRolls, followUpRolls, defenderHp, Item.NONE);
+        KoChanceResult actual = evaluateKoChance(firstHitRolls, followUpRolls, defenderHp, defenderItem);
         if (defenderItem == Item.LEFTOVERS && differsFromBaseline(actual, baseline)) {
             return new KoChanceResult(
                     actual.description() + " after Leftovers recovery", actual.probability(), actual.hits());
@@ -115,9 +112,24 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
         return actual;
     }
 
-    private KoChanceResult evaluateKoChance(int[] rolls, int defenderHp, Item defenderItem) {
+    private KoChanceResult toKoChance(int[] rolls, int defenderHp, Item defenderItem) {
+        KoChanceResult baseline = evaluateKoChance(rolls, rolls, defenderHp, Item.NONE);
+        KoChanceResult actual = evaluateKoChance(rolls, rolls, defenderHp, defenderItem);
+        if (defenderItem == Item.LEFTOVERS && differsFromBaseline(actual, baseline)) {
+            return new KoChanceResult(
+                    actual.description() + " after Leftovers recovery", actual.probability(), actual.hits());
+        }
+        if (defenderItem == Item.SITRUS_BERRY && differsFromBaseline(actual, baseline)) {
+            return new KoChanceResult(
+                    actual.description() + " after Sitrus Berry recovery", actual.probability(), actual.hits());
+        }
+        return actual;
+    }
+
+    private KoChanceResult evaluateKoChance(
+            int[] firstHitRolls, int[] followUpRolls, int defenderHp, Item defenderItem) {
         for (int hits = 1; hits <= 5; hits++) {
-            double probability = knockoutProbability(rolls, defenderHp, defenderItem, hits);
+            double probability = knockoutProbability(firstHitRolls, followUpRolls, defenderHp, defenderItem, hits);
             if (probability == 1.0d) {
                 return new KoChanceResult(guaranteedDescription(hits), probability, hits);
             }
@@ -128,24 +140,46 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
         return new KoChanceResult("no 5HKO", 0.0d, 5);
     }
 
-    private double knockoutProbability(int[] rolls, int defenderHp, Item defenderItem, int hits) {
-        long koSequences = countKoSequences(rolls, defenderHp, defenderHp, defenderItem, hits, false);
-        double totalSequences = Math.pow(rolls.length, hits);
+    private double knockoutProbability(
+            int[] firstHitRolls, int[] followUpRolls, int defenderHp, Item defenderItem, int hits) {
+        long koSequences = 0L;
+        for (int roll : firstHitRolls) {
+            HitState nextState = applyHit(defenderHp, defenderHp, defenderItem, false, roll, hits > 1);
+            if (nextState.knockedOut()) {
+                koSequences += (long) Math.pow(followUpRolls.length, hits - 1);
+                continue;
+            }
+            if (hits > 1) {
+                koSequences += countKoSequences(
+                        followUpRolls,
+                        defenderHp,
+                        nextState.remainingHp(),
+                        defenderItem,
+                        hits - 1,
+                        nextState.sitrusConsumed());
+            }
+        }
+        double totalSequences = Math.pow(firstHitRolls.length, hits);
         return koSequences / totalSequences;
     }
 
     private long countKoSequences(
-            int[] rolls, int maxHp, int currentHp, Item defenderItem, int remainingHits, boolean sitrusConsumed) {
+            int[] followUpRolls,
+            int maxHp,
+            int currentHp,
+            Item defenderItem,
+            int remainingHits,
+            boolean sitrusConsumed) {
         long koSequences = 0L;
-        for (int roll : rolls) {
+        for (int roll : followUpRolls) {
             HitState nextState = applyHit(maxHp, currentHp, defenderItem, sitrusConsumed, roll, remainingHits > 1);
             if (nextState.knockedOut()) {
-                koSequences += (long) Math.pow(rolls.length, remainingHits - 1);
+                koSequences += (long) Math.pow(followUpRolls.length, remainingHits - 1);
                 continue;
             }
             if (remainingHits > 1) {
                 koSequences += countKoSequences(
-                        rolls,
+                        followUpRolls,
                         maxHp,
                         nextState.remainingHp(),
                         defenderItem,
@@ -182,6 +216,65 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
 
     private boolean differsFromBaseline(KoChanceResult actual, KoChanceResult baseline) {
         return actual.hits() != baseline.hits() || Double.compare(actual.probability(), baseline.probability()) != 0;
+    }
+
+    private int[] followUpRolls(DamageContext context, int[] firstHitRolls) {
+        boolean consumesBerry = berryReducesDamage(context.defender().item(), context);
+        boolean dropsFullHpGate = context.defender().fullHp();
+        if (!consumesBerry && !dropsFullHpGate) {
+            return firstHitRolls;
+        }
+
+        Combatant followUpDefender = context.defender();
+        if (consumesBerry) {
+            followUpDefender = followUpDefender.withItem(Item.NONE);
+        }
+        if (dropsFullHpGate) {
+            followUpDefender = followUpDefender.withCurrentHp(
+                    Math.max(1, followUpDefender.stats().hp() - 1));
+        }
+
+        return damageFormula.rolls(new DamageContext(
+                context.attacker(),
+                followUpDefender,
+                context.move(),
+                context.field(),
+                context.attackerSide(),
+                context.defenderSide(),
+                context.criticalHit(),
+                context.targets()));
+    }
+
+    private Type resistedBerryType(Item item) {
+        return switch (item) {
+            case BABIRI_BERRY -> Type.STEEL;
+            case CHARTI_BERRY -> Type.ROCK;
+            case CHILAN_BERRY -> Type.NORMAL;
+            case CHOPLE_BERRY -> Type.FIGHTING;
+            case COBA_BERRY -> Type.FLYING;
+            case COLBUR_BERRY -> Type.DARK;
+            case HABAN_BERRY -> Type.DRAGON;
+            case KASIB_BERRY -> Type.GHOST;
+            case KEBIA_BERRY -> Type.POISON;
+            case OCCA_BERRY -> Type.FIRE;
+            case PASSHO_BERRY -> Type.WATER;
+            case PAYAPA_BERRY -> Type.PSYCHIC;
+            case RINDO_BERRY -> Type.GRASS;
+            case ROSELI_BERRY -> Type.FAIRY;
+            case SHUCA_BERRY -> Type.GROUND;
+            case TANGA_BERRY -> Type.BUG;
+            case WACAN_BERRY -> Type.ELECTRIC;
+            case YACHE_BERRY -> Type.ICE;
+            default -> null;
+        };
+    }
+
+    private boolean berryReducesDamage(Item item, DamageContext context) {
+        if (item == Item.CHILAN_BERRY) {
+            return context.move().type() == Type.NORMAL;
+        }
+        Type resistedType = resistedBerryType(item);
+        return resistedType != null && context.move().type() == resistedType && context.superEffective();
     }
 
     private String guaranteedDescription(int hits) {

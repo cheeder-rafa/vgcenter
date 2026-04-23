@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -67,76 +67,80 @@ describe('SavedPokemonRail', () => {
     const user = userEvent.setup()
     const attackerRail = screen.getByLabelText(/attacker saved rail/i)
 
-    useCalculatorStore.getState().setAttacker({
-      speciesId: 'charizard',
-      natureId: 'timid',
-      abilityId: 'blaze',
-      itemId: 'life-orb',
-      status: 'BURN',
-      megaActive: false,
-      moves: [
-        { moveId: 'heat-wave' },
-        { moveId: 'protect' },
-        { moveId: null },
-        { moveId: null },
-      ],
-      baseStats: {
-        hp: 78,
-        attack: 84,
-        defense: 78,
-        specialAttack: 109,
-        specialDefense: 85,
-        speed: 100,
-      },
-      finalStats: {
-        hp: 153,
-        attack: 104,
-        defense: 99,
-        specialAttack: 177,
-        specialDefense: 105,
-        speed: 132,
-      },
-      types: ['FIRE', 'FLYING'],
-      grounded: false,
-      fullHp: false,
+    act(() => {
+      useCalculatorStore.getState().setAttacker({
+        speciesId: 'charizard',
+        natureId: 'timid',
+        abilityId: 'blaze',
+        itemId: 'life-orb',
+        status: 'BURN',
+        megaActive: false,
+        moves: [
+          { moveId: 'heat-wave' },
+          { moveId: 'protect' },
+          { moveId: null },
+          { moveId: null },
+        ],
+        baseStats: {
+          hp: 78,
+          attack: 84,
+          defense: 78,
+          specialAttack: 109,
+          specialDefense: 85,
+          speed: 100,
+        },
+        finalStats: {
+          hp: 153,
+          attack: 104,
+          defense: 99,
+          specialAttack: 177,
+          specialDefense: 105,
+          speed: 132,
+        },
+        types: ['FIRE', 'FLYING'],
+        grounded: false,
+        currentHp: 120,
+      })
     })
 
     await user.click(
       within(attackerRail).getByRole('button', { name: /^save$/i }),
     )
 
-    useCalculatorStore.getState().setAttacker({
-      speciesId: 'amoonguss',
-      natureId: 'serious',
-      abilityId: 'regenerator',
-      itemId: 'sitrus-berry',
-      status: 'NONE',
-      megaActive: false,
-      moves: [
-        { moveId: 'spore' },
-        { moveId: null },
-        { moveId: null },
-        { moveId: null },
-      ],
-      baseStats: {
-        hp: 114,
-        attack: 85,
-        defense: 70,
-        specialAttack: 85,
-        specialDefense: 80,
-        speed: 30,
-      },
-      finalStats: {
-        hp: 189,
-        attack: 105,
-        defense: 90,
-        specialAttack: 105,
-        specialDefense: 100,
-        speed: 50,
-      },
-      types: ['GRASS', 'POISON'],
-      grounded: true,
-      fullHp: true,
+    act(() => {
+      useCalculatorStore.getState().setAttacker({
+        speciesId: 'amoonguss',
+        natureId: 'serious',
+        abilityId: 'regenerator',
+        itemId: 'sitrus-berry',
+        status: 'NONE',
+        megaActive: false,
+        moves: [
+          { moveId: 'spore' },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+        baseStats: {
+          hp: 114,
+          attack: 85,
+          defense: 70,
+          specialAttack: 85,
+          specialDefense: 80,
+          speed: 30,
+        },
+        finalStats: {
+          hp: 189,
+          attack: 105,
+          defense: 90,
+          specialAttack: 105,
+          specialDefense: 100,
+          speed: 50,
+        },
+        types: ['GRASS', 'POISON'],
+        grounded: true,
+        currentHp: 189,
+      })
     })
 
     await user.click(screen.getByRole('button', { name: /load charizard/i }))
@@ -150,7 +154,7 @@ describe('SavedPokemonRail', () => {
           itemId: 'life-orb',
           status: 'BURN',
           grounded: false,
-          fullHp: false,
+          currentHp: 120,
           moves: expect.arrayContaining([{ moveId: 'heat-wave' }]),
         }),
       ),

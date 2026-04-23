@@ -22,7 +22,7 @@ type ReactiveCombatantInputs = Pick<
   | 'megaActive'
   | 'moves'
   | 'grounded'
-  | 'fullHp'
+  | 'currentHp'
   | 'finalStats'
   | 'types'
 >
@@ -63,7 +63,7 @@ function selectCombatantInputs(
     megaActive: combatant.megaActive,
     moves: combatant.moves,
     grounded: combatant.grounded,
-    fullHp: combatant.fullHp,
+    currentHp: combatant.currentHp,
     finalStats: combatant.finalStats,
     types: combatant.types,
   }

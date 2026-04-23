@@ -47,7 +47,7 @@ const savedPokemonFactory = (
   },
   types: ['FIRE', 'FLYING'] as CombatantBuild['types'],
   grounded: false,
-  fullHp: true,
+  currentHp: 153,
   speciesName: 'Charizard',
   spriteId: 'charizard',
   ...overrides,

@@ -75,6 +75,23 @@ const pokedex: PokedexEntry[] = [
     moveIds: ['spore', 'rage-powder'],
     megaForms: [],
   },
+  {
+    id: 'mismagius',
+    name: 'Mismagius',
+    imageUrl: '/sprites/mismagius.png',
+    types: ['GHOST'],
+    baseStats: {
+      hp: 60,
+      attack: 60,
+      defense: 60,
+      specialAttack: 105,
+      specialDefense: 105,
+      speed: 105,
+    },
+    abilityIds: ['levitate', 'flash-fire'],
+    moveIds: ['protect'],
+    megaForms: [],
+  },
 ]
 
 const abilities: NamedDatasetEntry[] = [
@@ -84,6 +101,7 @@ const abilities: NamedDatasetEntry[] = [
   { id: 'drought', name: 'Drought' },
   { id: 'regenerator', name: 'Regenerator' },
   { id: 'levitate', name: 'Levitate' },
+  { id: 'flash-fire', name: 'Flash Fire' },
 ]
 
 const items: NamedDatasetEntry[] = [
@@ -208,6 +226,7 @@ describe('PokemonPanel', () => {
     expect(state.types).toEqual(['FIRE', 'FLYING'])
     expect(state.grounded).toBe(false)
     expect(state.abilityId).toBe('blaze')
+    expect(state.currentHp).toBe(78)
 
     const abilitySelect = screen.getByLabelText(
       /^ability$/i,
@@ -241,6 +260,39 @@ describe('PokemonPanel', () => {
     )
     expect(values).not.toContain('spore')
     expect(values).not.toContain('rage-powder')
+  })
+
+  it('clamps current hp to the active max hp', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'amoo')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    const currentHpInput = screen.getByLabelText(/^current hp$/i)
+    await user.clear(currentHpInput)
+    await user.type(currentHpInput, '999')
+
+    expect(useCalculatorStore.getState().attacker.currentHp).toBe(114)
+  })
+
+  it('treats levitate users as ungrounded and restores grounding when ability changes', async () => {
+    renderPanel()
+    const user = userEvent.setup()
+
+    const speciesInput = screen.getByRole('combobox', { name: /^species$/i })
+    await user.click(speciesInput)
+    await user.type(speciesInput, 'mism')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    expect(useCalculatorStore.getState().attacker.grounded).toBe(false)
+
+    await user.selectOptions(screen.getByLabelText(/^ability$/i), 'flash-fire')
+
+    expect(useCalculatorStore.getState().attacker.abilityId).toBe('flash-fire')
+    expect(useCalculatorStore.getState().attacker.grounded).toBe(true)
   })
 
   it('focuses a move slot when clicked', async () => {

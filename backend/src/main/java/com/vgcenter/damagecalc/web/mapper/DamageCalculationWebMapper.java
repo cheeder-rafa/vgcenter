@@ -27,7 +27,7 @@ public class DamageCalculationWebMapper {
                         request.attacker().status(),
                         request.attacker().stages(),
                         request.attacker().grounded(),
-                        request.attacker().fullHp()),
+                        request.attacker().currentHp()),
                 new CombatantCommand(
                         request.defender().level(),
                         toStatsCommand(request.defender().stats()),
@@ -37,7 +37,7 @@ public class DamageCalculationWebMapper {
                         request.defender().status(),
                         request.defender().stages(),
                         request.defender().grounded(),
-                        request.defender().fullHp()),
+                        request.defender().currentHp()),
                 new MoveCommand(
                         request.move().type(),
                         request.move().category(),
