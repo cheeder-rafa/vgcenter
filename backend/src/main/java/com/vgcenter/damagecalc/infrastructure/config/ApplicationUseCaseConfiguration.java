@@ -14,8 +14,11 @@ import com.vgcenter.damagecalc.application.usecase.CalculateDamageService;
 import com.vgcenter.damagecalc.application.usecase.CalculateDamageUseCase;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogService;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogUseCase;
+import com.vgcenter.damagecalc.application.usecase.EvaluateMatchupService;
+import com.vgcenter.damagecalc.application.usecase.EvaluateMatchupUseCase;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
+import com.vgcenter.damagecalc.domain.gameplan.MatchupScorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -46,5 +49,11 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     ImportTeamUseCase importTeamUseCase(TeamParser teamParser, PokepasteClient pokepasteClient) {
         return new ImportTeamService(teamParser, pokepasteClient);
+    }
+
+    @Bean
+    EvaluateMatchupUseCase evaluateMatchupUseCase(
+            CalculateDamageUseCase calculateDamageUseCase, MoveRepository moveRepository) {
+        return new EvaluateMatchupService(calculateDamageUseCase, moveRepository, new MatchupScorer());
     }
 }
