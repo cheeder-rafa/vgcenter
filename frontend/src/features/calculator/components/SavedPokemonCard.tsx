@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { CalculatorSide } from '../store/useCalculatorStore'
-import type { SavedPokemon } from '../store/useSavedTeamStore'
+import type { SavedPokemon } from '../../../store/useTeamsStore'
 
 type Props = {
   index: number

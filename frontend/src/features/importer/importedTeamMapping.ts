@@ -1,4 +1,4 @@
-import type { SavedPokemon } from '../calculator/store/useSavedTeamStore'
+import type { SavedPokemon } from '../../store/useTeamsStore'
 import type {
   CombatantBuild,
   ImportedPokemon,

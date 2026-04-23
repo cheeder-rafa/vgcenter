@@ -1,8 +1,8 @@
 import type { CombatantBuild } from '../types/api'
 import {
-  useSavedTeamStore,
+  useTeamsStore,
   type SavedPokemon,
-} from '../store/useSavedTeamStore'
+} from '../../../store/useTeamsStore'
 import type { CalculatorSide } from '../store/useCalculatorStore'
 import { SavedPokemonCard } from './SavedPokemonCard'
 
@@ -21,12 +21,12 @@ export function SavedPokemonRail({
   spriteId,
   onLoadBuild,
 }: Props) {
-  const saved = useSavedTeamStore((state) =>
-    side === 'attacker' ? state.attackerSaved : state.defenderSaved,
+  const saved = useTeamsStore((state) =>
+    side === 'attacker' ? state.mine : state.opponent,
   )
-  const save = useSavedTeamStore((state) => state.save)
-  const remove = useSavedTeamStore((state) => state.remove)
-  const load = useSavedTeamStore((state) => state.load)
+  const save = useTeamsStore((state) => state.save)
+  const remove = useTeamsStore((state) => state.remove)
+  const load = useTeamsStore((state) => state.load)
 
   const sideLabel = side === 'attacker' ? 'Attacker' : 'Defender'
   const canSave = currentBuild.speciesId !== null

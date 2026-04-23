@@ -1,3 +1,5 @@
+// These tests cover the backward-compat alias. The canonical store is useTeamsStore.
+// The alias re-exports useTeamsStore directly, so behaviour is identical.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { CombatantBuild } from '../../../src/features/calculator/types/api'
@@ -70,7 +72,7 @@ function createLocalStorageStub() {
   }
 }
 
-describe('useSavedTeamStore', () => {
+describe('useSavedTeamStore (backward-compat alias)', () => {
   beforeEach(() => {
     vi.resetModules()
   })
@@ -88,7 +90,7 @@ describe('useSavedTeamStore', () => {
 
     useSavedTeamStore.getState().save('attacker', savedPokemonFactory())
 
-    expect(useSavedTeamStore.getState().attackerSaved[0]).toEqual(
+    expect(useSavedTeamStore.getState().mine[0]).toEqual(
       expect.objectContaining({
         speciesId: 'charizard',
         speciesName: 'Charizard',
@@ -116,7 +118,7 @@ describe('useSavedTeamStore', () => {
     useSavedTeamStore.getState().save('defender', savedPokemonFactory())
     useSavedTeamStore.getState().remove('defender', 0)
 
-    expect(useSavedTeamStore.getState().defenderSaved[0]).toBeNull()
+    expect(useSavedTeamStore.getState().opponent[0]).toBeNull()
     expect(useSavedTeamStore.getState().load('defender', 0)).toBeNull()
   })
 
@@ -152,9 +154,9 @@ describe('useSavedTeamStore', () => {
     expect(
       useSavedTeamStore
         .getState()
-        .attackerSaved.filter((entry) => entry !== null),
+        .mine.filter((entry) => entry !== null),
     ).toHaveLength(6)
-    expect(useSavedTeamStore.getState().attackerSaved[5]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe(
       'charizard-5',
     )
     expect(useToastStore.getState().toasts.at(-1)?.message).toMatch(/full/i)
@@ -163,11 +165,11 @@ describe('useSavedTeamStore', () => {
   it('rehydrates saved rails from localStorage', async () => {
     const localStorage = createLocalStorageStub()
     localStorage.setItem(
-      'vgcenter.savedTeams.v1',
+      'vgcenter.teamsStore.v1',
       JSON.stringify({
         state: {
-          attackerSaved: [savedPokemonFactory(), null, null, null, null, null],
-          defenderSaved: [null, null, null, null, null, null],
+          mine: [savedPokemonFactory(), null, null, null, null, null],
+          opponent: [null, null, null, null, null, null],
         },
         version: 1,
       }),
@@ -177,7 +179,7 @@ describe('useSavedTeamStore', () => {
     const { useSavedTeamStore } =
       await import('../../../src/features/calculator/store/useSavedTeamStore')
 
-    expect(useSavedTeamStore.getState().attackerSaved[0]).toEqual(
+    expect(useSavedTeamStore.getState().mine[0]).toEqual(
       expect.objectContaining({
         speciesId: 'charizard',
         speciesName: 'Charizard',
@@ -222,7 +224,7 @@ describe('useSavedTeamStore', () => {
       }),
     ])
 
-    expect(useSavedTeamStore.getState().attackerSaved).toEqual([
+    expect(useSavedTeamStore.getState().mine).toEqual([
       expect.objectContaining({ speciesId: 'amoonguss' }),
       expect.objectContaining({ speciesId: 'incineroar' }),
       null,

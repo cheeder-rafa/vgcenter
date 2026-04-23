@@ -34,7 +34,7 @@ import {
   toSavedPokemon,
 } from '../features/importer/importedTeamMapping'
 import { t } from '../lib/i18n'
-import { useSavedTeamStore } from '../features/calculator/store/useSavedTeamStore'
+import { useTeamsStore } from '../store/useTeamsStore'
 import {
   usePinStore,
   type MatchupPin,
@@ -49,7 +49,7 @@ export function CalculatorPage() {
   const setDefender = useCalculatorStore((s) => s.setDefender)
   const setMoveCatalog = useCalculatorStore((s) => s.setMoveCatalog)
   const results = useCalculatorStore((s) => s.results)
-  const importSavedTeam = useSavedTeamStore((s) => s.importTeam)
+  const importSavedTeam = useTeamsStore((s) => s.importTeam)
 
   const [pokedex, setPokedex] = useState<PokedexEntry[]>([])
   const [abilities, setAbilities] = useState<NamedDatasetEntry[]>([])
