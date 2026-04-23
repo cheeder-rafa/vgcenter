@@ -117,7 +117,7 @@ describe('PatchNotesModal', () => {
     expect(screen.getAllByText(/known issues/i).length).toBeGreaterThan(0)
   })
 
-  it('uses more player-friendly patch notes copy', async () => {
+  it('uses cumulative patch notes copy for the current and prior updates', async () => {
     const user = userEvent.setup()
     render(<CalculatorPage />)
 
@@ -125,17 +125,22 @@ describe('PatchNotesModal', () => {
 
     expect(
       screen.getByText(
-        /the calculator is easier to use on phones and smaller screens/i,
+        /damage plan mode lets you chain multi-turn lines instead of only looking at isolated single-hit calcs/i,
       ),
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        /damage details are easier to scan during quick comparisons/i,
+        /small delta chips now sit beside each move so edits are easier to compare at a glance/i,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /mystic water, levitate, mold breaker, and the new item and ability interactions/i,
       ),
     ).toBeInTheDocument()
   })
 
-  it('flags item, ability, and calculation issues as being under correction', async () => {
+  it('keeps the patch notes focused on the current calculator workflow', async () => {
     const user = userEvent.setup()
     render(<CalculatorPage />)
 
@@ -143,7 +148,7 @@ describe('PatchNotesModal', () => {
 
     expect(
       screen.getByText(
-        /some items, abilities, and damage calculations are still under correction/i,
+        /the calculator stays reactive, so weather, terrain, and field changes update the line without a manual calculate step/i,
       ),
     ).toBeInTheDocument()
   })

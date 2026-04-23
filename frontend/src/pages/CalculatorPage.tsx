@@ -8,6 +8,7 @@ import {
   fetchPokedex,
 } from '../features/calculator/api/datasetApi'
 import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
+import { DamagePlanView } from '../features/calculator/components/DamagePlanView'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { MatchupPinStrip } from '../features/calculator/components/MatchupPinStrip'
@@ -59,6 +60,7 @@ export function CalculatorPage() {
 
   const [focusedSide, setFocusedSide] = useState<CalculatorSide>('attacker')
   const [focusedMoveIndex, setFocusedMoveIndex] = useState(0)
+  const [viewMode, setViewMode] = useState<'overview' | 'plan'>('overview')
 
   useBuildStatsSync('attacker', pokedex)
   useBuildStatsSync('defender', pokedex)
@@ -102,11 +104,13 @@ export function CalculatorPage() {
     'attacker',
     moves,
     results.attackerMoves,
+    results.previousAttackerMoves,
   )
   const defenderMoveEntries = useAllMoveEntries(
     'defender',
     moves,
     results.defenderMoves,
+    results.previousDefenderMoves,
   )
   const attackerHp = useCalculatorStore(
     (s) => s.attacker.finalStats?.hp ?? null,
@@ -226,6 +230,47 @@ export function CalculatorPage() {
           onCurrentPin={handleCurrentPin}
         />
 
+        <section className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-white/10 bg-white/[0.03] px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="arena-label text-arena-violet">Damage View</span>
+            <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-white/35">
+              switch between overview and turn sequencing
+            </span>
+          </div>
+          <div
+            className="inline-flex rounded-sm border border-white/10 bg-black/10 p-1"
+            role="tablist"
+            aria-label="Damage view mode"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'overview'}
+              onClick={() => setViewMode('overview')}
+              className={`arena-chip rounded-none px-3 py-1.5 text-[0.62rem] tracking-[0.2em] ${
+                viewMode === 'overview'
+                  ? 'border-arena-plasma/50 bg-arena-plasma/15 text-white'
+                  : 'border-transparent text-white/50 hover:text-white/80'
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'plan'}
+              onClick={() => setViewMode('plan')}
+              className={`arena-chip rounded-none px-3 py-1.5 text-[0.62rem] tracking-[0.2em] ${
+                viewMode === 'plan'
+                  ? 'border-arena-cyan/50 bg-arena-cyan/15 text-white'
+                  : 'border-transparent text-white/50 hover:text-white/80'
+              }`}
+            >
+              Damage Plan
+            </button>
+          </div>
+        </section>
+
         <section
           className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]"
           data-testid="detailed-result-grid"
@@ -234,14 +279,25 @@ export function CalculatorPage() {
             className="xl:col-start-2 xl:col-end-5"
             data-testid="detailed-result-span"
           >
-            <DualMoveReadout
-              attackerName={attackerName}
-              defenderName={defenderName}
-              attackerMoves={attackerMoveEntries}
-              defenderMoves={defenderMoveEntries}
-              attackerHp={attackerHp}
-              defenderHp={defenderHp}
-            />
+            {viewMode === 'overview' ? (
+              <DualMoveReadout
+                attackerName={attackerName}
+                defenderName={defenderName}
+                attackerMoves={attackerMoveEntries}
+                defenderMoves={defenderMoveEntries}
+                attackerHp={attackerHp}
+                defenderHp={defenderHp}
+              />
+            ) : (
+              <DamagePlanView
+                attackerName={attackerName}
+                defenderName={defenderName}
+                attackerMoves={attackerMoveEntries}
+                defenderMoves={defenderMoveEntries}
+                attackerHp={attackerHp}
+                defenderHp={defenderHp}
+              />
+            )}
           </div>
         </section>
 
@@ -322,11 +378,15 @@ function useAllMoveEntries(
   results: ReturnType<
     typeof useCalculatorStore.getState
   >['results']['attackerMoves'][number][],
+  previousResults: ReturnType<
+    typeof useCalculatorStore.getState
+  >['results']['previousAttackerMoves'][number][],
 ): {
   moveName: string | null
   moveType: string | null
   moveCategory: MoveDefinition['category'] | null
   result: import('../features/calculator/types/api').DamageResult | null
+  previousResult: import('../features/calculator/types/api').DamageResult | null
 }[] {
   const slots = useCalculatorStore((s) => s[side].moves)
   return slots.map((slot, i) => {
@@ -338,6 +398,7 @@ function useAllMoveEntries(
       moveType: move?.type ?? null,
       moveCategory: move?.category ?? null,
       result: results[i] ?? null,
+      previousResult: previousResults[i] ?? null,
     }
   })
 }

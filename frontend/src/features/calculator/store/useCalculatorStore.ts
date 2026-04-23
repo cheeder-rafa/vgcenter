@@ -39,6 +39,18 @@ type DamageResults = {
     DamageResult | null,
     DamageResult | null,
   ]
+  previousAttackerMoves: [
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+  ]
+  previousDefenderMoves: [
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+    DamageResult | null,
+  ]
 }
 
 type ResultsStatus = 'idle' | 'loading' | 'success' | 'error'
@@ -125,6 +137,8 @@ function createEmptyResults(): DamageResults {
   return {
     attackerMoves: [null, null, null, null],
     defenderMoves: [null, null, null, null],
+    previousAttackerMoves: [null, null, null, null],
+    previousDefenderMoves: [null, null, null, null],
   }
 }
 
@@ -283,6 +297,10 @@ export const useCalculatorStore = create<CalculatorState>()(
       set((state) => {
         const resultKey =
           side === 'attacker' ? 'attackerMoves' : 'defenderMoves'
+        const previousResultKey =
+          side === 'attacker'
+            ? 'previousAttackerMoves'
+            : 'previousDefenderMoves'
 
         return {
           [side]: {
@@ -292,22 +310,40 @@ export const useCalculatorStore = create<CalculatorState>()(
           results: {
             ...state.results,
             [resultKey]: createEmptySideResults(),
+            [previousResultKey]: createEmptySideResults(),
           },
         }
       }),
     setResult: (side, index, result) =>
       set((state) => {
         const key = side === 'attacker' ? 'attackerMoves' : 'defenderMoves'
+        const previousKey =
+          side === 'attacker'
+            ? 'previousAttackerMoves'
+            : 'previousDefenderMoves'
         const moves = [...state.results[key]] as DamageResults[typeof key]
+        const previousMoves = [
+          ...state.results[previousKey],
+        ] as DamageResults[typeof previousKey]
+        previousMoves[index] = moves[index] ?? null
         moves[index] = result
         return {
           results: {
             ...state.results,
             [key]: moves,
+            [previousKey]: previousMoves,
           },
         }
       }),
-    setResults: (results) => set({ results }),
+    setResults: (results) =>
+      set((state) => ({
+        results: {
+          attackerMoves: [...results.attackerMoves],
+          defenderMoves: [...results.defenderMoves],
+          previousAttackerMoves: [...state.results.attackerMoves],
+          previousDefenderMoves: [...state.results.defenderMoves],
+        },
+      })),
     clearResults: () => set({ results: createEmptyResults() }),
     setResultsStatus: (resultsStatus) => set({ resultsStatus }),
     toggleCriticalHit: () =>

@@ -83,6 +83,18 @@ function createEmptyResults() {
       DamageResult | null,
       DamageResult | null,
     ],
+    previousAttackerMoves: [null, null, null, null] as [
+      DamageResult | null,
+      DamageResult | null,
+      DamageResult | null,
+      DamageResult | null,
+    ],
+    previousDefenderMoves: [null, null, null, null] as [
+      DamageResult | null,
+      DamageResult | null,
+      DamageResult | null,
+      DamageResult | null,
+    ],
   }
 }
 

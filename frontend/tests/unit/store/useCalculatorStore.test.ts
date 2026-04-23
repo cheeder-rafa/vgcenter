@@ -54,6 +54,55 @@ describe('useCalculatorStore', () => {
     expect(useCalculatorStore.getState().field.weather).toBe('SUN')
   })
 
+  it('preserves the previous result snapshot when results are replaced', () => {
+    const store = useCalculatorStore.getState()
+
+    store.setResults({
+      attackerMoves: [
+        {
+          rolls: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
+          min: 10,
+          max: 25,
+          minPct: 10,
+          maxPct: 25,
+          koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+        },
+        null,
+        null,
+        null,
+      ],
+      defenderMoves: [null, null, null, null],
+      previousAttackerMoves: [null, null, null, null],
+      previousDefenderMoves: [null, null, null, null],
+    })
+
+    store.setResults({
+      attackerMoves: [
+        {
+          rolls: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27],
+          min: 12,
+          max: 27,
+          minPct: 12,
+          maxPct: 27,
+          koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+        },
+        null,
+        null,
+        null,
+      ],
+      defenderMoves: [null, null, null, null],
+      previousAttackerMoves: [null, null, null, null],
+      previousDefenderMoves: [null, null, null, null],
+    })
+
+    expect(useCalculatorStore.getState().results.previousAttackerMoves[0]).toEqual(
+      expect.objectContaining({ min: 10, max: 25 }),
+    )
+    expect(useCalculatorStore.getState().results.attackerMoves[0]).toEqual(
+      expect.objectContaining({ min: 12, max: 27 }),
+    )
+  })
+
   it('toggles critical hit and updates move slots and targets', () => {
     const store = useCalculatorStore.getState()
 

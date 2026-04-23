@@ -2,6 +2,7 @@ import { useId, useMemo } from 'react'
 
 import type { DamageResult, MoveDefinition } from '../types/api'
 import { DamageBar } from './DamageBar'
+import { DamageDeltaChip } from './DamageDeltaChip'
 import { getTypeChipClasses } from './typeColors'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
   legalMoveIds: string[] | null
   allMoves: MoveDefinition[]
   result: DamageResult | null
+  previousResult?: DamageResult | null
   focused: boolean
   accent?: 'plasma' | 'cyan'
   onMoveChange: (moveId: string | null) => void
@@ -22,6 +24,7 @@ export function MoveSlotRow({
   legalMoveIds,
   allMoves,
   result,
+  previousResult = null,
   focused,
   accent = 'plasma',
   onMoveChange,
@@ -79,7 +82,7 @@ export function MoveSlotRow({
       className={`flex cursor-pointer flex-col gap-1.5 rounded-sm border bg-white/[0.04] px-2.5 py-2 transition hover:border-white/25 sm:px-3 ${accentBorder} ${accentGlow}`}
       data-testid={`move-slot-${index}`}
     >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1.5 sm:grid-cols-[auto_minmax(0,1fr)_8ch_10ch] sm:gap-3">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1.5 sm:grid-cols-[auto_minmax(0,1fr)_8ch_10ch_auto] sm:gap-3">
         <span className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-white/55">
           M{index + 1}
         </span>
@@ -117,6 +120,14 @@ export function MoveSlotRow({
         >
           {readout}
         </span>
+        {result !== null ? (
+          <DamageDeltaChip
+            current={result}
+            previous={previousResult}
+            testId={`move-slot-delta-${index}`}
+            className="sm:justify-self-end"
+          />
+        ) : null}
       </div>
       {result !== null && (
         <DamageBar minPct={result.minPct} maxPct={result.maxPct} />

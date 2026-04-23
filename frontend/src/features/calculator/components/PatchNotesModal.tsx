@@ -40,19 +40,21 @@ export function PatchNotesModal({ isOpen, onClose, regulation }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
-              The calculator is easier to use on phones and smaller screens.
+              Damage Plan mode lets you chain multi-turn lines instead of only
+              looking at isolated single-hit calcs.
             </li>
             <li>
-              The header stays cleaner, so the branding and quick actions no
-              longer crowd each other on mid-sized screens.
+              Small delta chips now sit beside each move so edits are easier to
+              compare at a glance.
             </li>
             <li>
-              Damage details are easier to scan during quick comparisons,
-              including clearer KO coloring and matchup pins.
+              The previous direct-damage corrections pass now covers Mystic
+              Water, Levitate, Mold Breaker, and the new item and ability
+              interactions more faithfully.
             </li>
             <li>
-              Move-by-move damage breakdowns are easier to inspect without
-              losing your place in the matchup.
+              The calculator stays reactive, so weather, terrain, and field
+              changes update the line without a manual calculate step.
             </li>
           </ul>
         </section>
@@ -61,13 +63,12 @@ export function PatchNotesModal({ isOpen, onClose, regulation }: Props) {
           <h3 className="arena-label mb-3 text-arena-violet">Known Issues</h3>
           <ul className="space-y-2 text-sm text-white/50">
             <li>
-              Some items, abilities, and damage calculations are still under
-              correction, so a few matchups may read incorrectly while this pass
-              is being cleaned up.
-            </li>
-            <li>
               If a result looks off, treat it as provisional and send feedback
               so it can be checked against the current corrections list.
+            </li>
+            <li>
+              Damage Plan mode is a line-building aid, not a full battle engine,
+              so keep an eye on field changes when sequencing turns.
             </li>
           </ul>
         </section>

@@ -71,6 +71,7 @@ The current calculator flow is species-first and fully reactive:
 - Choose a Regulation M-A species for each side to auto-populate types, base stats, legal abilities, and legal moves.
 - Manually changing a species resets the build for that side back to a fresh default set of item, nature, SP spread, moves, and derived stats for the newly selected Pokemon.
 - Damage updates automatically for all four move slots as species, moves, stats, abilities, items, status, or field inputs change. There is no manual "Calculate Damage" button.
+- A Damage Plan view lets you read those same results as a turn-by-turn sequence, with delta chips beside each move so edits are easy to compare.
 - Each move shows the full damage range, HP percentages, KO odds, lethal or safe roll counts, and the 16-roll spread at the same time without a separate heatmap panel.
 - Each side exposes a `Current HP` input so full-HP and low-HP interactions such as Multiscale and Blaze/Torrent-style thresholds are represented in the live calculation.
 - Copied or expanded damage text uses `Mega <species>` for Mega forms, and when relevant attack or defense stages are active it adds the matching SP context to the readout.

@@ -273,6 +273,8 @@ describe('useReactiveDamage', () => {
     expect(useCalculatorStore.getState().results).toEqual({
       attackerMoves: [null, null, null, null],
       defenderMoves: [null, null, null, null],
+      previousAttackerMoves: [null, null, null, null],
+      previousDefenderMoves: [null, null, null, null],
     })
   })
 })

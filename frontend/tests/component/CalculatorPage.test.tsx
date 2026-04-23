@@ -866,4 +866,14 @@ describe('CalculatorPage', () => {
     expect(readout?.className).toContain('py-2')
     sidePanels.forEach((panel) => expect(panel?.className).toContain('p-4'))
   })
+
+  it('toggles into damage plan view from the calculator header controls', async () => {
+    const user = userEvent.setup()
+
+    render(<CalculatorPage />)
+
+    await user.click(screen.getByRole('tab', { name: /damage plan/i }))
+
+    expect(screen.getByTestId('damage-plan-view')).toBeInTheDocument()
+  })
 })
