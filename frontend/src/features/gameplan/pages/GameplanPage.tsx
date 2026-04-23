@@ -8,13 +8,17 @@ import type { SavedPokemon } from '../../../store/useTeamsStore'
 import { useTeamsStore } from '../../../store/useTeamsStore'
 import { CellFlagsLegend } from '../components/CellFlagsLegend'
 import type { LeadOrder } from '../components/LeadOrderPicker'
+import { LineupRecommendations } from '../components/LineupRecommendations'
 import { MatchupDrilldown } from '../components/MatchupDrilldown'
 import { MatchupMatrix } from '../components/MatchupMatrix'
+import { ReportExportButton } from '../components/ReportExportButton'
 import { ScenarioEditor } from '../components/ScenarioEditor'
 import { useGameplanEvaluation } from '../hooks/useGameplanEvaluation'
+import { useGameplanStore } from '../store/useGameplanStore'
 import type {
   EvaluateMatchupPokemonRequest,
   EvaluateMatchupRequest,
+  RecommendLineupRequest,
 } from '../types/api'
 
 const EMPTY_ORDER: LeadOrder = {
@@ -128,9 +132,55 @@ function buildRequest(
   // are evaluated server-side); keeping the picker for Phase D recommendations.
 }
 
+function buildRecommendRequest(
+  mine: (SavedPokemon | null)[],
+  opponent: (SavedPokemon | null)[],
+  winConditionSpeciesId: string | null,
+  mineForms: Record<string, string[]>,
+  opponentForms: Record<string, string[]>,
+): RecommendLineupRequest | null {
+  const mineAll = fullRoster(mine)
+  const oppAll = fullRoster(opponent)
+  if (mineAll === null || oppAll === null) return null
+
+  const mineReqs = mineAll.map((mon) =>
+    toPokemonRequest(mon, mineForms[mon.speciesId ?? ''] ?? []),
+  )
+  const opponentReqs = oppAll.map((mon) =>
+    toPokemonRequest(mon, opponentForms[mon.speciesId ?? ''] ?? []),
+  )
+  if (
+    mineReqs.some((r) => r === null) ||
+    opponentReqs.some((r) => r === null)
+  ) {
+    return null
+  }
+
+  const winConditionIndex =
+    winConditionSpeciesId === null
+      ? null
+      : mineAll.findIndex((m) => m.speciesId === winConditionSpeciesId)
+
+  return {
+    regulation: 'M-A',
+    mine: mineReqs as EvaluateMatchupPokemonRequest[],
+    winConditionIndex:
+      winConditionIndex !== null && winConditionIndex >= 0
+        ? winConditionIndex
+        : null,
+    opponent: opponentReqs as EvaluateMatchupPokemonRequest[],
+  }
+}
+
 export function GameplanPage() {
   const mine = useTeamsStore((s) => s.mine)
   const opponent = useTeamsStore((s) => s.opponent)
+  const gamePlanNote = useGameplanStore((s) => s.gamePlanNote)
+  const setGamePlanNote = useGameplanStore((s) => s.setGamePlanNote)
+  const opponentArchetypeTag = useGameplanStore((s) => s.opponentArchetypeTag)
+  const setOpponentArchetypeTag = useGameplanStore(
+    (s) => s.setOpponentArchetypeTag,
+  )
 
   const [myOrder, setMyOrder] = useState<LeadOrder>(EMPTY_ORDER)
   const [oppOrder, setOppOrder] = useState<LeadOrder>(EMPTY_ORDER)
@@ -156,6 +206,18 @@ export function GameplanPage() {
         opponentForms,
       ),
     [mine, opponent, myOrder, winConditionSpeciesId, mineForms, opponentForms],
+  )
+
+  const recommendRequest = useMemo(
+    () =>
+      buildRecommendRequest(
+        mine,
+        opponent,
+        winConditionSpeciesId,
+        mineForms,
+        opponentForms,
+      ),
+    [mine, opponent, winConditionSpeciesId, mineForms, opponentForms],
   )
 
   const evaluation = useGameplanEvaluation(request)
@@ -237,9 +299,37 @@ export function GameplanPage() {
         />
       </div>
 
+      <section className="grid gap-4 rounded border border-white/10 bg-arena-surface/50 p-4 lg:grid-cols-[1fr_18rem]">
+        <label className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-widest text-white/55">
+            Game-plan note
+          </span>
+          <textarea
+            value={gamePlanNote}
+            onChange={(event) => setGamePlanNote(event.target.value)}
+            rows={4}
+            placeholder="Example: Preserve Farigiraf, force Trick Room mirror, pivot Charizard late."
+            className="min-h-24 rounded border border-white/10 bg-black/25 p-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/35"
+          />
+        </label>
+        <label className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-widest text-white/55">
+            Opponent archetype
+          </span>
+          <input
+            value={opponentArchetypeTag}
+            onChange={(event) => setOpponentArchetypeTag(event.target.value)}
+            placeholder="Trick Room, Sun, Hyper Offense…"
+            className="rounded border border-white/10 bg-black/25 p-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/35"
+          />
+        </label>
+      </section>
+
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold text-white/80">Matchup Matrix</h2>
+          <h2 className="text-lg font-semibold text-white/80">
+            Matchup Matrix
+          </h2>
           <span className="text-xs text-white/40">
             {evaluation.status === 'loading' && 'evaluating…'}
             {evaluation.status === 'error' && `error: ${evaluation.error}`}
@@ -260,7 +350,25 @@ export function GameplanPage() {
           </div>
         )}
         <CellFlagsLegend />
+        <div className="flex justify-end">
+          <ReportExportButton
+            cells={cells}
+            gamePlanNote={gamePlanNote}
+            opponentArchetypeTag={opponentArchetypeTag}
+            winConditionSpeciesId={winConditionSpeciesId}
+            mineAssumedForms={mineForms}
+            opponentAssumedForms={opponentForms}
+            mineNameById={mineNameById}
+            opponentNameById={opponentNameById}
+          />
+        </div>
       </section>
+
+      <LineupRecommendations
+        request={recommendRequest}
+        onPromote={setMyOrder}
+        opponentNameById={opponentNameById}
+      />
 
       <MatchupDrilldown
         cell={selectedCell}

@@ -66,3 +66,23 @@ export type GameplanMatchupCell = {
 export type EvaluateMatchupResponse = {
   cells: GameplanMatchupCell[]
 }
+
+export type RecommendLineupRequest = {
+  regulation: Regulation
+  mine: EvaluateMatchupPokemonRequest[]
+  winConditionIndex: number | null
+  opponent: EvaluateMatchupPokemonRequest[]
+}
+
+export type Recommendation = {
+  lineupIndices: number[]
+  lineupSpeciesIds: string[]
+  winConditionIndex: number | null
+  averageScore: number
+  cells: GameplanMatchupCell[]
+}
+
+export type RecommendLineupResponse = {
+  evaluatedLineups: number
+  recommendations: Recommendation[]
+}

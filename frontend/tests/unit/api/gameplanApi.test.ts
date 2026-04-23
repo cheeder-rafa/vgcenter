@@ -1,9 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { evaluateMatchup } from '../../../src/features/gameplan/api/gameplanApi'
+import {
+  evaluateMatchup,
+  recommendLineups,
+} from '../../../src/features/gameplan/api/gameplanApi'
 import type {
   EvaluateMatchupRequest,
   EvaluateMatchupResponse,
+  RecommendLineupRequest,
+  RecommendLineupResponse,
 } from '../../../src/features/gameplan/types/api'
 import type { CombatantRequest } from '../../../src/features/calculator/types/api'
 
@@ -57,6 +62,23 @@ const sampleRequest: EvaluateMatchupRequest = {
 }
 
 const sampleResponse: EvaluateMatchupResponse = { cells: [] }
+const sampleRecommendRequest: RecommendLineupRequest = {
+  regulation: 'M-A',
+  mine: [
+    makePokemon('m1'),
+    makePokemon('m2'),
+    makePokemon('m3'),
+    makePokemon('m4'),
+    makePokemon('m5'),
+    makePokemon('m6'),
+  ],
+  winConditionIndex: 4,
+  opponent: sampleRequest.opponent,
+}
+const sampleRecommendResponse: RecommendLineupResponse = {
+  evaluatedLineups: 45,
+  recommendations: [],
+}
 
 describe('evaluateMatchup', () => {
   const fetchMock = vi.fn()
@@ -92,7 +114,10 @@ describe('evaluateMatchup', () => {
   it('throws with ProblemDetails detail on 4xx', async () => {
     fetchMock.mockResolvedValue(
       new Response(
-        JSON.stringify({ title: 'Bad Request', detail: 'opponent size must be 6' }),
+        JSON.stringify({
+          title: 'Bad Request',
+          detail: 'opponent size must be 6',
+        }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/problem+json' },
@@ -103,5 +128,36 @@ describe('evaluateMatchup', () => {
     await expect(evaluateMatchup(sampleRequest)).rejects.toThrow(
       /opponent size must be 6/,
     )
+  })
+})
+
+describe('recommendLineups', () => {
+  const fetchMock = vi.fn()
+
+  beforeEach(() => {
+    fetchMock.mockReset()
+    vi.stubGlobal('fetch', fetchMock)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('POSTs JSON to /api/v1/gameplan/recommend and returns the response', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(sampleRecommendResponse), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    const result = await recommendLineups(sampleRecommendRequest)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/v1/gameplan/recommend')
+    expect(init?.method).toBe('POST')
+    expect(JSON.parse(init?.body as string)).toEqual(sampleRecommendRequest)
+    expect(result).toEqual(sampleRecommendResponse)
   })
 })
