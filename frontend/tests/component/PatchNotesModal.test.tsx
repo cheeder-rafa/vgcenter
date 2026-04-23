@@ -108,6 +108,26 @@ describe('PatchNotesModal', () => {
     expect(screen.getByText(/what'?s new/i)).toBeInTheDocument()
   })
 
+  it('lists the current-hp/direct interaction work from pr 32 and the new calculator polish items', async () => {
+    const user = userEvent.setup()
+    render(<CalculatorPage />)
+
+    await user.click(screen.getByRole('button', { name: /patch notes/i }))
+
+    expect(
+      screen.getByText(/#32/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/current hp, low-hp thresholds/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/selective damage recompute/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/delta chips/i),
+    ).toBeInTheDocument()
+  })
+
   it('the dialog contains a "Known Issues" section', async () => {
     const user = userEvent.setup()
     render(<CalculatorPage />)
@@ -117,7 +137,7 @@ describe('PatchNotesModal', () => {
     expect(screen.getAllByText(/known issues/i).length).toBeGreaterThan(0)
   })
 
-  it('uses more player-friendly patch notes copy', async () => {
+  it('uses the updated calculator correction copy', async () => {
     const user = userEvent.setup()
     render(<CalculatorPage />)
 
@@ -125,17 +145,17 @@ describe('PatchNotesModal', () => {
 
     expect(
       screen.getByText(
-        /the calculator is easier to use on phones and smaller screens/i,
+        /selective damage recompute now avoids rerunning every calc/i,
       ),
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        /damage details are easier to scan during quick comparisons/i,
+        /speed ribbon labels were rebuilt to stay readable/i,
       ),
     ).toBeInTheDocument()
   })
 
-  it('flags item, ability, and calculation issues as being under correction', async () => {
+  it('shows the calculator as having no known issues at this time', async () => {
     const user = userEvent.setup()
     render(<CalculatorPage />)
 
@@ -143,7 +163,7 @@ describe('PatchNotesModal', () => {
 
     expect(
       screen.getByText(
-        /some items, abilities, and damage calculations are still under correction/i,
+        /no known issues at this time/i,
       ),
     ).toBeInTheDocument()
   })

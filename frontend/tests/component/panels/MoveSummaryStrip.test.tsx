@@ -7,11 +7,11 @@ import type { DamageResult } from '../../../src/features/calculator/types/api'
 function makeResult(overrides: Partial<DamageResult> = {}): DamageResult {
   return {
     rolls: [100],
-    minRoll: 100,
-    maxRoll: 100,
+    min: 100,
+    max: 100,
     minPct: 50,
     maxPct: 75,
-    koChance: 0,
+    koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
     ...overrides,
   }
 }
@@ -59,11 +59,11 @@ describe('MoveSummaryStrip', () => {
     expect(rangeFills).toHaveLength(0)
   })
 
-  it('returns null when all results are null', () => {
-    const { container } = render(
-      <MoveSummaryStrip results={[null, null, null, null]} accent="cyan" />,
-    )
-    expect(container.firstChild).toBeNull()
+  it('renders placeholder slots even when all results are null', () => {
+    render(<MoveSummaryStrip results={[null, null, null, null]} accent="cyan" />)
+
+    const strip = screen.getByLabelText('Move damage summary')
+    expect(strip.children).toHaveLength(4)
   })
 
   it('renders exactly 4 slots for a 4-result array with mixed null/non-null entries', () => {

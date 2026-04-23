@@ -30,34 +30,54 @@ export function FieldPanel({
   const setDefenderSide = useCalculatorStore((s) => s.setDefenderSide)
   const setTargets = useCalculatorStore((s) => s.setTargets)
 
-  const attackerRaw = useCalculatorStore((s) => s.attacker)
-  const defenderRaw = useCalculatorStore((s) => s.defender)
+  const attackerSpeed = useCalculatorStore((s) => s.attacker.finalStats?.speed ?? null)
+  const attackerStage = useCalculatorStore((s) => s.attacker.stages.spe)
+  const attackerItemId = useCalculatorStore((s) => s.attacker.itemId ?? null)
+  const attackerStatus = useCalculatorStore((s) => s.attacker.status)
+  const defenderSpeed = useCalculatorStore((s) => s.defender.finalStats?.speed ?? null)
+  const defenderStage = useCalculatorStore((s) => s.defender.stages.spe)
+  const defenderItemId = useCalculatorStore((s) => s.defender.itemId ?? null)
+  const defenderStatus = useCalculatorStore((s) => s.defender.status)
 
   const attackerCombatant = useMemo((): SpeedCombatant | null => {
-    const spd = attackerRaw.finalStats?.speed ?? null
+    const spd = attackerSpeed
     if (spd === null) return null
     return {
-      name: attackerName ?? attackerRaw.speciesId ?? 'Attacker',
+      name: attackerName ?? 'Attacker',
       baseSpeed: spd,
-      stagedSpeed: stagedSpeed(spd, attackerRaw.stages.spe),
-      itemId: attackerRaw.itemId ?? null,
-      status: attackerRaw.status,
+      stagedSpeed: stagedSpeed(spd, attackerStage),
+      itemId: attackerItemId,
+      status: attackerStatus,
       tailwind: attackerSide.tailwind,
     }
-  }, [attackerName, attackerRaw, attackerSide.tailwind])
+  }, [
+    attackerItemId,
+    attackerName,
+    attackerSide.tailwind,
+    attackerSpeed,
+    attackerStage,
+    attackerStatus,
+  ])
 
   const defenderCombatant = useMemo((): SpeedCombatant | null => {
-    const spd = defenderRaw.finalStats?.speed ?? null
+    const spd = defenderSpeed
     if (spd === null) return null
     return {
-      name: defenderName ?? defenderRaw.speciesId ?? 'Defender',
+      name: defenderName ?? 'Defender',
       baseSpeed: spd,
-      stagedSpeed: stagedSpeed(spd, defenderRaw.stages.spe),
-      itemId: defenderRaw.itemId ?? null,
-      status: defenderRaw.status,
+      stagedSpeed: stagedSpeed(spd, defenderStage),
+      itemId: defenderItemId,
+      status: defenderStatus,
       tailwind: defenderSide.tailwind,
     }
-  }, [defenderName, defenderRaw, defenderSide.tailwind])
+  }, [
+    defenderItemId,
+    defenderName,
+    defenderSide.tailwind,
+    defenderSpeed,
+    defenderStage,
+    defenderStatus,
+  ])
 
   const ids = {
     weather: useId(),

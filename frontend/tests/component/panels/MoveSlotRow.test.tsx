@@ -24,6 +24,10 @@ describe('MoveSlotRow', () => {
           },
         ]}
         result={null}
+        delta={{
+          minPctDelta: 2,
+          maxPctDelta: 4,
+        }}
         focused={false}
         onMoveChange={vi.fn()}
         onFocus={vi.fn()}
@@ -44,6 +48,9 @@ describe('MoveSlotRow', () => {
     )
     expect(screen.getByTestId('move-slot-readout-0').className).toContain(
       'col-start-2',
+    )
+    expect(screen.getByTestId('move-slot-delta-0')).toHaveTextContent(
+      '+2.0 / +4.0 pp',
     )
   })
 })

@@ -40,19 +40,33 @@ export function PatchNotesModal({ isOpen, onClose, regulation }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
-              The calculator is easier to use on phones and smaller screens.
+              <span className="mr-2 font-mono text-[0.65rem] tracking-widest text-white/35">
+                #33
+              </span>
+              Selective damage recompute now avoids rerunning every calc when a
+              stat change only affects one side or no damage rolls at all.
             </li>
             <li>
-              The header stays cleaner, so the branding and quick actions no
-              longer crowd each other on mid-sized screens.
+              <span className="mr-2 font-mono text-[0.65rem] tracking-widest text-white/35">
+                #33
+              </span>
+              Mini move heatmaps stay visible even with empty slots so both
+              Pokemon panels keep their headers aligned.
             </li>
             <li>
-              Damage details are easier to scan during quick comparisons,
-              including clearer KO coloring and matchup pins.
+              <span className="mr-2 font-mono text-[0.65rem] tracking-widest text-white/35">
+                #33
+              </span>
+              Speed ribbon labels were rebuilt to stay readable and move rows
+              now show delta chips after each side-specific edit.
             </li>
             <li>
-              Move-by-move damage breakdowns are easier to inspect without
-              losing your place in the matchup.
+              <span className="mr-2 font-mono text-[0.65rem] tracking-widest text-white/35">
+                #32
+              </span>
+              Current HP, low-HP thresholds, resist berries, Mold Breaker
+              bypasses, and other direct damage interactions are now part of
+              the live calc baseline.
             </li>
           </ul>
         </section>
@@ -60,15 +74,7 @@ export function PatchNotesModal({ isOpen, onClose, regulation }: Props) {
         <section>
           <h3 className="arena-label mb-3 text-arena-violet">Known Issues</h3>
           <ul className="space-y-2 text-sm text-white/50">
-            <li>
-              Some items, abilities, and damage calculations are still under
-              correction, so a few matchups may read incorrectly while this pass
-              is being cleaned up.
-            </li>
-            <li>
-              If a result looks off, treat it as provisional and send feedback
-              so it can be checked against the current corrections list.
-            </li>
+            <li className="italic">— No known issues at this time. —</li>
           </ul>
         </section>
       </div>

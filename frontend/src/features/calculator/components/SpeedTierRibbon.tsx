@@ -54,24 +54,33 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
   return (
     <div
       data-testid="speed-ribbon"
-      className="flex items-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.03] px-3 py-1"
+      className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-sm border border-white/[0.08] bg-white/[0.03] px-3 py-1.5"
     >
-      <span
-        data-testid="speed-attacker-effective"
-        className="w-[3ch] shrink-0 text-right font-mono text-[0.7rem] tabular-nums"
-        style={{
-          color: atkWins
-            ? winnerColor
-            : isTie
-              ? 'rgba(255,255,255,0.45)'
-              : loserColor,
-        }}
-      >
-        {atkEff}
-      </span>
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <p
+            data-testid="speed-attacker-name"
+            className="font-mono text-[0.62rem] leading-tight text-white/75"
+          >
+            {attacker.name}
+          </p>
+        </div>
+        <span
+          data-testid="speed-attacker-effective"
+          className="w-[4ch] shrink-0 text-right font-mono text-[0.78rem] tabular-nums"
+          style={{
+            color: atkWins
+              ? winnerColor
+              : isTie
+                ? 'rgba(255,255,255,0.45)'
+                : loserColor,
+          }}
+        >
+          {atkEff}
+        </span>
+      </div>
 
-      {/* Arrow / tie display */}
-      <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
+      <div className="flex min-w-0 items-center justify-center gap-1.5 px-1">
         {isTie ? (
           <span
             data-testid="speed-tie"
@@ -124,29 +133,39 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
             </span>
           </>
         )}
-        {trickRoom && (
+        {trickRoom ? (
           <span
             data-testid="trick-room-indicator"
-            className="ml-1 shrink-0 rounded-[2px] bg-[rgba(167,139,250,0.18)] px-1 font-mono text-[0.55rem] uppercase tracking-[0.15em] text-[rgba(167,139,250,0.85)]"
+            className="shrink-0 rounded-[2px] bg-[rgba(167,139,250,0.18)] px-1 font-mono text-[0.55rem] uppercase tracking-[0.15em] text-[rgba(167,139,250,0.85)]"
           >
             TR
           </span>
-        )}
+        ) : null}
       </div>
 
-      <span
-        data-testid="speed-defender-effective"
-        className="w-[3ch] shrink-0 font-mono text-[0.7rem] tabular-nums"
-        style={{
-          color: !atkWins
-            ? winnerColor
-            : isTie
-              ? 'rgba(255,255,255,0.45)'
-              : loserColor,
-        }}
-      >
-        {defEff}
-      </span>
+      <div className="flex min-w-0 items-center justify-end gap-2">
+        <span
+          data-testid="speed-defender-effective"
+          className="w-[4ch] shrink-0 text-left font-mono text-[0.78rem] tabular-nums"
+          style={{
+            color: !atkWins
+              ? winnerColor
+              : isTie
+                ? 'rgba(255,255,255,0.45)'
+                : loserColor,
+          }}
+        >
+          {defEff}
+        </span>
+        <div className="min-w-0 flex-1 text-right">
+          <p
+            data-testid="speed-defender-name"
+            className="font-mono text-[0.62rem] leading-tight text-white/75"
+          >
+            {defender.name}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

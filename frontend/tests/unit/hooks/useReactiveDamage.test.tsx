@@ -360,7 +360,7 @@ describe('useReactiveDamage', () => {
     )
   })
 
-  it('recalculates damage when stat stages change', async () => {
+  it('recalculates damage when the active move category stat stage changes', async () => {
     mocks.calculateDamage
       .mockResolvedValueOnce({
         rolls: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
@@ -424,7 +424,7 @@ describe('useReactiveDamage', () => {
 
     act(() => {
       useCalculatorStore.getState().setAttacker({
-        stages: { atk: 1 },
+        stages: { spa: 1 },
       })
     })
 
@@ -436,7 +436,7 @@ describe('useReactiveDamage', () => {
     expect(mocks.calculateDamage).toHaveBeenLastCalledWith(
       expect.objectContaining({
         attacker: expect.objectContaining({
-          stages: { atk: 1, def: 0, spa: 0, spd: 0, spe: 0 },
+          stages: { atk: 0, def: 0, spa: 1, spd: 0, spe: 0 },
         }),
       }),
     )

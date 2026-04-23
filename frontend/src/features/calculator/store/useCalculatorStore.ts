@@ -3,6 +3,7 @@ import { subscribeWithSelector } from 'zustand/middleware'
 
 import type {
   CombatantBuild,
+  DamageDelta,
   DamageCalculationRequest,
   DamageResult,
   FieldRequest,
@@ -38,6 +39,21 @@ type DamageResults = {
     DamageResult | null,
     DamageResult | null,
     DamageResult | null,
+  ]
+}
+
+type DamageDeltas = {
+  attackerMoves: [
+    DamageDelta | null,
+    DamageDelta | null,
+    DamageDelta | null,
+    DamageDelta | null,
+  ]
+  defenderMoves: [
+    DamageDelta | null,
+    DamageDelta | null,
+    DamageDelta | null,
+    DamageDelta | null,
   ]
 }
 
@@ -128,11 +144,22 @@ function createEmptyResults(): DamageResults {
   }
 }
 
+function createEmptyDeltas(): DamageDeltas {
+  return {
+    attackerMoves: [null, null, null, null],
+    defenderMoves: [null, null, null, null],
+  }
+}
+
 function createEmptyMoveSlots(): CombatantBuild['moves'] {
   return cloneMoveSlots(defaultMoveSlots)
 }
 
 function createEmptySideResults(): DamageResults['attackerMoves'] {
+  return [null, null, null, null]
+}
+
+function createEmptySideDeltas(): DamageDeltas['attackerMoves'] {
   return [null, null, null, null]
 }
 
@@ -198,6 +225,7 @@ type CalculatorState = {
   criticalHit: boolean
   targets: number
   results: DamageResults
+  moveDeltas: DamageDeltas
   resultsStatus: ResultsStatus
   setRegulation: (regulation: Regulation) => void
   setAttacker: (patch: CombatantBuildPatch) => void
@@ -226,6 +254,11 @@ type CalculatorState = {
     result: DamageResult | null,
   ) => void
   setResults: (results: DamageResults) => void
+  setMoveDeltas: (
+    side: CalculatorSide,
+    deltas: DamageDeltas['attackerMoves'],
+  ) => void
+  clearMoveDeltas: (side?: CalculatorSide) => void
   clearResults: () => void
   setResultsStatus: (status: ResultsStatus) => void
   toggleCriticalHit: () => void
@@ -245,6 +278,7 @@ function createInitialState() {
     criticalHit: false,
     targets: 1,
     results: createEmptyResults(),
+    moveDeltas: createEmptyDeltas(),
     resultsStatus: 'idle' as ResultsStatus,
   }
 }
@@ -293,6 +327,10 @@ export const useCalculatorStore = create<CalculatorState>()(
             ...state.results,
             [resultKey]: createEmptySideResults(),
           },
+          moveDeltas: {
+            ...state.moveDeltas,
+            [resultKey]: createEmptySideDeltas(),
+          },
         }
       }),
     setResult: (side, index, result) =>
@@ -308,7 +346,28 @@ export const useCalculatorStore = create<CalculatorState>()(
         }
       }),
     setResults: (results) => set({ results }),
-    clearResults: () => set({ results: createEmptyResults() }),
+    setMoveDeltas: (side, deltas) =>
+      set((state) => ({
+        moveDeltas: {
+          ...state.moveDeltas,
+          [side === 'attacker' ? 'attackerMoves' : 'defenderMoves']: deltas,
+        },
+      })),
+    clearMoveDeltas: (side) =>
+      set((state) => {
+        if (side === undefined) {
+          return { moveDeltas: createEmptyDeltas() }
+        }
+        return {
+          moveDeltas: {
+            ...state.moveDeltas,
+            [side === 'attacker' ? 'attackerMoves' : 'defenderMoves']:
+              createEmptySideDeltas(),
+          },
+        }
+      }),
+    clearResults: () =>
+      set({ results: createEmptyResults(), moveDeltas: createEmptyDeltas() }),
     setResultsStatus: (resultsStatus) => set({ resultsStatus }),
     toggleCriticalHit: () =>
       set((state) => ({ criticalHit: !state.criticalHit })),

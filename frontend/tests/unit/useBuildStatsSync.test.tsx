@@ -275,4 +275,225 @@ describe('useReactiveDamage', () => {
       defenderMoves: [null, null, null, null],
     })
   })
+
+  it('does not recalculate damage when only speed changes for an existing special move result', async () => {
+    mocks.calculateDamage
+      .mockResolvedValueOnce({
+        rolls: Array.from({ length: 16 }, (_, index) => 40 + index),
+        min: 40,
+        max: 55,
+        minPct: 20,
+        maxPct: 27.5,
+        koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+      })
+
+    renderHook(() => useReactiveDamage())
+
+    act(() => {
+      useCalculatorStore.getState().setMoveCatalog([
+        {
+          id: 'heat-wave',
+          name: 'Heat Wave',
+          type: 'FIRE',
+          category: 'SPECIAL',
+          basePower: 95,
+          spread: true,
+          contact: false,
+          doublePowerWhenUserStatused: false,
+          ignoreBurnPenaltyWhenUserStatused: false,
+        },
+      ])
+      useCalculatorStore.getState().setAttacker({
+        speciesId: 'charizard',
+        finalStats: {
+          hp: 153,
+          attack: 104,
+          defense: 99,
+          specialAttack: 177,
+          specialDefense: 105,
+          speed: 132,
+        },
+        types: ['FIRE', 'FLYING'],
+        currentHp: 153,
+        moves: [
+          { moveId: 'heat-wave' },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+      useCalculatorStore.getState().setDefender({
+        speciesId: 'amoonguss',
+        finalStats: {
+          hp: 189,
+          attack: 105,
+          defense: 90,
+          specialAttack: 105,
+          specialDefense: 100,
+          speed: 50,
+        },
+        types: ['GRASS', 'POISON'],
+        currentHp: 189,
+      })
+    })
+
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      useCalculatorStore.getState().setAttacker({
+        sp: { spe: 1 },
+        finalStats: {
+          hp: 153,
+          attack: 104,
+          defense: 99,
+          specialAttack: 177,
+          specialDefense: 105,
+          speed: 133,
+        },
+      })
+    })
+
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(1)
+  })
+
+  it('recalculates only the edited side move slots and preserves the opposite side results', async () => {
+    mocks.calculateDamage
+      .mockResolvedValueOnce({
+        rolls: Array.from({ length: 16 }, (_, index) => 60 + index),
+        min: 60,
+        max: 75,
+        minPct: 30,
+        maxPct: 37.5,
+        koChance: { description: 'Never OHKO', probability: 0, hits: 2 },
+      })
+      .mockResolvedValueOnce({
+        rolls: Array.from({ length: 16 }, (_, index) => 20 + index),
+        min: 20,
+        max: 35,
+        minPct: 10,
+        maxPct: 17.5,
+        koChance: { description: 'Never OHKO', probability: 0, hits: 3 },
+      })
+      .mockResolvedValueOnce({
+        rolls: Array.from({ length: 16 }, (_, index) => 80 + index),
+        min: 80,
+        max: 95,
+        minPct: 40,
+        maxPct: 47.5,
+        koChance: { description: 'Possible 2HKO', probability: 0.5, hits: 2 },
+      })
+
+    renderHook(() => useReactiveDamage())
+
+    act(() => {
+      useCalculatorStore.getState().setMoveCatalog([
+        {
+          id: 'heat-wave',
+          name: 'Heat Wave',
+          type: 'FIRE',
+          category: 'SPECIAL',
+          basePower: 95,
+          spread: true,
+          contact: false,
+          doublePowerWhenUserStatused: false,
+          ignoreBurnPenaltyWhenUserStatused: false,
+        },
+        {
+          id: 'air-slash',
+          name: 'Air Slash',
+          type: 'FLYING',
+          category: 'SPECIAL',
+          basePower: 75,
+          spread: false,
+          contact: false,
+          doublePowerWhenUserStatused: false,
+          ignoreBurnPenaltyWhenUserStatused: false,
+        },
+      ])
+      useCalculatorStore.getState().setAttacker({
+        speciesId: 'charizard',
+        finalStats: {
+          hp: 153,
+          attack: 104,
+          defense: 99,
+          specialAttack: 177,
+          specialDefense: 105,
+          speed: 132,
+        },
+        types: ['FIRE', 'FLYING'],
+        currentHp: 153,
+        moves: [
+          { moveId: 'heat-wave' },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+      useCalculatorStore.getState().setDefender({
+        speciesId: 'amoonguss',
+        finalStats: {
+          hp: 189,
+          attack: 105,
+          defense: 90,
+          specialAttack: 105,
+          specialDefense: 100,
+          speed: 50,
+        },
+        types: ['GRASS', 'POISON'],
+        currentHp: 189,
+        moves: [
+          { moveId: 'air-slash' },
+          { moveId: null },
+          { moveId: null },
+          { moveId: null },
+        ],
+      })
+    })
+
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(2)
+    expect(useCalculatorStore.getState().results.attackerMoves[0]).toEqual(
+      expect.objectContaining({ min: 60, max: 75 }),
+    )
+    expect(useCalculatorStore.getState().results.defenderMoves[0]).toEqual(
+      expect.objectContaining({ min: 20, max: 35 }),
+    )
+
+    act(() => {
+      useCalculatorStore.getState().setAttacker({
+        sp: { spa: 2 },
+        finalStats: {
+          hp: 153,
+          attack: 104,
+          defense: 99,
+          specialAttack: 179,
+          specialDefense: 105,
+          speed: 132,
+        },
+      })
+    })
+
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
+
+    expect(mocks.calculateDamage).toHaveBeenCalledTimes(3)
+    expect(useCalculatorStore.getState().results.attackerMoves[0]).toEqual(
+      expect.objectContaining({ min: 80, max: 95 }),
+    )
+    expect(useCalculatorStore.getState().results.defenderMoves[0]).toEqual(
+      expect.objectContaining({ min: 20, max: 35 }),
+    )
+  })
 })

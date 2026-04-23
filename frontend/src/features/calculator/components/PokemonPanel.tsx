@@ -72,6 +72,9 @@ export function PokemonPanel({
   const results = useCalculatorStore((s) =>
     side === 'attacker' ? s.results.attackerMoves : s.results.defenderMoves,
   )
+  const moveDeltas = useCalculatorStore((s) =>
+    side === 'attacker' ? s.moveDeltas.attackerMoves : s.moveDeltas.defenderMoves,
+  )
   const setCombatant = useCalculatorStore((s) =>
     side === 'attacker' ? s.setAttacker : s.setDefender,
   )
@@ -517,6 +520,7 @@ export function PokemonPanel({
                 legalMoveIds={speciesEntry?.moveIds ?? null}
                 allMoves={moves}
                 result={results[index] ?? null}
+                delta={moveDeltas[index] ?? null}
                 focused={focusedSide === side && focusedMoveIndex === index}
                 accent={accent}
                 onMoveChange={(nextId) => setMoveSlot(side, index, nextId)}

@@ -9,9 +9,6 @@ export function MoveSummaryStrip({
   results: SideResults
   accent: 'plasma' | 'cyan'
 }) {
-  const hasAny = results.some((r) => r !== null)
-  if (!hasAny) return null
-
   const accentFill =
     accent === 'cyan' ? 'rgba(34,211,238,0.85)' : 'rgba(255,43,142,0.85)'
   const accentTrack =

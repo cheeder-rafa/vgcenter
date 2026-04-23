@@ -31,6 +31,12 @@ describe('SpeedTierRibbon', () => {
 
     expect(screen.getByTestId('speed-winner')).toHaveTextContent('Sneasler')
     expect(screen.getByText(/moves first/i)).toBeInTheDocument()
+    expect(screen.getByTestId('speed-attacker-name')).toHaveTextContent(
+      'Sneasler',
+    )
+    expect(screen.getByTestId('speed-defender-name')).toHaveTextContent(
+      'Kingambit',
+    )
   })
 
   it('shows defender moves first when defender is faster', () => {

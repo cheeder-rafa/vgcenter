@@ -96,6 +96,11 @@ export type CalculateDamageResponse = {
 
 export type DamageResult = CalculateDamageResponse
 
+export type DamageDelta = {
+  minPctDelta: number
+  maxPctDelta: number
+}
+
 export type StatsResponse = Stats
 
 export type Spread = {
