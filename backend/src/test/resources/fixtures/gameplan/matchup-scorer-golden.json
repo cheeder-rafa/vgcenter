@@ -1,0 +1,107 @@
+[
+  {
+    "name": "pressure-stack",
+    "offense": [
+      {
+        "minPct": 100.0,
+        "maxPct": 118.0,
+        "winCondition": false
+      },
+      {
+        "minPct": 52.0,
+        "maxPct": 71.0,
+        "winCondition": false
+      }
+    ],
+    "defense": [
+      {
+        "minPct": 18.0,
+        "maxPct": 40.0,
+        "winCondition": false
+      },
+      {
+        "minPct": 51.0,
+        "maxPct": 68.0,
+        "winCondition": false
+      }
+    ],
+    "fasterMatchups": 3,
+    "slowerMatchups": 1,
+    "immunityBlocks": 1,
+    "expectedOffense": 32,
+    "expectedDefense": -16,
+    "expectedSpeed": 4,
+    "expectedImmunity": 4,
+    "expectedTotal": 24
+  },
+  {
+    "name": "win-condition-swing",
+    "offense": [
+      {
+        "minPct": 100.0,
+        "maxPct": 132.0,
+        "winCondition": true
+      },
+      {
+        "minPct": 22.0,
+        "maxPct": 38.0,
+        "winCondition": false
+      }
+    ],
+    "defense": [
+      {
+        "minPct": 50.0,
+        "maxPct": 64.0,
+        "winCondition": true
+      },
+      {
+        "minPct": 12.0,
+        "maxPct": 26.0,
+        "winCondition": false
+      }
+    ],
+    "fasterMatchups": 0,
+    "slowerMatchups": 0,
+    "immunityBlocks": 0,
+    "expectedOffense": 34,
+    "expectedDefense": -21,
+    "expectedSpeed": 0,
+    "expectedImmunity": 0,
+    "expectedTotal": 13
+  },
+  {
+    "name": "chip-race",
+    "offense": [
+      {
+        "minPct": 19.0,
+        "maxPct": 41.0,
+        "winCondition": false
+      },
+      {
+        "minPct": 8.0,
+        "maxPct": 12.0,
+        "winCondition": false
+      }
+    ],
+    "defense": [
+      {
+        "minPct": 24.0,
+        "maxPct": 44.0,
+        "winCondition": false
+      },
+      {
+        "minPct": 7.0,
+        "maxPct": 12.0,
+        "winCondition": false
+      }
+    ],
+    "fasterMatchups": 1,
+    "slowerMatchups": 2,
+    "immunityBlocks": 2,
+    "expectedOffense": 5,
+    "expectedDefense": -5,
+    "expectedSpeed": -2,
+    "expectedImmunity": 8,
+    "expectedTotal": 6
+  }
+]
