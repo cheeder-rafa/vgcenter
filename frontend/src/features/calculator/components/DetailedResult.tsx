@@ -34,6 +34,9 @@ export function DetailedResult({
   const attackerLabel = focusedSide === 'attacker' ? attackerName : defenderName
   const defenderLabel = focusedSide === 'attacker' ? defenderName : attackerName
   const attackingCombatant = useCalculatorStore((state) => state[focusedSide])
+  const defendingCombatant = useCalculatorStore((state) =>
+    focusedSide === 'attacker' ? state.defender : state.attacker,
+  )
   const defendingSide = useCalculatorStore((state) =>
     focusedSide === 'attacker' ? state.defenderSide : state.attackerSide,
   )
@@ -67,10 +70,30 @@ export function DetailedResult({
             attackerName: attackerLabel,
             defenderName: defenderLabel,
             moveName,
+            attackerMegaActive: attackingCombatant.megaActive,
+            defenderMegaActive: defendingCombatant.megaActive,
+            moveCategory: move?.category ?? null,
+            attackerSp: attackingCombatant.sp,
+            defenderSp: defendingCombatant.sp,
+            attackerStages: attackingCombatant.stages,
+            defenderStages: defendingCombatant.stages,
             result,
             throughProtect,
           }),
-    [attackerLabel, defenderLabel, moveName, result, throughProtect],
+    [
+      attackerLabel,
+      defenderLabel,
+      moveName,
+      attackingCombatant.megaActive,
+      defendingCombatant.megaActive,
+      move?.category,
+      attackingCombatant.sp,
+      defendingCombatant.sp,
+      attackingCombatant.stages,
+      defendingCombatant.stages,
+      result,
+      throughProtect,
+    ],
   )
 
   async function handleCopy() {
@@ -150,6 +173,13 @@ export function DetailedResult({
             attackerName={attackerLabel}
             defenderName={defenderLabel}
             moveName={moveName}
+            attackerMegaActive={attackingCombatant.megaActive}
+            defenderMegaActive={defendingCombatant.megaActive}
+            moveCategory={move?.category ?? null}
+            attackerSp={attackingCombatant.sp}
+            defenderSp={defendingCombatant.sp}
+            attackerStages={attackingCombatant.stages}
+            defenderStages={defendingCombatant.stages}
             result={result}
             throughProtect={throughProtect}
             defenderHp={defenderHp}
@@ -187,6 +217,13 @@ function LiveBlock({
   attackerName,
   defenderName,
   moveName,
+  attackerMegaActive,
+  defenderMegaActive,
+  moveCategory,
+  attackerSp,
+  defenderSp,
+  attackerStages,
+  defenderStages,
   result,
   throughProtect,
   defenderHp,
@@ -194,6 +231,21 @@ function LiveBlock({
   attackerName: string | null
   defenderName: string | null
   moveName: string | null
+  attackerMegaActive: boolean
+  defenderMegaActive: boolean
+  moveCategory:
+    | ReturnType<
+        typeof useCalculatorStore.getState
+      >['moveCatalog'][number]['category']
+    | null
+  attackerSp: ReturnType<typeof useCalculatorStore.getState>['attacker']['sp']
+  defenderSp: ReturnType<typeof useCalculatorStore.getState>['defender']['sp']
+  attackerStages: ReturnType<
+    typeof useCalculatorStore.getState
+  >['attacker']['stages']
+  defenderStages: ReturnType<
+    typeof useCalculatorStore.getState
+  >['defender']['stages']
   result: DamageResult
   throughProtect: boolean
   defenderHp: number | null
@@ -203,6 +255,13 @@ function LiveBlock({
     attackerName,
     defenderName,
     moveName,
+    attackerMegaActive,
+    defenderMegaActive,
+    moveCategory,
+    attackerSp,
+    defenderSp,
+    attackerStages,
+    defenderStages,
     result,
     throughProtect,
   })
@@ -215,8 +274,8 @@ function LiveBlock({
         </p>
         <div className="pt-1.5">
           <RollSummary
-          rolls={result.rolls}
-          defenderHp={hp}
+            rolls={result.rolls}
+            defenderHp={hp}
             summaryTestId="detailed-roll-summary"
             rollsTestId="detailed-rolls"
           />

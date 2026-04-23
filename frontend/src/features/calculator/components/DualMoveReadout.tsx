@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
-import type { DamageResult } from '../types/api'
+import { useCalculatorStore } from '../store/useCalculatorStore'
+import type { DamageResult, MoveCategory } from '../types/api'
 import { copyDamageReport } from './copyDamageReport'
 import { DamageBar } from './DamageBar'
 import { formatSummaryText } from './formatReadoutText'
@@ -11,6 +12,7 @@ import { getTypeChipClasses } from './typeColors'
 export type MoveEntry = {
   moveName: string | null
   moveType: string | null
+  moveCategory?: MoveCategory | null
   result: DamageResult | null
 }
 
@@ -143,7 +145,13 @@ function DetailPanel({
   attackerHp: number | null
   defenderHp: number | null
 }) {
-  const { moveName, result } = entry
+  const attackingCombatant = useCalculatorStore((state) =>
+    side === 'attacker' ? state.attacker : state.defender,
+  )
+  const defendingCombatant = useCalculatorStore((state) =>
+    side === 'attacker' ? state.defender : state.attacker,
+  )
+  const { moveName, moveCategory, result } = entry
   if (result === null) return null
 
   const effectiveAttacker = side === 'attacker' ? attackerName : defenderName
@@ -154,6 +162,13 @@ function DetailPanel({
     attackerName: effectiveAttacker,
     defenderName: effectiveDefender,
     moveName,
+    attackerMegaActive: attackingCombatant.megaActive,
+    defenderMegaActive: defendingCombatant.megaActive,
+    moveCategory,
+    attackerSp: attackingCombatant.sp,
+    defenderSp: defendingCombatant.sp,
+    attackerStages: attackingCombatant.stages,
+    defenderStages: defendingCombatant.stages,
     result,
   })
   const hp = effectiveDefenderHp ?? result.max + 1
@@ -258,16 +273,18 @@ function FocusLane({
   const activeEntry =
     selected === null
       ? null
-      : (selected.side === 'attacker'
+      : ((selected.side === 'attacker'
           ? attackerMoves[selected.index]
-          : defenderMoves[selected.index]) ?? null
+          : defenderMoves[selected.index]) ?? null)
 
   return (
     <div
       data-testid="overview-focus-lane"
       className="order-3 flex min-h-[176px] flex-col xl:col-start-2 xl:row-start-1"
     >
-      {selected !== null && activeEntry !== null && activeEntry.result !== null ? (
+      {selected !== null &&
+      activeEntry !== null &&
+      activeEntry.result !== null ? (
         <DetailPanel
           entry={activeEntry}
           attackerName={attackerName}

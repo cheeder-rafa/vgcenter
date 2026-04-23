@@ -46,19 +46,42 @@ describe('PatchNotesModal', () => {
     useToastStore.getState().clear()
     Object.values(mocks).forEach((fn) => fn.mockReset?.())
     mocks.buildStats.mockResolvedValue({
-      baseStats: { hp: 78, attack: 84, defense: 78, specialAttack: 109, specialDefense: 85, speed: 100 },
-      finalStats: { hp: 155, attack: 104, defense: 99, specialAttack: 132, specialDefense: 105, speed: 120 },
+      baseStats: {
+        hp: 78,
+        attack: 84,
+        defense: 78,
+        specialAttack: 109,
+        specialDefense: 85,
+        speed: 100,
+      },
+      finalStats: {
+        hp: 155,
+        attack: 104,
+        defense: 99,
+        specialAttack: 132,
+        specialDefense: 105,
+        speed: 120,
+      },
     })
     mocks.fetchPokedex.mockResolvedValue([])
     mocks.fetchAbilities.mockResolvedValue([])
     mocks.fetchItems.mockResolvedValue([])
     mocks.fetchMoves.mockResolvedValue([])
-    mocks.fetchNatures.mockResolvedValue([{ id: 'serious', name: 'Serious', increasedStat: null, decreasedStat: null }])
+    mocks.fetchNatures.mockResolvedValue([
+      {
+        id: 'serious',
+        name: 'Serious',
+        increasedStat: null,
+        decreasedStat: null,
+      },
+    ])
   })
 
   it('renders a "Patch Notes" button in the header next to the regulation chip', () => {
     render(<CalculatorPage />)
-    expect(screen.getByRole('button', { name: /patch notes/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /patch notes/i }),
+    ).toBeInTheDocument()
   })
 
   it('the regulation chip itself is not a button (is a span)', () => {
@@ -92,6 +115,37 @@ describe('PatchNotesModal', () => {
     await user.click(screen.getByRole('button', { name: /patch notes/i }))
 
     expect(screen.getAllByText(/known issues/i).length).toBeGreaterThan(0)
+  })
+
+  it('uses more player-friendly patch notes copy', async () => {
+    const user = userEvent.setup()
+    render(<CalculatorPage />)
+
+    await user.click(screen.getByRole('button', { name: /patch notes/i }))
+
+    expect(
+      screen.getByText(
+        /the calculator is easier to use on phones and smaller screens/i,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /damage details are easier to scan during quick comparisons/i,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('flags item, ability, and calculation issues as being under correction', async () => {
+    const user = userEvent.setup()
+    render(<CalculatorPage />)
+
+    await user.click(screen.getByRole('button', { name: /patch notes/i }))
+
+    expect(
+      screen.getByText(
+        /some items, abilities, and damage calculations are still under correction/i,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('clicking the close button dismisses the dialog', async () => {

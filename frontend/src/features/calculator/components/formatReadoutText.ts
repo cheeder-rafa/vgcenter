@@ -1,4 +1,9 @@
-import type { DamageResult } from '../types/api'
+import type {
+  DamageResult,
+  MoveCategory,
+  Spread,
+  StatStages,
+} from '../types/api'
 
 type ReadoutContext = {
   attackerName: string | null
@@ -6,6 +11,22 @@ type ReadoutContext = {
   moveName: string | null
   result: DamageResult
   throughProtect?: boolean
+  attackerMegaActive?: boolean
+  defenderMegaActive?: boolean
+  moveCategory?: MoveCategory | null
+  attackerSp?: Spread | null
+  defenderSp?: Spread | null
+  attackerStages?: StatStages | null
+  defenderStages?: StatStages | null
+}
+
+const EMPTY_SPREAD: Spread = {
+  hp: 0,
+  atk: 0,
+  def: 0,
+  spa: 0,
+  spd: 0,
+  spe: 0,
 }
 
 export function formatReadoutText({
@@ -14,6 +35,13 @@ export function formatReadoutText({
   moveName,
   result,
   throughProtect = false,
+  attackerMegaActive = false,
+  defenderMegaActive = false,
+  moveCategory,
+  attackerSp,
+  defenderSp,
+  attackerStages,
+  defenderStages,
 }: ReadoutContext): string {
   const summary = formatSummaryText({
     attackerName,
@@ -21,6 +49,13 @@ export function formatReadoutText({
     moveName,
     result,
     throughProtect,
+    attackerMegaActive,
+    defenderMegaActive,
+    moveCategory,
+    attackerSp,
+    defenderSp,
+    attackerStages,
+    defenderStages,
   })
   return `${summary}\n${formatRollsText(result)}`
 }
@@ -31,14 +66,32 @@ export function formatSummaryText({
   moveName,
   result,
   throughProtect = false,
+  attackerMegaActive = false,
+  defenderMegaActive = false,
+  moveCategory,
+  attackerSp,
+  defenderSp,
+  attackerStages,
+  defenderStages,
 }: ReadoutContext): string {
-  const attacker = attackerName ?? '—'
-  const defender = defenderName ?? '—'
+  const attacker = formatSpeciesName(attackerName, attackerMegaActive)
+  const defender = formatSpeciesName(defenderName, defenderMegaActive)
   const move = moveName ?? '—'
   const defenderSuffix = throughProtect ? ' through Protect' : ''
   const percentRange = `${result.minPct.toFixed(1)} - ${result.maxPct.toFixed(1)}%`
   const koChanceText = formatKoChance(result)
-  return `${attacker} ${move} vs. ${defender}${defenderSuffix}: ${result.min}-${result.max} (${percentRange}) -- ${koChanceText}`
+  const includeStatContext = shouldIncludeStatContext(
+    moveCategory,
+    attackerStages,
+    defenderStages,
+  )
+  const attackerLead = includeStatContext
+    ? formatAttackerLead(moveCategory, attackerSp, attackerStages, attacker)
+    : attacker
+  const defenderLead = includeStatContext
+    ? formatDefenderLead(moveCategory, defenderSp, defenderStages, defender)
+    : defender
+  return `${attackerLead} ${move} vs. ${defenderLead}${defenderSuffix}: ${result.min}-${result.max} (${percentRange}) -- ${koChanceText}`
 }
 
 export function formatRollsText(result: DamageResult): string {
@@ -73,4 +126,102 @@ function formatPercent(probability: number): string {
 
 function formatHits(hits: number): string {
   return hits === 1 ? 'OHKO' : `${hits}HKO`
+}
+
+function formatSpeciesName(name: string | null, megaActive: boolean): string {
+  const resolvedName = name ?? '—'
+  if (!megaActive || resolvedName === '—' || resolvedName.startsWith('Mega ')) {
+    return resolvedName
+  }
+  return `Mega ${resolvedName}`
+}
+
+function shouldIncludeStatContext(
+  category: MoveCategory | null | undefined,
+  attackerStages: StatStages | null | undefined,
+  defenderStages: StatStages | null | undefined,
+): boolean {
+  if (!category || category === 'STATUS') {
+    return false
+  }
+
+  return (
+    relevantStage(attackerStages, category, 'attacker') !== 0 ||
+    relevantStage(defenderStages, category, 'defender') !== 0
+  )
+}
+
+function formatAttackerLead(
+  category: MoveCategory | null | undefined,
+  spread: Spread | null | undefined,
+  stages: StatStages | null | undefined,
+  name: string,
+): string {
+  const resolvedSpread = spread ?? EMPTY_SPREAD
+  if (category === 'SPECIAL') {
+    return joinSegments(
+      formatStageValue(relevantStage(stages, category, 'attacker')),
+      `${resolvedSpread.spa} SpA`,
+      name,
+    )
+  }
+
+  return joinSegments(
+    formatStageValue(relevantStage(stages, 'PHYSICAL', 'attacker')),
+    `${resolvedSpread.atk} Atk`,
+    name,
+  )
+}
+
+function formatDefenderLead(
+  category: MoveCategory | null | undefined,
+  spread: Spread | null | undefined,
+  stages: StatStages | null | undefined,
+  name: string,
+): string {
+  const resolvedSpread = spread ?? EMPTY_SPREAD
+  const defenseLabel = category === 'SPECIAL' ? 'SpD' : 'Def'
+  const defenseValue =
+    category === 'SPECIAL' ? resolvedSpread.spd : resolvedSpread.def
+
+  return joinSegments(
+    formatStageValue(
+      relevantStage(
+        stages,
+        category === 'SPECIAL' ? 'SPECIAL' : 'PHYSICAL',
+        'defender',
+      ),
+    ),
+    `${resolvedSpread.hp} HP / ${defenseValue} ${defenseLabel}`,
+    name,
+  )
+}
+
+function relevantStage(
+  stages: StatStages | null | undefined,
+  category: MoveCategory,
+  role: 'attacker' | 'defender',
+): number {
+  if (!stages || category === 'STATUS') {
+    return 0
+  }
+
+  if (role === 'attacker') {
+    return category === 'SPECIAL' ? stages.spa : stages.atk
+  }
+
+  return category === 'SPECIAL' ? stages.spd : stages.def
+}
+
+function formatStageValue(stage: number): string | null {
+  if (stage === 0) {
+    return null
+  }
+  return `${stage > 0 ? '+' : ''}${stage}`
+}
+
+function joinSegments(...parts: Array<string | null | undefined>) {
+  return parts
+    .filter((part): part is string => part !== null && part !== undefined)
+    .join(' ')
 }

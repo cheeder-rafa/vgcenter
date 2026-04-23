@@ -325,6 +325,7 @@ function useAllMoveEntries(
 ): {
   moveName: string | null
   moveType: string | null
+  moveCategory: MoveDefinition['category'] | null
   result: import('../features/calculator/types/api').DamageResult | null
 }[] {
   const slots = useCalculatorStore((s) => s[side].moves)
@@ -335,6 +336,7 @@ function useAllMoveEntries(
     return {
       moveName: move?.name ?? null,
       moveType: move?.type ?? null,
+      moveCategory: move?.category ?? null,
       result: results[i] ?? null,
     }
   })
@@ -368,7 +370,10 @@ function CompactHeader({
         <h1 className="font-display text-lg font-extrabold tracking-tight text-white sm:text-2xl">
           {t('calculator.title')}
         </h1>
-        <span className="arena-chip text-arena-plasma" data-testid="regulation-chip">
+        <span
+          className="arena-chip text-arena-plasma"
+          data-testid="regulation-chip"
+        >
           Regulation {regulation}
         </span>
         <button
