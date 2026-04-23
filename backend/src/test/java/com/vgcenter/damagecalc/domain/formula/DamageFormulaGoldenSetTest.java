@@ -67,6 +67,7 @@ class DamageFormulaGoldenSetTest {
         Combatant ghostDefender = combatant(List.of(Type.GHOST), new Stats(160, 69, 115, 76, 99, 68));
         Combatant bugDefender = combatant(List.of(Type.BUG), new Stats(160, 69, 115, 76, 99, 68));
         Combatant groundDefender = combatant(List.of(Type.GROUND), new Stats(160, 69, 115, 76, 99, 68));
+        Combatant electricDefender = combatant(List.of(Type.ELECTRIC), new Stats(160, 69, 115, 76, 99, 68));
         Combatant rockDefender = combatant(List.of(Type.ROCK), new Stats(160, 69, 118, 76, 145, 68));
         Combatant iceDefender = combatant(List.of(Type.ICE), new Stats(160, 77, 122, 68, 87, 68));
         Combatant fightingDefender = combatant(List.of(Type.FIGHTING), new Stats(160, 69, 115, 76, 99, 68));
@@ -315,9 +316,20 @@ class DamageFormulaGoldenSetTest {
                         context(physicalAttacker.withItem(Item.LIFE_ORB), bulkyDefender, physicalStab),
                         scaled(PHYSICAL_STAB, 13, 10)),
                 Arguments.of(
+                        "mystic water boosts water damage",
+                        context(
+                                specialAttacker.withTypes(List.of(Type.WATER)).withItem(Item.MYSTIC_WATER),
+                                groundDefender,
+                                move(Type.WATER, MoveCategory.SPECIAL, 90, false)),
+                        scaled(SPECIAL_STAB, 6, 5)),
+                Arguments.of(
                         "expert belt boosts super effective hits",
                         context(specialAttacker.withItem(Item.EXPERT_BELT), grassDefender, specialFire),
                         scaled(SPECIAL_STAB, 6, 5)),
+                Arguments.of(
+                        "shuca berry halves the first super effective ground hit",
+                        context(physicalAttacker, electricDefender.withItem(Item.SHUCA_BERRY), physicalNeutral),
+                        NEUTRAL_PHYSICAL),
                 Arguments.of(
                         "magic room suppresses life orb",
                         context(
@@ -358,9 +370,39 @@ class DamageFormulaGoldenSetTest {
                         "multiscale does not apply below full health",
                         context(
                                 specialAttacker,
-                                grassDefender.withAbility(Ability.MULTISCALE).withFullHp(false),
+                                grassDefender.withAbility(Ability.MULTISCALE).withCurrentHp(159),
                                 specialFire),
                         SPECIAL_STAB),
+                Arguments.of(
+                        "levitate nullifies ground damage",
+                        context(physicalAttacker, bulkyDefender.withAbility(Ability.LEVITATE), physicalNeutral),
+                        zeroes()),
+                Arguments.of(
+                        "mold breaker bypasses levitate",
+                        context(
+                                physicalAttacker.withAbility(Ability.MOLD_BREAKER),
+                                bulkyDefender.withAbility(Ability.LEVITATE),
+                                physicalNeutral),
+                        NEUTRAL_PHYSICAL),
+                Arguments.of(
+                        "water absorb nullifies water damage",
+                        context(
+                                specialAttacker.withTypes(List.of(Type.WATER)),
+                                groundDefender.withAbility(Ability.WATER_ABSORB),
+                                move(Type.WATER, MoveCategory.SPECIAL, 90, false)),
+                        zeroes()),
+                Arguments.of(
+                        "thick fat halves fire damage",
+                        context(specialAttacker, grassDefender.withAbility(Ability.THICK_FAT), specialFire),
+                        scaled(SPECIAL_STAB, 1, 2)),
+                Arguments.of(
+                        "heatproof halves fire damage",
+                        context(specialAttacker, grassDefender.withAbility(Ability.HEATPROOF), specialFire),
+                        scaled(SPECIAL_STAB, 1, 2)),
+                Arguments.of(
+                        "dry skin amplifies fire damage",
+                        context(specialAttacker, grassDefender.withAbility(Ability.DRY_SKIN), specialFire),
+                        scaled(SPECIAL_STAB, 5, 4)),
                 Arguments.of(
                         "fluffy halves contact damage",
                         context(physicalAttacker, bulkyDefender.withAbility(Ability.FLUFFY), physicalContact),

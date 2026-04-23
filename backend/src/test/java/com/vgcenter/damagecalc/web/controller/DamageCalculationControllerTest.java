@@ -72,7 +72,7 @@ class DamageCalculationControllerTest {
                                     "itemId": "none",
                                     "status": "NONE",
                                     "grounded": true,
-                                    "fullHp": true
+                                    "currentHp": 140
                                   },
                                   "defender": {
                                     "level": 50,
@@ -82,7 +82,7 @@ class DamageCalculationControllerTest {
                                     "itemId": "none",
                                     "status": "NONE",
                                     "grounded": true,
-                                    "fullHp": true
+                                    "currentHp": 160
                                   },
                                   "move": {
                                     "type": "FIRE",
@@ -116,7 +116,7 @@ class DamageCalculationControllerTest {
                     "itemId": "none",
                     "status": "NONE",
                     "grounded": true,
-                    "fullHp": true
+                    "currentHp": 140
                   },
                   "defender": {
                     "level": 50,
@@ -126,7 +126,7 @@ class DamageCalculationControllerTest {
                     "itemId": "none",
                     "status": "NONE",
                     "grounded": true,
-                    "fullHp": true
+                    "currentHp": 160
                   },
                   "move": {
                     "type": "FIRE",

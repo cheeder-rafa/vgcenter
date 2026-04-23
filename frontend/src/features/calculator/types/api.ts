@@ -38,7 +38,7 @@ export type CombatantRequest = {
   status: StatusCondition
   stages: StatStages
   grounded: boolean
-  fullHp: boolean
+  currentHp: number
 }
 
 export type MoveRequest = {
@@ -151,7 +151,7 @@ export type CombatantBuild = {
   finalStats: Stats | null
   types: [Type, Type | null] | null
   grounded: boolean
-  fullHp: boolean
+  currentHp: number
 }
 
 export type MegaFormResponse = {

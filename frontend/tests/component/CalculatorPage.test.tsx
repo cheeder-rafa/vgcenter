@@ -663,7 +663,7 @@ describe('CalculatorPage', () => {
         finalStats: null,
         types: null,
         grounded: true,
-        fullHp: true,
+        currentHp: 1,
       },
     } as never)
     useSavedTeamStore.getState().save('attacker', {
@@ -688,7 +688,7 @@ describe('CalculatorPage', () => {
         finalStats: null,
         types: null,
         grounded: true,
-        fullHp: true,
+        currentHp: 1,
       },
     } as never)
 

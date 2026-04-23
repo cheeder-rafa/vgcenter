@@ -21,6 +21,8 @@ describe('useCalculatorStore', () => {
       { moveId: null },
       { moveId: null },
     ])
+    expect(state.attacker.currentHp).toBe(175)
+    expect(state.defender.currentHp).toBe(180)
     expect(state.defender.finalStats?.defense).toBe(120)
     expect(state.field.weather).toBe('CLEAR')
     expect(state.field.room).toBe('NONE')
@@ -45,10 +47,10 @@ describe('useCalculatorStore', () => {
   })
 
   it('updates defender and field via their setters', () => {
-    useCalculatorStore.getState().setDefender({ fullHp: false })
+    useCalculatorStore.getState().setDefender({ currentHp: 90 })
     useCalculatorStore.getState().setField({ weather: 'SUN' })
 
-    expect(useCalculatorStore.getState().defender.fullHp).toBe(false)
+    expect(useCalculatorStore.getState().defender.currentHp).toBe(90)
     expect(useCalculatorStore.getState().field.weather).toBe('SUN')
   })
 
@@ -210,6 +212,7 @@ describe('useCalculatorStore', () => {
           level: 50,
           abilityId: null,
           types: ['FIRE', 'FLYING'],
+          currentHp: 160,
         }),
         move: expect.objectContaining({
           basePower: 95,

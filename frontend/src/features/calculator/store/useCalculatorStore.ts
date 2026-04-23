@@ -117,7 +117,7 @@ function createDefaultCombatant(stats: Stats): CombatantBuild {
     finalStats: { ...stats },
     types: ['NORMAL', null],
     grounded: true,
-    fullHp: true,
+    currentHp: stats.hp,
   }
 }
 
@@ -159,6 +159,11 @@ function mergeCombatant(
   current: CombatantBuild,
   patch: CombatantBuildPatch,
 ): CombatantBuild {
+  const nextBaseStats = mergeStats(current.baseStats, patch.baseStats)
+  const nextFinalStats = mergeStats(current.finalStats, patch.finalStats)
+  const nextMaxHp = nextFinalStats?.hp ?? nextBaseStats?.hp ?? null
+  const requestedCurrentHp = patch.currentHp ?? current.currentHp
+
   return {
     ...current,
     ...patch,
@@ -167,8 +172,10 @@ function mergeCombatant(
       ? { ...current.stages, ...patch.stages }
       : current.stages,
     moves: patch.moves ? cloneMoveSlots(patch.moves) : current.moves,
-    baseStats: mergeStats(current.baseStats, patch.baseStats),
-    finalStats: mergeStats(current.finalStats, patch.finalStats),
+    baseStats: nextBaseStats,
+    finalStats: nextFinalStats,
+    currentHp:
+      nextMaxHp === null ? requestedCurrentHp : Math.max(1, Math.min(requestedCurrentHp, nextMaxHp)),
   }
 }
 
@@ -198,7 +205,10 @@ type CalculatorState = {
   setMoveCatalog: (moves: MoveDefinition[]) => void
   setCombatantDerived: (
     side: CalculatorSide,
-    patch: Pick<CombatantBuildPatch, 'baseStats' | 'finalStats' | 'types'>,
+    patch: Pick<
+      CombatantBuildPatch,
+      'baseStats' | 'finalStats' | 'types' | 'currentHp'
+    >,
   ) => void
   setField: (patch: Partial<FieldRequest>) => void
   setAttackerSide: (patch: Partial<SideConditions>) => void
@@ -345,7 +355,7 @@ export function selectDamageRequestFor(
       status: attacker.status,
       stages: attacker.stages,
       grounded: attacker.grounded,
-      fullHp: attacker.fullHp,
+      currentHp: attacker.currentHp,
     },
     defender: {
       level: 50,
@@ -356,7 +366,7 @@ export function selectDamageRequestFor(
       status: defender.status,
       stages: defender.stages,
       grounded: defender.grounded,
-      fullHp: defender.fullHp,
+      currentHp: defender.currentHp,
     },
     move: toMoveRequest(move),
     field: state.field,

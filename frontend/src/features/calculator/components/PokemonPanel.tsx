@@ -144,6 +144,7 @@ export function PokemonPanel({
     combatant.megaActive && speciesName !== null
       ? `Mega ${speciesName}`
       : speciesName
+  const maxHp = combatant.finalStats?.hp ?? combatant.baseStats?.hp ?? 1
 
   function handleSpeciesChange(entry: PokedexEntry | null) {
     clearSideMovesAndResults(side)
@@ -165,12 +166,14 @@ export function PokemonPanel({
         megaFormId: null,
         moves: EMPTY_MOVE_SLOTS,
         grounded: true,
-        fullHp: true,
+        currentHp: combatant.currentHp,
       })
       return
     }
 
     const [primary, secondary] = entry.types
+    const nextAbilityId = entry.abilityIds[0] ?? null
+    const nextTypes: [string, string | null] = [primary, secondary ?? null]
     setCombatant({
       speciesId: entry.id,
       natureId: 'serious',
@@ -178,15 +181,15 @@ export function PokemonPanel({
       stages: { ...DEFAULT_STAGES },
       megaActive: false,
       megaFormId: null,
-      abilityId: entry.abilityIds[0] ?? null,
+      abilityId: nextAbilityId,
       itemId: null,
       status: 'NONE',
       moves: EMPTY_MOVE_SLOTS,
       baseStats: entry.baseStats,
       finalStats: null,
-      types: [primary, secondary ?? null],
-      grounded: !(primary === 'FLYING' || secondary === 'FLYING'),
-      fullHp: true,
+      types: nextTypes,
+      grounded: isGrounded(nextTypes, nextAbilityId),
+      currentHp: entry.baseStats.hp,
     })
   }
 
@@ -199,19 +202,21 @@ export function PokemonPanel({
         (candidate) => candidate.id === combatant.megaFormId,
       ) ?? speciesEntry.megaForms[0]
     const [primary, secondary] = next ? megaForm.types : speciesEntry.types
+    const nextAbilityId = next
+      ? megaForm.abilityId
+      : (speciesEntry.abilityIds[0] ?? combatant.abilityId)
+    const nextTypes: [string, string | null] = [primary, secondary ?? null]
     setCombatant({
       megaActive: next,
       megaFormId: next ? megaForm.id : combatant.megaFormId,
-      abilityId: next
-        ? megaForm.abilityId
-        : (speciesEntry.abilityIds[0] ?? combatant.abilityId),
+      abilityId: nextAbilityId,
       itemId: next
         ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId)
         : combatant.itemId,
       baseStats: next ? megaForm.baseStats : speciesEntry.baseStats,
       finalStats: null,
-      types: [primary, secondary ?? null],
-      grounded: !(primary === 'FLYING' || secondary === 'FLYING'),
+      types: nextTypes,
+      grounded: isGrounded(nextTypes, nextAbilityId),
     })
   }
 
@@ -226,6 +231,7 @@ export function PokemonPanel({
       return
     }
     const [primary, secondary] = megaForm.types
+    const nextTypes: [string, string | null] = [primary, secondary ?? null]
     setCombatant({
       megaFormId: nextMegaFormId,
       megaActive: true,
@@ -233,8 +239,8 @@ export function PokemonPanel({
       abilityId: megaForm.abilityId,
       baseStats: megaForm.baseStats,
       finalStats: null,
-      types: [primary, secondary ?? null],
-      grounded: !(primary === 'FLYING' || secondary === 'FLYING'),
+      types: nextTypes,
+      grounded: isGrounded(nextTypes, megaForm.abilityId),
     })
   }
 
@@ -360,10 +366,14 @@ export function PokemonPanel({
               className="arena-select"
               value={combatant.abilityId ?? ''}
               onChange={(event) =>
-                setCombatant({
-                  abilityId:
-                    event.target.value === '' ? null : event.target.value,
-                })
+                setCombatant((() => {
+                  const abilityId =
+                    event.target.value === '' ? null : event.target.value
+                  return {
+                    abilityId,
+                    grounded: isGrounded(combatant.types, abilityId),
+                  }
+                })())
               }
             >
               <option value="" className="bg-arena-void">
@@ -461,6 +471,24 @@ export function PokemonPanel({
               ))}
             </select>
           </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="arena-label text-arena-violet" htmlFor={`${ids.heading}-current-hp`}>
+              Current HP
+            </label>
+            <input
+              id={`${ids.heading}-current-hp`}
+              type="number"
+              min={1}
+              max={maxHp}
+              value={combatant.currentHp}
+              className="arena-input"
+              onChange={(event) =>
+                setCombatant({
+                  currentHp: clampCurrentHp(Number(event.target.value), maxHp),
+                })
+              }
+            />
+          </div>
         </div>
 
         <div className="arena-divider" />
@@ -507,6 +535,23 @@ function formatTypes(combatant: CombatantBuild): string[] {
     return []
   }
   return combatant.types.filter((value): value is string => value !== null)
+}
+
+function isGrounded(
+  types: CombatantBuild['types'],
+  abilityId: string | null,
+): boolean {
+  if (types === null) {
+    return true
+  }
+  return !types.includes('FLYING') && abilityId !== 'levitate'
+}
+
+function clampCurrentHp(value: number, maxHp: number): number {
+  if (!Number.isFinite(value)) {
+    return maxHp
+  }
+  return Math.max(1, Math.min(Math.trunc(value), maxHp))
 }
 
 function formatNatureLabel(nature: NatureResponse): string {

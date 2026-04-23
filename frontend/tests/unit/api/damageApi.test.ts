@@ -23,7 +23,7 @@ const sampleRequest: DamageCalculationRequest = {
     itemId: 'life-orb',
     status: 'NONE',
     grounded: true,
-    fullHp: true,
+    currentHp: 175,
   },
   defender: {
     level: 50,
@@ -40,7 +40,7 @@ const sampleRequest: DamageCalculationRequest = {
     itemId: null,
     status: 'NONE',
     grounded: true,
-    fullHp: true,
+    currentHp: 180,
   },
   move: {
     type: 'FIRE',

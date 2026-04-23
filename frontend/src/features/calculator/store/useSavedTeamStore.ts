@@ -80,7 +80,7 @@ function toCombatantBuild(pokemon: SavedPokemon): CombatantBuild {
     finalStats: cloneStats(pokemon.finalStats),
     types: cloneTypes(pokemon.types),
     grounded: pokemon.grounded,
-    fullHp: pokemon.fullHp,
+    currentHp: pokemon.currentHp,
   }
 }
 

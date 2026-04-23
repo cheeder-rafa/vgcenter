@@ -13,12 +13,15 @@ public record CombatantCommand(
         String status,
         Map<String, Integer> stages,
         boolean grounded,
-        boolean fullHp) {
+        int currentHp) {
 
     public CombatantCommand {
         Objects.requireNonNull(stats, "stats must not be null");
         types = List.copyOf(Objects.requireNonNull(types, "types must not be null"));
         Objects.requireNonNull(status, "status must not be null");
         stages = Map.copyOf(Objects.requireNonNullElse(stages, Map.of()));
+        if (currentHp <= 0 || currentHp > stats.hp()) {
+            throw new IllegalArgumentException("Current HP must be between 1 and max HP");
+        }
     }
 }

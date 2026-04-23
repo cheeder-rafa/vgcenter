@@ -19,4 +19,11 @@ public record CombatantRequestDto(
         @NotBlank String status,
         Map<@NotBlank String, @NotNull @Min(-6) @Max(6) Integer> stages,
         boolean grounded,
-        boolean fullHp) {}
+        @Min(1) int currentHp) {
+
+    public CombatantRequestDto {
+        if (stats != null && currentHp > stats.hp()) {
+            throw new IllegalArgumentException("Current HP must not exceed max HP");
+        }
+    }
+}

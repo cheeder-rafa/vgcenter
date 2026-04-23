@@ -67,7 +67,7 @@ class CalculateDamageServiceTest {
                 "PARALYSIS",
                 Map.of(),
                 true,
-                true));
+                140));
 
         assertThat(combatant.stats().speed()).isEqualTo(61);
     }
@@ -83,10 +83,26 @@ class CalculateDamageServiceTest {
                 "NONE",
                 Map.of("atk", 2, "spe", -1),
                 true,
-                true));
+                140));
 
         assertThat(combatant.stats().attack()).isEqualTo(152);
         assertThat(combatant.stats().speed()).isEqualTo(82);
+    }
+
+    @Test
+    void combatantCurrentHpMustNotExceedMaxHp() {
+        assertThatThrownBy(() -> invokeToCombatant(new CombatantCommand(
+                        50,
+                        new StatsCommand(140, 76, 70, 158, 95, 123),
+                        List.of("FIRE"),
+                        "none",
+                        "none",
+                        "NONE",
+                        Map.of(),
+                        true,
+                        141)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Current HP");
     }
 
     @Test
@@ -158,6 +174,38 @@ class CalculateDamageServiceTest {
 
         assertThat(protectedResult.rolls()[0]).isEqualTo(unprotected.rolls()[0] / 4);
         assertThat(protectedResult.rolls()[15]).isEqualTo(unprotected.rolls()[15] / 4);
+    }
+
+    @Test
+    void multiscaleOnlyAppliesToTheFirstHitWhenReportingKoChance() {
+        CalculateDamageResult result = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attacker(),
+                grassDefenderWithAbility("multiscale"),
+                move(),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                false,
+                1));
+
+        assertThat(result.koChance()).isEqualTo(new KoChanceResult("guaranteed 2HKO", 1.0d, 2));
+    }
+
+    @Test
+    void resistBerriesOnlyApplyToTheFirstHitWhenReportingKoChance() {
+        CalculateDamageResult result = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                groundAttacker(),
+                electricDefenderWithItem("shuca-berry"),
+                new MoveCommand("GROUND", "PHYSICAL", 80, false, false, false, false),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                false,
+                1));
+
+        assertThat(result.koChance()).isEqualTo(new KoChanceResult("guaranteed 2HKO", 1.0d, 2));
     }
 
     @Test
@@ -234,7 +282,7 @@ class CalculateDamageServiceTest {
                 "NONE",
                 Map.of(),
                 true,
-                true);
+                140);
     }
 
     private static CombatantCommand defender() {
@@ -247,7 +295,46 @@ class CalculateDamageServiceTest {
                 "NONE",
                 Map.of(),
                 true,
-                true);
+                160);
+    }
+
+    private static CombatantCommand grassDefenderWithAbility(String abilityId) {
+        return new CombatantCommand(
+                50,
+                new StatsCommand(160, 68, 111, 76, 99, 71),
+                List.of("GRASS"),
+                abilityId,
+                "none",
+                "NONE",
+                Map.of(),
+                true,
+                160);
+    }
+
+    private static CombatantCommand groundAttacker() {
+        return new CombatantCommand(
+                50,
+                new StatsCommand(154, 149, 77, 93, 76, 91),
+                List.of("NORMAL"),
+                "none",
+                "none",
+                "NONE",
+                Map.of(),
+                true,
+                154);
+    }
+
+    private static CombatantCommand electricDefenderWithItem(String itemId) {
+        return new CombatantCommand(
+                50,
+                new StatsCommand(100, 69, 115, 76, 99, 68),
+                List.of("ELECTRIC"),
+                "none",
+                itemId,
+                "NONE",
+                Map.of(),
+                true,
+                100);
     }
 
     private static CombatantCommand attackerWithAbility(String abilityId) {
@@ -260,7 +347,7 @@ class CalculateDamageServiceTest {
                 "NONE",
                 Map.of(),
                 true,
-                true);
+                140);
     }
 
     private static MoveCommand move() {
