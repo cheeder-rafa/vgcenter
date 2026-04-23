@@ -450,10 +450,10 @@ describe('CalculatorPage', () => {
     expect(
       screen.getByRole('button', { name: /load incineroar for attacker/i }),
     ).toBeInTheDocument()
-    expect(useSavedTeamStore.getState().attackerSaved[0]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().mine[0]?.speciesId).toBe(
       'charizard',
     )
-    expect(useSavedTeamStore.getState().attackerSaved[5]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe(
       'pelipper',
     )
 
@@ -642,7 +642,7 @@ describe('CalculatorPage', () => {
     })
 
     useSavedTeamStore.getState().save('attacker', {
-      ...useSavedTeamStore.getState().attackerSaved[0],
+      ...useSavedTeamStore.getState().mine[0],
       ...{
         speciesId: 'stale-one',
         speciesName: 'Stale One',
@@ -667,7 +667,7 @@ describe('CalculatorPage', () => {
       },
     } as never)
     useSavedTeamStore.getState().save('attacker', {
-      ...useSavedTeamStore.getState().attackerSaved[0],
+      ...useSavedTeamStore.getState().mine[0],
       ...{
         speciesId: 'stale-two',
         speciesName: 'Stale Two',
@@ -716,10 +716,10 @@ describe('CalculatorPage', () => {
     expect(
       screen.queryByRole('button', { name: /load stale two for attacker/i }),
     ).not.toBeInTheDocument()
-    expect(useSavedTeamStore.getState().attackerSaved[0]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().mine[0]?.speciesId).toBe(
       'charizard',
     )
-    expect(useSavedTeamStore.getState().attackerSaved[5]?.speciesId).toBe(
+    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe(
       'pelipper',
     )
   })
