@@ -3,8 +3,11 @@ package com.vgcenter.damagecalc.application.usecase;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public final class RecommendPlansService implements RecommendPlansUseCase {
 
@@ -20,19 +23,26 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
     public RecommendPlansResult recommend(RecommendPlansCommand command) {
         List<PreviewPokemonCommand> myTeam = command.myTeam();
 
-        // Pre-compute all C(6,2) = 15 lead pair evaluations.
+        // Pre-compute all C(6,2) = 15 lead pair evaluations in parallel.
         Map<Long, EvaluateLeadsResult> evalCache = new HashMap<>();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (int i = 0; i < myTeam.size(); i++) {
             for (int j = i + 1; j < myTeam.size(); j++) {
-                long key = pairKey(i, j);
-                EvaluateLeadsResult result = evaluateLeadsUseCase.evaluate(new EvaluateLeadsCommand(
-                        command.regulation(),
-                        List.of(myTeam.get(i), myTeam.get(j)),
-                        command.opponentTeam(),
-                        command.field()));
-                evalCache.put(key, result);
+                final int fi = i, fj = j;
+                final long key = pairKey(fi, fj);
+                futures.add(CompletableFuture.runAsync(() -> {
+                    EvaluateLeadsResult result = evaluateLeadsUseCase.evaluate(new EvaluateLeadsCommand(
+                            command.regulation(),
+                            List.of(myTeam.get(fi), myTeam.get(fj)),
+                            command.opponentTeam(),
+                            command.field()));
+                    synchronized (evalCache) {
+                        evalCache.put(key, result);
+                    }
+                }));
             }
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
         // Enumerate all C(6,4) = 15 bring-4 combinations and find the best lead per bring-4.
         List<PlanCandidate> candidates = new ArrayList<>();
@@ -42,9 +52,9 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
             candidates.add(best);
         }
 
-        // Sort by score descending and take top 3 unique bring-4 plans.
+        // Sort by score descending; pick top 3 with diverse lead pairs.
         candidates.sort(Comparator.comparingInt(PlanCandidate::score).reversed());
-        List<PlanCandidate> topCandidates = candidates.stream().limit(MAX_PLANS).toList();
+        List<PlanCandidate> topCandidates = selectDiverse(candidates);
 
         List<PlanRecommendation> plans = topCandidates.stream()
                 .map(c -> buildRecommendation(c, myTeam, command.opponentTeam(), command.winConditionIndex()))
@@ -97,6 +107,29 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
             base += leading ? 2 : 6;
         }
         return base;
+    }
+
+    private List<PlanCandidate> selectDiverse(List<PlanCandidate> sorted) {
+        List<PlanCandidate> selected = new ArrayList<>();
+        Set<Long> usedLeadKeys = new HashSet<>();
+        for (PlanCandidate c : sorted) {
+            if (selected.size() >= MAX_PLANS) break;
+            int g0 = c.bring().get(c.leadWithinBring().get(0));
+            int g1 = c.bring().get(c.leadWithinBring().get(1));
+            long leadKey = pairKey(Math.min(g0, g1), Math.max(g0, g1));
+            if (!usedLeadKeys.contains(leadKey) || selected.isEmpty()) {
+                selected.add(c);
+                usedLeadKeys.add(leadKey);
+            }
+        }
+        // Backfill if not enough diverse plans exist.
+        if (selected.size() < MAX_PLANS) {
+            for (PlanCandidate c : sorted) {
+                if (selected.size() >= MAX_PLANS) break;
+                if (!selected.contains(c)) selected.add(c);
+            }
+        }
+        return selected;
     }
 
     private PlanRecommendation buildRecommendation(
