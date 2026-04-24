@@ -47,17 +47,15 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
         return new LeadMatchupResult(
                 opponentLeads.stream().map(PreviewPokemonCommand::pokemonId).toList(),
                 opponentLeads.stream().map(PreviewPokemonCommand::displayName).toList(),
-                new PreviewMetricResult("KO pressure", koCount, tone(koCount, 2, 1)),
-                new PreviewMetricResult("2HKO pressure", twoHitCount, tone(twoHitCount, 4, 2)),
-                new PreviewMetricResult("Double-up pressure", doubleUpCount, tone(doubleUpCount, 2, 1)),
+                new PreviewMetricResult("Your OHKOs", koCount, tone(koCount, 2, 1)),
+                new PreviewMetricResult("Your 2HKOs", twoHitCount, tone(twoHitCount, 4, 2)),
+                new PreviewMetricResult("Combined KOs", doubleUpCount, tone(doubleUpCount, 2, 1)),
                 new PreviewMetricResult(
-                        "Incoming danger",
+                        "Threats on you",
                         incomingKoCount + incomingTwoHitCount,
                         tone(incomingKoCount * 2 + incomingTwoHitCount, 3, 1)),
                 new PreviewMetricResult(
-                        "Speed control",
-                        speedScore.selectedFasterCount(),
-                        tone(speedScore.selectedFasterCount(), 2, 1)),
+                        "You outspeed", speedScore.selectedFasterCount(), tone(speedScore.selectedFasterCount(), 2, 1)),
                 mustReactLabels,
                 annotations);
     }
@@ -142,22 +140,22 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
             int koCount, int doubleUpCount, int incomingKoCount, int incomingTwoHitCount, SpeedScore speedScore) {
         List<String> labels = new ArrayList<>();
         if (incomingKoCount > 0) {
-            labels.add("Cover immediate KO");
+            labels.add("Protect or switch — opponent can OHKO one of your leads");
         }
         if (doubleUpCount > 0) {
-            labels.add("Double-up is live");
+            labels.add("Both your leads can combine to KO one opponent this turn");
         }
         if (koCount > 0) {
-            labels.add("Press KO threat");
+            labels.add("You can OHKO an opponent lead — press the KO");
         }
         if (incomingTwoHitCount > 0) {
-            labels.add("Avoid free 2HKO");
+            labels.add("Opponent can 2HKO — avoid leaving targets in range");
         }
         if (speedScore.opponentFasterCount() > speedScore.selectedFasterCount()) {
-            labels.add("Respect faster lead");
+            labels.add("Opponent leads move first — plan around their turn-1 action");
         }
         if (labels.isEmpty()) {
-            labels.add("Stable opener");
+            labels.add("Stable turn 1 — no immediate threats or KO opportunities");
         }
         return labels;
     }

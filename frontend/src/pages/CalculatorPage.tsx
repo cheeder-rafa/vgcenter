@@ -38,7 +38,6 @@ import {
   usePinStore,
   type MatchupPin,
 } from '../features/calculator/store/usePinStore'
-import { getFeedbackUrl } from '../lib/app-config'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
@@ -353,7 +352,6 @@ function CompactHeader({
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
 }) {
   const activeSideLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
-  const feedbackUrl = getFeedbackUrl()
   return (
     <header
       className="grid gap-3 border-b border-white/10 pb-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center"
@@ -395,16 +393,6 @@ function CompactHeader({
           onImportTeam={onImportTeam}
           onLoadPokemon={onLoadPokemon}
         />
-        {feedbackUrl !== null ? (
-          <a
-            className="arena-button flex w-full items-center justify-center whitespace-nowrap text-white/80 sm:w-auto"
-            href={feedbackUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            Send feedback
-          </a>
-        ) : null}
       </div>
     </header>
   )

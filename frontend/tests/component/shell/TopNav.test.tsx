@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { TopNav } from '../../../src/components/shell/TopNav'
 
@@ -29,6 +29,9 @@ function renderTopNavAt(initialPath: string) {
 }
 
 describe('TopNav', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
   it('renders nav links for /calc and /preview', () => {
     renderTopNavAt('/calc')
 
@@ -100,6 +103,27 @@ describe('TopNav', () => {
     expect(
       screen.getByRole('button', { name: /patch notes/i }),
     ).toBeInTheDocument()
+  })
+
+  it('shows feedback link when VITE_FEEDBACK_URL is set', () => {
+    vi.stubEnv('VITE_FEEDBACK_URL', 'https://tally.so/r/vgcenter-feedback')
+    renderTopNavAt('/calc')
+
+    const feedbackLink = screen.getByRole('link', { name: /feedback/i })
+    expect(feedbackLink).toHaveAttribute(
+      'href',
+      'https://tally.so/r/vgcenter-feedback',
+    )
+    expect(feedbackLink).toHaveAttribute('target', '_blank')
+  })
+
+  it('hides feedback link when VITE_FEEDBACK_URL is not set', () => {
+    vi.stubEnv('VITE_FEEDBACK_URL', '')
+    renderTopNavAt('/calc')
+
+    expect(
+      screen.queryByRole('link', { name: /feedback/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('clicking patch notes opens the dialog', async () => {

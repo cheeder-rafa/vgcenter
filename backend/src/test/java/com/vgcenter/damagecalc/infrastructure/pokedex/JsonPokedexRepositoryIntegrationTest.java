@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class JsonPokedexRepositoryIntegrationTest {
 
-    private static final int EXPECTED_REGULATION_M_A_SPECIES = 201;
+    private static final int EXPECTED_REGULATION_M_A_SPECIES = 202;
 
     private final ApplicationContextRunner contextRunner =
             new ApplicationContextRunner().withUserConfiguration(DamageCalcApplication.class);
@@ -97,7 +97,9 @@ class JsonPokedexRepositoryIntegrationTest {
                             "lycanroc-midnight",
                             "lycanroc-dusk",
                             "palafin-zero",
-                            "palafin-hero")
+                            "palafin-hero",
+                            "floette",
+                            "floette-eternal")
                     .doesNotContain("meowstic", "aegislash", "lycanroc", "palafin");
         });
     }

@@ -172,7 +172,7 @@ describe('CalculatorPage', () => {
     ).toBeInTheDocument()
   })
 
-  it('keeps the header layout stable when VITE_FEEDBACK_URL is configured', () => {
+  it('keeps the header layout stable (feedback link has moved to TopNav)', () => {
     vi.stubEnv('VITE_FEEDBACK_URL', 'https://tally.so/r/vgcenter-feedback')
 
     render(<CalculatorPage />)
@@ -180,16 +180,14 @@ describe('CalculatorPage', () => {
     const header = screen.getByTestId('calculator-header')
     const brandGroup = screen.getByTestId('calculator-header-brand')
     const actionGroup = screen.getByTestId('calculator-header-actions')
-    const feedbackLink = screen.getByRole('link', { name: /send feedback/i })
 
     expect(header.className).toContain('xl:grid-cols-[minmax(0,1fr)_auto]')
     expect(brandGroup.className).toContain('min-w-0')
     expect(actionGroup.className).toContain('xl:justify-self-end')
-    expect(feedbackLink).toHaveAttribute(
-      'href',
-      'https://tally.so/r/vgcenter-feedback',
-    )
-    expect(feedbackLink.className).toContain('whitespace-nowrap')
+    // Feedback link lives in TopNav, not in the calculator header.
+    expect(
+      screen.queryByRole('link', { name: /send feedback/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('does not render the obsolete Calculate Damage button', () => {
