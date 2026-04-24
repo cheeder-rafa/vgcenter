@@ -915,3 +915,216 @@ stop after the script + fallback asset + docs are in place. Commit.
 
 After all four prompts: open the PR targeting `develop`, run `docker compose up --build`, and walk through the Phase F smoke checklist.
 
+---
+
+## Sub-project 2 — Preview Coach
+
+VGCenter's next tool replaces the rejected `/gameplan` experiment. The old Gameplan Lab route, backend package, frontend slice, and tests are deprecated and should be deleted in Phase A. The new public route is `/preview`.
+
+Preview Coach helps a VGC player turn calculator facts into team-preview decisions: which 4 of 6 to bring, which 2 to lead, what each plan pressures, what each plan risks, and how to adapt in a best-of-3 set. It must reuse the calculator as the source of truth for damage and stats; it must not modify the damage formula, the Regulation M-A dataset JSON, or the clean-architecture boundaries.
+
+### Product framing
+
+VGC team preview is not a pure ranking problem. A useful tool should explain the decision, not hide it behind one opaque score. Preview Coach therefore presents recommendations as arguments:
+
+- **Bring this when...** the plan covers the opponent's strongest modes.
+- **Avoid this unless...** the plan requires a hard read or leaves a major threat unanswered.
+- **Lead this because...** the pair creates immediate KO, 2HKO, double-up, speed, or positioning pressure.
+- **Adjust in Game 2/3 by...** responding to revealed leads, brought Pokémon, moves, items, and play style.
+
+The UI must keep the existing calculator design language: `arena-*` Tailwind tokens, compact VGC workflow density, readable damage evidence, and no unrelated visual restyle.
+
+### Scope
+
+**In scope**
+
+- Replace `/gameplan` with `/preview`.
+- Preserve useful shared shell and team-store work if it is not tied to the rejected Gameplan concept.
+- Evaluate lead pairs and bring-4 plans using exact `CalculateDamageUseCase` results.
+- Show pressure and risk labels in plain language.
+- Support BO3 notes and adjustments after each game.
+- Export markdown and JSON reports for testing notes and match prep.
+
+**Out of scope**
+
+- Full turn simulation, HP tracking across turns, Protect counter logic, PP, status ticks, stat-stage simulation, or switch-tree search.
+- User-configurable scoring weights in the first version.
+- Any damage formula change.
+- Any dataset JSON change under `backend/src/main/resources/data/regulation-m-a/`.
+- Any frontend redesign that abandons the calculator's existing arena theme.
+
+### Rules for this sub-project
+
+- Branch from `develop` as `feature/preview-<slug>`. Target `develop`.
+- `/gameplan` is deprecated. Do not build new behavior on that route.
+- `/preview` is the new route for all Preview Coach work.
+- All damage must flow through existing calculator use cases and APIs. Do not add inline damage math in frontend code.
+- Use TDD for new behavior: failing test first, implementation second, refactor third.
+- Keep backend architecture clean: domain stays framework-free; web controllers return DTOs, not domain types.
+- Keep the frontend visually consistent with the calculator: `arena-*` tokens, existing component patterns, dense but readable layouts.
+- Execute in four bounded phases. After each phase, run verification, commit with Conventional Commits, and stop for review.
+
+### Phase A — Remove rejected Gameplan + preserve shell
+
+Goal: clear the rejected experiment before building on top of it.
+
+1. Delete the `/gameplan` route and old Gameplan-specific frontend slice, backend controller/use cases/domain code, and tests that only cover the rejected matrix/recommendation concept.
+2. Preserve reusable infrastructure that still supports the calculator and future tools: `AppShell`, `Sidebar`, shared team store, saved-team migration, and calculator imports.
+3. Add `/preview` as a placeholder Preview Coach page using the existing calculator arena styling.
+4. Update navigation labels and README docs so users see Calculator and Preview Coach only.
+5. Add or update tests for routing, sidebar active state, and any preserved store migration behavior.
+
+### Phase B — Lead Lab
+
+Goal: ship the first useful slice: selected lead pair into all 15 opponent lead pairs.
+
+Backend:
+- Add `POST /api/v1/preview/leads/evaluate`.
+- Given my selected lead pair and opponent team of 6, evaluate all C(6,2) opponent lead pairs.
+- Reuse `CalculateDamageUseCase` for all move damage.
+- Return OHKO pressure, guaranteed 2HKO pressure, double-up KO pressure, incoming danger, speed comparison, and "must react" labels.
+- Return annotations for Protect, Fake Out, redirection, priority, Tailwind, Trick Room, and obvious switch pressure. These annotations do not simulate turns and do not change damage.
+
+Frontend:
+- Build Lead Lab inside `/preview`.
+- Let the user choose my lead pair from the saved team and inspect the 15 opponent lead pairs.
+- Render a compact matrix with severity icons, pressure labels, and flag icons.
+- Add a drilldown that cites the exact damage rolls/ranges that justify the label.
+- Reuse existing calculator components where practical.
+
+Testing:
+- Backend tests for pressure thresholds, double-up pressure, speed comparison, and annotations.
+- Frontend tests for the evaluation hook, loading/error states, matrix rendering, keyboard navigation, and drilldown evidence.
+
+### Phase C — Team Preview Coach
+
+Goal: recommend bring-4 plans with explanations, not opaque scores.
+
+Backend:
+- Add `POST /api/v1/preview/plans/recommend`.
+- Evaluate candidate bring-4 + lead-order plans against opponent lead modes.
+- Return top plans with structured explanation fields:
+  - plan summary,
+  - strongest opponent modes covered,
+  - opponent modes that remain risky,
+  - win-condition support,
+  - left-out Pokémon rationale,
+  - prediction burden: `low`, `medium`, or `high`,
+  - key damage evidence IDs that the frontend can show in drilldowns.
+
+Frontend:
+- Present recommendation cards as arguments: "Bring this when", "Main risk", "Why this lead", and "What to watch for".
+- Allow promoting a recommended plan into the Lead Lab view.
+- Let the user tag one of their Pokémon as the intended win condition.
+- Keep the UI compact enough for tournament prep use on a laptop screen.
+
+Testing:
+- Golden-style backend tests for recommendation explanations.
+- Frontend tests for plan cards, promote-to-current behavior, win-condition tagging, and empty/partial-team states.
+
+### Phase D — BO3 Adaptation Notebook
+
+Goal: support best-of-3 iteration after Game 1 and Game 2.
+
+Features:
+- Record game number, result, previous leads, brought Pokémon, revealed moves/items/abilities, hidden-info notes, and "what caused the win/loss".
+- Mark whether the opponent adjusted, repeated, or revealed a new mode.
+- Generate adjustment guidance:
+  - run it back,
+  - change lead only,
+  - change backline,
+  - change win condition,
+  - preserve unrevealed information,
+  - take a calculated risk because the current line is losing.
+- Export a markdown and JSON report with plans, notes, revealed information, and damage evidence.
+
+Testing:
+- Backend or pure utility tests for BO3 guidance classification.
+- Frontend tests for note persistence, report export, and copy clarity.
+
+### Verification
+
+Backend:
+```
+cd backend && ./mvnw spotless:apply && ./mvnw verify
+```
+
+Frontend:
+```
+cd frontend && pnpm lint && pnpm typecheck && pnpm test
+```
+
+End-to-end close-out after Phase D:
+1. Start the app with the normal local dev flow.
+2. Import or create a full team of 6 for both sides.
+3. Open `/preview`; confirm `/gameplan` is gone.
+4. Evaluate a lead pair and confirm all 15 opponent lead pairs render.
+5. Spot-check at least three damage claims against the standalone calculator.
+6. Generate team-preview recommendations and promote one into Lead Lab.
+7. Add BO3 notes after a mock Game 1 and confirm adaptation guidance updates.
+8. Export markdown and JSON; confirm both include notes, recommendations, and damage evidence.
+
+### Ready-to-paste phase prompts
+
+**Prompt A — Remove Gameplan**
+```
+Execute Phase A from PLAN.md's Preview Coach section. Branch from develop as
+feature/preview-shell. Delete the rejected /gameplan implementation: route,
+frontend feature slice, backend gameplan domain/application/web code, and tests
+that only cover the rejected concept. Preserve shared shell/navigation/team-store
+code if still useful. Add /preview as a placeholder Preview Coach page using the
+existing arena-* calculator theme. Use vercel-react-best-practices for routing
+and store changes, and use polish before final verification. Update README. TDD
+where behavior changes. Run backend and frontend verification. Commit per
+concern and stop.
+```
+
+**Prompt B — Lead Lab**
+```
+Execute Phase B from PLAN.md's Preview Coach section. Branch from develop as
+feature/preview-lead-lab. Build Lead Lab at /preview. TDD first. Use
+vercel-react-best-practices for the evaluation hook and rendering performance,
+vercel-composition-patterns for the matrix/drilldown component API, clarify for
+pressure/risk labels, web-design-guidelines for an accessibility pass, and
+polish before final verification. Backend adds POST
+/api/v1/preview/leads/evaluate and reuses CalculateDamageUseCase for all damage.
+Evaluate my selected lead pair into all 15 opponent lead pairs. Return KO/2HKO
+pressure, double-up pressure, incoming danger, speed comparison, must-react
+labels, and turn-1 annotations. Frontend renders a compact matrix and drilldown
+using existing calculator theme/components. No turn simulation. Run verification,
+commit, and stop.
+```
+
+**Prompt C — Team Preview Coach**
+```
+Execute Phase C from PLAN.md's Preview Coach section. Branch from develop as
+feature/preview-coach. TDD first. Use vercel-composition-patterns for plan-card
+and explanation component structure, vercel-react-best-practices for async
+recommendation state and memoization, clarify for recommendation/risk wording,
+web-design-guidelines for UX/accessibility review, and polish before final
+verification. Backend adds POST /api/v1/preview/plans/recommend over bring-4 +
+lead-order candidates. Return recommendation explanations: what the plan beats,
+what it risks, opponent modes covered, left-out Pokémon rationale, win-condition
+support, and prediction burden. Frontend presents argument-first plan cards, not
+a raw score leaderboard, and allows promoting a plan into the Lead Lab view.
+Keep arena-* styling. Run verification, commit, and stop.
+```
+
+**Prompt D — BO3 Notebook**
+```
+Execute Phase D from PLAN.md's Preview Coach section. Branch from develop as
+feature/preview-bo3-notebook. TDD first. Use clarify for BO3 adaptation copy and
+export wording, vercel-composition-patterns for notebook/report components,
+vercel-react-best-practices for persisted state and async flows,
+web-design-guidelines for accessibility review, and polish before final
+verification. Add BO3 adaptation notes to Preview Coach: game number, previous
+leads, brought Pokémon, revealed moves/items/abilities, result notes, and
+hidden-info notes. Coach output should suggest run it back, change lead only,
+change backline, change win condition, or preserve unrevealed info. Add markdown
++ JSON export. Run verification, commit, and stop.
+```
+
+After each implementation branch is ready to publish:
+```
+Use github:yeet to publish the branch and open a PR targeting develop. Do not merge it.
+```
