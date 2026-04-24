@@ -23,11 +23,11 @@ class EvaluateLeadsServiceTest {
 
         assertThat(result.matchups()).hasSize(15);
         assertThat(result.matchups().getFirst().opponentLeadIds()).containsExactly("opponent-1", "opponent-2");
-        assertThat(result.matchups().getFirst().koPressure().label()).isEqualTo("KO pressure");
-        assertThat(result.matchups().getFirst().twoHitKoPressure().label()).isEqualTo("2HKO pressure");
-        assertThat(result.matchups().getFirst().doubleUpPressure().label()).containsIgnoringCase("double-up");
-        assertThat(result.matchups().getFirst().incomingDanger().label()).isEqualTo("Incoming danger");
-        assertThat(result.matchups().getFirst().speedComparison().label()).isEqualTo("Speed control");
+        assertThat(result.matchups().getFirst().koPressure().label()).isEqualTo("Your OHKOs");
+        assertThat(result.matchups().getFirst().twoHitKoPressure().label()).isEqualTo("Your 2HKOs");
+        assertThat(result.matchups().getFirst().doubleUpPressure().label()).isEqualTo("Combined KOs");
+        assertThat(result.matchups().getFirst().incomingDanger().label()).isEqualTo("Threats on you");
+        assertThat(result.matchups().getFirst().speedComparison().label()).isEqualTo("You outspeed");
         assertThat(result.matchups().getFirst().mustReactLabels()).isNotEmpty();
         assertThat(result.matchups().getFirst().turnOneAnnotations()).isNotEmpty();
         assertThat(damageUseCase.commands).isNotEmpty();
@@ -40,7 +40,7 @@ class EvaluateLeadsServiceTest {
         EvaluateLeadsResult result = service.evaluate(new EvaluateLeadsCommand(
                 "M-A", List.of(pokemon("slow-left", 40), pokemon("slow-right", 35)), opponentTeam(), field()));
 
-        assertThat(result.matchups().getFirst().mustReactLabels()).contains("Respect faster lead");
+        assertThat(result.matchups().getFirst().mustReactLabels()).anyMatch(label -> label.contains("move first"));
     }
 
     private static List<PreviewPokemonCommand> opponentTeam() {

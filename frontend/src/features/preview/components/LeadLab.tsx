@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import type { LeadEvaluationResult, LeadMatchup, LeadOption } from '../types'
 
@@ -60,7 +60,9 @@ export function LeadLab({
               Lead Lab
             </h2>
             <p className="mt-2 text-sm leading-6 text-white/68">
-              Pick two saved leads. Lead Lab checks every opponent pair.
+              Pick two of your leads. Lead Lab runs them against all 15
+              possible opponent pairs and shows how each matchup looks on
+              turn 1.
             </p>
           </div>
 
@@ -166,6 +168,7 @@ function LeadMatrix({
             {matchups.length}/15
           </span>
         </div>
+        <ToneLegend />
 
         <div
           className="grid gap-2 md:grid-cols-2 2xl:grid-cols-3"
@@ -173,8 +176,14 @@ function LeadMatrix({
           aria-label="Lead matchup matrix"
         >
           {matchups.length === 0 ? (
-            <div className="rounded border border-white/10 bg-black/16 p-4 text-sm text-white/62">
-              Save two player leads and six opponents, then evaluate.
+            <div className="rounded border border-white/10 bg-black/16 p-4">
+              <p className="text-sm font-medium text-white/62">
+                No results yet
+              </p>
+              <p className="mt-1 text-xs leading-5 text-white/40">
+                Select two of your leads and make sure six opponent Pokémon
+                are loaded, then click "Evaluate leads."
+              </p>
             </div>
           ) : (
             matchups.map((matchup) => {
@@ -244,15 +253,41 @@ function LeadDrilldown({
         </div>
 
         <div className="grid gap-3">
-          <ReadoutList title="Must react" items={matchup.mustReactLabels} />
           <ReadoutList
-            title="Turn 1 notes"
+            title="Key decisions this turn"
+            items={matchup.mustReactLabels}
+          />
+          <ReadoutList
+            title="Damage evidence"
             items={matchup.turnOneAnnotations}
           />
         </div>
       </div>
     </section>
   )
+}
+
+const METRIC_TOOLTIPS: Record<string, { tip: string; outOf: number | null }> = {
+  'Your OHKOs': {
+    tip: 'Opponent lead pairs you can knock out in one hit this turn.',
+    outOf: 15,
+  },
+  'Your 2HKOs': {
+    tip: 'Pairs you can knock out in two hits — strong ongoing pressure.',
+    outOf: 15,
+  },
+  'Combined KOs': {
+    tip: 'Pairs that fall if both your leads focus one Pokémon.',
+    outOf: 2,
+  },
+  'Threats on you': {
+    tip: 'Pairs that can OHKO or 2HKO one of your leads — the higher, the more careful you must be.',
+    outOf: 15,
+  },
+  'You outspeed': {
+    tip: 'Individual speed matchups where one of your leads moves first (out of 4 total checks).',
+    outOf: 4,
+  },
 }
 
 function MetricPill({
@@ -262,24 +297,79 @@ function MetricPill({
   metric: LeadMatchup['koPressure']
   compact?: boolean
 }) {
+  const [showTip, setShowTip] = useState(false)
+  const tipRef = useRef<HTMLDivElement>(null)
+
   const toneClass = {
     low: 'border-white/10 bg-white/[0.04] text-white/62',
     medium: 'border-arena-sun/35 bg-arena-sun/10 text-arena-sun',
     high: 'border-arena-plasma/35 bg-arena-plasma/10 text-white',
   }[metric.tone]
 
+  const meta = METRIC_TOOLTIPS[metric.label]
+  const outOf = meta?.outOf ?? null
+
   return (
-    <div className={`rounded border px-3 py-2 ${toneClass}`}>
-      <p className="font-mono text-[0.66rem] uppercase tracking-[0.18em] opacity-75">
-        {metric.label}
-      </p>
+    <div className={`relative rounded border px-3 py-2 ${toneClass}`}>
+      <div className="flex items-center gap-1">
+        <p className="font-mono text-[0.66rem] uppercase tracking-[0.18em] opacity-75">
+          {metric.label}
+        </p>
+        {meta && (
+          <button
+            type="button"
+            aria-label={`What is ${metric.label}?`}
+            className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border border-current text-[0.55rem] opacity-50 transition hover:opacity-100"
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowTip((v) => !v)
+            }}
+            onBlur={() => setShowTip(false)}
+          >
+            ?
+          </button>
+        )}
+      </div>
       <p
         className={
           compact ? 'mt-1 text-sm font-black' : 'mt-1 text-xl font-black'
         }
       >
         {metric.value}
+        {outOf !== null && !compact && (
+          <span className="ml-0.5 font-mono text-xs font-normal opacity-50">
+            /{outOf}
+          </span>
+        )}
       </p>
+      {showTip && meta && (
+        <div
+          ref={tipRef}
+          className="absolute bottom-full left-0 z-20 mb-1.5 w-52 rounded border border-white/20 bg-arena-void/95 px-3 py-2 text-xs leading-5 text-white/80 shadow-lg backdrop-blur-sm"
+        >
+          {meta.tip}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ToneLegend() {
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[0.6rem] uppercase tracking-[0.14em]">
+      <span className="text-white/35">Color guide:</span>
+      <span className="flex items-center gap-1 text-white/55">
+        <span className="h-2 w-2 rounded-full border border-white/20 bg-white/[0.04]" />
+        Low — no immediate threat or pressure
+      </span>
+      <span className="flex items-center gap-1 text-arena-sun">
+        <span className="h-2 w-2 rounded-full border border-arena-sun/35 bg-arena-sun/10" />
+        Amber — notable advantage or risk
+      </span>
+      <span className="flex items-center gap-1 text-white">
+        <span className="h-2 w-2 rounded-full border border-arena-plasma/35 bg-arena-plasma/10" />
+        Pink — high pressure — act now
+      </span>
     </div>
   )
 }
