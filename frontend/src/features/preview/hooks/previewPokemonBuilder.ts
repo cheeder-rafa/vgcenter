@@ -1,5 +1,6 @@
 import type { SavedPokemon } from '../../../store/useTeamsStore'
 import type { MoveDefinition, MoveRequest } from '../../calculator/types/api'
+import { buildSupportTags } from '../supportTags'
 import type { PreviewPokemon } from '../types'
 
 export function buildPreviewTeam(
@@ -15,6 +16,7 @@ export function toPreviewPokemon(
   pokemon: SavedPokemon,
   moveById: Map<string, MoveDefinition>,
 ): PreviewPokemon {
+  const allMoveIds = pokemon.moves.map((slot) => slot.moveId)
   return {
     pokemonId: pokemon.speciesId ?? pokemon.speciesName,
     displayName: pokemon.speciesName,
@@ -38,6 +40,8 @@ export function toPreviewPokemon(
       .filter((move): move is MoveDefinition => move !== null && move !== undefined)
       .filter((move) => move.category !== 'STATUS' && move.basePower > 0)
       .map(toMoveRequest),
+    isMega: pokemon.megaActive ?? false,
+    supportTags: buildSupportTags(allMoveIds),
   }
 }
 

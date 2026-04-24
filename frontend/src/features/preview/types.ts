@@ -11,6 +11,8 @@ export type PreviewPokemon = {
   displayName: string
   combatant: CombatantRequest
   moves: MoveRequest[]
+  isMega: boolean
+  supportTags: string[]
 }
 
 export type PreviewField = {
@@ -72,6 +74,7 @@ export type PlanRecommendation = {
   winConditionSupported: boolean
   leftOutRationale: string[]
   predictionBurden: 'low' | 'medium' | 'high'
+  winConditionRole: 'leading' | 'backline' | 'benched' | 'none'
 }
 
 export type RecommendPlansResult = {

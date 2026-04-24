@@ -17,6 +17,7 @@ const plan1: PlanRecommendation = {
   winConditionSupported: true,
   leftOutRationale: ['Palafin: left out — coverage handled by the core four.'],
   predictionBurden: 'low',
+  winConditionRole: 'backline',
 }
 
 const plan2: PlanRecommendation = {
@@ -28,6 +29,7 @@ const plan2: PlanRecommendation = {
   winConditionSupported: false,
   leftOutRationale: ['Amoonguss: left out — coverage handled by the core four.'],
   predictionBurden: 'medium',
+  winConditionRole: 'benched',
 }
 
 const myTeamNames = ['Flutter Mane', 'Incineroar', 'Urshifu', 'Palafin', 'Amoonguss', 'Rillaboom']
@@ -65,7 +67,7 @@ describe('PlanCards', () => {
     expect(screen.getByText(/lead flutter mane \+ incineroar/i)).toBeInTheDocument()
   })
 
-  it('shows prediction burden label', () => {
+  it('shows read difficulty label', () => {
     const result: RecommendPlansResult = { plans: [plan1, plan2] }
 
     render(
@@ -78,12 +80,12 @@ describe('PlanCards', () => {
       />,
     )
 
-    expect(screen.getAllByText(/prediction burden/i).length).toBeGreaterThan(0)
-    expect(screen.getByText(/low/i)).toBeInTheDocument()
-    expect(screen.getByText(/medium/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/read difficulty/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/low/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/medium/i).length).toBeGreaterThan(0)
   })
 
-  it('highlights win-condition-supported plans', () => {
+  it('shows win condition role for plans when a win condition is set', () => {
     const result: RecommendPlansResult = { plans: [plan1] }
 
     render(
@@ -96,7 +98,7 @@ describe('PlanCards', () => {
       />,
     )
 
-    expect(screen.getByText(/win condition protected/i)).toBeInTheDocument()
+    expect(screen.getByText(/win condition in back/i)).toBeInTheDocument()
   })
 
   it('calls onPromote with the plan when the promote button is clicked', async () => {

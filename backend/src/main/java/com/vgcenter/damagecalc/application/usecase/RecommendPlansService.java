@@ -55,6 +55,7 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
         // Sort by score descending; pick top 3 with diverse lead pairs.
         candidates.sort(Comparator.comparingInt(PlanCandidate::score).reversed());
         List<PlanCandidate> topCandidates = selectDiverse(candidates);
+        topCandidates = applyMegaEscapeValve(topCandidates, candidates, myTeam);
 
         List<PlanRecommendation> plans = topCandidates.stream()
                 .map(c -> buildRecommendation(c, myTeam, command.opponentTeam(), command.winConditionIndex()))
@@ -75,7 +76,7 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
             int globalLead1 = bring[leadWithinBring[1]];
             EvaluateLeadsResult eval =
                     evalCache.get(pairKey(Math.min(globalLead0, globalLead1), Math.max(globalLead0, globalLead1)));
-            int score = score(eval, toList(bring), toList(leadWithinBring), winConditionIndex);
+            int score = score(eval, toList(bring), toList(leadWithinBring), winConditionIndex, myTeam);
             if (best == null || score > best.score()) {
                 best = new PlanCandidate(toList(bring), toList(leadWithinBring), score, eval);
             }
@@ -84,7 +85,11 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
     }
 
     private int score(
-            EvaluateLeadsResult eval, List<Integer> bring, List<Integer> leadWithinBring, Integer winConditionIndex) {
+            EvaluateLeadsResult eval,
+            List<Integer> bring,
+            List<Integer> leadWithinBring,
+            Integer winConditionIndex,
+            List<PreviewPokemonCommand> myTeam) {
         int offensive = 0;
         int safe = 0;
         int risky = 0;
@@ -101,12 +106,47 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
         int base = offensive * 4 + safe * 1 - risky * 3;
 
         if (winConditionIndex != null && bring.contains(winConditionIndex)) {
-            // Win-condition in back (not leading) → bonus.
             boolean leading = bring.get(leadWithinBring.get(0)).equals(winConditionIndex)
                     || bring.get(leadWithinBring.get(1)).equals(winConditionIndex);
             base += leading ? 2 : 6;
         }
+
+        // Mega priority: strongly prefer bringing the Mega; accept non-Mega plan only when matchup heavily disfavours
+        // it.
+        int megaIndex = findMegaIndex(myTeam);
+        if (megaIndex >= 0) {
+            if (bring.contains(megaIndex)) {
+                base += 5;
+                boolean megaLeading = bring.get(leadWithinBring.get(0)).equals(megaIndex)
+                        || bring.get(leadWithinBring.get(1)).equals(megaIndex);
+                if (megaLeading) base += 2;
+            } else {
+                base -= 6;
+            }
+        }
+
+        // Support-kit credit: each support tag in the bring adds to the score (capped at +6).
+        int supportBonus = 0;
+        for (int idx : bring) {
+            for (String tag : myTeam.get(idx).supportTags()) {
+                supportBonus += switch (tag) {
+                    case "speed-control", "redirection" -> 3;
+                    case "screens", "fake-out", "defense-shred" -> 2;
+                    case "helping-hand" -> 1;
+                    default -> 0;
+                };
+            }
+        }
+        base += Math.min(supportBonus, 6);
+
         return base;
+    }
+
+    private static int findMegaIndex(List<PreviewPokemonCommand> team) {
+        for (int i = 0; i < team.size(); i++) {
+            if (team.get(i).isMega()) return i;
+        }
+        return -1;
     }
 
     private List<PlanCandidate> selectDiverse(List<PlanCandidate> sorted) {
@@ -143,23 +183,36 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
 
         boolean winConditionSupported = winConditionIndex != null && bringIndices.contains(winConditionIndex);
 
-        List<String> modesCovered = new ArrayList<>();
-        List<String> modesAtRisk = new ArrayList<>();
-        int riskyCount = 0;
-        for (LeadMatchupResult matchup : eval.matchups()) {
-            String label = String.join(" + ", matchup.opponentLeadNames());
-            if (matchup.koPressure().value() > 0 || matchup.doubleUpPressure().value() > 0) {
-                if (modesCovered.size() < 3) {
-                    modesCovered.add(label);
-                }
-            }
-            if (matchup.incomingDanger().value() >= 2) {
-                riskyCount++;
-                if (modesAtRisk.size() < 3) {
-                    modesAtRisk.add(label);
-                }
-            }
+        String winConditionRole;
+        if (winConditionIndex == null) {
+            winConditionRole = "none";
+        } else if (bringIndices.contains(winConditionIndex)) {
+            boolean leading = bringIndices.get(leadWithinBring.get(0)).equals(winConditionIndex)
+                    || bringIndices.get(leadWithinBring.get(1)).equals(winConditionIndex);
+            winConditionRole = leading ? "leading" : "backline";
+        } else {
+            winConditionRole = "benched";
         }
+
+        List<String> modesCovered = eval.matchups().stream()
+                .filter(m -> coverageScore(m) > 0)
+                .sorted(Comparator.comparingDouble(RecommendPlansService::coverageScore)
+                        .reversed())
+                .limit(3)
+                .map(m -> String.join(" + ", m.opponentLeadNames()))
+                .toList();
+
+        List<String> modesAtRisk = eval.matchups().stream()
+                .filter(m -> m.incomingDanger().value() >= 2)
+                .sorted(Comparator.comparingDouble(RecommendPlansService::dangerScore)
+                        .reversed())
+                .limit(3)
+                .map(m -> String.join(" + ", m.opponentLeadNames()))
+                .toList();
+
+        int riskyCount = (int) eval.matchups().stream()
+                .filter(m -> m.incomingDanger().value() >= 2)
+                .count();
 
         String predictionBurden;
         if (riskyCount <= 2) {
@@ -182,7 +235,8 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
                 modesAtRisk,
                 winConditionSupported,
                 leftOutRationale,
-                predictionBurden);
+                predictionBurden,
+                winConditionRole);
     }
 
     private String buildSummary(
@@ -215,6 +269,45 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
             }
         }
         return rationale;
+    }
+
+    private List<PlanCandidate> applyMegaEscapeValve(
+            List<PlanCandidate> selected, List<PlanCandidate> allSorted, List<PreviewPokemonCommand> myTeam) {
+        int megaIndex = findMegaIndex(myTeam);
+        if (megaIndex < 0) return selected;
+
+        boolean allBringMega = selected.stream().allMatch(c -> c.bring().contains(megaIndex));
+        if (!allBringMega) return selected;
+
+        // All top-3 bring Mega. Find best non-Mega candidate.
+        allSorted.stream()
+                .filter(c -> !c.bring().contains(megaIndex))
+                .findFirst()
+                .ifPresent(nonMega -> {
+                    int lowestScore = selected.stream()
+                            .mapToInt(PlanCandidate::score)
+                            .min()
+                            .getAsInt();
+                    if (nonMega.score() >= lowestScore - 4) {
+                        PlanCandidate toRemove = selected.stream()
+                                .min(Comparator.comparingInt(PlanCandidate::score))
+                                .get();
+                        selected.remove(toRemove);
+                        selected.add(nonMega);
+                    }
+                });
+        return selected;
+    }
+
+    private static double coverageScore(LeadMatchupResult m) {
+        return m.koPressure().value() * 3.0
+                + m.doubleUpPressure().value() * 3.0
+                + m.twoHitKoPressure().value() * 1.0
+                - m.incomingDanger().value() * 2.0;
+    }
+
+    private static double dangerScore(LeadMatchupResult m) {
+        return m.incomingDanger().value() * 3.0 - m.speedComparison().value() * 1.0;
     }
 
     // --- utilities ---

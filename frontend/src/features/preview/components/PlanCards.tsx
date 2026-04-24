@@ -78,9 +78,9 @@ function PlanList({
   onPromote: (plan: PlanRecommendation) => void
 }) {
   return (
-    <ul className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+    <ul className="grid auto-rows-fr gap-4 lg:grid-cols-2 2xl:grid-cols-3">
       {plans.map((plan, idx) => (
-        <li key={idx}>
+        <li key={idx} className="flex">
           <PlanCard
             plan={plan}
             winConditionIndex={winConditionIndex}
@@ -101,17 +101,17 @@ function PlanCard({
   winConditionIndex: number | null
   onPromote: (plan: PlanRecommendation) => void
 }) {
-  const showWinConditionBadge =
-    plan.winConditionSupported && winConditionIndex !== null
-
   return (
-    <article className="arena-panel p-4">
-      <div className="relative z-10 grid gap-3">
+    <article className="arena-panel flex h-full w-full flex-col p-4">
+      <div className="relative z-10 flex flex-1 flex-col gap-3">
         <PlanSummary summary={plan.summary} />
 
-        {showWinConditionBadge ? <WinConditionBadge /> : null}
+        <WinConditionRow
+          role={plan.winConditionRole}
+          winConditionIndex={winConditionIndex}
+        />
 
-        <PredictionBurden burden={plan.predictionBurden} />
+        <ReadDifficulty burden={plan.predictionBurden} />
 
         <ModesSection
           covered={plan.modesCovered}
@@ -124,7 +124,7 @@ function PlanCard({
 
         <button
           type="button"
-          className="arena-button mt-1 h-10 w-full justify-center text-white"
+          className="arena-button mt-auto h-10 w-full justify-center text-white"
           onClick={() => onPromote(plan)}
         >
           Use this plan
@@ -140,15 +140,52 @@ function PlanSummary({ summary }: { summary: string }) {
   )
 }
 
-function WinConditionBadge() {
+function WinConditionRow({
+  role,
+  winConditionIndex,
+}: {
+  role: PlanRecommendation['winConditionRole']
+  winConditionIndex: number | null
+}) {
+  if (winConditionIndex === null) {
+    return (
+      <p className="text-xs text-white/35">
+        No win condition set — pick one above to see plan impact.
+      </p>
+    )
+  }
+
+  const config = {
+    leading: {
+      label: 'Win condition leading — exposed early',
+      cls: 'border-arena-sun/35 bg-arena-sun/10 text-arena-sun',
+    },
+    backline: {
+      label: 'Win condition in back — closes the game',
+      cls: 'border-arena-cyan/35 bg-arena-cyan/10 text-arena-cyan',
+    },
+    benched: {
+      label: 'Win condition benched — this plan abandons it',
+      cls: 'border-arena-plasma/35 bg-arena-plasma/10 text-arena-plasma',
+    },
+    none: {
+      label: '',
+      cls: '',
+    },
+  }[role]
+
+  if (role === 'none') return null
+
   return (
-    <span className="inline-flex w-fit items-center rounded border border-arena-cyan/35 bg-arena-cyan/10 px-2 py-1 font-mono text-[0.66rem] uppercase tracking-[0.18em] text-arena-cyan">
-      Win condition protected
+    <span
+      className={`inline-flex w-fit items-center rounded border px-2 py-1 font-mono text-[0.66rem] uppercase tracking-[0.18em] ${config.cls}`}
+    >
+      {config.label}
     </span>
   )
 }
 
-function PredictionBurden({
+function ReadDifficulty({
   burden,
 }: {
   burden: PlanRecommendation['predictionBurden']
@@ -159,12 +196,19 @@ function PredictionBurden({
     high: 'border-arena-plasma/35 bg-arena-plasma/10 text-white',
   }[burden]
 
+  const description = {
+    low: 'Few matchups force a guess',
+    medium: 'A couple of 50/50s',
+    high: 'Many forced reads',
+  }[burden]
+
   return (
     <div className={`rounded border px-3 py-2 ${toneClass}`}>
       <p className="font-mono text-[0.66rem] uppercase tracking-[0.18em] opacity-75">
-        Prediction burden
+        Read difficulty
       </p>
       <p className="mt-1 text-sm font-black capitalize">{burden}</p>
+      <p className="mt-0.5 text-xs opacity-60">{description}</p>
     </div>
   )
 }
