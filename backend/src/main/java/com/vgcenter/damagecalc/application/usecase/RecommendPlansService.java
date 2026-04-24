@@ -143,23 +143,25 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
 
         boolean winConditionSupported = winConditionIndex != null && bringIndices.contains(winConditionIndex);
 
-        List<String> modesCovered = new ArrayList<>();
-        List<String> modesAtRisk = new ArrayList<>();
-        int riskyCount = 0;
-        for (LeadMatchupResult matchup : eval.matchups()) {
-            String label = String.join(" + ", matchup.opponentLeadNames());
-            if (matchup.koPressure().value() > 0 || matchup.doubleUpPressure().value() > 0) {
-                if (modesCovered.size() < 3) {
-                    modesCovered.add(label);
-                }
-            }
-            if (matchup.incomingDanger().value() >= 2) {
-                riskyCount++;
-                if (modesAtRisk.size() < 3) {
-                    modesAtRisk.add(label);
-                }
-            }
-        }
+        List<String> modesCovered = eval.matchups().stream()
+                .filter(m -> coverageScore(m) > 0)
+                .sorted(Comparator.comparingDouble(RecommendPlansService::coverageScore)
+                        .reversed())
+                .limit(3)
+                .map(m -> String.join(" + ", m.opponentLeadNames()))
+                .toList();
+
+        List<String> modesAtRisk = eval.matchups().stream()
+                .filter(m -> m.incomingDanger().value() >= 2)
+                .sorted(Comparator.comparingDouble(RecommendPlansService::dangerScore)
+                        .reversed())
+                .limit(3)
+                .map(m -> String.join(" + ", m.opponentLeadNames()))
+                .toList();
+
+        int riskyCount = (int) eval.matchups().stream()
+                .filter(m -> m.incomingDanger().value() >= 2)
+                .count();
 
         String predictionBurden;
         if (riskyCount <= 2) {
@@ -215,6 +217,17 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
             }
         }
         return rationale;
+    }
+
+    private static double coverageScore(LeadMatchupResult m) {
+        return m.koPressure().value() * 3.0
+                + m.doubleUpPressure().value() * 3.0
+                + m.twoHitKoPressure().value() * 1.0
+                - m.incomingDanger().value() * 2.0;
+    }
+
+    private static double dangerScore(LeadMatchupResult m) {
+        return m.incomingDanger().value() * 3.0 - m.speedComparison().value() * 1.0;
     }
 
     // --- utilities ---
