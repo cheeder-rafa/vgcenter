@@ -40,12 +40,4 @@ class ArchUnitTests {
             .dependOnClassesThat()
             .resideInAnyPackage("org.springframework..", "com.fasterxml.jackson..", "java.net.http..")
             .allowEmptyShould(true);
-
-    @ArchTest
-    static final ArchRule domainGameplanStaysFrameworkFree = noClasses()
-            .that()
-            .resideInAPackage("com.vgcenter.damagecalc.domain.gameplan..")
-            .should()
-            .dependOnClassesThat()
-            .resideInAnyPackage("org.springframework..", "com.fasterxml.jackson..", "java.net.http..");
 }

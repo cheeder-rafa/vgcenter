@@ -8,7 +8,7 @@ The v1 calculator is at milestone M10:
 
 - `backend/` serves the Regulation M-A API for damage calculation, dataset lookup, and Showdown/Pokepaste imports.
 - `frontend/` is a React calculator UI with live API-backed results and importer modals.
-- `/gameplan` adds Gameplan Lab v1 for preview matchup scoring, lineup recommendations, and report export.
+- `/preview` is the Preview Coach shell for the next VGC team-preview workflow.
 - Dockerfiles exist for both applications, and root `docker-compose.yml` runs the full stack.
 - GitHub Actions verify backend, frontend, and a `main`-targeted Docker smoke check.
 
@@ -80,16 +80,15 @@ The current calculator flow is species-first and fully reactive:
 - Direct item and ability damage interactions now include type-boosting held items, resist berries, Levitate-style immunities, Mold Breaker bypasses, and direct defensive modifiers such as Thick Fat, Heatproof, Dry Skin, and Water Bubble.
 - Level is locked to 50. The UI shows `Base -> SP -> Final` so the final stat build stays traceable while the backend remains the source of truth for stat calculation.
 
-## Gameplan Lab
+## Preview Coach
 
-Gameplan Lab lives at `/gameplan` and reuses saved calculator teams:
+Preview Coach lives at `/preview` and replaces the rejected Gameplan Lab experiment. Phase A ships a themed placeholder while preserving shared shell and saved-team infrastructure for the calculator and future tools.
 
-- Pick a bring-4 with Lead 1, Lead 2, Back 1, and Back 2 for your side while the opponent side evaluates all 15 possible lead pairs.
-- Tag one win-condition Pokemon; its offense and survival are weighted more heavily in the matchup score.
-- Mark per-Pokemon assumed forms such as `mega` without changing the open-ended form schema.
-- Add a free-text game-plan note and opponent archetype tag; both persist locally and export with reports.
-- Click `Recommend lineups` to score 45 user permutations and show the top 3 with per-opponent breakdowns and a promote-to-current action.
-- Export a markdown report with embedded JSON, score summary, heatmap table, flags legend, note, archetype, win-condition tag, and assumed forms.
+Planned Preview Coach phases:
+
+- Lead Lab: compare selected leads into all 15 opponent lead pairs using calculator damage evidence.
+- Team Preview Coach: recommend bring-4 and lead-order plans with pressure, risk, and win-condition explanations.
+- BO3 Notebook: track revealed information and adjustment guidance across a best-of-3 set.
 
 ## Sprite Assets
 
@@ -151,8 +150,6 @@ Detailed steps live in [docs/hosting-beta.md](docs/hosting-beta.md).
 - `POST /api/v1/dataset/build-stats` (Regulation M-A, level 50 locked server-side)
 - `POST /api/v1/import/showdown`
 - `POST /api/v1/import/pokepaste`
-- `POST /api/v1/gameplan/evaluate`
-- `POST /api/v1/gameplan/recommend`
 
 Validation failures return RFC 7807 Problem Details with a `violations` map keyed by request field.
 
