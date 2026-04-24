@@ -10178,6 +10178,68 @@
     ]
   },
   {
+    "id": "floette-eternal",
+    "name": "Floette-Eternal",
+    "types": [
+      "FAIRY"
+    ],
+    "baseStats": {
+      "hp": 74,
+      "attack": 65,
+      "defense": 67,
+      "specialAttack": 125,
+      "specialDefense": 128,
+      "speed": 92
+    },
+    "abilities": [
+      "flower-veil",
+      "symbiosis"
+    ],
+    "moves": [
+      "alluring-voice",
+      "baton-pass",
+      "calm-mind",
+      "charm",
+      "chilling-water",
+      "copycat",
+      "dazzling-gleam",
+      "draining-kiss",
+      "endeavor",
+      "endure",
+      "energy-ball",
+      "facade",
+      "giga-drain",
+      "grass-knot",
+      "grassy-terrain",
+      "helping-hand",
+      "hyper-beam",
+      "light-of-ruin",
+      "light-screen",
+      "misty-terrain",
+      "moonblast",
+      "petal-blizzard",
+      "petal-dance",
+      "pollen-puff",
+      "protect",
+      "psychic",
+      "rain-dance",
+      "rest",
+      "safeguard",
+      "seed-bomb",
+      "skill-swap",
+      "sleep-talk",
+      "solar-beam",
+      "stored-power",
+      "substitute",
+      "sunny-day",
+      "synthesis",
+      "tearful-look",
+      "trailblaze",
+      "trick",
+      "wish"
+    ]
+  },
+  {
     "id": "floette",
     "name": "Floette",
     "types": [
