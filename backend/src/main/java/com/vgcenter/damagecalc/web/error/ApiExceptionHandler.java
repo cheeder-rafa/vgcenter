@@ -10,6 +10,7 @@ import java.util.Map;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -54,11 +55,29 @@ public class ApiExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException exception) {
+        ProblemDetail problemDetail = baseProblemDetail(HttpStatus.BAD_REQUEST, "Bad Request");
+        String cause = exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage();
+        problemDetail.setDetail(cause);
+        return problemDetail;
+    }
+
     @ExceptionHandler({SpeciesNotFoundException.class, NatureNotFoundException.class})
     ProblemDetail handleNotFound(RuntimeException exception) {
         ProblemDetail problemDetail =
                 baseProblemDetail(HttpStatus.NOT_FOUND, "Not Found", "https://vgcenter.dev/problems/not-found");
         problemDetail.setDetail(exception.getMessage());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    ProblemDetail handleUnexpected(Exception exception) {
+        ProblemDetail problemDetail = baseProblemDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Recommendation failed",
+                "https://vgcenter.dev/problems/internal-error");
+        problemDetail.setDetail(exception.getClass().getSimpleName() + ": " + exception.getMessage());
         return problemDetail;
     }
 

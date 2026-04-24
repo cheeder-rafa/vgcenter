@@ -433,6 +433,32 @@ class RecommendPlansServiceTest {
             return nextResult;
         }
 
+        @Override
+        public DamageMatrix buildMatrix(
+                String regulation,
+                List<PreviewPokemonCommand> myTeam,
+                List<PreviewPokemonCommand> opponentTeam,
+                PreviewFieldCommand field) {
+            // Return a stub matrix — RecordingEvaluateLeadsUseCase uses evaluateFromMatrix,
+            // not the real damage calc path, so this matrix is never actually queried.
+            HitEvidence[][] out = new HitEvidence[myTeam.size()][opponentTeam.size()];
+            HitEvidence[][] in = new HitEvidence[opponentTeam.size()][myTeam.size()];
+            return new DamageMatrix(out, in);
+        }
+
+        @Override
+        public EvaluateLeadsResult evaluateFromMatrix(
+                List<PreviewPokemonCommand> selectedLeads,
+                int[] selectedLeadIndices,
+                List<PreviewPokemonCommand> opponentTeam,
+                DamageMatrix matrix) {
+            callCount++;
+            if (strongFirstResult && callCount == 1) {
+                return strongEvaluation();
+            }
+            return nextResult;
+        }
+
         private static EvaluateLeadsResult strongEvaluation() {
             List<LeadMatchupResult> matchups = new ArrayList<>();
             String[][] pairs = {

@@ -3,6 +3,9 @@ package com.vgcenter.damagecalc.application.usecase;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
 
@@ -14,69 +17,98 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
 
     @Override
     public EvaluateLeadsResult evaluate(EvaluateLeadsCommand command) {
+        // Build a mini-matrix for the 2 selected leads to eliminate redundant calcs across 15 pairs.
+        DamageMatrix matrix =
+                buildMatrix(command.regulation(), command.selectedLeads(), command.opponentTeam(), command.field());
+        return evaluateFromMatrix(command.selectedLeads(), new int[] {0, 1}, command.opponentTeam(), matrix);
+    }
+
+    @Override
+    public DamageMatrix buildMatrix(
+            String regulation,
+            List<PreviewPokemonCommand> myTeam,
+            List<PreviewPokemonCommand> opponentTeam,
+            PreviewFieldCommand field) {
+        int mySize = myTeam.size();
+        int oppSize = opponentTeam.size();
+        HitEvidence[][] bestOutgoing = new HitEvidence[mySize][oppSize];
+        HitEvidence[][] bestIncoming = new HitEvidence[oppSize][mySize];
+
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+            for (int i = 0; i < mySize; i++) {
+                for (int j = 0; j < oppSize; j++) {
+                    final int fi = i, fj = j;
+                    futures.add(CompletableFuture.runAsync(
+                            () -> bestOutgoing[fi][fj] =
+                                    bestEvidence(regulation, myTeam.get(fi), opponentTeam.get(fj), field, true),
+                            executor));
+                    futures.add(CompletableFuture.runAsync(
+                            () -> bestIncoming[fj][fi] =
+                                    bestEvidence(regulation, opponentTeam.get(fj), myTeam.get(fi), field, false),
+                            executor));
+                }
+            }
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        }
+
+        return new DamageMatrix(bestOutgoing, bestIncoming);
+    }
+
+    @Override
+    public EvaluateLeadsResult evaluateFromMatrix(
+            List<PreviewPokemonCommand> selectedLeads,
+            int[] selectedLeadIndices,
+            List<PreviewPokemonCommand> opponentTeam,
+            DamageMatrix matrix) {
         List<LeadMatchupResult> matchups = new ArrayList<>();
-        for (int first = 0; first < command.opponentTeam().size(); first++) {
-            for (int second = first + 1; second < command.opponentTeam().size(); second++) {
-                matchups.add(evaluatePair(
-                        command,
-                        List.of(
-                                command.opponentTeam().get(first),
-                                command.opponentTeam().get(second))));
+        for (int first = 0; first < opponentTeam.size(); first++) {
+            for (int second = first + 1; second < opponentTeam.size(); second++) {
+                matchups.add(evaluatePairFromMatrix(
+                        selectedLeads,
+                        selectedLeadIndices,
+                        List.of(opponentTeam.get(first), opponentTeam.get(second)),
+                        new int[] {first, second},
+                        matrix));
             }
         }
         return new EvaluateLeadsResult(matchups);
     }
 
-    private LeadMatchupResult evaluatePair(EvaluateLeadsCommand command, List<PreviewPokemonCommand> opponentLeads) {
-        List<HitEvidence> outgoing =
-                collectEvidence(command.regulation(), command.selectedLeads(), opponentLeads, command.field(), true);
-        List<HitEvidence> incoming =
-                collectEvidence(command.regulation(), opponentLeads, command.selectedLeads(), command.field(), false);
+    private LeadMatchupResult evaluatePairFromMatrix(
+            List<PreviewPokemonCommand> selectedLeads,
+            int[] selectedLeadIndices,
+            List<PreviewPokemonCommand> opponentLeads,
+            int[] opponentLeadIndices,
+            DamageMatrix matrix) {
+        List<HitEvidence> outgoing = new ArrayList<>();
+        List<HitEvidence> incoming = new ArrayList<>();
 
-        int koCount = countByHits(outgoing, 1);
-        int twoHitCount = countByHits(outgoing, 2);
-        int incomingKoCount = countByHits(incoming, 1);
-        int incomingTwoHitCount = countByHits(incoming, 2);
-        int doubleUpCount = countDoubleUps(outgoing, opponentLeads);
-
-        SpeedScore speedScore = compareSpeed(command.selectedLeads(), opponentLeads);
-        List<String> mustReactLabels =
-                mustReactLabels(koCount, doubleUpCount, incomingKoCount, incomingTwoHitCount, speedScore);
-        List<String> annotations = annotations(outgoing, incoming, speedScore);
-
-        return new LeadMatchupResult(
-                opponentLeads.stream().map(PreviewPokemonCommand::pokemonId).toList(),
-                opponentLeads.stream().map(PreviewPokemonCommand::displayName).toList(),
-                new PreviewMetricResult("Your OHKOs", koCount, tone(koCount, 2, 1)),
-                new PreviewMetricResult("Your 2HKOs", twoHitCount, tone(twoHitCount, 4, 2)),
-                new PreviewMetricResult("Combined KOs", doubleUpCount, tone(doubleUpCount, 2, 1)),
-                new PreviewMetricResult(
-                        "Threats on you",
-                        incomingKoCount + incomingTwoHitCount,
-                        tone(incomingKoCount * 2 + incomingTwoHitCount, 3, 1)),
-                new PreviewMetricResult(
-                        "You outspeed", speedScore.selectedFasterCount(), tone(speedScore.selectedFasterCount(), 2, 1)),
-                mustReactLabels,
-                annotations);
-    }
-
-    private List<HitEvidence> collectEvidence(
-            String regulation,
-            List<PreviewPokemonCommand> attackers,
-            List<PreviewPokemonCommand> defenders,
-            PreviewFieldCommand field,
-            boolean selectedAttacking) {
-        List<HitEvidence> evidence = new ArrayList<>();
-        for (PreviewPokemonCommand attacker : attackers) {
-            for (PreviewPokemonCommand defender : defenders) {
-                attacker.moves().stream()
-                        .filter(move -> move.basePower() > 0)
-                        .map(move -> evaluateMove(regulation, attacker, defender, move, field, selectedAttacking))
-                        .max(Comparator.comparingDouble(hit -> hit.result().maxPct()))
-                        .ifPresent(evidence::add);
+        for (int si : selectedLeadIndices) {
+            for (int oi : opponentLeadIndices) {
+                HitEvidence out = matrix.bestOutgoing()[si][oi];
+                if (out != null) outgoing.add(out);
+                HitEvidence in = matrix.bestIncoming()[oi][si];
+                if (in != null) incoming.add(in);
             }
         }
-        return evidence;
+
+        return buildMatchupResult(selectedLeads, opponentLeads, outgoing, incoming);
+    }
+
+    private HitEvidence bestEvidence(
+            String regulation,
+            PreviewPokemonCommand attacker,
+            PreviewPokemonCommand defender,
+            PreviewFieldCommand field,
+            boolean selectedAttacking) {
+        return attacker.moves().stream()
+                .filter(move -> move.basePower() > 0)
+                .map(move -> evaluateMove(regulation, attacker, defender, move, field, selectedAttacking))
+                .max(Comparator.comparingDouble(hit -> hit.result().maxPct()))
+                .orElse(null);
     }
 
     private HitEvidence evaluateMove(
@@ -97,6 +129,38 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                 field.criticalHit(),
                 field.targets()));
         return new HitEvidence(attacker, defender, move, result);
+    }
+
+    private LeadMatchupResult buildMatchupResult(
+            List<PreviewPokemonCommand> selectedLeads,
+            List<PreviewPokemonCommand> opponentLeads,
+            List<HitEvidence> outgoing,
+            List<HitEvidence> incoming) {
+        int koCount = countByHits(outgoing, 1);
+        int twoHitCount = countByHits(outgoing, 2);
+        int incomingKoCount = countByHits(incoming, 1);
+        int incomingTwoHitCount = countByHits(incoming, 2);
+        int doubleUpCount = countDoubleUps(outgoing, opponentLeads);
+
+        SpeedScore speedScore = compareSpeed(selectedLeads, opponentLeads);
+        List<String> mustReactLabels =
+                mustReactLabels(koCount, doubleUpCount, incomingKoCount, incomingTwoHitCount, speedScore);
+        List<String> annotations = annotations(outgoing, incoming, speedScore);
+
+        return new LeadMatchupResult(
+                opponentLeads.stream().map(PreviewPokemonCommand::pokemonId).toList(),
+                opponentLeads.stream().map(PreviewPokemonCommand::displayName).toList(),
+                new PreviewMetricResult("Your OHKOs", koCount, tone(koCount, 2, 1)),
+                new PreviewMetricResult("Your 2HKOs", twoHitCount, tone(twoHitCount, 4, 2)),
+                new PreviewMetricResult("Combined KOs", doubleUpCount, tone(doubleUpCount, 2, 1)),
+                new PreviewMetricResult(
+                        "Threats on you",
+                        incomingKoCount + incomingTwoHitCount,
+                        tone(incomingKoCount * 2 + incomingTwoHitCount, 3, 1)),
+                new PreviewMetricResult(
+                        "You outspeed", speedScore.selectedFasterCount(), tone(speedScore.selectedFasterCount(), 2, 1)),
+                mustReactLabels,
+                annotations);
     }
 
     private int countByHits(List<HitEvidence> evidence, int maxHits) {
@@ -186,20 +250,10 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
     }
 
     private String tone(double value, double high, double medium) {
-        if (value >= high) {
-            return "high";
-        }
-        if (value >= medium) {
-            return "medium";
-        }
+        if (value >= high) return "high";
+        if (value >= medium) return "medium";
         return "low";
     }
-
-    private record HitEvidence(
-            PreviewPokemonCommand attacker,
-            PreviewPokemonCommand defender,
-            MoveCommand move,
-            CalculateDamageResult result) {}
 
     private record SpeedScore(int selectedFasterCount, int opponentFasterCount) {}
 }
