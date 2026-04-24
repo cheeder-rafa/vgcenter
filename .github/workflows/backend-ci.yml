@@ -38,4 +38,6 @@ jobs:
 
       - name: OWASP dependency check
         continue-on-error: true
-        run: ./mvnw -B org.owasp:dependency-check-maven:12.1.0:check -DfailBuildOnCVSS=8 -DnvdApiDelay=6000
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: ./mvnw -B org.owasp:dependency-check-maven:12.1.0:check -DfailBuildOnCVSS=8 -DnvdApiDelay=2000 -DnvdApiKey=$NVD_API_KEY
