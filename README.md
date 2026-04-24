@@ -82,7 +82,9 @@ The current calculator flow is species-first and fully reactive:
 
 ## Preview Coach
 
-Preview Coach lives at `/preview` and replaces the rejected Gameplan Lab experiment. Phase A ships a themed placeholder while preserving shared shell and saved-team infrastructure for the calculator and future tools.
+Preview Coach lives at `/preview` and replaces the rejected Gameplan Lab experiment. Lead Lab compares two saved player leads into all 15 opposing lead pairs from the opponent rail. It uses backend calculator damage evidence only; it does not simulate turn order or multi-turn play.
+
+Lead Lab reports KO pressure, 2HKO pressure, double-up pressure, incoming danger, speed comparison, must-react labels, and turn-1 notes for each opponent pair.
 
 Planned Preview Coach phases:
 

@@ -14,6 +14,8 @@ import com.vgcenter.damagecalc.application.usecase.CalculateDamageService;
 import com.vgcenter.damagecalc.application.usecase.CalculateDamageUseCase;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogService;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogUseCase;
+import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsService;
+import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsUseCase;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +43,11 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     BuildStatsUseCase buildStatsUseCase(PokedexRepository pokedexRepository, NatureRepository natureRepository) {
         return new BuildStatsService(pokedexRepository, natureRepository);
+    }
+
+    @Bean
+    EvaluateLeadsUseCase evaluateLeadsUseCase(CalculateDamageUseCase calculateDamageUseCase) {
+        return new EvaluateLeadsService(calculateDamageUseCase);
     }
 
     @Bean
