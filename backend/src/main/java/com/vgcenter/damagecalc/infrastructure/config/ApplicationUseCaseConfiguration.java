@@ -18,6 +18,8 @@ import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsService;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsUseCase;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
+import com.vgcenter.damagecalc.application.usecase.RecommendPlansService;
+import com.vgcenter.damagecalc.application.usecase.RecommendPlansUseCase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,6 +50,11 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     EvaluateLeadsUseCase evaluateLeadsUseCase(CalculateDamageUseCase calculateDamageUseCase) {
         return new EvaluateLeadsService(calculateDamageUseCase);
+    }
+
+    @Bean
+    RecommendPlansUseCase recommendPlansUseCase(EvaluateLeadsUseCase evaluateLeadsUseCase) {
+        return new RecommendPlansService(evaluateLeadsUseCase);
     }
 
     @Bean

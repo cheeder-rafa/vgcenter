@@ -5,9 +5,12 @@ import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsCommand;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsResult;
 import com.vgcenter.damagecalc.application.usecase.FieldCommand;
 import com.vgcenter.damagecalc.application.usecase.MoveCommand;
+import com.vgcenter.damagecalc.application.usecase.PlanRecommendation;
 import com.vgcenter.damagecalc.application.usecase.PreviewFieldCommand;
 import com.vgcenter.damagecalc.application.usecase.PreviewMetricResult;
 import com.vgcenter.damagecalc.application.usecase.PreviewPokemonCommand;
+import com.vgcenter.damagecalc.application.usecase.RecommendPlansCommand;
+import com.vgcenter.damagecalc.application.usecase.RecommendPlansResult;
 import com.vgcenter.damagecalc.application.usecase.SideConditionsCommand;
 import com.vgcenter.damagecalc.application.usecase.StatsCommand;
 import com.vgcenter.damagecalc.web.dto.CombatantRequestDto;
@@ -16,9 +19,12 @@ import com.vgcenter.damagecalc.web.dto.EvaluateLeadsResponseDto;
 import com.vgcenter.damagecalc.web.dto.FieldRequestDto;
 import com.vgcenter.damagecalc.web.dto.LeadMatchupResponseDto;
 import com.vgcenter.damagecalc.web.dto.MoveRequestDto;
+import com.vgcenter.damagecalc.web.dto.PlanRecommendationDto;
 import com.vgcenter.damagecalc.web.dto.PreviewFieldDto;
 import com.vgcenter.damagecalc.web.dto.PreviewMetricDto;
 import com.vgcenter.damagecalc.web.dto.PreviewPokemonDto;
+import com.vgcenter.damagecalc.web.dto.RecommendPlansRequestDto;
+import com.vgcenter.damagecalc.web.dto.RecommendPlansResponseDto;
 import com.vgcenter.damagecalc.web.dto.SideConditionsDto;
 import com.vgcenter.damagecalc.web.dto.StatsDto;
 import org.springframework.stereotype.Component;
@@ -112,5 +118,31 @@ public class PreviewWebMapper {
 
     private PreviewMetricDto toMetricDto(PreviewMetricResult metric) {
         return new PreviewMetricDto(metric.label(), metric.value(), metric.tone());
+    }
+
+    public RecommendPlansCommand toRecommendCommand(RecommendPlansRequestDto request) {
+        return new RecommendPlansCommand(
+                request.regulation(),
+                request.myTeam().stream().map(this::toPokemonCommand).toList(),
+                request.opponentTeam().stream().map(this::toPokemonCommand).toList(),
+                request.winConditionIndex(),
+                toFieldCommand(request.field()));
+    }
+
+    public RecommendPlansResponseDto toRecommendResponse(RecommendPlansResult result) {
+        return new RecommendPlansResponseDto(
+                result.plans().stream().map(this::toPlanDto).toList());
+    }
+
+    private PlanRecommendationDto toPlanDto(PlanRecommendation plan) {
+        return new PlanRecommendationDto(
+                plan.bringIndices(),
+                plan.leadIndices(),
+                plan.summary(),
+                plan.modesCovered(),
+                plan.modesAtRisk(),
+                plan.winConditionSupported(),
+                plan.leftOutRationale(),
+                plan.predictionBurden());
     }
 }
