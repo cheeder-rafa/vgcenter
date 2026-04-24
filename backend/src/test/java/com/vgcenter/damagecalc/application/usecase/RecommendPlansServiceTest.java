@@ -66,15 +66,40 @@ class RecommendPlansServiceTest {
     }
 
     @Test
-    void winConditionIndexInBringFourIsMarkedSupported() {
+    void winConditionRoleIsNoneWhenNoWinConditionSet() {
+        evaluateLeadsUseCase.nextResult = emptyEvaluation();
+
+        RecommendPlansResult result =
+                service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), null, field()));
+
+        assertThat(result.plans()).allMatch(p -> "none".equals(p.winConditionRole()));
+    }
+
+    @Test
+    void winConditionRoleIsAlwaysAValidValue() {
+        // Validates the field exists and stays within the allowed set.
+        evaluateLeadsUseCase.nextResult = emptyEvaluation();
+        List<String> validRoles = List.of("leading", "backline", "benched", "none");
+
+        RecommendPlansResult withWc =
+                service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), 0, field()));
+        assertThat(withWc.plans()).allMatch(p -> validRoles.contains(p.winConditionRole()));
+
+        RecommendPlansResult withoutWc =
+                service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), null, field()));
+        assertThat(withoutWc.plans()).allMatch(p -> "none".equals(p.winConditionRole()));
+    }
+
+    @Test
+    void winConditionRoleIsBacklineOrLeadingWhenInBringFour() {
         evaluateLeadsUseCase.nextResult = emptyEvaluation();
 
         RecommendPlansResult result =
                 service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), 0, field()));
 
-        // At least one plan should include index 0 (the win condition)
-        boolean anySupported = result.plans().stream().anyMatch(PlanRecommendation::winConditionSupported);
-        assertThat(anySupported).isTrue();
+        boolean anyBrought = result.plans().stream()
+                .anyMatch(p -> "backline".equals(p.winConditionRole()) || "leading".equals(p.winConditionRole()));
+        assertThat(anyBrought).isTrue();
     }
 
     @Test

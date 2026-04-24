@@ -173,7 +173,8 @@ class PreviewControllerTest {
                 List.of(),
                 false,
                 List.of("Palafin: left out — coverage handled by the core four."),
-                "low")));
+                "low",
+                "none")));
 
         mockMvc.perform(post("/api/v1/preview/plans/recommend")
                         .contentType(APPLICATION_JSON)

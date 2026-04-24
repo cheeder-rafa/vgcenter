@@ -10,7 +10,8 @@ public record PlanRecommendation(
         List<String> modesAtRisk,
         boolean winConditionSupported,
         List<String> leftOutRationale,
-        String predictionBurden) {
+        String predictionBurden,
+        String winConditionRole) {
 
     public PlanRecommendation {
         bringIndices = List.copyOf(bringIndices);
@@ -18,5 +19,8 @@ public record PlanRecommendation(
         modesCovered = List.copyOf(modesCovered);
         modesAtRisk = List.copyOf(modesAtRisk);
         leftOutRationale = List.copyOf(leftOutRationale);
+        if (!List.of("leading", "backline", "benched", "none").contains(winConditionRole)) {
+            throw new IllegalArgumentException("Invalid winConditionRole: " + winConditionRole);
+        }
     }
 }

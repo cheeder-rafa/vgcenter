@@ -10,4 +10,5 @@ public record PlanRecommendationDto(
         List<String> modesAtRisk,
         boolean winConditionSupported,
         List<String> leftOutRationale,
-        String predictionBurden) {}
+        String predictionBurden,
+        String winConditionRole) {}

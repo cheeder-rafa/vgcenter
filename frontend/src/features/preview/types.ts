@@ -74,6 +74,7 @@ export type PlanRecommendation = {
   winConditionSupported: boolean
   leftOutRationale: string[]
   predictionBurden: 'low' | 'medium' | 'high'
+  winConditionRole: 'leading' | 'backline' | 'benched' | 'none'
 }
 
 export type RecommendPlansResult = {

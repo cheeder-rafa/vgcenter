@@ -183,6 +183,17 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
 
         boolean winConditionSupported = winConditionIndex != null && bringIndices.contains(winConditionIndex);
 
+        String winConditionRole;
+        if (winConditionIndex == null) {
+            winConditionRole = "none";
+        } else if (bringIndices.contains(winConditionIndex)) {
+            boolean leading = bringIndices.get(leadWithinBring.get(0)).equals(winConditionIndex)
+                    || bringIndices.get(leadWithinBring.get(1)).equals(winConditionIndex);
+            winConditionRole = leading ? "leading" : "backline";
+        } else {
+            winConditionRole = "benched";
+        }
+
         List<String> modesCovered = eval.matchups().stream()
                 .filter(m -> coverageScore(m) > 0)
                 .sorted(Comparator.comparingDouble(RecommendPlansService::coverageScore)
@@ -224,7 +235,8 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
                 modesAtRisk,
                 winConditionSupported,
                 leftOutRationale,
-                predictionBurden);
+                predictionBurden,
+                winConditionRole);
     }
 
     private String buildSummary(

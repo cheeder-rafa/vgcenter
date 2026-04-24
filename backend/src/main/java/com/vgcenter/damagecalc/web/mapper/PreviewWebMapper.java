@@ -147,6 +147,7 @@ public class PreviewWebMapper {
                 plan.modesAtRisk(),
                 plan.winConditionSupported(),
                 plan.leftOutRationale(),
-                plan.predictionBurden());
+                plan.predictionBurden(),
+                plan.winConditionRole());
     }
 }
