@@ -86,4 +86,39 @@ describe('TopNav', () => {
     const nav = screen.getByRole('navigation')
     expect(nav.className).toMatch(/fixed/)
   })
+
+  it('Preview Coach link has a "new" badge', () => {
+    renderTopNavAt('/calc')
+
+    const previewLink = screen.getByRole('link', { name: /preview coach/i })
+    expect(previewLink.querySelector('[data-testid="new-badge"]')).toBeInTheDocument()
+  })
+
+  it('renders a patch notes button', () => {
+    renderTopNavAt('/calc')
+
+    expect(
+      screen.getByRole('button', { name: /patch notes/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('clicking patch notes opens the dialog', async () => {
+    const user = userEvent.setup()
+    renderTopNavAt('/calc')
+
+    await user.click(screen.getByRole('button', { name: /patch notes/i }))
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('closing the dialog from inside hides it', async () => {
+    const user = userEvent.setup()
+    renderTopNavAt('/calc')
+
+    await user.click(screen.getByRole('button', { name: /patch notes/i }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /close/i }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
 })
