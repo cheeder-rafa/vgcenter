@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { fetchMoves } from '../features/calculator/api/datasetApi'
 import type { MoveDefinition } from '../features/calculator/types/api'
+import { Bo3Notebook } from '../features/preview/components/Bo3Notebook'
 import { LeadLab } from '../features/preview/components/LeadLab'
 import { PlanCards } from '../features/preview/components/PlanCards'
 import { useLeadEvaluation } from '../features/preview/hooks/useLeadEvaluation'
 import { usePlanRecommendation } from '../features/preview/hooks/usePlanRecommendation'
+import { useBo3Store } from '../features/preview/store/useBo3Store'
 import type { LeadOption, PlanRecommendation } from '../features/preview/types'
 import { useTeamsStore } from '../store/useTeamsStore'
 
@@ -57,6 +59,10 @@ export function PreviewPage() {
   )
 
   const opponentCount = opponent.filter(Boolean).length
+  const bo3Games = useBo3Store((state) => state.games)
+  const addBo3Game = useBo3Store((state) => state.addGame)
+  const clearBo3 = useBo3Store((state) => state.clear)
+
   const evaluation = useLeadEvaluation({ selectedLeadIds, moves })
   const plans = usePlanRecommendation({ moves, winConditionIndex })
 
@@ -134,6 +140,12 @@ export function PreviewPage() {
           status={evaluation.status}
           error={evaluation.error}
           onEvaluate={evaluation.evaluate}
+        />
+
+        <Bo3Notebook
+          games={bo3Games}
+          onAddGame={addBo3Game}
+          onClear={clearBo3}
         />
       </div>
     </main>

@@ -85,3 +85,33 @@ export type RecommendPlansRequest = {
   winConditionIndex: number | null
   field: PreviewField
 }
+
+export type GameResult = 'win' | 'loss'
+
+export type OpponentBehavior = 'ran-it-back' | 'adjusted' | 'new-mode'
+
+export type GameRecord = {
+  gameNumber: 1 | 2
+  result: GameResult | null
+  myLeads: string
+  opponentLeads: string
+  myBrought: string
+  opponentBrought: string
+  scoutedInfo: string
+  unrevealedInfo: string
+  resultNotes: string
+  opponentBehavior: OpponentBehavior | null
+}
+
+export type AdaptationSuggestion =
+  | 'run-it-back'
+  | 'change-lead-only'
+  | 'change-backline'
+  | 'change-win-condition'
+  | 'preserve-unrevealed'
+  | 'calculated-risk'
+
+export type AdaptationGuidance = {
+  suggestions: AdaptationSuggestion[]
+  reasoning: string[]
+}
