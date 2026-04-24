@@ -12,7 +12,6 @@ import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSyn
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { MatchupPinStrip } from '../features/calculator/components/MatchupPinStrip'
 import { PokemonPanel } from '../features/calculator/components/PokemonPanel'
-import { PatchNotesModal } from '../features/calculator/components/PatchNotesModal'
 import { SavedPokemonRail } from '../features/calculator/components/SavedPokemonRail'
 import { ToastViewport } from '../features/calculator/components/ToastViewport'
 import { useReactiveDamage } from '../features/calculator/hooks/useReactiveDamage'
@@ -355,8 +354,6 @@ function CompactHeader({
 }) {
   const activeSideLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
   const feedbackUrl = getFeedbackUrl()
-  const [patchNotesOpen, setPatchNotesOpen] = useState(false)
-
   return (
     <header
       className="grid gap-3 border-b border-white/10 pb-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center"
@@ -376,19 +373,7 @@ function CompactHeader({
         >
           Regulation {regulation}
         </span>
-        <button
-          type="button"
-          className="arena-chip cursor-pointer text-white/55 transition hover:text-white/80"
-          onClick={() => setPatchNotesOpen(true)}
-          aria-label="Patch notes and known issues"
-        >
-          Patch Notes
-        </button>
-        <PatchNotesModal
-          isOpen={patchNotesOpen}
-          onClose={() => setPatchNotesOpen(false)}
-          regulation={regulation}
-        />
+
       </div>
       <div
         className="grid gap-2 sm:flex sm:flex-wrap sm:items-center xl:justify-self-end"
