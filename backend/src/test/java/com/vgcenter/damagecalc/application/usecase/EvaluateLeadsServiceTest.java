@@ -55,7 +55,13 @@ class EvaluateLeadsServiceTest {
 
     private static PreviewPokemonCommand pokemon(String id, int speed) {
         return new PreviewPokemonCommand(
-                id, id, combatant(speed), List.of(move("FAIRY", "SPECIAL", 90), move("FIRE", "PHYSICAL", 80)));
+                id,
+                id,
+                combatant(speed),
+                List.of(move("FAIRY", "SPECIAL", 90), move("FIRE", "PHYSICAL", 80)),
+                false,
+                0,
+                List.of());
     }
 
     private static CombatantCommand combatant(int speed) {

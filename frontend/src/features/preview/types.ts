@@ -11,6 +11,8 @@ export type PreviewPokemon = {
   displayName: string
   combatant: CombatantRequest
   moves: MoveRequest[]
+  isMega: boolean
+  supportTags: string[]
 }
 
 export type PreviewField = {

@@ -10,4 +10,7 @@ public record PreviewPokemonDto(
         @NotBlank String pokemonId,
         @NotBlank String displayName,
         @NotNull @Valid CombatantRequestDto combatant,
-        @NotNull @Size(min = 1, max = 4) List<@Valid MoveRequestDto> moves) {}
+        @NotNull @Size(min = 1, max = 4) List<@Valid MoveRequestDto> moves,
+        boolean isMega,
+        int statusMoveCount,
+        List<String> supportTags) {}

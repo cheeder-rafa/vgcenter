@@ -132,6 +132,33 @@ class RecommendPlansServiceTest {
     }
 
     @Test
+    void megaIsIncludedInTopPlanWhenTeamHasOne() {
+        // Mega at index 5: without scoring all bring-4 tie and stable sort picks {0,1,2,3} first
+        // (which does NOT include index 5). After scoring, +5 bonus for including Mega / -6 penalty
+        // for leaving it out should push the Mega-containing plan to the top.
+        evaluateLeadsUseCase.nextResult = emptyEvaluation();
+        List<PreviewPokemonCommand> team = teamWithMegaAtIndex(5);
+
+        RecommendPlansResult result =
+                service.recommend(new RecommendPlansCommand("M-A", team, opponentTeam(), null, field()));
+
+        assertThat(result.plans().getFirst().bringIndices()).contains(5);
+    }
+
+    @Test
+    void supportKitBoostsPlanScore() {
+        // Support mon at index 5: without scoring stable sort picks {0,1,2,3} (no index 5).
+        // After scoring, speed-control+redirection bonus should push the support plan to the top.
+        evaluateLeadsUseCase.nextResult = emptyEvaluation();
+        List<PreviewPokemonCommand> team = teamWithSupportMonAtIndex(5);
+
+        RecommendPlansResult result =
+                service.recommend(new RecommendPlansCommand("M-A", team, opponentTeam(), null, field()));
+
+        assertThat(result.plans().getFirst().bringIndices()).contains(5);
+    }
+
+    @Test
     void handlesWellRanksHigherCoverageScoreFirst() {
         // matchup[0] "Opponent 0 + Opponent 1": koPressure=1, incomingDanger=0 → score=3
         // matchup[1] "Opponent 0 + Opponent 2": doubleUpPressure=2, incomingDanger=0 → score=6
@@ -147,6 +174,41 @@ class RecommendPlansServiceTest {
     }
 
     // --- helpers ---
+
+    private static List<PreviewPokemonCommand> teamWithMegaAtIndex(int megaIndex) {
+        List<PreviewPokemonCommand> team = new ArrayList<>();
+        String[] names = {"Amoonguss", "Incineroar", "Charizard-Mega-Y", "Urshifu", "Palafin", "Rillaboom"};
+        for (int i = 0; i < 6; i++) {
+            boolean isMega = i == megaIndex;
+            team.add(new PreviewPokemonCommand(
+                    "mon-" + i,
+                    names[i % names.length],
+                    combatant(100 + i * 5),
+                    List.of(move("FAIRY", "SPECIAL", 90)),
+                    isMega,
+                    0,
+                    List.of()));
+        }
+        return team;
+    }
+
+    private static List<PreviewPokemonCommand> teamWithSupportMonAtIndex(int supportIndex) {
+        // Support mon has speed-control + redirection tags (bonus = 3 + 3 = 6 after capping)
+        List<PreviewPokemonCommand> team = new ArrayList<>();
+        String[] names = {"Amoonguss", "Incineroar", "Flutter Mane", "Urshifu", "Palafin", "Rillaboom"};
+        for (int i = 0; i < 6; i++) {
+            List<String> tags = i == supportIndex ? List.of("speed-control", "redirection") : List.of();
+            team.add(new PreviewPokemonCommand(
+                    "mon-" + i,
+                    names[i % names.length],
+                    combatant(100 + i * 5),
+                    List.of(move("FAIRY", "SPECIAL", 90)),
+                    false,
+                    0,
+                    tags));
+        }
+        return team;
+    }
 
     private static List<PreviewPokemonCommand> myTeam(int size) {
         List<PreviewPokemonCommand> team = new ArrayList<>();
@@ -168,7 +230,8 @@ class RecommendPlansServiceTest {
     }
 
     private static PreviewPokemonCommand pokemon(String id, String name, int speed) {
-        return new PreviewPokemonCommand(id, name, combatant(speed), List.of(move("FAIRY", "SPECIAL", 90)), false, 0);
+        return new PreviewPokemonCommand(
+                id, name, combatant(speed), List.of(move("FAIRY", "SPECIAL", 90)), false, 0, List.of());
     }
 
     private static CombatantCommand combatant(int speed) {

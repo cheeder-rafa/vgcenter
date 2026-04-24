@@ -27,6 +27,7 @@ import com.vgcenter.damagecalc.web.dto.RecommendPlansRequestDto;
 import com.vgcenter.damagecalc.web.dto.RecommendPlansResponseDto;
 import com.vgcenter.damagecalc.web.dto.SideConditionsDto;
 import com.vgcenter.damagecalc.web.dto.StatsDto;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -60,7 +61,10 @@ public class PreviewWebMapper {
                 dto.pokemonId(),
                 dto.displayName(),
                 toCombatantCommand(dto.combatant()),
-                dto.moves().stream().map(this::toMoveCommand).toList());
+                dto.moves().stream().map(this::toMoveCommand).toList(),
+                dto.isMega(),
+                dto.statusMoveCount(),
+                dto.supportTags() != null ? dto.supportTags() : List.of());
     }
 
     private PreviewFieldCommand toFieldCommand(PreviewFieldDto dto) {
