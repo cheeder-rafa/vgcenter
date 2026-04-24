@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 
-import { Sidebar } from '../../../src/components/shell/Sidebar'
+import { TopNav } from '../../../src/components/shell/TopNav'
 
-function renderSidebarAt(initialPath: string) {
+function renderTopNavAt(initialPath: string) {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
@@ -13,7 +13,7 @@ function renderSidebarAt(initialPath: string) {
           path="*"
           element={
             <>
-              <Sidebar />
+              <TopNav />
               <main>
                 <Routes>
                   <Route path="/calc" element={<div>Calculator</div>} />
@@ -28,9 +28,9 @@ function renderSidebarAt(initialPath: string) {
   )
 }
 
-describe('Sidebar', () => {
+describe('TopNav', () => {
   it('renders nav links for /calc and /preview', () => {
-    renderSidebarAt('/calc')
+    renderTopNavAt('/calc')
 
     expect(
       screen.getByRole('link', { name: /calculator/i }),
@@ -41,7 +41,7 @@ describe('Sidebar', () => {
   })
 
   it('marks the active link with aria-current="page"', () => {
-    renderSidebarAt('/calc')
+    renderTopNavAt('/calc')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
     const previewLink = screen.getByRole('link', { name: /preview coach/i })
@@ -51,7 +51,7 @@ describe('Sidebar', () => {
   })
 
   it('marks preview as current when on /preview', () => {
-    renderSidebarAt('/preview')
+    renderTopNavAt('/preview')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
     const previewLink = screen.getByRole('link', { name: /preview coach/i })
@@ -62,7 +62,7 @@ describe('Sidebar', () => {
 
   it('nav links are keyboard focusable', async () => {
     const user = userEvent.setup()
-    renderSidebarAt('/calc')
+    renderTopNavAt('/calc')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
     const previewLink = screen.getByRole('link', { name: /preview coach/i })
@@ -74,9 +74,16 @@ describe('Sidebar', () => {
     expect(document.activeElement).toBe(previewLink)
   })
 
-  it('sidebar nav has a landmark role', () => {
-    renderSidebarAt('/calc')
+  it('has a navigation landmark role', () => {
+    renderTopNavAt('/calc')
 
     expect(screen.getByRole('navigation')).toBeInTheDocument()
+  })
+
+  it('nav is fixed to the top of the viewport', () => {
+    renderTopNavAt('/calc')
+
+    const nav = screen.getByRole('navigation')
+    expect(nav.className).toMatch(/fixed/)
   })
 })

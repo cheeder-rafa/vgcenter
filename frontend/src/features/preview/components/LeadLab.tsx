@@ -130,7 +130,7 @@ function LeadSelect({
     <label className="grid gap-2">
       <span className="arena-label text-white/55">{label}</span>
       <select
-        className="min-h-11 rounded border border-white/10 bg-arena-surface px-3 text-sm text-white outline-none transition focus-visible:border-arena-cyan/70 focus-visible:ring-2 focus-visible:ring-arena-cyan/25"
+        className="min-h-11 rounded border border-white/10 bg-arena-night/60 px-3 text-sm text-white outline-none transition focus-visible:border-arena-cyan/70 focus-visible:ring-2 focus-visible:ring-arena-cyan/25"
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
       >
