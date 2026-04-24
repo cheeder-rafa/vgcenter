@@ -1,0 +1,116 @@
+package com.vgcenter.damagecalc.web.mapper;
+
+import com.vgcenter.damagecalc.application.usecase.CombatantCommand;
+import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsCommand;
+import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsResult;
+import com.vgcenter.damagecalc.application.usecase.FieldCommand;
+import com.vgcenter.damagecalc.application.usecase.MoveCommand;
+import com.vgcenter.damagecalc.application.usecase.PreviewFieldCommand;
+import com.vgcenter.damagecalc.application.usecase.PreviewMetricResult;
+import com.vgcenter.damagecalc.application.usecase.PreviewPokemonCommand;
+import com.vgcenter.damagecalc.application.usecase.SideConditionsCommand;
+import com.vgcenter.damagecalc.application.usecase.StatsCommand;
+import com.vgcenter.damagecalc.web.dto.CombatantRequestDto;
+import com.vgcenter.damagecalc.web.dto.EvaluateLeadsRequestDto;
+import com.vgcenter.damagecalc.web.dto.EvaluateLeadsResponseDto;
+import com.vgcenter.damagecalc.web.dto.FieldRequestDto;
+import com.vgcenter.damagecalc.web.dto.LeadMatchupResponseDto;
+import com.vgcenter.damagecalc.web.dto.MoveRequestDto;
+import com.vgcenter.damagecalc.web.dto.PreviewFieldDto;
+import com.vgcenter.damagecalc.web.dto.PreviewMetricDto;
+import com.vgcenter.damagecalc.web.dto.PreviewPokemonDto;
+import com.vgcenter.damagecalc.web.dto.SideConditionsDto;
+import com.vgcenter.damagecalc.web.dto.StatsDto;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PreviewWebMapper {
+
+    public EvaluateLeadsCommand toCommand(EvaluateLeadsRequestDto request) {
+        return new EvaluateLeadsCommand(
+                request.regulation(),
+                request.selectedLeads().stream().map(this::toPokemonCommand).toList(),
+                request.opponentTeam().stream().map(this::toPokemonCommand).toList(),
+                toFieldCommand(request.field()));
+    }
+
+    public EvaluateLeadsResponseDto toResponse(EvaluateLeadsResult result) {
+        return new EvaluateLeadsResponseDto(result.matchups().stream()
+                .map(matchup -> new LeadMatchupResponseDto(
+                        matchup.opponentLeadIds(),
+                        matchup.opponentLeadNames(),
+                        toMetricDto(matchup.koPressure()),
+                        toMetricDto(matchup.twoHitKoPressure()),
+                        toMetricDto(matchup.doubleUpPressure()),
+                        toMetricDto(matchup.incomingDanger()),
+                        toMetricDto(matchup.speedComparison()),
+                        matchup.mustReactLabels(),
+                        matchup.turnOneAnnotations()))
+                .toList());
+    }
+
+    private PreviewPokemonCommand toPokemonCommand(PreviewPokemonDto dto) {
+        return new PreviewPokemonCommand(
+                dto.pokemonId(),
+                dto.displayName(),
+                toCombatantCommand(dto.combatant()),
+                dto.moves().stream().map(this::toMoveCommand).toList());
+    }
+
+    private PreviewFieldCommand toFieldCommand(PreviewFieldDto dto) {
+        return new PreviewFieldCommand(
+                toFieldCommand(dto.field()),
+                toSideConditionsCommand(dto.selectedSide()),
+                toSideConditionsCommand(dto.opponentSide()),
+                dto.criticalHit(),
+                dto.targets());
+    }
+
+    private CombatantCommand toCombatantCommand(CombatantRequestDto dto) {
+        return new CombatantCommand(
+                dto.level(),
+                toStatsCommand(dto.stats()),
+                dto.types(),
+                dto.abilityId(),
+                dto.itemId(),
+                dto.status(),
+                dto.stages(),
+                dto.grounded(),
+                dto.currentHp());
+    }
+
+    private MoveCommand toMoveCommand(MoveRequestDto dto) {
+        return new MoveCommand(
+                dto.type(),
+                dto.category(),
+                dto.basePower(),
+                dto.spread(),
+                dto.contact(),
+                dto.doublePowerWhenUserStatused(),
+                dto.ignoreBurnPenaltyWhenUserStatused());
+    }
+
+    private FieldCommand toFieldCommand(FieldRequestDto dto) {
+        return new FieldCommand(dto.weather(), dto.terrain(), dto.room());
+    }
+
+    private SideConditionsCommand toSideConditionsCommand(SideConditionsDto dto) {
+        return new SideConditionsCommand(
+                dto.reflect(),
+                dto.lightScreen(),
+                dto.auroraVeil(),
+                dto.friendGuard(),
+                dto.helpingHand(),
+                dto.tailwind(),
+                dto.protect());
+    }
+
+    private StatsCommand toStatsCommand(StatsDto dto) {
+        return new StatsCommand(
+                dto.hp(), dto.attack(), dto.defense(), dto.specialAttack(), dto.specialDefense(), dto.speed());
+    }
+
+    private PreviewMetricDto toMetricDto(PreviewMetricResult metric) {
+        return new PreviewMetricDto(metric.label(), metric.value(), metric.tone());
+    }
+}
