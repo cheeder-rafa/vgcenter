@@ -17,6 +17,7 @@ type Props = {
   title: string
   triggerLabel: string
   multiline?: boolean
+  validateInput?: (value: string) => string | null
   onImport: (value: string) => Promise<ImportedTeamResponse>
   onImportTeam: (side: 'attacker' | 'defender', team: ImportedPokemon[]) => void
   onLoadPokemon: (
@@ -36,6 +37,7 @@ export function ImportTeamModal({
   title,
   triggerLabel,
   multiline = false,
+  validateInput,
   onImport,
   onImportTeam,
   onLoadPokemon,
@@ -51,6 +53,15 @@ export function ImportTeamModal({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    if (validateInput) {
+      const validationError = validateInput(value)
+      if (validationError) {
+        setErrorMessage(validationError)
+        setTeam([])
+        return
+      }
+    }
 
     setLoading(true)
     setErrorMessage(null)
