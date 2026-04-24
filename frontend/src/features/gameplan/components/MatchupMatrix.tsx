@@ -1,9 +1,6 @@
 import { memo, useMemo } from 'react'
 
-import type {
-  GameplanMatchupCell,
-  TurnOneFlags,
-} from '../types/api'
+import type { GameplanMatchupCell, TurnOneFlags } from '../types/api'
 
 type Severity =
   | 'strong-advantage'
@@ -28,13 +25,20 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   'strong-disadvantage': 'strong disadvantage',
 }
 
-// Geometric shapes (not emojis) used to convey severity without colour.
 const SEVERITY_GLYPH: Record<Severity, string> = {
   'strong-advantage': '▲▲',
   advantage: '▲',
   even: '◆',
   disadvantage: '▽',
   'strong-disadvantage': '▽▽',
+}
+
+const SEVERITY_SCORE_CLASS: Record<Severity, string> = {
+  'strong-advantage': 'text-arena-cyan',
+  advantage: 'text-arena-mint',
+  even: 'text-arena-violet',
+  disadvantage: 'text-arena-ember',
+  'strong-disadvantage': 'text-arena-plasma',
 }
 
 type FlagBadge = { key: string; label: string; title: string }
@@ -51,11 +55,18 @@ function collectFlagBadges(
   const speed =
     mine.speedControl !== 'NONE' ? mine.speedControl : opponent.speedControl
 
-  if (anyProtect) out.push({ key: 'pro', label: 'PRO', title: 'Protect available' })
+  if (anyProtect)
+    out.push({ key: 'pro', label: 'PRO', title: 'Protect available' })
   if (anyRedirection)
-    out.push({ key: 'red', label: 'RED', title: 'Redirection (Follow Me / Rage Powder)' })
-  if (anyFakeOut) out.push({ key: 'fo', label: 'FO', title: 'Fake Out on turn 1' })
-  if (anyPriority) out.push({ key: 'pri', label: 'PRI', title: 'Priority move available' })
+    out.push({
+      key: 'red',
+      label: 'RED',
+      title: 'Redirection (Follow Me / Rage Powder)',
+    })
+  if (anyFakeOut)
+    out.push({ key: 'fo', label: 'FO', title: 'Fake Out on turn 1' })
+  if (anyPriority)
+    out.push({ key: 'pri', label: 'PRI', title: 'Priority move available' })
   if (speed === 'TAILWIND')
     out.push({ key: 'tw', label: 'TW', title: 'Tailwind (speed control)' })
   if (speed === 'TRICK_ROOM')
@@ -90,33 +101,32 @@ const MatchupCellButton = memo(function MatchupCellButton({
       aria-pressed={selected}
       aria-label={`${pair}: ${SEVERITY_LABEL[severity]}, score ${cell.score.total}`}
       onClick={() => onSelect(index)}
-      className={
-        'flex min-w-[9rem] flex-col items-start gap-1 rounded border px-3 py-2 text-left transition ' +
-        (selected
-          ? 'border-white bg-white/10'
-          : 'border-white/10 bg-arena-surface hover:border-white/30')
-      }
+      data-severity={severity}
+      className="arena-cell flex min-w-[9rem] flex-col items-start gap-1 rounded px-3 py-2.5 text-left"
+      style={{ '--cell-i': index } as React.CSSProperties}
     >
       <div className="flex w-full items-center justify-between gap-2">
-        <span className="font-mono text-lg font-semibold text-white">
+        <span
+          className={`font-mono text-lg font-bold leading-none ${SEVERITY_SCORE_CLASS[severity]}`}
+        >
           {cell.score.total}
         </span>
         <span
           aria-hidden="true"
-          className="font-mono text-sm text-white/70"
+          className="font-mono text-xs text-white/40"
           title={SEVERITY_LABEL[severity]}
         >
           {SEVERITY_GLYPH[severity]}
         </span>
       </div>
-      <div className="truncate text-xs text-white/55">{pair}</div>
+      <div className="truncate text-xs text-white/50">{pair}</div>
       {flags.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-1">
+        <div className="mt-0.5 flex flex-wrap gap-1">
           {flags.map((f) => (
             <span
               key={f.key}
               title={f.title}
-              className="rounded border border-white/20 px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-white/80"
+              className="arena-chip py-0.5 text-white/60"
             >
               {f.label}
             </span>

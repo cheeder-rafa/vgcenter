@@ -61,13 +61,17 @@ function MegaToggle({
       type="button"
       aria-pressed={isMega}
       onClick={() =>
-        onChange(isMega ? assumedForms.filter((f) => f !== 'mega') : [...assumedForms, 'mega'])
+        onChange(
+          isMega
+            ? assumedForms.filter((f) => f !== 'mega')
+            : [...assumedForms, 'mega'],
+        )
       }
       className={
-        'rounded border px-2 py-0.5 font-mono text-[11px] tracking-wide transition ' +
+        'arena-chip transition ' +
         (isMega
-          ? 'border-white bg-white/10 text-white'
-          : 'border-white/20 text-white/55 hover:border-white/40')
+          ? 'border-arena-violet/60 text-arena-violet'
+          : 'border-white/15 text-white/40 hover:border-white/30 hover:text-white/70')
       }
     >
       {mon.speciesName ?? mon.speciesId} · Mega
@@ -79,8 +83,8 @@ export function ScenarioEditor(props: Props) {
   const lineup = pickLineup(props.roster, props.leadOrder)
 
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold text-white/80">{props.title}</h2>
+    <section className="arena-panel flex flex-col gap-4 p-4">
+      <h2 className="arena-label text-white/70">{props.title}</h2>
 
       <LeadOrderPicker
         roster={props.roster}
@@ -90,11 +94,11 @@ export function ScenarioEditor(props: Props) {
 
       {props.side === 'mine' && lineup.length === 4 && (
         <fieldset
-          className="flex flex-col gap-2 rounded border border-white/10 bg-arena-surface/50 p-3"
+          className="flex flex-col gap-2 rounded border border-white/10 bg-arena-void/40 p-3"
           aria-label="Win condition"
         >
-          <legend className="text-xs uppercase tracking-widest text-white/55">
-            Win condition (weighed ~1.5× in scoring)
+          <legend className="arena-label px-1 text-[9px] text-arena-sun/70">
+            Win condition (×1.5 in scoring)
           </legend>
           <div className="flex flex-wrap gap-3">
             {lineup.map((mon) => {
@@ -103,7 +107,7 @@ export function ScenarioEditor(props: Props) {
               return (
                 <label
                   key={id}
-                  className="flex items-center gap-1.5 text-xs text-white/80"
+                  className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white"
                 >
                   <input
                     type="radio"
@@ -111,6 +115,7 @@ export function ScenarioEditor(props: Props) {
                     value={id}
                     checked={checked}
                     onChange={() => props.onWinConditionChange(id)}
+                    className="accent-arena-violet"
                   />
                   {mon.speciesName ?? id}
                 </label>
@@ -121,9 +126,9 @@ export function ScenarioEditor(props: Props) {
       )}
 
       {lineup.length === 4 && (
-        <div className="flex flex-col gap-2 rounded border border-white/10 bg-arena-surface/50 p-3">
-          <span className="text-xs uppercase tracking-widest text-white/55">
-            Assumed mid-battle forms
+        <div className="flex flex-col gap-2 rounded border border-white/10 bg-arena-void/40 p-3">
+          <span className="arena-label text-[9px] text-white/40">
+            Assumed forms
           </span>
           <div className="flex flex-wrap gap-2">
             {lineup.map((mon) => {

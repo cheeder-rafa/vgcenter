@@ -7,11 +7,11 @@ export type LeadOrder = {
   back2: string | null
 }
 
-const SLOTS: { key: keyof LeadOrder; label: string }[] = [
-  { key: 'lead1', label: 'Lead 1' },
-  { key: 'lead2', label: 'Lead 2' },
-  { key: 'back1', label: 'Back 1' },
-  { key: 'back2', label: 'Back 2' },
+const SLOTS: { key: keyof LeadOrder; label: string; abbr: string }[] = [
+  { key: 'lead1', label: 'Lead 1', abbr: 'L1' },
+  { key: 'lead2', label: 'Lead 2', abbr: 'L2' },
+  { key: 'back1', label: 'Back 1', abbr: 'B1' },
+  { key: 'back2', label: 'Back 2', abbr: 'B2' },
 ]
 
 type Props = {
@@ -24,7 +24,9 @@ export function LeadOrderPicker({ roster, order, onChange }: Props) {
   const available = roster.filter((p): p is SavedPokemon => p !== null)
   const disabled = available.length < 4
 
-  const selectedIds = Object.values(order).filter((id): id is string => id !== null)
+  const selectedIds = Object.values(order).filter(
+    (id): id is string => id !== null,
+  )
 
   const filledCount = selectedIds.length
   const isIncomplete = filledCount < 4
@@ -36,20 +38,21 @@ export function LeadOrderPicker({ roster, order, onChange }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {SLOTS.map(({ key, label }) => (
-          <div key={key} className="flex flex-col gap-1">
+        {SLOTS.map(({ key, label, abbr }) => (
+          <div key={key} className="flex flex-col gap-1.5">
             <label
               htmlFor={`lead-order-${key}`}
-              className="text-xs font-medium uppercase tracking-widest text-white/55"
+              className="arena-label text-[10px] text-white/50"
             >
-              {label}
+              <span className="text-arena-violet">{abbr}</span>
+              <span className="ml-1.5 text-white/40">{label}</span>
             </label>
             <select
               id={`lead-order-${key}`}
               disabled={disabled}
               value={order[key] ?? ''}
               onChange={(e) => handleChange(key, e.target.value)}
-              className="rounded border border-white/10 bg-arena-surface px-2 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="arena-select text-xs"
             >
               <option value="">— pick —</option>
               {available.map((mon) => (
@@ -70,7 +73,7 @@ export function LeadOrderPicker({ roster, order, onChange }: Props) {
       </div>
 
       {!disabled && isIncomplete && (
-        <p role="alert" className="text-xs text-yellow-400">
+        <p role="alert" className="text-xs text-arena-sun/80">
           Select all 4 slots to complete your lineup.
         </p>
       )}

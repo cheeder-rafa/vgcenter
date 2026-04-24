@@ -128,8 +128,6 @@ function buildRequest(
     },
     opponent: opponentReqs as EvaluateMatchupPokemonRequest[],
   }
-  // Opponent lead order is not yet consumed by the backend (all 15 pairs
-  // are evaluated server-side); keeping the picker for Phase D recommendations.
 }
 
 function buildRecommendRequest(
@@ -262,17 +260,23 @@ export function GameplanPage() {
 
   return (
     <div className="flex flex-col gap-8 p-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight text-white">
-          Gameplan Lab
-        </h1>
-        <p className="mt-1 text-sm text-white/55">
-          Configure your bring-4 lineup and lead order, then score against
-          opponent lead pairs.
-        </p>
+      {/* ── Page header ──────────────────────────────────── */}
+      <header className="flex items-baseline justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display text-xl font-bold tracking-widest text-white">
+            Gameplan Lab
+          </h1>
+          <p className="text-xs text-white/40">
+            Configure bring-4 + lead order · score all 15 opponent lead pairs
+          </p>
+        </div>
+        <span className="arena-chip border-arena-violet/30 text-arena-violet/60">
+          Reg M-A
+        </span>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* ── Team editors ─────────────────────────────────── */}
+      <div className="grid gap-5 lg:grid-cols-2">
         <ScenarioEditor
           title="My Team"
           side="mine"
@@ -299,44 +303,51 @@ export function GameplanPage() {
         />
       </div>
 
-      <section className="grid gap-4 rounded border border-white/10 bg-arena-surface/50 p-4 lg:grid-cols-[1fr_18rem]">
+      {/* ── Context box ──────────────────────────────────── */}
+      <section className="arena-panel grid gap-4 p-4 lg:grid-cols-[1fr_18rem]">
         <label className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-widest text-white/55">
+          <span className="arena-label text-[10px] text-white/45">
             Game-plan note
           </span>
           <textarea
             value={gamePlanNote}
             onChange={(event) => setGamePlanNote(event.target.value)}
-            rows={4}
-            placeholder="Example: Preserve Farigiraf, force Trick Room mirror, pivot Charizard late."
-            className="min-h-24 rounded border border-white/10 bg-black/25 p-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/35"
+            rows={3}
+            placeholder="Preserve Farigiraf, force Trick Room mirror, pivot Charizard late."
+            className="arena-input min-h-20 resize-none placeholder:text-white/20"
           />
         </label>
         <label className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-widest text-white/55">
+          <span className="arena-label text-[10px] text-white/45">
             Opponent archetype
           </span>
           <input
             value={opponentArchetypeTag}
             onChange={(event) => setOpponentArchetypeTag(event.target.value)}
             placeholder="Trick Room, Sun, Hyper Offense…"
-            className="rounded border border-white/10 bg-black/25 p-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-white/35"
+            className="arena-input placeholder:text-white/20"
           />
         </label>
       </section>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-lg font-semibold text-white/80">
-            Matchup Matrix
-          </h2>
-          <span className="text-xs text-white/40">
-            {evaluation.status === 'loading' && 'evaluating…'}
-            {evaluation.status === 'error' && `error: ${evaluation.error}`}
+      {/* ── Matchup matrix ───────────────────────────────── */}
+      <section className="arena-panel flex flex-col gap-3 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="arena-label text-white/65">Matchup Matrix</h2>
+          <span className="text-xs text-white/35">
+            {evaluation.status === 'loading' && (
+              <span className="text-arena-cyan/70">evaluating…</span>
+            )}
+            {evaluation.status === 'error' && (
+              <span className="text-arena-plasma/80">
+                error: {evaluation.error}
+              </span>
+            )}
             {request === null &&
-              'fill lineup + lead order + 6 opponent mons with stats & moves to evaluate'}
+              'complete lineup + moves + 6 opponent mons to evaluate'}
           </span>
         </div>
+
         {cells.length > 0 ? (
           <MatchupMatrix
             cells={cells}
@@ -345,12 +356,13 @@ export function GameplanPage() {
             opponentNameById={opponentNameById}
           />
         ) : (
-          <div className="rounded border border-dashed border-white/15 p-8 text-center text-sm text-white/40">
-            Matrix will render once evaluation completes.
+          <div className="rounded border border-dashed border-white/10 p-10 text-center text-xs text-white/30">
+            Matrix renders once evaluation completes.
           </div>
         )}
-        <CellFlagsLegend />
-        <div className="flex justify-end">
+
+        <div className="mt-1 flex items-end justify-between gap-4">
+          <CellFlagsLegend />
           <ReportExportButton
             cells={cells}
             gamePlanNote={gamePlanNote}
@@ -364,17 +376,27 @@ export function GameplanPage() {
         </div>
       </section>
 
+      {/* ── Recommendations ──────────────────────────────── */}
       <LineupRecommendations
         request={recommendRequest}
         onPromote={setMyOrder}
         opponentNameById={opponentNameById}
       />
 
-      <MatchupDrilldown
-        cell={selectedCell}
-        mineNameById={mineNameById}
-        opponentNameById={opponentNameById}
-      />
+      {/* ── Drilldown reveal ─────────────────────────────── */}
+      <div
+        className={`drilldown-wrapper${selectedCell !== null ? ' drilldown-wrapper--open' : ''}`}
+      >
+        <div className="drilldown-inner">
+          <section className="arena-panel p-4">
+            <MatchupDrilldown
+              cell={selectedCell}
+              mineNameById={mineNameById}
+              opponentNameById={opponentNameById}
+            />
+          </section>
+        </div>
+      </div>
     </div>
   )
 }

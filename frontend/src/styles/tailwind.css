@@ -226,6 +226,148 @@ body {
     appearance: textfield;
   }
 
+  /* ── Matrix cell severity ───────────────────────────── */
+  .arena-cell {
+    position: relative;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease,
+      background 0.15s ease,
+      transform 0.12s ease;
+    animation: cellEnter 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(var(--cell-i, 0) * 26ms);
+  }
+  @keyframes cellEnter {
+    from {
+      opacity: 0;
+      transform: scale(0.88) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .arena-cell {
+      animation: none !important;
+    }
+  }
+
+  .arena-cell[data-severity='strong-advantage'] {
+    border-color: oklch(75% 0.15 200 / 0.6);
+    box-shadow:
+      0 0 0 1px oklch(75% 0.15 200 / 0.18),
+      0 8px 24px -8px oklch(75% 0.15 200 / 0.35);
+    background: linear-gradient(
+      160deg,
+      oklch(75% 0.15 200 / 0.09) 0%,
+      transparent 55%
+    );
+  }
+  .arena-cell[data-severity='advantage'] {
+    border-color: oklch(78% 0.12 155 / 0.5);
+    box-shadow:
+      0 0 0 1px oklch(78% 0.12 155 / 0.12),
+      0 4px 16px -8px oklch(78% 0.12 155 / 0.22);
+    background: linear-gradient(
+      160deg,
+      oklch(78% 0.12 155 / 0.05) 0%,
+      transparent 55%
+    );
+  }
+  .arena-cell[data-severity='even'] {
+    border-color: rgba(167, 139, 250, 0.22);
+  }
+  .arena-cell[data-severity='disadvantage'] {
+    border-color: oklch(72% 0.18 45 / 0.5);
+    box-shadow:
+      0 0 0 1px oklch(72% 0.18 45 / 0.12),
+      0 4px 16px -8px oklch(72% 0.18 45 / 0.22);
+    background: linear-gradient(
+      160deg,
+      oklch(72% 0.18 45 / 0.05) 0%,
+      transparent 55%
+    );
+  }
+  .arena-cell[data-severity='strong-disadvantage'] {
+    border-color: oklch(65% 0.22 350 / 0.6);
+    box-shadow:
+      0 0 0 1px oklch(65% 0.22 350 / 0.18),
+      0 8px 24px -8px oklch(65% 0.22 350 / 0.35);
+    background: linear-gradient(
+      160deg,
+      oklch(65% 0.22 350 / 0.09) 0%,
+      transparent 55%
+    );
+  }
+  .arena-cell:hover {
+    transform: translateY(-1px);
+  }
+  .arena-cell[aria-pressed='true'] {
+    background: rgba(167, 139, 250, 0.13) !important;
+    border-color: rgba(167, 139, 250, 0.55) !important;
+    box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.22) !important;
+  }
+
+  /* ── Score bar animation ─────────────────────────────── */
+  @keyframes growBar {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .score-bar-fill {
+    transform-origin: left;
+    animation: growBar 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--bar-delay, 0ms);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .score-bar-fill {
+      animation: none !important;
+    }
+  }
+
+  /* ── Drilldown reveal ────────────────────────────────── */
+  .drilldown-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .drilldown-wrapper--open {
+    grid-template-rows: 1fr;
+  }
+  .drilldown-inner {
+    overflow: hidden;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .drilldown-wrapper {
+      transition: none;
+    }
+  }
+
+  /* ── Drilldown content entry ─────────────────────────── */
+  @keyframes drilldownEnter {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .drilldown-content {
+    animation: drilldownEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 80ms;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .drilldown-content {
+      animation: none !important;
+    }
+  }
+
   .arena-divider {
     height: 1px;
     background: linear-gradient(

@@ -12,6 +12,7 @@ export default {
       colors: {
         arena: {
           void: '#04030f',
+          surface: '#0d0e3d',
           night: '#0a0b2e',
           deep: '#131454',
           indigo: '#2a1f8c',

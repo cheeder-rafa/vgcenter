@@ -8,11 +8,7 @@ import type {
 
 const DEBOUNCE_MS = 200
 
-export type GameplanEvaluationStatus =
-  | 'idle'
-  | 'loading'
-  | 'success'
-  | 'error'
+export type GameplanEvaluationStatus = 'idle' | 'loading' | 'success' | 'error'
 
 export type GameplanEvaluationState = {
   status: GameplanEvaluationStatus

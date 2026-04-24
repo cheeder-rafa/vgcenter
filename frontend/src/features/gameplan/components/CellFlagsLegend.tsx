@@ -37,21 +37,21 @@ const ENTRIES: LegendEntry[] = [
 
 export function CellFlagsLegend() {
   return (
-    <div className="flex flex-col gap-2 rounded border border-white/10 bg-arena-surface/60 p-3">
-      <h4 className="text-xs uppercase tracking-widest text-white/55">
+    <div className="flex flex-col gap-2 rounded border border-white/8 bg-arena-void/40 p-3">
+      <h4 className="arena-label text-[9px] text-white/35">
         Turn-1 flags legend
       </h4>
-      <ul className="flex flex-wrap gap-2 text-xs">
+      <ul className="flex flex-wrap gap-x-4 gap-y-1.5">
         {ENTRIES.map((entry) => (
           <li
             key={entry.label}
             className="flex items-center gap-1.5"
             title={`${entry.name}: ${entry.description}`}
           >
-            <span className="rounded border border-white/20 px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-white/80">
+            <span className="arena-chip border-white/20 py-0.5 text-white/55">
               {entry.label}
             </span>
-            <span className="text-white/70">{entry.name}</span>
+            <span className="text-xs text-white/55">{entry.name}</span>
           </li>
         ))}
       </ul>

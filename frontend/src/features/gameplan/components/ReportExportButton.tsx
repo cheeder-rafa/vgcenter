@@ -114,7 +114,7 @@ export function ReportExportButton(props: Props) {
       type="button"
       disabled={props.cells.length === 0}
       onClick={() => copyDamageReport(buildReport(props))}
-      className="rounded border border-white/20 px-3 py-2 text-sm font-semibold text-white transition hover:border-white/40 disabled:cursor-not-allowed disabled:opacity-40"
+      className="arena-button disabled:cursor-not-allowed disabled:opacity-40"
     >
       Export report
     </button>
