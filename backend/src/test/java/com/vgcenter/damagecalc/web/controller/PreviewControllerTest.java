@@ -7,12 +7,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vgcenter.damagecalc.application.usecase.DamageMatrix;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsCommand;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsResult;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsUseCase;
+import com.vgcenter.damagecalc.application.usecase.HitEvidence;
 import com.vgcenter.damagecalc.application.usecase.LeadMatchupResult;
 import com.vgcenter.damagecalc.application.usecase.PlanRecommendation;
+import com.vgcenter.damagecalc.application.usecase.PreviewFieldCommand;
 import com.vgcenter.damagecalc.application.usecase.PreviewMetricResult;
+import com.vgcenter.damagecalc.application.usecase.PreviewPokemonCommand;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansCommand;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansResult;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansUseCase;
@@ -251,6 +255,26 @@ class PreviewControllerTest {
 
         @Override
         public EvaluateLeadsResult evaluate(EvaluateLeadsCommand command) {
+            return nextResult;
+        }
+
+        @Override
+        public DamageMatrix buildMatrix(
+                String regulation,
+                List<PreviewPokemonCommand> myTeam,
+                List<PreviewPokemonCommand> opponentTeam,
+                PreviewFieldCommand field) {
+            return new DamageMatrix(
+                    new HitEvidence[myTeam.size()][opponentTeam.size()],
+                    new HitEvidence[opponentTeam.size()][myTeam.size()]);
+        }
+
+        @Override
+        public EvaluateLeadsResult evaluateFromMatrix(
+                List<PreviewPokemonCommand> selectedLeads,
+                int[] selectedLeadIndices,
+                List<PreviewPokemonCommand> opponentTeam,
+                DamageMatrix matrix) {
             return nextResult;
         }
     }

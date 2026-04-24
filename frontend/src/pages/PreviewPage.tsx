@@ -110,10 +110,16 @@ export function PreviewPage() {
               >
                 {plans.status === 'loading' ? 'Evaluating matchups…' : 'Get recommendations'}
               </button>
-              {plans.status === 'error' ? (
-                <p className="mt-2 rounded border border-arena-plasma/30 bg-arena-plasma/10 px-3 py-2 text-sm text-white/78">
-                  {plans.error ?? 'Could not generate recommendations. Make sure both teams are saved with at least one damaging move each.'}
-                </p>
+              {plans.status === 'error' && plans.error ? (
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="mt-2 rounded border border-arena-plasma/30 bg-arena-plasma/10 px-3 py-2 text-sm"
+                >
+                  <p className="font-semibold text-white">{plans.error.title}</p>
+                  <p className="mt-0.5 text-white/78">{plans.error.detail}</p>
+                  <p className="mt-1 text-white/50">{plans.error.hint}</p>
+                </div>
               ) : null}
             </div>
 

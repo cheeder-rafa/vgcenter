@@ -17,9 +17,11 @@ export function evaluateLeads(
 
 export function recommendPlans(
   request: RecommendPlansRequest,
+  signal?: AbortSignal,
 ): Promise<RecommendPlansResult> {
   return requestJson<RecommendPlansResult>('/preview/plans/recommend', {
     method: 'POST',
     body: JSON.stringify(request),
+    signal,
   })
 }

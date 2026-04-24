@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 public final class RecommendPlansService implements RecommendPlansUseCase {
 
@@ -22,27 +21,22 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
     @Override
     public RecommendPlansResult recommend(RecommendPlansCommand command) {
         List<PreviewPokemonCommand> myTeam = command.myTeam();
+        List<PreviewPokemonCommand> opponentTeam = command.opponentTeam();
 
-        // Pre-compute all C(6,2) = 15 lead pair evaluations in parallel.
+        // Pre-compute the full 6×6 damage matrix in parallel (virtual threads, one task per pair).
+        // This replaces the old per-lead-pair fan-out and eliminates ~25× redundant damage calls.
+        DamageMatrix matrix =
+                evaluateLeadsUseCase.buildMatrix(command.regulation(), myTeam, opponentTeam, command.field());
+
+        // Evaluate all C(6,2) = 15 lead pairs via matrix lookups (no further damage calculation).
         Map<Long, EvaluateLeadsResult> evalCache = new HashMap<>();
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (int i = 0; i < myTeam.size(); i++) {
             for (int j = i + 1; j < myTeam.size(); j++) {
-                final int fi = i, fj = j;
-                final long key = pairKey(fi, fj);
-                futures.add(CompletableFuture.runAsync(() -> {
-                    EvaluateLeadsResult result = evaluateLeadsUseCase.evaluate(new EvaluateLeadsCommand(
-                            command.regulation(),
-                            List.of(myTeam.get(fi), myTeam.get(fj)),
-                            command.opponentTeam(),
-                            command.field()));
-                    synchronized (evalCache) {
-                        evalCache.put(key, result);
-                    }
-                }));
+                EvaluateLeadsResult result = evaluateLeadsUseCase.evaluateFromMatrix(
+                        List.of(myTeam.get(i), myTeam.get(j)), new int[] {i, j}, opponentTeam, matrix);
+                evalCache.put(pairKey(i, j), result);
             }
         }
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
         // Enumerate all C(6,4) = 15 bring-4 combinations and find the best lead per bring-4.
         List<PlanCandidate> candidates = new ArrayList<>();
@@ -58,7 +52,7 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
         topCandidates = applyMegaEscapeValve(topCandidates, candidates, myTeam);
 
         List<PlanRecommendation> plans = topCandidates.stream()
-                .map(c -> buildRecommendation(c, myTeam, command.opponentTeam(), command.winConditionIndex()))
+                .map(c -> buildRecommendation(c, myTeam, opponentTeam, command.winConditionIndex()))
                 .toList();
 
         return new RecommendPlansResult(plans);
@@ -224,7 +218,6 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
         }
 
         String summary = buildSummary(bringIndices, leadWithinBring, myTeam, modesCovered, modesAtRisk);
-
         List<String> leftOutRationale = buildLeftOutRationale(bringIndices, myTeam);
 
         return new PlanRecommendation(

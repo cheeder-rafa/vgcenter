@@ -41,6 +41,18 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
+              <strong className="text-white/90">Faster recommendations.</strong>{' '}
+              "Get recommendations" is now ~25× faster. The engine pre-computes
+              all attacker–defender pairs in parallel using virtual threads
+              instead of recomputing the same matchup data hundreds of times.
+            </li>
+            <li>
+              <strong className="text-white/90">Clearer error messages.</strong>{' '}
+              When a recommendation fails you now see a specific title, detail,
+              and hint — including a friendly message if the server is
+              cold-starting or the request times out after 60 s.
+            </li>
+            <li>
               <strong className="text-white/90">Smarter team plans.</strong>{' '}
               Recommendations now prioritise your Mega Evolution and reward
               Pokémon with support moves (Tailwind, screens, redirection, Fake

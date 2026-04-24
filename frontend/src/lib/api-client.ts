@@ -25,19 +25,29 @@ export async function requestJson<TResponse>(
   return (await response.json()) as TResponse
 }
 
-async function parseError(response: Response): Promise<Error> {
+export type ApiError = Error & {
+  status: number
+  problem?: ProblemDetails
+}
+
+async function parseError(response: Response): Promise<ApiError> {
   const contentType = response.headers.get('content-type') ?? ''
   if (contentType.includes('json')) {
     try {
       const problem = (await response.json()) as ProblemDetails
       const detail = problem.detail ?? problem.title ?? response.statusText
-      return new Error(`[${response.status}] ${detail}`)
+      const err = new Error(`[${response.status}] ${detail}`) as ApiError
+      err.status = response.status
+      err.problem = problem
+      return err
     } catch {
       /* fall through */
     }
   }
   const text = await response.text().catch(() => '')
-  return new Error(
+  const err = new Error(
     `[${response.status}] ${text || response.statusText || 'request failed'}`,
-  )
+  ) as ApiError
+  err.status = response.status
+  return err
 }
