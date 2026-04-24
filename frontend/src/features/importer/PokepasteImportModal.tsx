@@ -1,6 +1,7 @@
 import { importPokepaste } from '../calculator/api/importApi'
 import type { ImportedPokemon } from '../calculator/types/api'
 import { ImportTeamModal } from './ImportTeamModal'
+import { validatePokepasteUrl } from './validatePokepasteUrl'
 
 type Props = {
   activeSide: 'attacker' | 'defender'
@@ -27,6 +28,7 @@ export function PokepasteImportModal({
       submitLabel="Import Team"
       title="Import From Pokepaste"
       triggerLabel="Import Pokepaste"
+      validateInput={validatePokepasteUrl}
       onImport={importPokepaste}
       onImportTeam={onImportTeam}
       onLoadPokemon={onLoadPokemon}
