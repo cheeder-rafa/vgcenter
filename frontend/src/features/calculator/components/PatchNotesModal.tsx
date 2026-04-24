@@ -41,24 +41,42 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
-              <strong className="text-white/90">Preview Coach is live.</strong>{' '}
-              Pick your bring-4, analyze every opponent lead pair in Lead Lab,
-              get explained team-plan recommendations, and track your BO3
-              adaptation notes — all in one place.
+              <strong className="text-white/90">Smarter team plans.</strong>{' '}
+              Recommendations now prioritise your Mega Evolution and reward
+              Pokémon with support moves (Tailwind, screens, redirection, Fake
+              Out, etc.) — teams that enable your win condition score higher.
             </li>
             <li>
-              The navigation was redesigned as a minimal floating bar so the
-              calculator and Preview Coach take up the full screen without
-              wasted space on the sides.
+              <strong className="text-white/90">
+                Better "Handles well" lists.
+              </strong>{' '}
+              Each plan card now shows the opponent leads your lead pair
+              genuinely threatens — matchups where you also take serious damage
+              back are no longer counted as handled.
+            </li>
+            <li>
+              <strong className="text-white/90">Win condition clarity.</strong>{' '}
+              The plan cards now tell you whether your chosen win condition is
+              leading (exposed early), in the back (set up to close), or left on
+              the bench by this plan.
+            </li>
+            <li>
+              <strong className="text-white/90">Read difficulty</strong> (formerly
+              "Prediction burden") now shows a brief explanation of what the
+              rating means so it's clear at a glance.
+            </li>
+            <li>
+              Plan cards are now the same height in every row, with the "Use
+              this plan" button always anchored to the bottom.
+            </li>
+            <li>
+              <strong className="text-white/90">Preview Coach is live.</strong>{' '}
+              Lead Lab, team-plan recommendations, and BO3 adaptation notes all
+              in one place.
             </li>
             <li>
               Damage results show the full 16-roll spread, min–max range, HP
-              percentage, and KO chance simultaneously — no more toggling
-              between views.
-            </li>
-            <li>
-              Species-first input: pick a Pokémon and its types, base stats,
-              abilities, and moves populate automatically.
+              percentage, and KO chance simultaneously — no toggling.
             </li>
           </ul>
         </section>
@@ -71,8 +89,7 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
               verified. If a result looks off, treat it as provisional.
             </li>
             <li>
-              Send feedback using the link in the calculator header so it can be
-              checked against the corrections list.
+              Send feedback using the button in the top navigation bar.
             </li>
           </ul>
         </section>
