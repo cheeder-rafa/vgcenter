@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 import { PatchNotesModal } from '../../features/calculator/components/PatchNotesModal'
+import { getFeedbackUrl } from '../../lib/app-config'
 
 const NAV_ITEMS = [
   { to: '/calc', label: 'Calculator', isNew: false },
@@ -10,6 +11,7 @@ const NAV_ITEMS = [
 
 export function TopNav() {
   const [patchNotesOpen, setPatchNotesOpen] = useState(false)
+  const feedbackUrl = getFeedbackUrl()
 
   return (
     <>
@@ -45,14 +47,26 @@ export function TopNav() {
         </div>
       </nav>
 
-      <button
-        type="button"
-        aria-label="Patch notes and known issues"
-        onClick={() => setPatchNotesOpen(true)}
-        className="arena-chip fixed right-4 top-3 z-50 cursor-pointer text-white/35 transition hover:text-white/70"
-      >
-        Patch Notes
-      </button>
+      <div className="fixed right-4 top-3 z-50 flex items-center gap-2">
+        {feedbackUrl !== null && (
+          <a
+            href={feedbackUrl}
+            rel="noreferrer"
+            target="_blank"
+            className="arena-chip cursor-pointer text-white/35 transition hover:text-white/70"
+          >
+            Feedback
+          </a>
+        )}
+        <button
+          type="button"
+          aria-label="Patch notes and known issues"
+          onClick={() => setPatchNotesOpen(true)}
+          className="arena-chip cursor-pointer text-white/35 transition hover:text-white/70"
+        >
+          Patch Notes
+        </button>
+      </div>
 
       <PatchNotesModal
         isOpen={patchNotesOpen}
