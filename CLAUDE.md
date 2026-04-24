@@ -160,3 +160,28 @@ Scope summary (full details in `PLAN.md`):
 - TDD applies: write tests first for `BuildStatsUseCase`, `useReactiveDamage`, `StatTable`, and the portal regression.
 - Execute the plan in four bounded sessions (Phase A backend → Phase B+D data layer + modal portal → Phase C UI rewrite → Phase E sprites). After each, run the verification commands, commit per concern with Conventional Commits, and stop for review.
 - Ready-to-paste prompts for each phase are at the end of `PLAN.md`'s Corrections Pass section.
+
+## Active work after the Corrections Pass — Sub-project 2: Preview Coach
+
+The rejected **Gameplan Lab** experiment is deprecated. Ignore it as product direction, and delete `/gameplan` in Phase A of the new plan. The next work item is **Sub-project 2 — Preview Coach**, defined in `PLAN.md` under that section. Read it before starting any task in this phase.
+
+Preview Coach helps VGC players choose which 4 of 6 Pokémon to bring, which 2 to lead, what each plan pressures, what each plan risks, and how to adapt in a best-of-3 set. It must reuse exact calculator damage and stats; it must not become a turn simulator.
+
+Scope summary (full details in `PLAN.md`):
+
+1. Replace `/gameplan` with `/preview`. Preserve only reusable shell/navigation/team-store work that still serves the calculator and future tools.
+2. Phase A removes the rejected Gameplan implementation and adds a themed `/preview` placeholder.
+3. Phase B builds **Lead Lab**: selected lead pair versus all 15 opponent lead pairs, with KO/2HKO pressure, double-up pressure, incoming danger, speed comparison, must-react labels, and turn-1 annotations.
+4. Phase C builds **Team Preview Coach**: bring-4 + lead-order recommendations explained as arguments, including covered modes, risky modes, left-out Pokémon rationale, win-condition support, and prediction burden.
+5. Phase D builds **BO3 Adaptation Notebook**: game notes, revealed information, adjustment guidance, and markdown/JSON export.
+
+**Rules for this sub-project:**
+- Branch from `develop` as `feature/preview-<slug>`. Target `develop`. Never push directly; never target `main`.
+- `/gameplan` is deprecated and should be deleted in Phase A. Do not add new behavior to it.
+- `/preview` replaces `/gameplan` for all new Preview Coach work.
+- Do **not** modify the damage formula, dataset JSON (`backend/src/main/resources/data/regulation-m-a/`), clean-architecture boundaries, or existing golden tests.
+- All damage must flow through existing calculator use cases and APIs. Do not add inline damage math in frontend code.
+- Frontend work must keep the existing calculator theme and design language: `arena-*` Tailwind tokens, compact VGC workflow density, and readable damage evidence.
+- TDD applies: write failing tests first for every new behavior, then implement, then refactor.
+- Execute in **four bounded sessions** (Phase A remove Gameplan → Phase B Lead Lab → Phase C Team Preview Coach → Phase D BO3 Notebook). After each, run verification (`./mvnw verify` / `pnpm lint && pnpm typecheck && pnpm test` as applicable), commit per concern with Conventional Commits, and stop for review.
+- Ready-to-paste prompts for each phase are at the end of `PLAN.md`'s Sub-project 2 section.
