@@ -171,7 +171,7 @@ function AddGameForm({
   }
 
   const inputClass =
-    'min-h-11 w-full rounded border border-white/10 bg-arena-surface px-3 py-2 text-sm text-white outline-none transition focus-visible:border-arena-cyan/70 focus-visible:ring-2 focus-visible:ring-arena-cyan/25'
+    'min-h-11 w-full rounded border border-white/10 bg-arena-night/60 px-3 py-2 text-sm text-white outline-none transition focus-visible:border-arena-cyan/70 focus-visible:ring-2 focus-visible:ring-arena-cyan/25'
 
   return (
     <div className="rounded border border-white/10 bg-black/18 p-4 grid gap-4">

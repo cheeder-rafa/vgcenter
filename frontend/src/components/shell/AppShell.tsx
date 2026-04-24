@@ -1,13 +1,13 @@
 import { Outlet } from 'react-router-dom'
-import { Sidebar } from './Sidebar'
+import { TopNav } from './TopNav'
 
 export function AppShell() {
   return (
-    <div className="flex min-h-screen bg-arena-bg text-white">
-      <Sidebar />
-      <main className="flex min-w-0 flex-1 flex-col">
+    <div className="min-h-screen bg-arena-void text-white">
+      <TopNav />
+      <div className="min-w-0 pt-16">
         <Outlet />
-      </main>
+      </div>
     </div>
   )
 }
