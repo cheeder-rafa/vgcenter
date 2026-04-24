@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 const NAV_ITEMS = [
   { to: '/calc', label: 'Calculator' },
-  { to: '/gameplan', label: 'Gameplan Lab' },
+  { to: '/preview', label: 'Preview Coach' },
 ] as const
 
 export function Sidebar() {

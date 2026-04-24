@@ -17,7 +17,7 @@ function renderSidebarAt(initialPath: string) {
               <main>
                 <Routes>
                   <Route path="/calc" element={<div>Calculator</div>} />
-                  <Route path="/gameplan" element={<div>Gameplan</div>} />
+                  <Route path="/preview" element={<div>Preview Coach</div>} />
                 </Routes>
               </main>
             </>
@@ -29,30 +29,34 @@ function renderSidebarAt(initialPath: string) {
 }
 
 describe('Sidebar', () => {
-  it('renders nav links for /calc and /gameplan', () => {
+  it('renders nav links for /calc and /preview', () => {
     renderSidebarAt('/calc')
 
-    expect(screen.getByRole('link', { name: /calculator/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /gameplan/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /calculator/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /preview coach/i }),
+    ).toBeInTheDocument()
   })
 
   it('marks the active link with aria-current="page"', () => {
     renderSidebarAt('/calc')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
-    const gameplanLink = screen.getByRole('link', { name: /gameplan/i })
+    const previewLink = screen.getByRole('link', { name: /preview coach/i })
 
     expect(calcLink).toHaveAttribute('aria-current', 'page')
-    expect(gameplanLink).not.toHaveAttribute('aria-current', 'page')
+    expect(previewLink).not.toHaveAttribute('aria-current', 'page')
   })
 
-  it('marks gameplan as current when on /gameplan', () => {
-    renderSidebarAt('/gameplan')
+  it('marks preview as current when on /preview', () => {
+    renderSidebarAt('/preview')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
-    const gameplanLink = screen.getByRole('link', { name: /gameplan/i })
+    const previewLink = screen.getByRole('link', { name: /preview coach/i })
 
-    expect(gameplanLink).toHaveAttribute('aria-current', 'page')
+    expect(previewLink).toHaveAttribute('aria-current', 'page')
     expect(calcLink).not.toHaveAttribute('aria-current', 'page')
   })
 
@@ -61,13 +65,13 @@ describe('Sidebar', () => {
     renderSidebarAt('/calc')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
-    const gameplanLink = screen.getByRole('link', { name: /gameplan/i })
+    const previewLink = screen.getByRole('link', { name: /preview coach/i })
 
     await user.tab()
     expect(document.activeElement).toBe(calcLink)
 
     await user.tab()
-    expect(document.activeElement).toBe(gameplanLink)
+    expect(document.activeElement).toBe(previewLink)
   })
 
   it('sidebar nav has a landmark role', () => {

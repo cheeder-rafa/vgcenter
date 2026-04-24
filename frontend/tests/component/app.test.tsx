@@ -17,15 +17,15 @@ describe('App', () => {
     expect(screen.getByText(/^regulation m-a$/i)).toBeInTheDocument()
   })
 
-  it('renders the Gameplan Lab page at /gameplan', () => {
+  it('renders the Preview Coach placeholder at /preview', () => {
     render(
-      <MemoryRouter initialEntries={['/gameplan']}>
+      <MemoryRouter initialEntries={['/preview']}>
         <App />
       </MemoryRouter>,
     )
 
     expect(
-      screen.getByRole('heading', { name: /gameplan lab/i }),
+      screen.getByRole('heading', { level: 1, name: /preview coach/i }),
     ).toBeInTheDocument()
   })
 
