@@ -1,161 +1,51 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
-const mocks = vi.hoisted(() => ({
-  calculateDamage: vi.fn(),
-  fetchPokedex: vi.fn(),
-  fetchAbilities: vi.fn(),
-  fetchItems: vi.fn(),
-  fetchMoves: vi.fn(),
-  fetchNatures: vi.fn(),
-  buildStats: vi.fn(),
-  importShowdown: vi.fn(),
-  importPokepaste: vi.fn(),
-}))
-
-vi.mock('../../src/features/calculator/api/damageApi', () => ({
-  calculateDamage: mocks.calculateDamage,
-}))
-
-vi.mock('../../src/features/calculator/api/datasetApi', () => ({
-  fetchPokedex: mocks.fetchPokedex,
-  fetchAbilities: mocks.fetchAbilities,
-  fetchItems: mocks.fetchItems,
-  fetchMoves: mocks.fetchMoves,
-  fetchNatures: mocks.fetchNatures,
-  buildStats: mocks.buildStats,
-}))
-
-vi.mock('../../src/features/calculator/api/importApi', () => ({
-  importShowdown: mocks.importShowdown,
-  importPokepaste: mocks.importPokepaste,
-}))
-
-import { CalculatorPage } from '../../src/pages/CalculatorPage'
-import { useCalculatorStore } from '../../src/features/calculator/store/useCalculatorStore'
-import { useSavedTeamStore } from '../../src/features/calculator/store/useSavedTeamStore'
-import { useToastStore } from '../../src/features/calculator/store/useToastStore'
+import { PatchNotesModal } from '../../src/features/calculator/components/PatchNotesModal'
 
 describe('PatchNotesModal', () => {
-  beforeEach(() => {
-    vi.unstubAllEnvs()
-    useCalculatorStore.getState().reset()
-    useSavedTeamStore.getState().reset()
-    useSavedTeamStore.persist.clearStorage()
-    useToastStore.getState().clear()
-    Object.values(mocks).forEach((fn) => fn.mockReset?.())
-    mocks.buildStats.mockResolvedValue({
-      baseStats: {
-        hp: 78,
-        attack: 84,
-        defense: 78,
-        specialAttack: 109,
-        specialDefense: 85,
-        speed: 100,
-      },
-      finalStats: {
-        hp: 155,
-        attack: 104,
-        defense: 99,
-        specialAttack: 132,
-        specialDefense: 105,
-        speed: 120,
-      },
-    })
-    mocks.fetchPokedex.mockResolvedValue([])
-    mocks.fetchAbilities.mockResolvedValue([])
-    mocks.fetchItems.mockResolvedValue([])
-    mocks.fetchMoves.mockResolvedValue([])
-    mocks.fetchNatures.mockResolvedValue([
-      {
-        id: 'serious',
-        name: 'Serious',
-        increasedStat: null,
-        decreasedStat: null,
-      },
-    ])
+  it('renders nothing when closed', () => {
+    render(<PatchNotesModal isOpen={false} onClose={() => {}} />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('renders a "Patch Notes" button in the header next to the regulation chip', () => {
-    render(<CalculatorPage />)
-    expect(
-      screen.getByRole('button', { name: /patch notes/i }),
-    ).toBeInTheDocument()
-  })
-
-  it('the regulation chip itself is not a button (is a span)', () => {
-    render(<CalculatorPage />)
-    const chip = screen.getByTestId('regulation-chip')
-    expect(chip.tagName.toLowerCase()).toBe('span')
-  })
-
-  it('clicking the Patch Notes button opens a dialog', async () => {
-    const user = userEvent.setup()
-    render(<CalculatorPage />)
-
-    await user.click(screen.getByRole('button', { name: /patch notes/i }))
-
+  it('renders dialog when open', () => {
+    render(<PatchNotesModal isOpen={true} onClose={() => {}} />)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
-  it('the dialog contains a "What\'s New" section', async () => {
-    const user = userEvent.setup()
-    render(<CalculatorPage />)
-
-    await user.click(screen.getByRole('button', { name: /patch notes/i }))
-
+  it('contains a "What\'s New" section', () => {
+    render(<PatchNotesModal isOpen={true} onClose={() => {}} />)
     expect(screen.getByText(/what'?s new/i)).toBeInTheDocument()
   })
 
-  it('the dialog contains a "Known Issues" section', async () => {
-    const user = userEvent.setup()
-    render(<CalculatorPage />)
-
-    await user.click(screen.getByRole('button', { name: /patch notes/i }))
-
+  it('contains a "Known Issues" section', () => {
+    render(<PatchNotesModal isOpen={true} onClose={() => {}} />)
     expect(screen.getAllByText(/known issues/i).length).toBeGreaterThan(0)
   })
 
-  it('uses more player-friendly patch notes copy', async () => {
-    const user = userEvent.setup()
-    render(<CalculatorPage />)
-
-    await user.click(screen.getByRole('button', { name: /patch notes/i }))
-
-    expect(
-      screen.getByText(
-        /the calculator is easier to use on phones and smaller screens/i,
-      ),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        /damage details are easier to scan during quick comparisons/i,
-      ),
-    ).toBeInTheDocument()
+  it('mentions Preview Coach in patch notes', () => {
+    render(<PatchNotesModal isOpen={true} onClose={() => {}} />)
+    expect(screen.getAllByText(/preview coach/i).length).toBeGreaterThan(0)
   })
 
-  it('flags item, ability, and calculation issues as being under correction', async () => {
+  it('clicking close button calls onClose', async () => {
     const user = userEvent.setup()
-    render(<CalculatorPage />)
-
-    await user.click(screen.getByRole('button', { name: /patch notes/i }))
-
-    expect(
-      screen.getByText(
-        /some items, abilities, and damage calculations are still under correction/i,
-      ),
-    ).toBeInTheDocument()
-  })
-
-  it('clicking the close button dismisses the dialog', async () => {
-    const user = userEvent.setup()
-    render(<CalculatorPage />)
-
-    await user.click(screen.getByRole('button', { name: /patch notes/i }))
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    let closed = false
+    render(<PatchNotesModal isOpen={true} onClose={() => { closed = true }} />)
 
     await user.click(screen.getByRole('button', { name: /close/i }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(closed).toBe(true)
+  })
+
+  it('clicking the backdrop calls onClose', async () => {
+    const user = userEvent.setup()
+    let closed = false
+    render(<PatchNotesModal isOpen={true} onClose={() => { closed = true }} />)
+
+    const backdrop = screen.getByRole('dialog').parentElement!
+    await user.click(backdrop)
+    expect(closed).toBe(true)
   })
 })

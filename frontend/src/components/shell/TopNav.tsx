@@ -1,34 +1,63 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
+import { PatchNotesModal } from '../../features/calculator/components/PatchNotesModal'
+
 const NAV_ITEMS = [
-  { to: '/calc', label: 'Calculator' },
-  { to: '/preview', label: 'Preview Coach' },
+  { to: '/calc', label: 'Calculator', isNew: false },
+  { to: '/preview', label: 'Preview Coach', isNew: true },
 ] as const
 
 export function TopNav() {
+  const [patchNotesOpen, setPatchNotesOpen] = useState(false)
+
   return (
-    <nav
-      aria-label="Site navigation"
-      className="fixed left-1/2 top-3 z-50 -translate-x-1/2"
-    >
-      <div className="flex items-center gap-0.5 rounded-full border border-arena-violet/20 bg-arena-void/90 px-1.5 py-1.5 backdrop-blur-sm">
-        {NAV_ITEMS.map(({ to, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              [
-                'rounded-full px-5 py-2 font-body text-[0.72rem] font-medium uppercase tracking-[0.12em] transition-colors duration-200',
-                isActive
-                  ? 'bg-arena-plasma/10 text-white'
-                  : 'text-white/40 hover:text-white/70',
-              ].join(' ')
-            }
-          >
-            {label}
-          </NavLink>
-        ))}
-      </div>
-    </nav>
+    <>
+      <nav
+        aria-label="Site navigation"
+        className="fixed left-1/2 top-3 z-50 -translate-x-1/2"
+      >
+        <div className="flex items-center gap-0.5 rounded-full border border-arena-violet/20 bg-arena-void/90 px-1.5 py-1.5 backdrop-blur-sm">
+          {NAV_ITEMS.map(({ to, label, isNew }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                [
+                  'flex items-center gap-1.5 rounded-full px-5 py-2 font-body text-[0.72rem] font-medium uppercase tracking-[0.12em] transition-colors duration-200',
+                  isActive
+                    ? 'bg-arena-plasma/10 text-white'
+                    : 'text-white/40 hover:text-white/70',
+                ].join(' ')
+              }
+            >
+              {label}
+              {isNew && (
+                <span
+                  data-testid="new-badge"
+                  className="rounded bg-arena-plasma/20 px-1.5 py-px font-display text-[0.5rem] font-bold uppercase tracking-[0.08em] text-arena-plasma"
+                >
+                  new
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+
+      <button
+        type="button"
+        aria-label="Patch notes and known issues"
+        onClick={() => setPatchNotesOpen(true)}
+        className="arena-chip fixed right-4 top-3 z-50 cursor-pointer text-white/35 transition hover:text-white/70"
+      >
+        Patch Notes
+      </button>
+
+      <PatchNotesModal
+        isOpen={patchNotesOpen}
+        onClose={() => setPatchNotesOpen(false)}
+      />
+    </>
   )
 }
