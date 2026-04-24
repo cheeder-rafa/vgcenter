@@ -204,14 +204,14 @@ export function CalculatorPage() {
   )
 
   return (
-    <main className="relative isolate min-h-screen overflow-hidden bg-arena-gradient text-white">
+    <main className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden bg-arena-gradient text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05] [background-size:48px_48px]" />
       <div className="pointer-events-none absolute inset-0 arena-scanlines opacity-60" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[4px] bg-gradient-to-r from-arena-plasma via-arena-sun to-arena-cyan shadow-[0_0_32px_rgba(255,43,142,0.7)]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-arena-cyan via-arena-violet to-arena-plasma" />
 
       <div
-        className="relative mx-auto flex min-h-screen max-w-[1600px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 xl:gap-3 xl:px-6"
+        className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1600px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 xl:gap-3 xl:px-6"
         data-testid="calculator-shell"
       >
         <CompactHeader
