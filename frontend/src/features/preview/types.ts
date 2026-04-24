@@ -62,3 +62,26 @@ export type LeadOption = {
   speciesName: string
   spriteId: string | null
 }
+
+export type PlanRecommendation = {
+  bringIndices: number[]
+  leadIndices: number[]
+  summary: string
+  modesCovered: string[]
+  modesAtRisk: string[]
+  winConditionSupported: boolean
+  leftOutRationale: string[]
+  predictionBurden: 'low' | 'medium' | 'high'
+}
+
+export type RecommendPlansResult = {
+  plans: PlanRecommendation[]
+}
+
+export type RecommendPlansRequest = {
+  regulation: string
+  myTeam: PreviewPokemon[]
+  opponentTeam: PreviewPokemon[]
+  winConditionIndex: number | null
+  field: PreviewField
+}
