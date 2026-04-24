@@ -112,7 +112,8 @@ describe('usePlanRecommendation', () => {
     await act(() => result.current.recommend())
 
     expect(result.current.status).toBe('error')
-    expect(result.current.error).toMatch(/network error/i)
+    expect(result.current.error).not.toBeNull()
+    expect(result.current.error?.detail).toMatch(/network error/i)
   })
 })
 
