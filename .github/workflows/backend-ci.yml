@@ -35,3 +35,7 @@ jobs:
         with:
           name: backend-jacoco-report
           path: backend/target/site/jacoco/
+
+      - name: OWASP dependency check
+        continue-on-error: true
+        run: ./mvnw -B org.owasp:dependency-check-maven:12.1.0:check -DfailBuildOnCVSS=8 -DnvdApiDelay=6000
