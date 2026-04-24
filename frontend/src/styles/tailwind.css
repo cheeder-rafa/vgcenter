@@ -214,6 +214,10 @@ body {
     outline: 2px solid rgba(34, 211, 238, 0.9);
     outline-offset: 3px;
   }
+  .arena-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 
   /* Hide number input spinners inside .stat-sp-input */
   .stat-sp-input::-webkit-outer-spin-button,
@@ -307,6 +311,14 @@ body {
     background: rgba(167, 139, 250, 0.13) !important;
     border-color: rgba(167, 139, 250, 0.55) !important;
     box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.22) !important;
+    transform: none;
+  }
+  .arena-cell[aria-pressed='true']:hover {
+    transform: none;
+  }
+  .arena-cell:focus-visible {
+    outline: 2px solid rgba(34, 211, 238, 0.85);
+    outline-offset: 2px;
   }
 
   /* ── Score bar animation ─────────────────────────────── */

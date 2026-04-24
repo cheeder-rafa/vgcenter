@@ -37,7 +37,7 @@ const ENTRIES: LegendEntry[] = [
 
 export function CellFlagsLegend() {
   return (
-    <div className="flex flex-col gap-2 rounded border border-white/8 bg-arena-void/40 p-3">
+    <div className="flex flex-col gap-2 rounded border border-white/10 bg-arena-void/40 p-3">
       <h4 className="arena-label text-[9px] text-white/35">
         Turn-1 flags legend
       </h4>

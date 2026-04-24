@@ -79,7 +79,7 @@ export function LineupRecommendations({
           type="button"
           disabled={request === null || status === 'loading'}
           onClick={fetchRecommendations}
-          className="arena-button"
+          className="arena-button disabled:pointer-events-none"
         >
           {status === 'loading' ? 'Recommending…' : 'Recommend lineups'}
         </button>
@@ -120,7 +120,7 @@ export function LineupRecommendations({
                       back2: recommendation.lineupSpeciesIds[3] ?? null,
                     })
                   }
-                  className="arena-chip border-arena-violet/30 text-arena-violet/80 transition hover:border-arena-violet/60 hover:text-arena-violet"
+                  className="arena-chip cursor-pointer border-arena-violet/30 text-arena-violet/80 transition hover:border-arena-violet/60 hover:text-arena-violet focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan/80"
                 >
                   Promote
                 </button>

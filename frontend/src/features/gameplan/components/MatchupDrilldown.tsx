@@ -133,7 +133,7 @@ export function MatchupDrilldown({
 }: Props) {
   if (cell === null) {
     return (
-      <div className="rounded border border-dashed border-white/12 p-8 text-center text-sm text-white/35">
+      <div className="rounded border border-dashed border-white/10 p-8 text-center text-sm text-white/40">
         Select a cell in the matrix to see the matchup breakdown.
       </div>
     )
@@ -144,7 +144,10 @@ export function MatchupDrilldown({
     .join(' + ')
 
   return (
-    <section className="drilldown-content flex flex-col gap-4">
+    <section
+      key={`${cell.firstOpponentIndex}-${cell.secondOpponentIndex}`}
+      className="drilldown-content flex flex-col gap-4"
+    >
       <header className="flex items-baseline justify-between">
         <h3 className="arena-label text-white/80">vs. {pairLabel}</h3>
         <span className="font-mono text-xs text-white/35">

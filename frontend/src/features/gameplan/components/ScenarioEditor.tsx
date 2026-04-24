@@ -68,7 +68,7 @@ function MegaToggle({
         )
       }
       className={
-        'arena-chip transition ' +
+        'arena-chip cursor-pointer transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan/80 ' +
         (isMega
           ? 'border-arena-violet/60 text-arena-violet'
           : 'border-white/15 text-white/40 hover:border-white/30 hover:text-white/70')
