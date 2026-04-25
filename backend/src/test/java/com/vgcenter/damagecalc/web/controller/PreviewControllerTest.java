@@ -43,8 +43,8 @@ class PreviewControllerTest {
         validator.afterPropertiesSet();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        PreviewController controller =
-                new PreviewController(evaluateLeadsUseCase, recommendPlansUseCase, new PreviewWebMapper());
+        PreviewController controller = new PreviewController(
+                evaluateLeadsUseCase, recommendPlansUseCase, _cmd -> null, new PreviewWebMapper());
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ApiExceptionHandler())
                 .setValidator(validator)

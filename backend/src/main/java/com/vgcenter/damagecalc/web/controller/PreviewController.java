@@ -1,11 +1,14 @@
 package com.vgcenter.damagecalc.web.controller;
 
+import com.vgcenter.damagecalc.application.usecase.BuildSpeedTiersUseCase;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsUseCase;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansUseCase;
 import com.vgcenter.damagecalc.web.dto.EvaluateLeadsRequestDto;
 import com.vgcenter.damagecalc.web.dto.EvaluateLeadsResponseDto;
 import com.vgcenter.damagecalc.web.dto.RecommendPlansRequestDto;
 import com.vgcenter.damagecalc.web.dto.RecommendPlansResponseDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTiersRequestDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTiersResponseDto;
 import com.vgcenter.damagecalc.web.mapper.PreviewWebMapper;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +22,17 @@ public class PreviewController {
 
     private final EvaluateLeadsUseCase evaluateLeadsUseCase;
     private final RecommendPlansUseCase recommendPlansUseCase;
+    private final BuildSpeedTiersUseCase buildSpeedTiersUseCase;
     private final PreviewWebMapper mapper;
 
     public PreviewController(
             EvaluateLeadsUseCase evaluateLeadsUseCase,
             RecommendPlansUseCase recommendPlansUseCase,
+            BuildSpeedTiersUseCase buildSpeedTiersUseCase,
             PreviewWebMapper mapper) {
         this.evaluateLeadsUseCase = evaluateLeadsUseCase;
         this.recommendPlansUseCase = recommendPlansUseCase;
+        this.buildSpeedTiersUseCase = buildSpeedTiersUseCase;
         this.mapper = mapper;
     }
 
@@ -38,5 +44,10 @@ public class PreviewController {
     @PostMapping("/plans/recommend")
     public RecommendPlansResponseDto recommendPlans(@Valid @RequestBody RecommendPlansRequestDto request) {
         return mapper.toRecommendResponse(recommendPlansUseCase.recommend(mapper.toRecommendCommand(request)));
+    }
+
+    @PostMapping("/speed-tiers")
+    public SpeedTiersResponseDto buildSpeedTiers(@Valid @RequestBody SpeedTiersRequestDto request) {
+        return mapper.toSpeedTiersResponse(buildSpeedTiersUseCase.buildTiers(mapper.toSpeedTiersCommand(request)));
     }
 }

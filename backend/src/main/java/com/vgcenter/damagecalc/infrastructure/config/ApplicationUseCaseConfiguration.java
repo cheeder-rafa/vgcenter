@@ -8,6 +8,8 @@ import com.vgcenter.damagecalc.application.port.NatureRepository;
 import com.vgcenter.damagecalc.application.port.PokedexRepository;
 import com.vgcenter.damagecalc.application.port.PokepasteClient;
 import com.vgcenter.damagecalc.application.port.TeamParser;
+import com.vgcenter.damagecalc.application.usecase.BuildSpeedTiersService;
+import com.vgcenter.damagecalc.application.usecase.BuildSpeedTiersUseCase;
 import com.vgcenter.damagecalc.application.usecase.BuildStatsService;
 import com.vgcenter.damagecalc.application.usecase.BuildStatsUseCase;
 import com.vgcenter.damagecalc.application.usecase.CalculateDamageService;
@@ -45,6 +47,12 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     BuildStatsUseCase buildStatsUseCase(PokedexRepository pokedexRepository, NatureRepository natureRepository) {
         return new BuildStatsService(pokedexRepository, natureRepository);
+    }
+
+    @Bean
+    BuildSpeedTiersUseCase buildSpeedTiersUseCase(
+            PokedexRepository pokedexRepository, NatureRepository natureRepository) {
+        return new BuildSpeedTiersService(pokedexRepository, natureRepository);
     }
 
     @Bean
