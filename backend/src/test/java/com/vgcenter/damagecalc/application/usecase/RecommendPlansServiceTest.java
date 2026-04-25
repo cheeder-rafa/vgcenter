@@ -311,7 +311,9 @@ class RecommendPlansServiceTest {
                     new PreviewMetricResult("Incoming danger", 0, "low"),
                     new PreviewMetricResult("Speed control", 1, "medium"),
                     List.of("Stable opener"),
-                    List.of("No major threats.")));
+                    List.of("No major threats."),
+                    List.of(),
+                    List.of()));
         }
         return new EvaluateLeadsResult(matchups);
     }
@@ -342,7 +344,9 @@ class RecommendPlansServiceTest {
                     new PreviewMetricResult("Incoming danger", 3, "high"),
                     new PreviewMetricResult("Speed control", 0, "low"),
                     List.of("Cover immediate KO"),
-                    List.of("Opponent threatens both leads.")));
+                    List.of("Opponent threatens both leads."),
+                    List.of(),
+                    List.of()));
         }
         return new EvaluateLeadsResult(matchups);
     }
@@ -377,6 +381,8 @@ class RecommendPlansServiceTest {
                     new PreviewMetricResult("Combined KOs", 0, "low"),
                     new PreviewMetricResult("Threats on you", danger, danger >= 2 ? "high" : "low"),
                     new PreviewMetricResult("You outspeed", 1, "medium"),
+                    List.of(),
+                    List.of(),
                     List.of(),
                     List.of()));
         }
@@ -413,6 +419,8 @@ class RecommendPlansServiceTest {
                     new PreviewMetricResult("Combined KOs", doubleUp, doubleUp > 0 ? "high" : "low"),
                     new PreviewMetricResult("Threats on you", 0, "low"),
                     new PreviewMetricResult("You outspeed", 1, "medium"),
+                    List.of(),
+                    List.of(),
                     List.of(),
                     List.of()));
         }
@@ -485,7 +493,9 @@ class RecommendPlansServiceTest {
                         new PreviewMetricResult("Incoming danger", 0, "low"),
                         new PreviewMetricResult("Speed control", 2, "high"),
                         List.of("Press KO threat"),
-                        List.of("Strong outgoing pressure.")));
+                        List.of("Strong outgoing pressure."),
+                        List.of(),
+                        List.of()));
             }
             return new EvaluateLeadsResult(matchups);
         }

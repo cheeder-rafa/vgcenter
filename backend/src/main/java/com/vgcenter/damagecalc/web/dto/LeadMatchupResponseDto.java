@@ -11,4 +11,6 @@ public record LeadMatchupResponseDto(
         PreviewMetricDto incomingDanger,
         PreviewMetricDto speedComparison,
         List<String> mustReactLabels,
-        List<String> turnOneAnnotations) {}
+        List<String> turnOneAnnotations,
+        List<HitEvidenceSummaryDto> outgoingEvidence,
+        List<HitEvidenceSummaryDto> incomingEvidence) {}

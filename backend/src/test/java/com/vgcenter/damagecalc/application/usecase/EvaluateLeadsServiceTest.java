@@ -34,6 +34,23 @@ class EvaluateLeadsServiceTest {
     }
 
     @Test
+    void includesHitEvidenceSummariesInMatchupResult() {
+        damageUseCase.nextResults = List.of(result(100, 120, "guaranteed OHKO", 1, 1.0d));
+
+        EvaluateLeadsResult result = service.evaluate(new EvaluateLeadsCommand(
+                "M-A", List.of(pokemon("flutter-mane", 200), pokemon("incineroar", 80)), opponentTeam(), field()));
+
+        LeadMatchupResult first = result.matchups().getFirst();
+        assertThat(first.outgoingEvidence()).isNotEmpty();
+        assertThat(first.incomingEvidence()).isNotEmpty();
+        assertThat(first.outgoingEvidence().getFirst().selectedAttacking()).isTrue();
+        assertThat(first.incomingEvidence().getFirst().selectedAttacking()).isFalse();
+        assertThat(first.outgoingEvidence().getFirst().minPct()).isGreaterThan(0);
+        assertThat(first.outgoingEvidence().getFirst().moveType()).isNotBlank();
+        assertThat(first.outgoingEvidence().getFirst().attackerName()).isEqualTo("flutter-mane");
+    }
+
+    @Test
     void marksSlowLeadsAsMustReactWhenOpponentCanHitFirst() {
         damageUseCase.nextResults = List.of(result(20, 25, "guaranteed 4HKO", 4, 1.0d));
 
@@ -106,15 +123,16 @@ class EvaluateLeadsServiceTest {
 
     private static final class RecordingDamageUseCase implements CalculateDamageUseCase {
         private List<CalculateDamageResult> nextResults = List.of(result("guaranteed 3HKO", 3));
-        private final java.util.ArrayList<CalculateDamageCommand> commands = new java.util.ArrayList<>();
-        private int index;
+        private final java.util.concurrent.CopyOnWriteArrayList<CalculateDamageCommand> commands =
+                new java.util.concurrent.CopyOnWriteArrayList<>();
+        private final java.util.concurrent.atomic.AtomicInteger index =
+                new java.util.concurrent.atomic.AtomicInteger(0);
 
         @Override
         public CalculateDamageResult calculate(CalculateDamageCommand command) {
             commands.add(command);
-            CalculateDamageResult result = nextResults.get(index % nextResults.size());
-            index++;
-            return result;
+            int i = index.getAndIncrement();
+            return nextResults.get(i % nextResults.size());
         }
     }
 }

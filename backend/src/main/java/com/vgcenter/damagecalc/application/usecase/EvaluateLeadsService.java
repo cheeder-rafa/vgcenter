@@ -147,6 +147,11 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                 mustReactLabels(koCount, doubleUpCount, incomingKoCount, incomingTwoHitCount, speedScore);
         List<String> annotations = annotations(outgoing, incoming, speedScore);
 
+        List<HitEvidenceSummary> outgoingEvidence =
+                outgoing.stream().map(hit -> toSummary(hit, true)).toList();
+        List<HitEvidenceSummary> incomingEvidence =
+                incoming.stream().map(hit -> toSummary(hit, false)).toList();
+
         return new LeadMatchupResult(
                 opponentLeads.stream().map(PreviewPokemonCommand::pokemonId).toList(),
                 opponentLeads.stream().map(PreviewPokemonCommand::displayName).toList(),
@@ -160,7 +165,9 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                 new PreviewMetricResult(
                         "You outspeed", speedScore.selectedFasterCount(), tone(speedScore.selectedFasterCount(), 2, 1)),
                 mustReactLabels,
-                annotations);
+                annotations,
+                outgoingEvidence,
+                incomingEvidence);
     }
 
     private int countByHits(List<HitEvidence> evidence, int maxHits) {
@@ -247,6 +254,20 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                         ? "Your leads move first in most checks."
                         : "Opponent leads move first in most checks.");
         return annotations;
+    }
+
+    private HitEvidenceSummary toSummary(HitEvidence hit, boolean selectedAttacking) {
+        String moveName = hit.move().type() + " " + hit.move().category();
+        return new HitEvidenceSummary(
+                hit.attacker().displayName(),
+                hit.defender().displayName(),
+                moveName,
+                hit.move().type(),
+                hit.result().minPct(),
+                hit.result().maxPct(),
+                hit.result().koChance().description(),
+                hit.result().koChance().probability(),
+                selectedAttacking);
     }
 
     private String tone(double value, double high, double medium) {
