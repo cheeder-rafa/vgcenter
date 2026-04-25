@@ -20,6 +20,8 @@ import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsService;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsUseCase;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
+import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadService;
+import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadUseCase;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansService;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansUseCase;
 import org.springframework.context.annotation.Bean;
@@ -63,6 +65,16 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     RecommendPlansUseCase recommendPlansUseCase(EvaluateLeadsUseCase evaluateLeadsUseCase) {
         return new RecommendPlansService(evaluateLeadsUseCase);
+    }
+
+    @Bean
+    OptimizeDefensiveSpreadUseCase optimizeDefensiveSpreadUseCase(
+            PokedexRepository pokedexRepository,
+            NatureRepository natureRepository,
+            MoveRepository moveRepository,
+            CalculateDamageUseCase calculateDamageUseCase) {
+        return new OptimizeDefensiveSpreadService(
+                pokedexRepository, natureRepository, moveRepository, calculateDamageUseCase);
     }
 
     @Bean
