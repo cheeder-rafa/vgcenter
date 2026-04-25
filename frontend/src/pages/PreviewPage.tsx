@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchMoves } from '../features/calculator/api/datasetApi'
 import type { MoveDefinition } from '../features/calculator/types/api'
 import { Bo3Notebook } from '../features/preview/components/Bo3Notebook'
+import { FieldControlsBar } from '../features/preview/components/FieldControlsBar'
 import { LeadLab } from '../features/preview/components/LeadLab'
 import { PlanCards } from '../features/preview/components/PlanCards'
 import { useLeadEvaluation } from '../features/preview/hooks/useLeadEvaluation'
 import { usePlanRecommendation } from '../features/preview/hooks/usePlanRecommendation'
 import { useBo3Store } from '../features/preview/store/useBo3Store'
+import { usePreviewFieldStore } from '../features/preview/store/usePreviewFieldStore'
 import type { LeadOption, PlanRecommendation } from '../features/preview/types'
 import { useTeamsStore } from '../store/useTeamsStore'
 
@@ -62,6 +64,7 @@ export function PreviewPage() {
   const bo3Games = useBo3Store((state) => state.games)
   const addBo3Game = useBo3Store((state) => state.addGame)
   const clearBo3 = useBo3Store((state) => state.clear)
+  const previewField = usePreviewFieldStore((state) => state.field)
 
   const evaluation = useLeadEvaluation({ selectedLeadIds, moves })
   const plans = usePlanRecommendation({ moves, winConditionIndex })
@@ -91,6 +94,8 @@ export function PreviewPage() {
             Preview Coach
           </h1>
         </header>
+
+        <FieldControlsBar />
 
         <section className="arena-panel arena-panel--plasma p-4">
           <div className="relative z-10 grid gap-4 sm:grid-cols-[minmax(200px,0.3fr)_minmax(0,1fr)] sm:items-start">
@@ -146,6 +151,7 @@ export function PreviewPage() {
           status={evaluation.status}
           error={evaluation.error}
           onEvaluate={evaluation.evaluate}
+          field={previewField}
         />
 
         <Bo3Notebook
