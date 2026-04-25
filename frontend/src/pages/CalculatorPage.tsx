@@ -8,6 +8,7 @@ import {
   fetchPokedex,
 } from '../features/calculator/api/datasetApi'
 import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
+import { EvOptimizerPanel } from '../features/calculator/components/EvOptimizerPanel'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { MatchupPinStrip } from '../features/calculator/components/MatchupPinStrip'
@@ -293,6 +294,8 @@ export function CalculatorPage() {
             />
           </div>
         </section>
+
+        <EvOptimizerPanel />
 
         <footer className="pb-1 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
           VGCenter · Champions Circuit · Regulation M-A
