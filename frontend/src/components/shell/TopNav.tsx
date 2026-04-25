@@ -18,7 +18,7 @@ export function TopNav() {
     <>
       <nav
         aria-label="Site navigation"
-        className="fixed left-1/2 top-3 z-50 -translate-x-1/2"
+        className="fixed left-0 right-0 top-3 z-50 flex justify-center"
       >
         <div className="flex items-center gap-0.5 rounded-full border border-arena-violet/20 bg-arena-void/90 px-1.5 py-1.5 backdrop-blur-sm">
           {NAV_ITEMS.map(({ to, label, isNew }) => (
