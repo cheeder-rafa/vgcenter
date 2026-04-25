@@ -6,7 +6,8 @@ import { getFeedbackUrl } from '../../lib/app-config'
 
 const NAV_ITEMS = [
   { to: '/calc', label: 'Calculator', isNew: false },
-  { to: '/preview', label: 'Preview Coach', isNew: true },
+  { to: '/preview', label: 'Preview Coach', isNew: false },
+  { to: '/speed', label: 'Speed Tiers', isNew: true },
 ] as const
 
 export function TopNav() {

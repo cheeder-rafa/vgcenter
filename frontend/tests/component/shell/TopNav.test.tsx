@@ -32,7 +32,7 @@ describe('TopNav', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
   })
-  it('renders nav links for /calc and /preview', () => {
+  it('renders nav links for /calc, /preview, and /speed', () => {
     renderTopNavAt('/calc')
 
     expect(
@@ -40,6 +40,9 @@ describe('TopNav', () => {
     ).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: /preview coach/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /speed tiers/i }),
     ).toBeInTheDocument()
   })
 
@@ -90,11 +93,11 @@ describe('TopNav', () => {
     expect(nav.className).toMatch(/fixed/)
   })
 
-  it('Preview Coach link has a "new" badge', () => {
+  it('Speed Tiers link has a "new" badge', () => {
     renderTopNavAt('/calc')
 
-    const previewLink = screen.getByRole('link', { name: /preview coach/i })
-    expect(previewLink.querySelector('[data-testid="new-badge"]')).toBeInTheDocument()
+    const speedLink = screen.getByRole('link', { name: /speed tiers/i })
+    expect(speedLink.querySelector('[data-testid="new-badge"]')).toBeInTheDocument()
   })
 
   it('renders a patch notes button', () => {
