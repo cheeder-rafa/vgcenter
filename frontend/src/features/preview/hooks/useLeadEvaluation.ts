@@ -8,6 +8,7 @@ import type {
   LeadEvaluationResult,
   PreviewPokemon,
 } from '../types'
+import { usePreviewFieldStore } from '../store/usePreviewFieldStore'
 import { toPreviewPokemon } from './previewPokemonBuilder'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
@@ -17,36 +18,13 @@ type UseLeadEvaluationArgs = {
   moves: MoveDefinition[]
 }
 
-const DEFAULT_FIELD: LeadEvaluationRequest['field'] = {
-  field: { weather: 'CLEAR', terrain: 'NONE', room: 'NONE' },
-  selectedSide: {
-    reflect: false,
-    lightScreen: false,
-    auroraVeil: false,
-    friendGuard: false,
-    helpingHand: false,
-    tailwind: false,
-    protect: false,
-  },
-  opponentSide: {
-    reflect: false,
-    lightScreen: false,
-    auroraVeil: false,
-    friendGuard: false,
-    helpingHand: false,
-    tailwind: false,
-    protect: false,
-  },
-  criticalHit: false,
-  targets: 1,
-}
-
 export function useLeadEvaluation({
   selectedLeadIds,
   moves,
 }: UseLeadEvaluationArgs) {
   const mine = useTeamsStore((state) => state.mine)
   const opponent = useTeamsStore((state) => state.opponent)
+  const field = usePreviewFieldStore((state) => state.field)
   const [status, setStatus] = useState<Status>('idle')
   const [result, setResult] = useState<LeadEvaluationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -58,8 +36,8 @@ export function useLeadEvaluation({
   )
 
   const request = useMemo(
-    () => createRequest(mine, opponent, selectedLeadIds, moveById),
-    [mine, opponent, selectedLeadIds, moveById],
+    () => createRequest(mine, opponent, selectedLeadIds, moveById, field),
+    [mine, opponent, selectedLeadIds, moveById, field],
   )
 
   const evaluate = useCallback(async () => {
@@ -95,6 +73,7 @@ function createRequest(
   opponent: (SavedPokemon | null)[],
   selectedLeadIds: [string | null, string | null],
   moveById: Map<string, MoveDefinition>,
+  field: LeadEvaluationRequest['field'],
 ): LeadEvaluationRequest | null {
   const selectedLeads = selectedLeadIds
     .map((speciesId) =>
@@ -130,7 +109,7 @@ function createRequest(
     regulation: 'M-A',
     selectedLeads: selectedPreview,
     opponentTeam: opponentPreview,
-    field: DEFAULT_FIELD,
+    field,
   }
 }
 

@@ -4,6 +4,7 @@ import com.vgcenter.damagecalc.application.usecase.CombatantCommand;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsCommand;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsResult;
 import com.vgcenter.damagecalc.application.usecase.FieldCommand;
+import com.vgcenter.damagecalc.application.usecase.HitEvidenceSummary;
 import com.vgcenter.damagecalc.application.usecase.MoveCommand;
 import com.vgcenter.damagecalc.application.usecase.PlanRecommendation;
 import com.vgcenter.damagecalc.application.usecase.PreviewFieldCommand;
@@ -17,6 +18,7 @@ import com.vgcenter.damagecalc.web.dto.CombatantRequestDto;
 import com.vgcenter.damagecalc.web.dto.EvaluateLeadsRequestDto;
 import com.vgcenter.damagecalc.web.dto.EvaluateLeadsResponseDto;
 import com.vgcenter.damagecalc.web.dto.FieldRequestDto;
+import com.vgcenter.damagecalc.web.dto.HitEvidenceSummaryDto;
 import com.vgcenter.damagecalc.web.dto.LeadMatchupResponseDto;
 import com.vgcenter.damagecalc.web.dto.MoveRequestDto;
 import com.vgcenter.damagecalc.web.dto.PlanRecommendationDto;
@@ -52,8 +54,27 @@ public class PreviewWebMapper {
                         toMetricDto(matchup.incomingDanger()),
                         toMetricDto(matchup.speedComparison()),
                         matchup.mustReactLabels(),
-                        matchup.turnOneAnnotations()))
+                        matchup.turnOneAnnotations(),
+                        matchup.outgoingEvidence().stream()
+                                .map(this::toEvidenceDto)
+                                .toList(),
+                        matchup.incomingEvidence().stream()
+                                .map(this::toEvidenceDto)
+                                .toList()))
                 .toList());
+    }
+
+    private HitEvidenceSummaryDto toEvidenceDto(HitEvidenceSummary e) {
+        return new HitEvidenceSummaryDto(
+                e.attackerName(),
+                e.defenderName(),
+                e.moveName(),
+                e.moveType(),
+                e.minPct(),
+                e.maxPct(),
+                e.koLabel(),
+                e.koProbability(),
+                e.selectedAttacking());
     }
 
     private PreviewPokemonCommand toPokemonCommand(PreviewPokemonDto dto) {

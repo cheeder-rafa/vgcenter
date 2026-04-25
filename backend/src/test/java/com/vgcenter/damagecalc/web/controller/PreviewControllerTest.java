@@ -63,7 +63,9 @@ class PreviewControllerTest {
                 new PreviewMetricResult("Incoming danger", 0, "low"),
                 new PreviewMetricResult("Speed control", 2, "high"),
                 List.of("Press KO threat"),
-                List.of("Flutter Mane threatens Opponent 1"))));
+                List.of("Flutter Mane threatens Opponent 1"),
+                List.of(),
+                List.of())));
 
         mockMvc.perform(post("/api/v1/preview/leads/evaluate")
                         .contentType(APPLICATION_JSON)

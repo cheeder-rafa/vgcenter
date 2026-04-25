@@ -11,12 +11,16 @@ public record LeadMatchupResult(
         PreviewMetricResult incomingDanger,
         PreviewMetricResult speedComparison,
         List<String> mustReactLabels,
-        List<String> turnOneAnnotations) {
+        List<String> turnOneAnnotations,
+        List<HitEvidenceSummary> outgoingEvidence,
+        List<HitEvidenceSummary> incomingEvidence) {
 
     public LeadMatchupResult {
         opponentLeadIds = List.copyOf(opponentLeadIds);
         opponentLeadNames = List.copyOf(opponentLeadNames);
         mustReactLabels = List.copyOf(mustReactLabels);
         turnOneAnnotations = List.copyOf(turnOneAnnotations);
+        outgoingEvidence = List.copyOf(outgoingEvidence);
+        incomingEvidence = List.copyOf(incomingEvidence);
     }
 }

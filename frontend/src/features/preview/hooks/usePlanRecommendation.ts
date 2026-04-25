@@ -5,6 +5,7 @@ import { useTeamsStore } from '../../../store/useTeamsStore'
 import type { MoveDefinition } from '../../calculator/types/api'
 import { recommendPlans } from '../api/previewApi'
 import type { RecommendPlansResult } from '../types'
+import { usePreviewFieldStore } from '../store/usePreviewFieldStore'
 import { buildPreviewTeam } from './previewPokemonBuilder'
 
 const RECOMMEND_TIMEOUT_MS = 60_000
@@ -28,6 +29,7 @@ export function usePlanRecommendation({
 }: UsePlanRecommendationArgs) {
   const mine = useTeamsStore((state) => state.mine)
   const opponent = useTeamsStore((state) => state.opponent)
+  const field = usePreviewFieldStore((state) => state.field)
   const [status, setStatus] = useState<Status>('idle')
   const [result, setResult] = useState<RecommendPlansResult | null>(null)
   const [error, setError] = useState<RecommendError | null>(null)
@@ -69,7 +71,7 @@ export function usePlanRecommendation({
           myTeam,
           opponentTeam,
           winConditionIndex,
-          field: DEFAULT_FIELD,
+          field,
         },
         controller.signal,
       )
@@ -84,7 +86,7 @@ export function usePlanRecommendation({
     } finally {
       clearTimeout(timeoutId)
     }
-  }, [myTeam, opponentTeam, winConditionIndex, startTransition])
+  }, [myTeam, opponentTeam, winConditionIndex, field, startTransition])
 
   return { status, result, error, recommend }
 }
@@ -144,26 +146,3 @@ function classifyError(caught: unknown): RecommendError {
   }
 }
 
-const DEFAULT_FIELD = {
-  field: { weather: 'CLEAR', terrain: 'NONE', room: 'NONE' },
-  selectedSide: {
-    reflect: false,
-    lightScreen: false,
-    auroraVeil: false,
-    friendGuard: false,
-    helpingHand: false,
-    tailwind: false,
-    protect: false,
-  },
-  opponentSide: {
-    reflect: false,
-    lightScreen: false,
-    auroraVeil: false,
-    friendGuard: false,
-    helpingHand: false,
-    tailwind: false,
-    protect: false,
-  },
-  criticalHit: false,
-  targets: 1,
-} as const
