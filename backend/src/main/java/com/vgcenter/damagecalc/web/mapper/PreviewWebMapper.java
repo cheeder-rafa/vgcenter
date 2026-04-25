@@ -13,6 +13,10 @@ import com.vgcenter.damagecalc.application.usecase.PreviewPokemonCommand;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansCommand;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansResult;
 import com.vgcenter.damagecalc.application.usecase.SideConditionsCommand;
+import com.vgcenter.damagecalc.application.usecase.SpeedTierEntryCommand;
+import com.vgcenter.damagecalc.application.usecase.SpeedTierModifiersCommand;
+import com.vgcenter.damagecalc.application.usecase.SpeedTiersCommand;
+import com.vgcenter.damagecalc.application.usecase.SpeedTiersResult;
 import com.vgcenter.damagecalc.application.usecase.StatsCommand;
 import com.vgcenter.damagecalc.web.dto.CombatantRequestDto;
 import com.vgcenter.damagecalc.web.dto.EvaluateLeadsRequestDto;
@@ -28,6 +32,11 @@ import com.vgcenter.damagecalc.web.dto.PreviewPokemonDto;
 import com.vgcenter.damagecalc.web.dto.RecommendPlansRequestDto;
 import com.vgcenter.damagecalc.web.dto.RecommendPlansResponseDto;
 import com.vgcenter.damagecalc.web.dto.SideConditionsDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTierEntryDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTierModifiersDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTierRowDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTiersRequestDto;
+import com.vgcenter.damagecalc.web.dto.SpeedTiersResponseDto;
 import com.vgcenter.damagecalc.web.dto.StatsDto;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -157,6 +166,31 @@ public class PreviewWebMapper {
     public RecommendPlansResponseDto toRecommendResponse(RecommendPlansResult result) {
         return new RecommendPlansResponseDto(
                 result.plans().stream().map(this::toPlanDto).toList());
+    }
+
+    public SpeedTiersCommand toSpeedTiersCommand(SpeedTiersRequestDto request) {
+        List<SpeedTierEntryCommand> userTeam = request.userTeam() == null
+                ? List.of()
+                : request.userTeam().stream().map(this::toEntryCommand).toList();
+        SpeedTierModifiersCommand modifiers = request.modifiers() == null
+                ? new SpeedTierModifiersCommand(false, false, false, false, 0)
+                : toModifiersCommand(request.modifiers());
+        return new SpeedTiersCommand(request.regulation(), userTeam, modifiers);
+    }
+
+    public SpeedTiersResponseDto toSpeedTiersResponse(SpeedTiersResult result) {
+        return new SpeedTiersResponseDto(result.rows().stream()
+                .map(r -> new SpeedTierRowDto(r.speciesId(), r.speciesName(), r.finalSpeed(), r.userTeam()))
+                .toList());
+    }
+
+    private SpeedTierEntryCommand toEntryCommand(SpeedTierEntryDto dto) {
+        return new SpeedTierEntryCommand(dto.speciesId(), dto.speciesName(), dto.spSpeed(), dto.natureId());
+    }
+
+    private SpeedTierModifiersCommand toModifiersCommand(SpeedTierModifiersDto dto) {
+        return new SpeedTierModifiersCommand(
+                dto.tailwind(), dto.trickRoom(), dto.paralysis(), dto.choiceScarf(), dto.stages());
     }
 
     private PlanRecommendationDto toPlanDto(PlanRecommendation plan) {
