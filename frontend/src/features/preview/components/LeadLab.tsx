@@ -1,6 +1,14 @@
 import { useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import type { LeadEvaluationResult, LeadMatchup, LeadOption } from '../types'
+import type {
+  LeadEvaluationResult,
+  LeadMatchup,
+  LeadOption,
+  PreviewField,
+} from '../types'
+import { hydrateFromMatchup } from '../lib/hydrateFromMatchup'
+import { DamageEvidenceTable } from './DamageEvidenceTable'
 
 type LeadLabProps = {
   selectedLeadIds: [string | null, string | null]
@@ -11,6 +19,7 @@ type LeadLabProps = {
   status: 'idle' | 'loading' | 'success' | 'error'
   error?: string | null
   onEvaluate: () => void
+  field: PreviewField
 }
 
 export function LeadLab({
@@ -22,6 +31,7 @@ export function LeadLab({
   status,
   error,
   onEvaluate,
+  field,
 }: LeadLabProps) {
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const activeKey =
@@ -111,7 +121,12 @@ export function LeadLab({
           activeKey={activeMatchup ? matchupKey(activeMatchup) : null}
           onSelect={setSelectedKey}
         />
-        <LeadDrilldown matchup={activeMatchup} status={status} />
+        <LeadDrilldown
+          matchup={activeMatchup}
+          status={status}
+          selectedLeadIds={selectedLeadIds}
+          field={field}
+        />
       </div>
     </section>
   )
@@ -221,10 +236,16 @@ function LeadMatrix({
 function LeadDrilldown({
   matchup,
   status,
+  selectedLeadIds,
+  field,
 }: {
   matchup: LeadMatchup | null
   status: LeadLabProps['status']
+  selectedLeadIds: [string | null, string | null]
+  field: PreviewField
 }) {
+  const navigate = useNavigate()
+
   if (matchup === null) {
     return (
       <section className="rounded border border-white/10 bg-arena-panel/85 p-4 text-sm text-white/62">
@@ -235,14 +256,32 @@ function LeadDrilldown({
     )
   }
 
+  function openInCalculator() {
+    if (matchup === null) return
+    hydrateFromMatchup(matchup, selectedLeadIds, field, 0)
+    navigate('/')
+  }
+
   return (
     <section className="arena-panel p-4" aria-label="Lead matchup drilldown">
       <div className="relative z-10 grid gap-4 lg:grid-cols-[0.8fr_1fr]">
         <div>
-          <p className="arena-label text-arena-sun">Drilldown</p>
-          <h3 className="mt-1 text-xl font-black text-white">
-            {matchup.opponentLeadNames.join(' + ')}
-          </h3>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <p className="arena-label text-arena-sun">Drilldown</p>
+              <h3 className="mt-1 text-xl font-black text-white">
+                {matchup.opponentLeadNames.join(' + ')}
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={openInCalculator}
+              className="mt-1 flex shrink-0 items-center gap-1 rounded border border-white/14 bg-white/[0.04] px-2.5 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-white/52 transition hover:border-arena-cyan/40 hover:bg-arena-cyan/8 hover:text-arena-cyan focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-arena-cyan/50"
+              title="Open this matchup in the damage calculator"
+            >
+              Calc →
+            </button>
+          </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <MetricPill metric={matchup.koPressure} />
             <MetricPill metric={matchup.twoHitKoPressure} />
@@ -257,9 +296,15 @@ function LeadDrilldown({
             title="Key decisions this turn"
             items={matchup.mustReactLabels}
           />
-          <ReadoutList
-            title="Damage evidence"
-            items={matchup.turnOneAnnotations}
+          {matchup.turnOneAnnotations.length > 0 && (
+            <ReadoutList
+              title="Turn-1 notes"
+              items={matchup.turnOneAnnotations}
+            />
+          )}
+          <DamageEvidenceTable
+            outgoing={matchup.outgoingEvidence ?? []}
+            incoming={matchup.incomingEvidence ?? []}
           />
         </div>
       </div>

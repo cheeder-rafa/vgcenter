@@ -43,6 +43,18 @@ export type PreviewMetric = {
   tone: 'low' | 'medium' | 'high'
 }
 
+export type DamageEvidenceEntry = {
+  attackerName: string
+  defenderName: string
+  moveName: string
+  moveType: string
+  minPct: number
+  maxPct: number
+  koLabel: string
+  koProbability: number
+  selectedAttacking: boolean
+}
+
 export type LeadMatchup = {
   opponentLeadIds: [string, string]
   opponentLeadNames: [string, string]
@@ -53,6 +65,8 @@ export type LeadMatchup = {
   speedComparison: PreviewMetric
   mustReactLabels: string[]
   turnOneAnnotations: string[]
+  outgoingEvidence: DamageEvidenceEntry[]
+  incomingEvidence: DamageEvidenceEntry[]
 }
 
 export type LeadEvaluationResult = {

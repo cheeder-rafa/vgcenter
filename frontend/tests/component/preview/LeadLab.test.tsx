@@ -1,9 +1,24 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
 import { LeadLab } from '../../../src/features/preview/components/LeadLab'
 import type { LeadEvaluationResult } from '../../../src/features/preview/types'
+
+const DEFAULT_FIELD = {
+  field: { weather: 'CLEAR', terrain: 'NONE', room: 'NONE' },
+  selectedSide: {
+    reflect: false, lightScreen: false, auroraVeil: false,
+    friendGuard: false, helpingHand: false, tailwind: false, protect: false,
+  },
+  opponentSide: {
+    reflect: false, lightScreen: false, auroraVeil: false,
+    friendGuard: false, helpingHand: false, tailwind: false, protect: false,
+  },
+  criticalHit: false,
+  targets: 1,
+} as const
 
 describe('LeadLab', () => {
   it('renders compact matrix and drilldown labels', async () => {
@@ -16,18 +31,21 @@ describe('LeadLab', () => {
     }
 
     render(
-      <LeadLab
-        selectedLeadIds={['flutter-mane', 'incineroar']}
-        onSelectedLeadIdsChange={vi.fn()}
-        mine={[
-          option('flutter-mane', 'Flutter Mane'),
-          option('incineroar', 'Incineroar'),
-        ]}
-        opponentCount={6}
-        result={result}
-        status="success"
-        onEvaluate={vi.fn()}
-      />,
+      <MemoryRouter>
+        <LeadLab
+          selectedLeadIds={['flutter-mane', 'incineroar']}
+          onSelectedLeadIdsChange={vi.fn()}
+          mine={[
+            option('flutter-mane', 'Flutter Mane'),
+            option('incineroar', 'Incineroar'),
+          ]}
+          opponentCount={6}
+          result={result}
+          status="success"
+          onEvaluate={vi.fn()}
+          field={DEFAULT_FIELD}
+        />
+      </MemoryRouter>,
     )
 
     expect(
@@ -69,5 +87,7 @@ function matchup(ids: [string, string], names: [string, string]) {
     speedComparison: { label: 'Speed control', value: 2, tone: 'high' },
     mustReactLabels: ['Cover immediate KO'],
     turnOneAnnotations: ['Moonblast threatens Opponent 1'],
+    outgoingEvidence: [],
+    incomingEvidence: [],
   } satisfies LeadEvaluationResult['matchups'][number]
 }
