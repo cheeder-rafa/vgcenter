@@ -229,6 +229,7 @@ type CalculatorState = {
   clearResults: () => void
   setResultsStatus: (status: ResultsStatus) => void
   toggleCriticalHit: () => void
+  applyDefensiveSpread: (spHp: number, spDef: number, spSpd: number) => void
   reset: () => void
 }
 
@@ -312,6 +313,13 @@ export const useCalculatorStore = create<CalculatorState>()(
     setResultsStatus: (resultsStatus) => set({ resultsStatus }),
     toggleCriticalHit: () =>
       set((state) => ({ criticalHit: !state.criticalHit })),
+    applyDefensiveSpread: (spHp, spDef, spSpd) =>
+      set((state) => ({
+        defender: {
+          ...state.defender,
+          sp: { ...state.defender.sp, hp: spHp, def: spDef, spd: spSpd },
+        },
+      })),
     reset: () => set({ ...createInitialState() }),
   })),
 )
