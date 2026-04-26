@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSpreadUseCase {
 
@@ -57,93 +61,101 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
         Sp attackerSp = toSp(command.attackerSp());
         Stats attackerStats = attacker.baseStats().toBattleStats(attackerSp, attackerNature, VGC_LEVEL);
         StatsCommand attackerStatsCmd = toStatsCommand(attackerStats);
-        List<String> attackerTypes =
-                attacker.types().stream().map(t -> t.name()).toList();
+        List<String> attackerTypes = attacker.types().stream().map(Enum::name).toList();
+        List<String> defenderTypes = defender.types().stream().map(Enum::name).toList();
 
-        List<DefenseSpreadCandidate> passing = new ArrayList<>();
+        MoveCommand moveCmd = new MoveCommand(
+                move.type(),
+                move.category(),
+                move.basePower(),
+                move.spread(),
+                move.contact(),
+                move.doublePowerWhenUserStatused(),
+                move.ignoreBurnPenaltyWhenUserStatused());
 
-        for (int spHp = 0; spHp <= MAX_SP; spHp++) {
-            for (int spDef = 0; spDef <= MAX_SP - spHp; spDef++) {
-                for (int spSpd = 0; spSpd <= MAX_SP - spHp - spDef; spSpd++) {
-                    Sp defenderSp = new Sp(spHp, 0, spDef, 0, spSpd, 0);
-                    Stats defenderStats = defender.baseStats().toBattleStats(defenderSp, defenderNature, VGC_LEVEL);
-                    StatsCommand defenderStatsCmd = toStatsCommand(defenderStats);
-                    List<String> defenderTypes =
-                            defender.types().stream().map(t -> t.name()).toList();
+        // Iterate totalSp tier-by-tier (0 → MAX_SP) and stop at the first tier
+        // that contains at least one passing candidate. Each tier's combos run in
+        // parallel via virtual threads, matching the EvaluateLeadsService pattern.
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (int tier = 0; tier <= MAX_SP; tier++) {
+                List<DefenseSpreadCandidate> tierPassing = new CopyOnWriteArrayList<>();
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-                    CombatantCommand attackerCmd = new CombatantCommand(
-                            VGC_LEVEL,
-                            attackerStatsCmd,
-                            attackerTypes,
-                            command.attackerAbilityId(),
-                            command.attackerItemId(),
-                            "NONE",
-                            Map.of(),
-                            false,
-                            attackerStats.hp());
-                    CombatantCommand defenderCmd = new CombatantCommand(
-                            VGC_LEVEL,
-                            defenderStatsCmd,
-                            defenderTypes,
-                            null,
-                            null,
-                            "NONE",
-                            Map.of(),
-                            false,
-                            defenderStats.hp());
+                for (int spHp = 0; spHp <= tier; spHp++) {
+                    for (int spDef = 0; spDef <= tier - spHp; spDef++) {
+                        int spSpd = tier - spHp - spDef;
+                        final int fHp = spHp, fDef = spDef, fSpd = spSpd, fTier = tier;
 
-                    MoveCommand moveCmd = new MoveCommand(
-                            move.type(),
-                            move.category(),
-                            move.basePower(),
-                            move.spread(),
-                            move.contact(),
-                            move.doublePowerWhenUserStatused(),
-                            move.ignoreBurnPenaltyWhenUserStatused());
+                        futures.add(CompletableFuture.runAsync(
+                                () -> {
+                                    Sp defenderSp = new Sp(fHp, 0, fDef, 0, fSpd, 0);
+                                    Stats defenderStats =
+                                            defender.baseStats().toBattleStats(defenderSp, defenderNature, VGC_LEVEL);
 
-                    CalculateDamageCommand damageCmd = new CalculateDamageCommand(
-                            command.regulation(),
-                            attackerCmd,
-                            defenderCmd,
-                            moveCmd,
-                            command.field(),
-                            command.attackerSide(),
-                            command.defenderSide(),
-                            command.criticalHit(),
-                            1);
+                                    CombatantCommand attackerCmd = new CombatantCommand(
+                                            VGC_LEVEL,
+                                            attackerStatsCmd,
+                                            attackerTypes,
+                                            command.attackerAbilityId(),
+                                            command.attackerItemId(),
+                                            "NONE",
+                                            Map.of(),
+                                            false,
+                                            attackerStats.hp());
+                                    CombatantCommand defenderCmd = new CombatantCommand(
+                                            VGC_LEVEL,
+                                            toStatsCommand(defenderStats),
+                                            defenderTypes,
+                                            null,
+                                            null,
+                                            "NONE",
+                                            Map.of(),
+                                            false,
+                                            defenderStats.hp());
 
-                    CalculateDamageResult result = calculateDamageUseCase.calculate(damageCmd);
+                                    CalculateDamageResult result =
+                                            calculateDamageUseCase.calculate(new CalculateDamageCommand(
+                                                    command.regulation(),
+                                                    attackerCmd,
+                                                    defenderCmd,
+                                                    moveCmd,
+                                                    command.field(),
+                                                    command.attackerSide(),
+                                                    command.defenderSide(),
+                                                    command.criticalHit(),
+                                                    1));
 
-                    if (meetsGoal(result, command.goal())) {
-                        int totalSp = spHp + spDef + spSpd;
-                        passing.add(new DefenseSpreadCandidate(
-                                spHp,
-                                spDef,
-                                spSpd,
-                                totalSp,
-                                MAX_SP - totalSp,
-                                result.minPct(),
-                                result.maxPct(),
-                                result.koChance().probability(),
-                                result.koChance().description()));
+                                    if (meetsGoal(result, command.goal())) {
+                                        tierPassing.add(new DefenseSpreadCandidate(
+                                                fHp,
+                                                fDef,
+                                                fSpd,
+                                                fTier,
+                                                MAX_SP - fTier,
+                                                result.minPct(),
+                                                result.maxPct(),
+                                                result.koChance().probability(),
+                                                result.koChance().description()));
+                                    }
+                                },
+                                executor));
                     }
+                }
+
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                        .join();
+
+                if (!tierPassing.isEmpty()) {
+                    return new OptimizeDefenseResult(tierPassing.stream()
+                            .sorted(Comparator.comparingInt(DefenseSpreadCandidate::spHp)
+                                    .reversed())
+                            .limit(MAX_RESULTS)
+                            .toList());
                 }
             }
         }
 
-        if (passing.isEmpty()) {
-            return new OptimizeDefenseResult(List.of());
-        }
-
-        int minTotalSp =
-                passing.stream().mapToInt(DefenseSpreadCandidate::totalSp).min().orElseThrow();
-        List<DefenseSpreadCandidate> optimal = passing.stream()
-                .filter(c -> c.totalSp() == minTotalSp)
-                .sorted(Comparator.comparingInt(DefenseSpreadCandidate::spHp).reversed())
-                .limit(MAX_RESULTS)
-                .toList();
-
-        return new OptimizeDefenseResult(optimal);
+        return new OptimizeDefenseResult(List.of());
     }
 
     private static boolean meetsGoal(CalculateDamageResult result, String goal) {
