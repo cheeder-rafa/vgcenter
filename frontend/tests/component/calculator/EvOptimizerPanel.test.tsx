@@ -21,6 +21,16 @@ const mockCandidate = {
   koChanceDescription: 'guaranteed survival',
 }
 
+function setAttackerWithMoves(...moveIds: string[]) {
+  const slots = [null, null, null, null].map((_, i) => ({
+    moveId: moveIds[i] ?? null,
+  })) as [{ moveId: string | null }, { moveId: string | null }, { moveId: string | null }, { moveId: string | null }]
+  useCalculatorStore.setState({
+    attacker: { ...useCalculatorStore.getState().attacker, speciesId: 'garchomp', natureId: 'jolly', moves: slots },
+    defender: { ...useCalculatorStore.getState().defender, speciesId: 'snorlax', natureId: 'hardy' },
+  })
+}
+
 function renderPanel() {
   return render(
     <MemoryRouter>
@@ -30,6 +40,10 @@ function renderPanel() {
 }
 
 describe('EvOptimizerPanel', () => {
+  const nullMoves: [{ moveId: string | null }, { moveId: string | null }, { moveId: string | null }, { moveId: string | null }] = [
+    { moveId: null }, { moveId: null }, { moveId: null }, { moveId: null },
+  ]
+
   beforeEach(() => {
     vi.mocked(optimizerApi.optimizeDefense).mockResolvedValue({
       candidates: [mockCandidate],
@@ -44,6 +58,7 @@ describe('EvOptimizerPanel', () => {
         ...useCalculatorStore.getState().attacker,
         speciesId: 'garchomp',
         natureId: 'jolly',
+        moves: nullMoves,
       },
     })
   })
@@ -61,12 +76,29 @@ describe('EvOptimizerPanel', () => {
     expect(screen.getByRole('button', { name: /optimize/i })).toBeDisabled()
   })
 
-  it('shows results after clicking optimize', async () => {
+  it('shows move dropdown with attacker moves', () => {
+    setAttackerWithMoves('earthquake', 'protect')
+    renderPanel()
+
+    const select = screen.getByRole('combobox', { name: /move/i })
+    expect(select).not.toBeDisabled()
+    expect(screen.getByRole('option', { name: 'earthquake' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'protect' })).toBeInTheDocument()
+  })
+
+  it('shows disabled select with hint when attacker has no moves', () => {
+    renderPanel()
+    const select = screen.getByRole('combobox', { name: /move/i })
+    expect(select).toBeDisabled()
+    expect(screen.getByRole('option', { name: /select moves on the attacker first/i })).toBeInTheDocument()
+  })
+
+  it('shows results after selecting a move and clicking optimize', async () => {
+    setAttackerWithMoves('earthquake', 'protect')
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'earthquake')
+    await user.selectOptions(screen.getByRole('combobox', { name: /move/i }), 'earthquake')
 
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
@@ -79,11 +111,11 @@ describe('EvOptimizerPanel', () => {
     vi.mocked(optimizerApi.optimizeDefense).mockResolvedValue({
       candidates: [],
     })
+    setAttackerWithMoves('flare-blitz')
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'flare-blitz')
+    await user.selectOptions(screen.getByRole('combobox', { name: /move/i }), 'flare-blitz')
 
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
@@ -93,11 +125,11 @@ describe('EvOptimizerPanel', () => {
   })
 
   it('calls applyDefensiveSpread on the store when apply button clicked', async () => {
+    setAttackerWithMoves('earthquake')
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'earthquake')
+    await user.selectOptions(screen.getByRole('combobox', { name: /move/i }), 'earthquake')
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
     await waitFor(() => screen.getByText(/4 SP/i))
