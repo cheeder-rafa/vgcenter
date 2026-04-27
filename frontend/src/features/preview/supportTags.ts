@@ -1,4 +1,9 @@
-const SPEED_CONTROL_MOVES = new Set(['tailwind', 'trick-room', 'icy-wind', 'electroweb'])
+const SPEED_CONTROL_MOVES = new Set([
+  'tailwind',
+  'trick-room',
+  'icy-wind',
+  'electroweb',
+])
 const REDIRECTION_MOVES = new Set(['follow-me', 'rage-powder'])
 const SCREEN_MOVES = new Set(['reflect', 'light-screen', 'aurora-veil'])
 const FAKE_OUT_MOVES = new Set(['fake-out'])

@@ -70,9 +70,8 @@ export function LeadLab({
               Lead Lab
             </h2>
             <p className="mt-2 text-sm leading-6 text-white/68">
-              Pick two of your leads. Lead Lab runs them against all 15
-              possible opponent pairs and shows how each matchup looks on
-              turn 1.
+              Pick two of your leads. Lead Lab runs them against all 15 possible
+              opponent pairs and shows how each matchup looks on turn 1.
             </p>
           </div>
 
@@ -196,8 +195,8 @@ function LeadMatrix({
                 No results yet
               </p>
               <p className="mt-1 text-xs leading-5 text-white/40">
-                Select two of your leads and make sure six opponent Pokémon
-                are loaded, then click "Evaluate leads."
+                Select two of your leads and make sure six opponent Pokémon are
+                loaded, then click "Evaluate leads."
               </p>
             </div>
           ) : (

@@ -52,7 +52,9 @@ export function optimizeDefense(
   })
 }
 
-export function spreadToApiSp(sp: Spread): OptimizeDefenseRequest['attackerSp'] {
+export function spreadToApiSp(
+  sp: Spread,
+): OptimizeDefenseRequest['attackerSp'] {
   return {
     hp: sp.hp,
     attack: sp.atk,

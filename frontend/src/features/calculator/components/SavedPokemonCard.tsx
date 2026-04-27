@@ -72,7 +72,7 @@ function SavedPokemonCardInner({
             }
           }}
         />
-        <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-[rgba(8,12,27,0.82)] px-2 py-1 text-center font-mono text-[0.58rem] uppercase tracking-[0.18em] text-white/78">
+        <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-arena-night/82 px-2 py-1 text-center font-mono text-arena-2xs uppercase tracking-[0.18em] text-white/78">
           {index + 1}
         </span>
       </button>

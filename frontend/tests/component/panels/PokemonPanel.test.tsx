@@ -396,9 +396,7 @@ describe('PokemonPanel', () => {
     await user.keyboard('{ArrowDown}{Enter}')
 
     expect(useCalculatorStore.getState().attacker.speciesId).toBe('amoonguss')
-    expect(useCalculatorStore.getState().attacker.abilityId).toBe(
-      'regenerator',
-    )
+    expect(useCalculatorStore.getState().attacker.abilityId).toBe('regenerator')
     expect(useCalculatorStore.getState().attacker.itemId).toBeNull()
     expect(useCalculatorStore.getState().attacker.natureId).toBe('serious')
     expect(useCalculatorStore.getState().attacker.status).toBe('NONE')

@@ -582,4 +582,3 @@ function CompactHeader({
     </header>
   )
 }
-

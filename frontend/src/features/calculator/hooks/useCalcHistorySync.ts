@@ -61,7 +61,8 @@ export function useCalcHistorySync() {
             topMoveId:
               topAttackerResult !== null && topAttackerResult !== undefined
                 ? (attacker.moves.find(
-                    (_, i) => state.results.attackerMoves[i] === topAttackerResult,
+                    (_, i) =>
+                      state.results.attackerMoves[i] === topAttackerResult,
                   )?.moveId ?? null)
                 : null,
             topMoveMaxPercent: topAttackerResult?.maxPct ?? null,

@@ -3,10 +3,7 @@ import { useEffect, useId, useState } from 'react'
 import { calculateDamage } from '../api/damageApi'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { useSpring } from '../hooks/useSpring'
-import {
-  useCompareStore,
-  type PinnedDefender,
-} from '../store/useCompareStore'
+import { useCompareStore, type PinnedDefender } from '../store/useCompareStore'
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import type {
   CalculateDamageResponse,
@@ -236,7 +233,8 @@ function PinnedDefenderColumn({
       {colStatus.kind === 'ready' && (
         <div className="flex flex-col gap-1.5">
           <span className="font-mono text-[0.7rem] tabular-nums text-arena-plasma">
-            {colStatus.result.minPct.toFixed(1)}–{colStatus.result.maxPct.toFixed(1)}%
+            {colStatus.result.minPct.toFixed(1)}–
+            {colStatus.result.maxPct.toFixed(1)}%
           </span>
           <DamageBar
             minPct={colStatus.result.minPct}
@@ -317,8 +315,7 @@ export function SpreadComparePanel({ defenderName }: Props) {
               aria-controls={columnsId}
               className="arena-chip cursor-pointer text-arena-violet transition hover:bg-arena-violet/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
             >
-              Compare{' '}
-              <span className="tabular-nums">({pins.length})</span>
+              Compare <span className="tabular-nums">({pins.length})</span>
               <span
                 className="ml-0.5 inline-block transition-transform duration-150"
                 style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}

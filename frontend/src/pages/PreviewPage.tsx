@@ -20,7 +20,9 @@ export function PreviewPage() {
   const [selectedLeadIds, setSelectedLeadIds] = useState<
     [string | null, string | null]
   >([null, null])
-  const [winConditionIndex, setWinConditionIndex] = useState<number | null>(null)
+  const [winConditionIndex, setWinConditionIndex] = useState<number | null>(
+    null,
+  )
 
   useEffect(() => {
     let active = true
@@ -113,7 +115,9 @@ export function PreviewPage() {
                 disabled={plans.status === 'loading'}
                 onClick={plans.recommend}
               >
-                {plans.status === 'loading' ? 'Evaluating matchups…' : 'Get recommendations'}
+                {plans.status === 'loading'
+                  ? 'Evaluating matchups…'
+                  : 'Get recommendations'}
               </button>
               {plans.status === 'error' && plans.error ? (
                 <div
@@ -121,7 +125,9 @@ export function PreviewPage() {
                   aria-live="polite"
                   className="mt-2 rounded border border-arena-plasma/30 bg-arena-plasma/10 px-3 py-2 text-sm"
                 >
-                  <p className="font-semibold text-white">{plans.error.title}</p>
+                  <p className="font-semibold text-white">
+                    {plans.error.title}
+                  </p>
                   <p className="mt-0.5 text-white/78">{plans.error.detail}</p>
                   <p className="mt-1 text-white/50">{plans.error.hint}</p>
                 </div>

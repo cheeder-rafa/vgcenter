@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { decodeCalcState, encodeCalcState, type ShareableState } from '../../src/features/calculator/share/encodeState'
+import {
+  decodeCalcState,
+  encodeCalcState,
+  type ShareableState,
+} from '../../src/features/calculator/share/encodeState'
 
 const MINIMAL_COMBATANT = {
   speciesId: 'incineroar',
@@ -17,9 +21,28 @@ const MINIMAL_COMBATANT = {
     { moveId: 'knock-off' },
     { moveId: null },
     { moveId: null },
-  ] as [{ moveId: string | null }, { moveId: string | null }, { moveId: string | null }, { moveId: string | null }],
-  baseStats: { hp: 95, attack: 115, defense: 90, specialAttack: 70, specialDefense: 90, speed: 60 },
-  finalStats: { hp: 175, attack: 192, defense: 110, specialAttack: 82, specialDefense: 110, speed: 71 },
+  ] as [
+    { moveId: string | null },
+    { moveId: string | null },
+    { moveId: string | null },
+    { moveId: string | null },
+  ],
+  baseStats: {
+    hp: 95,
+    attack: 115,
+    defense: 90,
+    specialAttack: 70,
+    specialDefense: 90,
+    speed: 60,
+  },
+  finalStats: {
+    hp: 175,
+    attack: 192,
+    defense: 110,
+    specialAttack: 82,
+    specialDefense: 110,
+    speed: 71,
+  },
   types: ['FIRE', 'DARK'] as ['FIRE', 'DARK'],
   grounded: true,
   currentHp: 175,
@@ -28,7 +51,11 @@ const MINIMAL_COMBATANT = {
 const SAMPLE_STATE: ShareableState = {
   regulation: 'M-A',
   attacker: { ...MINIMAL_COMBATANT },
-  defender: { ...MINIMAL_COMBATANT, speciesId: 'flutter-mane', natureId: 'timid' },
+  defender: {
+    ...MINIMAL_COMBATANT,
+    speciesId: 'flutter-mane',
+    natureId: 'timid',
+  },
   field: { weather: 'SUN', terrain: 'NONE', room: 'NONE' },
   attackerSide: {
     reflect: false,
@@ -82,10 +109,20 @@ describe('encodeCalcState / decodeCalcState', () => {
   it('preserves all SP allocation fields', () => {
     const encoded = encodeCalcState({
       ...SAMPLE_STATE,
-      attacker: { ...MINIMAL_COMBATANT, sp: { hp: 4, atk: 20, def: 8, spa: 0, spd: 0, spe: 0 } },
+      attacker: {
+        ...MINIMAL_COMBATANT,
+        sp: { hp: 4, atk: 20, def: 8, spa: 0, spd: 0, spe: 0 },
+      },
     })
     const decoded = decodeCalcState(encoded)!
-    expect(decoded.attacker.sp).toEqual({ hp: 4, atk: 20, def: 8, spa: 0, spd: 0, spe: 0 })
+    expect(decoded.attacker.sp).toEqual({
+      hp: 4,
+      atk: 20,
+      def: 8,
+      spa: 0,
+      spd: 0,
+      spe: 0,
+    })
   })
 
   it('preserves move slots including nulls', () => {
@@ -104,7 +141,10 @@ describe('encodeCalcState / decodeCalcState', () => {
   it('returns null for wrong version', () => {
     // Manually craft a v:0 payload
     const payload = JSON.stringify({ v: 0, reg: 'M-A' })
-    const fakeEncoded = btoa(payload).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    const fakeEncoded = btoa(payload)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
     expect(decodeCalcState(fakeEncoded)).toBeNull()
   })
 

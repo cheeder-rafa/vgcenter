@@ -51,7 +51,9 @@ describe('EvOptimizerPanel', () => {
   it('renders heading and optimize button', () => {
     renderPanel()
     expect(screen.getByText(/ev optimizer/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /optimize/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /optimize/i }),
+    ).toBeInTheDocument()
   })
 
   it('requires a move selection before optimizing', () => {
@@ -74,7 +76,9 @@ describe('EvOptimizerPanel', () => {
   })
 
   it('shows empty state when no candidates returned', async () => {
-    vi.mocked(optimizerApi.optimizeDefense).mockResolvedValue({ candidates: [] })
+    vi.mocked(optimizerApi.optimizeDefense).mockResolvedValue({
+      candidates: [],
+    })
     const user = userEvent.setup()
     renderPanel()
 

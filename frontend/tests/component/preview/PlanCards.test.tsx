@@ -27,12 +27,21 @@ const plan2: PlanRecommendation = {
   modesCovered: [],
   modesAtRisk: ['Opponent E + Opponent F'],
   winConditionSupported: false,
-  leftOutRationale: ['Amoonguss: left out — coverage handled by the core four.'],
+  leftOutRationale: [
+    'Amoonguss: left out — coverage handled by the core four.',
+  ],
   predictionBurden: 'medium',
   winConditionRole: 'benched',
 }
 
-const myTeamNames = ['Flutter Mane', 'Incineroar', 'Urshifu', 'Palafin', 'Amoonguss', 'Rillaboom']
+const myTeamNames = [
+  'Flutter Mane',
+  'Incineroar',
+  'Urshifu',
+  'Palafin',
+  'Amoonguss',
+  'Rillaboom',
+]
 
 describe('PlanCards', () => {
   it('renders a card for each plan', () => {
@@ -64,7 +73,9 @@ describe('PlanCards', () => {
       />,
     )
 
-    expect(screen.getByText(/lead flutter mane \+ incineroar/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/lead flutter mane \+ incineroar/i),
+    ).toBeInTheDocument()
   })
 
   it('shows read difficulty label', () => {
@@ -165,7 +176,9 @@ describe('PlanCards', () => {
       />,
     )
 
-    expect(screen.getByRole('combobox', { name: /win condition/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('combobox', { name: /win condition/i }),
+    ).toBeInTheDocument()
   })
 
   it('calls onWinConditionChange when a different win-condition is selected', async () => {

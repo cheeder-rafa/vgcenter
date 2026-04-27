@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useSpeedTiers } from '../features/speed/hooks/useSpeedTiers'
 import { META_TOP_IDS } from '../features/speed/data/meta-top'
@@ -9,7 +9,15 @@ export function SpeedTierPage() {
   const [metaOnly, setMetaOnly] = useState(false)
 
   const displayRows = metaOnly
-    ? rows.filter((r) => r.userTeam || META_TOP_IDS.has(r.speciesId))
+    ? rows.filter((r) => {
+        if (r.userTeam) return true
+        if (META_TOP_IDS.has(r.speciesId)) return true
+        if (r.isMega) {
+          const baseId = r.speciesId.replace(/-mega.*$/, '')
+          return META_TOP_IDS.has(baseId)
+        }
+        return false
+      })
     : rows
 
   return (
@@ -46,6 +54,7 @@ export function SpeedTierPage() {
                   type="button"
                   role="switch"
                   aria-checked={metaOnly}
+                  aria-label="Top-30 meta only"
                   onClick={() => setMetaOnly((v) => !v)}
                   className={`relative h-5 w-9 rounded-full border transition ${
                     metaOnly
@@ -82,7 +91,11 @@ export function SpeedTierPage() {
                   </h2>
                 </div>
                 {rows.length > 0 && (
-                  <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/45">
+                  <span
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="font-mono text-xs uppercase tracking-[0.2em] text-white/45"
+                  >
                     {status === 'loading'
                       ? 'updating…'
                       : `${displayRows.length} entries`}
@@ -100,12 +113,9 @@ export function SpeedTierPage() {
                 </div>
               ) : rows.length === 0 ? (
                 <div className="rounded border border-white/10 bg-black/16 p-6">
-                  <p className="text-sm font-medium text-white/62">
-                    No tiers loaded yet
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-white/40">
-                    Speed tiers load automatically. Add Pokémon to your team to
-                    see them highlighted.
+                  <p className="text-sm text-white/50">
+                    Add Pokémon to your team rail to see your speeds
+                    highlighted.
                   </p>
                 </div>
               ) : (
@@ -207,20 +217,28 @@ function SpeedSection({
   rows: SpeedTierRow[]
   modifiers: SpeedTierModifiers
 }) {
-  const grouped = groupBySpeed(rows, modifiers.trickRoom)
+  const grouped = useMemo(
+    () => groupBySpeed(rows, modifiers.trickRoom),
+    [rows, modifiers.trickRoom],
+  )
 
   type GroupWithOffset = {
     speed: number
     entries: SpeedTierRow[]
     offset: number
   }
-  const groupsWithOffset = grouped.reduce<GroupWithOffset[]>((acc, group) => {
-    const offset =
-      acc.length === 0
-        ? 0
-        : acc[acc.length - 1].offset + acc[acc.length - 1].entries.length
-    return [...acc, { ...group, offset }]
-  }, [])
+  const groupsWithOffset = useMemo(
+    () =>
+      grouped.reduce<GroupWithOffset[]>((acc, group) => {
+        const offset =
+          acc.length === 0
+            ? 0
+            : acc[acc.length - 1].offset + acc[acc.length - 1].entries.length
+        acc.push({ ...group, offset })
+        return acc
+      }, []),
+    [grouped],
+  )
 
   return (
     <div>
@@ -234,10 +252,14 @@ function SpeedSection({
             role="row"
             className="grid grid-cols-[5rem_32px_1fr_auto] gap-x-3 border-b border-white/10 bg-white/[0.03] px-4 py-2"
           >
-            <span role="columnheader" className="arena-label text-white/45">
+            <span
+              role="columnheader"
+              aria-sort={modifiers.trickRoom ? 'ascending' : 'descending'}
+              className="arena-label text-white/45"
+            >
               {modifiers.trickRoom ? 'Slowest first' : 'Fastest first'}
             </span>
-            <span role="columnheader" />
+            <span role="columnheader" aria-label="Sprite" />
             <span role="columnheader" className="arena-label text-white/45">
               Species
             </span>
@@ -338,6 +360,8 @@ function MiniSprite({ speciesId, name }: { speciesId: string; name: string }) {
       alt={name}
       width={28}
       height={28}
+      loading="lazy"
+      decoding="async"
       className="h-7 w-7 object-contain"
       onError={(e) => {
         const img = e.currentTarget

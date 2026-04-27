@@ -16,7 +16,9 @@ export function DamageEvidenceTable({
     return (
       <div className="rounded border border-white/8 bg-black/14 px-3 py-3">
         <p className="arena-label text-white/32">Damage evidence</p>
-        <p className="mt-2 text-xs text-white/32">No damage data for this matchup.</p>
+        <p className="mt-2 text-xs text-white/32">
+          No damage data for this matchup.
+        </p>
       </div>
     )
   }
@@ -38,24 +40,26 @@ export function DamageEvidenceTable({
 
 function EvidenceRow({ entry }: { entry: DamageEvidenceEntry }) {
   const isOutgoing = entry.selectedAttacking
-  const accentClass = isOutgoing
-    ? 'text-arena-cyan'
-    : 'text-arena-plasma'
-  const dotClass = isOutgoing
-    ? 'bg-arena-cyan/60'
-    : 'bg-arena-plasma/60'
+  const accentClass = isOutgoing ? 'text-arena-cyan' : 'text-arena-plasma'
+  const dotClass = isOutgoing ? 'bg-arena-cyan/60' : 'bg-arena-plasma/60'
 
   const koPct = Math.round(entry.koProbability * 100)
-  const isOhko = entry.koLabel.toLowerCase().includes('ohko') || entry.koLabel.toLowerCase().includes('1hko')
+  const isOhko =
+    entry.koLabel.toLowerCase().includes('ohko') ||
+    entry.koLabel.toLowerCase().includes('1hko')
   const is2hko = entry.koLabel.toLowerCase().includes('2hko')
 
   return (
     <div className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-white/[0.03]">
-      <span className={`mt-0.5 h-1.5 w-1.5 shrink-0 self-start rounded-full ${dotClass}`} />
+      <span
+        className={`mt-0.5 h-1.5 w-1.5 shrink-0 self-start rounded-full ${dotClass}`}
+      />
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-          <span className={`font-mono text-[0.7rem] font-semibold ${accentClass}`}>
+          <span
+            className={`font-mono text-[0.7rem] font-semibold ${accentClass}`}
+          >
             {entry.attackerName}
           </span>
           <span className="text-[0.65rem] text-white/30">→</span>
@@ -76,7 +80,12 @@ function EvidenceRow({ entry }: { entry: DamageEvidenceEntry }) {
           </span>
 
           {koPct > 0 && (
-            <KoBadge label={entry.koLabel} pct={koPct} isOhko={isOhko} is2hko={is2hko} />
+            <KoBadge
+              label={entry.koLabel}
+              pct={koPct}
+              isOhko={isOhko}
+              is2hko={is2hko}
+            />
           )}
         </div>
       </div>
@@ -101,9 +110,10 @@ function KoBadge({
       ? 'border-arena-sun/35 bg-arena-sun/10 text-arena-sun'
       : 'border-white/14 bg-white/[0.05] text-white/50'
 
-  const displayLabel = pct >= 99
-    ? label.replace(/guaranteed /i, '').toUpperCase()
-    : `${pct}% ${label.replace(/guaranteed /i, '').toUpperCase()}`
+  const displayLabel =
+    pct >= 99
+      ? label.replace(/guaranteed /i, '').toUpperCase()
+      : `${pct}% ${label.replace(/guaranteed /i, '').toUpperCase()}`
 
   return (
     <span

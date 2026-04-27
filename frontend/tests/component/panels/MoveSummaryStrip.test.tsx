@@ -18,10 +18,17 @@ function makeResult(overrides: Partial<DamageResult> = {}): DamageResult {
 
 describe('MoveSummaryStrip', () => {
   it('renders a full-width range fill when maxPct exceeds 100', () => {
-    const results = [makeResult({ minPct: 85, maxPct: 103.6 }), null, null, null]
+    const results = [
+      makeResult({ minPct: 85, maxPct: 103.6 }),
+      null,
+      null,
+      null,
+    ]
     render(<MoveSummaryStrip results={results} accent="plasma" />)
 
-    const rangeFills = document.querySelectorAll<HTMLElement>('[data-testid="range-fill"]')
+    const rangeFills = document.querySelectorAll<HTMLElement>(
+      '[data-testid="range-fill"]',
+    )
     expect(rangeFills).toHaveLength(1)
     expect(rangeFills[0].style.left).toBe('0%')
     expect(rangeFills[0].style.width).toBe('100%')
@@ -31,7 +38,9 @@ describe('MoveSummaryStrip', () => {
     const results = [makeResult({ minPct: 45, maxPct: 70 }), null, null, null]
     render(<MoveSummaryStrip results={results} accent="plasma" />)
 
-    const rangeFills = document.querySelectorAll<HTMLElement>('[data-testid="range-fill"]')
+    const rangeFills = document.querySelectorAll<HTMLElement>(
+      '[data-testid="range-fill"]',
+    )
     expect(rangeFills).toHaveLength(1)
     expect(rangeFills[0].style.left).toBe('45%')
     expect(rangeFills[0].style.width).toBe('25%')
@@ -41,7 +50,9 @@ describe('MoveSummaryStrip', () => {
     const results = [makeResult({ minPct: 85, maxPct: 110 }), null, null, null]
     render(<MoveSummaryStrip results={results} accent="plasma" />)
 
-    const rangeFills = document.querySelectorAll<HTMLElement>('[data-testid="range-fill"]')
+    const rangeFills = document.querySelectorAll<HTMLElement>(
+      '[data-testid="range-fill"]',
+    )
     // Vivid fill — opacity > 0.3 to distinguish from the faint 0.18 track
     // Browser may normalize spacing in rgba(), so match flexibly
     const bg = rangeFills[0].style.background

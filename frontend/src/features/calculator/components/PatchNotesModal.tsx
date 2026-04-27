@@ -41,27 +41,33 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
-              <strong className="text-white/90">Speed Tier Sheet.</strong>{' '}
-              New <em>/speed</em> page shows the full Regulation M-A roster
-              sorted by final speed. Toggle tailwind, trick room, paralysis,
-              choice scarf, and stat stages. Your team Pokémon are highlighted.
-              A "top meta" filter narrows the list to the 29 most competitively
+              <strong className="text-white/90">Speed Tier Sheet.</strong> New{' '}
+              <em>/speed</em> page shows the full Regulation M-A roster sorted
+              by final speed. Toggle tailwind, trick room, paralysis, choice
+              scarf, and stat stages. Your team Pokémon are highlighted. A "top
+              meta" filter narrows the list to the 29 most competitively
               relevant species in the roster.
             </li>
             <li>
-              <strong className="text-white/90">Damage evidence in Lead Lab.</strong>{' '}
-              The Lead Lab drilldown now shows a damage evidence table — attacker,
-              defender, move, min–max%, and KO label for every relevant turn-1
-              interaction.
+              <strong className="text-white/90">
+                Damage evidence in Lead Lab.
+              </strong>{' '}
+              The Lead Lab drilldown now shows a damage evidence table —
+              attacker, defender, move, min–max%, and KO label for every
+              relevant turn-1 interaction.
             </li>
             <li>
-              <strong className="text-white/90">Field controls in Preview Coach.</strong>{' '}
+              <strong className="text-white/90">
+                Field controls in Preview Coach.
+              </strong>{' '}
               Weather, terrain, room, tailwind, and screens are now selectable
               above the Lead Lab matrix. Both Lead Lab and Team Plan evaluations
               use the shared field state.
             </li>
             <li>
-              <strong className="text-white/90">Open in Calculator bridge.</strong>{' '}
+              <strong className="text-white/90">
+                Open in Calculator bridge.
+              </strong>{' '}
               Each Lead Lab drilldown has a "Calc →" button that pre-loads the
               matchup (attacker, defender, field) into the damage calculator.
             </li>
@@ -98,9 +104,9 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
               the bench by this plan.
             </li>
             <li>
-              <strong className="text-white/90">Read difficulty</strong> (formerly
-              "Prediction burden") now shows a brief explanation of what the
-              rating means so it's clear at a glance.
+              <strong className="text-white/90">Read difficulty</strong>{' '}
+              (formerly "Prediction burden") now shows a brief explanation of
+              what the rating means so it's clear at a glance.
             </li>
             <li>
               Plan cards are now the same height in every row, with the "Use
@@ -125,9 +131,7 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
               A small number of item and ability interactions are still being
               verified. If a result looks off, treat it as provisional.
             </li>
-            <li>
-              Send feedback using the button in the top navigation bar.
-            </li>
+            <li>Send feedback using the button in the top navigation bar.</li>
           </ul>
         </section>
       </div>

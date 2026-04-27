@@ -14,14 +14,18 @@ export function hydrateFromMatchup(
   const attackerSpeciesId = selectedLeadIds[0]
   const attackerPokemon = attackerSpeciesId
     ? (teams.mine.find(
-        (p) => p?.speciesId === attackerSpeciesId || p?.speciesName === attackerSpeciesId,
+        (p) =>
+          p?.speciesId === attackerSpeciesId ||
+          p?.speciesName === attackerSpeciesId,
       ) ?? null)
     : null
 
   const defenderSpeciesId = matchup.opponentLeadIds[focusOpponentIndex]
   const defenderPokemon =
     teams.opponent.find(
-      (p) => p?.speciesId === defenderSpeciesId || p?.speciesName === defenderSpeciesId,
+      (p) =>
+        p?.speciesId === defenderSpeciesId ||
+        p?.speciesName === defenderSpeciesId,
     ) ?? null
 
   if (attackerPokemon) {
@@ -35,9 +39,15 @@ export function hydrateFromMatchup(
       status: attackerPokemon.status,
       megaActive: attackerPokemon.megaActive,
       megaFormId: attackerPokemon.megaFormId,
-      moves: attackerPokemon.moves.map((m) => ({ ...m })) as typeof attackerPokemon.moves,
-      baseStats: attackerPokemon.baseStats ? { ...attackerPokemon.baseStats } : null,
-      finalStats: attackerPokemon.finalStats ? { ...attackerPokemon.finalStats } : null,
+      moves: attackerPokemon.moves.map((m) => ({
+        ...m,
+      })) as typeof attackerPokemon.moves,
+      baseStats: attackerPokemon.baseStats
+        ? { ...attackerPokemon.baseStats }
+        : null,
+      finalStats: attackerPokemon.finalStats
+        ? { ...attackerPokemon.finalStats }
+        : null,
       types: attackerPokemon.types,
       grounded: attackerPokemon.grounded,
       currentHp: attackerPokemon.currentHp,
@@ -55,9 +65,15 @@ export function hydrateFromMatchup(
       status: defenderPokemon.status,
       megaActive: defenderPokemon.megaActive,
       megaFormId: defenderPokemon.megaFormId,
-      moves: defenderPokemon.moves.map((m) => ({ ...m })) as typeof defenderPokemon.moves,
-      baseStats: defenderPokemon.baseStats ? { ...defenderPokemon.baseStats } : null,
-      finalStats: defenderPokemon.finalStats ? { ...defenderPokemon.finalStats } : null,
+      moves: defenderPokemon.moves.map((m) => ({
+        ...m,
+      })) as typeof defenderPokemon.moves,
+      baseStats: defenderPokemon.baseStats
+        ? { ...defenderPokemon.baseStats }
+        : null,
+      finalStats: defenderPokemon.finalStats
+        ? { ...defenderPokemon.finalStats }
+        : null,
       types: defenderPokemon.types,
       grounded: defenderPokemon.grounded,
       currentHp: defenderPokemon.currentHp,

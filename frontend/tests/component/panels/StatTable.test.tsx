@@ -78,7 +78,9 @@ describe('StatTable', () => {
       />,
     )
 
-    const atkInput = screen.getByRole('spinbutton', { name: /^Atk SP$/i }) as HTMLInputElement
+    const atkInput = screen.getByRole('spinbutton', {
+      name: /^Atk SP$/i,
+    }) as HTMLInputElement
     fireEvent.change(atkInput, { target: { value: '99' } })
 
     expect(onSpChange).toHaveBeenCalledWith({ atk: MAX_SP_PER_STAT })
@@ -283,8 +285,9 @@ describe('StatTable', () => {
       />,
     )
 
-    const stageControls = document
-      .querySelectorAll('[data-testid^="stage-control-"]')
+    const stageControls = document.querySelectorAll(
+      '[data-testid^="stage-control-"]',
+    )
     const buttons = Array.from(stageControls).flatMap((cell) =>
       Array.from(cell.querySelectorAll('button')),
     )

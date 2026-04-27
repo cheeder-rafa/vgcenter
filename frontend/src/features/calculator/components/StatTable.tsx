@@ -86,8 +86,12 @@ export function StatTable({
             <span role="columnheader">Stat</span>
             <span role="columnheader">Base</span>
             <span role="columnheader">SP 0–32</span>
-            <span role="columnheader" className="text-center">Stage</span>
-            <span role="columnheader" className="text-right">Final</span>
+            <span role="columnheader" className="text-center">
+              Stage
+            </span>
+            <span role="columnheader" className="text-right">
+              Final
+            </span>
           </div>
           {ROWS.map((row) => (
             <StatRow
@@ -157,7 +161,7 @@ function StatRow({
       <div role="cell" className="flex items-center gap-1">
         <button
           type="button"
-          className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
           aria-label={`${row.label} SP decrease`}
           onClick={() => onChange(Math.max(0, sp - 1))}
         >
@@ -180,7 +184,7 @@ function StatRow({
         />
         <button
           type="button"
-          className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
           aria-label={`${row.label} SP increase`}
           onClick={() => onChange(Math.min(MAX_SP_PER_STAT, sp + 1))}
         >
@@ -193,9 +197,15 @@ function StatRow({
           data-testid={`stat-stage-${row.key}`}
           className="flex items-center justify-end gap-1"
         >
-          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">−</span>
-          <span className="w-6 text-center font-mono text-[0.7rem] text-white/22">—</span>
-          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">+</span>
+          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">
+            −
+          </span>
+          <span className="w-6 text-center font-mono text-[0.7rem] text-white/22">
+            —
+          </span>
+          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">
+            +
+          </span>
         </div>
       ) : (
         <StageControl

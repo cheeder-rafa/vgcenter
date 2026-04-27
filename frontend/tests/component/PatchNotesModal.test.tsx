@@ -33,7 +33,14 @@ describe('PatchNotesModal', () => {
   it('clicking close button calls onClose', async () => {
     const user = userEvent.setup()
     let closed = false
-    render(<PatchNotesModal isOpen={true} onClose={() => { closed = true }} />)
+    render(
+      <PatchNotesModal
+        isOpen={true}
+        onClose={() => {
+          closed = true
+        }}
+      />,
+    )
 
     await user.click(screen.getByRole('button', { name: /close/i }))
     expect(closed).toBe(true)
@@ -42,7 +49,14 @@ describe('PatchNotesModal', () => {
   it('clicking the backdrop calls onClose', async () => {
     const user = userEvent.setup()
     let closed = false
-    render(<PatchNotesModal isOpen={true} onClose={() => { closed = true }} />)
+    render(
+      <PatchNotesModal
+        isOpen={true}
+        onClose={() => {
+          closed = true
+        }}
+      />,
+    )
 
     const backdrop = screen.getByRole('dialog').parentElement!
     await user.click(backdrop)

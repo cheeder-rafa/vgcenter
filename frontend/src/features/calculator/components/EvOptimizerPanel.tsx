@@ -42,14 +42,14 @@ export function EvOptimizerPanel() {
 
   const [moveId, setMoveId] = useState('')
   const [goal, setGoal] = useState<Goal>('ALWAYS_SURVIVE')
-  const [candidates, setCandidates] = useState<DefenseSpreadCandidate[] | null>(null)
+  const [candidates, setCandidates] = useState<DefenseSpreadCandidate[] | null>(
+    null,
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const canOptimize =
-    moveId.trim().length > 0 &&
-    !!defender.speciesId &&
-    !!attacker.speciesId
+    moveId.trim().length > 0 && !!defender.speciesId && !!attacker.speciesId
 
   async function handleOptimize() {
     if (!canOptimize) return
@@ -125,13 +125,12 @@ export function EvOptimizerPanel() {
         </button>
       </div>
 
-      {error && (
-        <p className="mb-2 text-xs text-red-400">{error}</p>
-      )}
+      {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
 
       {candidates !== null && candidates.length === 0 && (
         <p className="text-xs text-white/40">
-          No spread found — no HP/Def/SpD allocation up to 32 SP meets the goal against this attacker.
+          No spread found — no HP/Def/SpD allocation up to 32 SP meets the goal
+          against this attacker.
         </p>
       )}
 
@@ -161,12 +160,16 @@ export function EvOptimizerPanel() {
                   <td className="py-1 pr-4 text-white/40">{c.remainingSp}</td>
                   <td className="py-1 pr-4">{c.minDamagePct.toFixed(1)}%</td>
                   <td className="py-1 pr-4">{c.maxDamagePct.toFixed(1)}%</td>
-                  <td className="py-1 pr-4 text-white/50">{(c.koChanceProbability * 100).toFixed(1)}%</td>
+                  <td className="py-1 pr-4 text-white/50">
+                    {(c.koChanceProbability * 100).toFixed(1)}%
+                  </td>
                   <td className="py-1">
                     <button
                       type="button"
                       aria-label="Apply"
-                      onClick={() => applyDefensiveSpread(c.spHp, c.spDef, c.spSpd)}
+                      onClick={() =>
+                        applyDefensiveSpread(c.spHp, c.spDef, c.spSpd)
+                      }
                       className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white"
                     >
                       Apply

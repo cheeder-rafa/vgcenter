@@ -14,7 +14,11 @@ type Props = {
   onLoad: (spread: NamedSpread) => void
 }
 
-function buildToSpread(id: string, name: string, build: CombatantBuild): NamedSpread {
+function buildToSpread(
+  id: string,
+  name: string,
+  build: CombatantBuild,
+): NamedSpread {
   return {
     id,
     name,
@@ -31,7 +35,11 @@ function buildToSpread(id: string, name: string, build: CombatantBuild): NamedSp
   }
 }
 
-export function SpreadLibraryDropdown({ speciesId, currentBuild, onLoad }: Props) {
+export function SpreadLibraryDropdown({
+  speciesId,
+  currentBuild,
+  onLoad,
+}: Props) {
   const spreads = useSpreadLibraryStore((s) => s.library[speciesId] ?? EMPTY)
   const saveSpread = useSpreadLibraryStore((s) => s.saveSpread)
   const deleteSpread = useSpreadLibraryStore((s) => s.deleteSpread)
@@ -75,7 +83,10 @@ export function SpreadLibraryDropdown({ speciesId, currentBuild, onLoad }: Props
       </div>
 
       {saving && (
-        <div className="mt-1.5 flex items-center gap-2" data-testid="spread-save-form">
+        <div
+          className="mt-1.5 flex items-center gap-2"
+          data-testid="spread-save-form"
+        >
           <label htmlFor={inputId} className="sr-only">
             Spread name
           </label>

@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { exportAsJson, exportAsMarkdown } from '../../../src/features/preview/lib/bo3Export'
-import type { AdaptationGuidance, GameRecord } from '../../../src/features/preview/types'
+import {
+  exportAsJson,
+  exportAsMarkdown,
+} from '../../../src/features/preview/lib/bo3Export'
+import type {
+  AdaptationGuidance,
+  GameRecord,
+} from '../../../src/features/preview/types'
 
 function makeGame(overrides: Partial<GameRecord> = {}): GameRecord {
   return {
@@ -73,7 +79,10 @@ describe('exportAsMarkdown', () => {
 
   it('handles multiple games', () => {
     const md = exportAsMarkdown(
-      [makeGame({ gameNumber: 1 }), makeGame({ gameNumber: 2, result: 'loss' })],
+      [
+        makeGame({ gameNumber: 1 }),
+        makeGame({ gameNumber: 2, result: 'loss' }),
+      ],
       guidance,
     )
     expect(md).toMatch(/game 1/i)

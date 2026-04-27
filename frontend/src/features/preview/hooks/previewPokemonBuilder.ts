@@ -23,7 +23,9 @@ export function toPreviewPokemon(
     combatant: {
       level: 50,
       stats: pokemon.finalStats ?? pokemon.baseStats ?? fallbackStats(),
-      types: pokemon.types?.filter((t): t is string => t !== null) ?? ['NORMAL'],
+      types: pokemon.types?.filter((t): t is string => t !== null) ?? [
+        'NORMAL',
+      ],
       abilityId: pokemon.abilityId,
       itemId: pokemon.itemId,
       status: pokemon.status,
@@ -37,7 +39,9 @@ export function toPreviewPokemon(
     },
     moves: pokemon.moves
       .map((slot) => (slot.moveId === null ? null : moveById.get(slot.moveId)))
-      .filter((move): move is MoveDefinition => move !== null && move !== undefined)
+      .filter(
+        (move): move is MoveDefinition => move !== null && move !== undefined,
+      )
       .filter((move) => move.category !== 'STATUS' && move.basePower > 0)
       .map(toMoveRequest),
     isMega: pokemon.megaActive ?? false,
@@ -58,5 +62,12 @@ function toMoveRequest(move: MoveDefinition): MoveRequest {
 }
 
 function fallbackStats() {
-  return { hp: 1, attack: 1, defense: 1, specialAttack: 1, specialDefense: 1, speed: 1 }
+  return {
+    hp: 1,
+    attack: 1,
+    defense: 1,
+    specialAttack: 1,
+    specialDefense: 1,
+    speed: 1,
+  }
 }

@@ -2,14 +2,23 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { HistoryPanel } from '../../../src/features/calculator/components/HistoryPanel'
-import { useCalcHistoryStore, type HistoryEntry } from '../../../src/features/calculator/store/useCalcHistoryStore'
+import {
+  useCalcHistoryStore,
+  type HistoryEntry,
+} from '../../../src/features/calculator/store/useCalcHistoryStore'
 import { useCalculatorStore } from '../../../src/features/calculator/store/useCalculatorStore'
 
 vi.mock('../../../src/features/calculator/api/damageApi', () => ({
-  calculateDamage: vi.fn().mockResolvedValue({ rolls: [], minPct: 0, maxPct: 0, koChance: 0 }),
+  calculateDamage: vi
+    .fn()
+    .mockResolvedValue({ rolls: [], minPct: 0, maxPct: 0, koChance: 0 }),
 }))
 
-function makeEntry(id: number, atkName = 'Garchomp', defName = 'Gliscor'): HistoryEntry {
+function makeEntry(
+  id: number,
+  atkName = 'Garchomp',
+  defName = 'Gliscor',
+): HistoryEntry {
   const baseAttacker = useCalculatorStore.getState().attacker
   const baseDefender = useCalculatorStore.getState().defender
   return {
@@ -20,11 +29,35 @@ function makeEntry(id: number, atkName = 'Garchomp', defName = 'Gliscor'): Histo
     attackerName: atkName,
     defenderName: defName,
     snapshot: {
-      attacker: { ...baseAttacker, speciesId: `atk-${id}`, speciesName: atkName },
-      defender: { ...baseDefender, speciesId: `def-${id}`, speciesName: defName },
+      attacker: {
+        ...baseAttacker,
+        speciesId: `atk-${id}`,
+        speciesName: atkName,
+      },
+      defender: {
+        ...baseDefender,
+        speciesId: `def-${id}`,
+        speciesName: defName,
+      },
       field: { weather: 'CLEAR', terrain: 'NONE', room: 'NONE' },
-      attackerSide: { reflect: false, lightScreen: false, auroraVeil: false, friendGuard: false, helpingHand: false, tailwind: false, protect: false },
-      defenderSide: { reflect: false, lightScreen: false, auroraVeil: false, friendGuard: false, helpingHand: false, tailwind: false, protect: false },
+      attackerSide: {
+        reflect: false,
+        lightScreen: false,
+        auroraVeil: false,
+        friendGuard: false,
+        helpingHand: false,
+        tailwind: false,
+        protect: false,
+      },
+      defenderSide: {
+        reflect: false,
+        lightScreen: false,
+        auroraVeil: false,
+        friendGuard: false,
+        helpingHand: false,
+        tailwind: false,
+        protect: false,
+      },
       criticalHit: false,
       targets: 1,
     },

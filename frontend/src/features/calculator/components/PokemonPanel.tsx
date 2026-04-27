@@ -209,7 +209,8 @@ export function PokemonPanel({
       : (speciesEntry.abilityIds[0] ?? combatant.abilityId)
     const nextTypes: [string, string | null] = [primary, secondary ?? null]
     const nextBaseStats = next ? megaForm.baseStats : speciesEntry.baseStats
-    const currentNature = natures.find((n) => n.id === combatant.natureId) ?? null
+    const currentNature =
+      natures.find((n) => n.id === combatant.natureId) ?? null
     setCombatant({
       megaActive: next,
       megaFormId: next ? megaForm.id : combatant.megaFormId,
@@ -218,7 +219,11 @@ export function PokemonPanel({
         ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId)
         : combatant.itemId,
       baseStats: nextBaseStats,
-      finalStats: computeBattleStats(nextBaseStats, combatant.sp, currentNature),
+      finalStats: computeBattleStats(
+        nextBaseStats,
+        combatant.sp,
+        currentNature,
+      ),
       types: nextTypes,
       grounded: isGrounded(nextTypes, nextAbilityId),
     })
@@ -236,14 +241,19 @@ export function PokemonPanel({
     }
     const [primary, secondary] = megaForm.types
     const nextTypes: [string, string | null] = [primary, secondary ?? null]
-    const currentNature = natures.find((n) => n.id === combatant.natureId) ?? null
+    const currentNature =
+      natures.find((n) => n.id === combatant.natureId) ?? null
     setCombatant({
       megaFormId: nextMegaFormId,
       megaActive: true,
       itemId: MEGA_STONE_MAP[nextMegaFormId] ?? combatant.itemId,
       abilityId: megaForm.abilityId,
       baseStats: megaForm.baseStats,
-      finalStats: computeBattleStats(megaForm.baseStats, combatant.sp, currentNature),
+      finalStats: computeBattleStats(
+        megaForm.baseStats,
+        combatant.sp,
+        currentNature,
+      ),
       types: nextTypes,
       grounded: isGrounded(nextTypes, megaForm.abilityId),
     })
@@ -387,14 +397,16 @@ export function PokemonPanel({
               className="arena-select"
               value={combatant.abilityId ?? ''}
               onChange={(event) =>
-                setCombatant((() => {
-                  const abilityId =
-                    event.target.value === '' ? null : event.target.value
-                  return {
-                    abilityId,
-                    grounded: isGrounded(combatant.types, abilityId),
-                  }
-                })())
+                setCombatant(
+                  (() => {
+                    const abilityId =
+                      event.target.value === '' ? null : event.target.value
+                    return {
+                      abilityId,
+                      grounded: isGrounded(combatant.types, abilityId),
+                    }
+                  })(),
+                )
               }
             >
               <option value="" className="bg-arena-void">
@@ -448,12 +460,20 @@ export function PokemonPanel({
               value={combatant.natureId}
               onChange={(event) => {
                 const nextNatureId = event.target.value
-                const nextNature = natures.find((n) => n.id === nextNatureId) ?? null
+                const nextNature =
+                  natures.find((n) => n.id === nextNatureId) ?? null
                 const nextFinalStats =
                   combatant.baseStats !== null
-                    ? computeBattleStats(combatant.baseStats, combatant.sp, nextNature)
+                    ? computeBattleStats(
+                        combatant.baseStats,
+                        combatant.sp,
+                        nextNature,
+                      )
                     : null
-                setCombatant({ natureId: nextNatureId, finalStats: nextFinalStats })
+                setCombatant({
+                  natureId: nextNatureId,
+                  finalStats: nextFinalStats,
+                })
               }}
             >
               {natures.map((nature) => (
@@ -499,7 +519,10 @@ export function PokemonPanel({
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="arena-label text-arena-violet" htmlFor={`${ids.heading}-current-hp`}>
+            <label
+              className="arena-label text-arena-violet"
+              htmlFor={`${ids.heading}-current-hp`}
+            >
               Current HP
             </label>
             <input
@@ -529,7 +552,8 @@ export function PokemonPanel({
           accent={accent}
           onSpChange={(patch) => {
             const nextSp = { ...combatant.sp, ...patch }
-            const currentNature = natures.find((n) => n.id === combatant.natureId) ?? null
+            const currentNature =
+              natures.find((n) => n.id === combatant.natureId) ?? null
             const nextFinalStats =
               combatant.baseStats !== null
                 ? computeBattleStats(combatant.baseStats, nextSp, currentNature)

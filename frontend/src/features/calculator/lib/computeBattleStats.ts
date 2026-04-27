@@ -5,7 +5,14 @@ const NATURE_DROP = 0.9
 
 export function computeBattleStats(
   baseStats: Stats,
-  sp: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number },
+  sp: {
+    hp: number
+    atk: number
+    def: number
+    spa: number
+    spd: number
+    spe: number
+  },
   nature: NatureResponse | null,
 ): Stats {
   const hp = baseStats.hp + sp.hp + 75
@@ -13,8 +20,10 @@ export function computeBattleStats(
   function nonHp(base: number, spValue: number, apiKey: string): number {
     const raw = base + spValue + 20
     if (!nature) return raw
-    if (nature.increasedStat?.toUpperCase() === apiKey) return Math.floor(raw * NATURE_BOOST)
-    if (nature.decreasedStat?.toUpperCase() === apiKey) return Math.floor(raw * NATURE_DROP)
+    if (nature.increasedStat?.toUpperCase() === apiKey)
+      return Math.floor(raw * NATURE_BOOST)
+    if (nature.decreasedStat?.toUpperCase() === apiKey)
+      return Math.floor(raw * NATURE_DROP)
     return raw
   }
 

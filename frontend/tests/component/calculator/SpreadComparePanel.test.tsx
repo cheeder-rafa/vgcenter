@@ -77,7 +77,9 @@ describe('SpreadComparePanel', () => {
 
   it('adds a column with species name when pinning', async () => {
     render(<SpreadComparePanel defenderName="Garchomp" />)
-    fireEvent.click(screen.getByRole('button', { name: /pin current defender/i }))
+    fireEvent.click(
+      screen.getByRole('button', { name: /pin current defender/i }),
+    )
     await waitFor(() => {
       expect(screen.getByText('Garchomp')).toBeInTheDocument()
     })
@@ -85,7 +87,9 @@ describe('SpreadComparePanel', () => {
 
   it('shows damage range in pinned column', async () => {
     render(<SpreadComparePanel defenderName="Garchomp" />)
-    fireEvent.click(screen.getByRole('button', { name: /pin current defender/i }))
+    fireEvent.click(
+      screen.getByRole('button', { name: /pin current defender/i }),
+    )
     await waitFor(() => {
       expect(screen.getByText(/44\.4.+52\.8%/)).toBeInTheDocument()
     })
@@ -93,7 +97,9 @@ describe('SpreadComparePanel', () => {
 
   it('removes column when unpinned', async () => {
     render(<SpreadComparePanel defenderName="Garchomp" />)
-    fireEvent.click(screen.getByRole('button', { name: /pin current defender/i }))
+    fireEvent.click(
+      screen.getByRole('button', { name: /pin current defender/i }),
+    )
     await waitFor(() => {
       expect(screen.getByText('Garchomp')).toBeInTheDocument()
     })
@@ -105,8 +111,12 @@ describe('SpreadComparePanel', () => {
 
   it('shows multiple columns for multiple pins', async () => {
     const { rerender } = render(<SpreadComparePanel defenderName="Garchomp" />)
-    fireEvent.click(screen.getByRole('button', { name: /pin current defender/i }))
-    await waitFor(() => expect(screen.getByText('Garchomp')).toBeInTheDocument())
+    fireEvent.click(
+      screen.getByRole('button', { name: /pin current defender/i }),
+    )
+    await waitFor(() =>
+      expect(screen.getByText('Garchomp')).toBeInTheDocument(),
+    )
 
     useCalculatorStore.setState({
       defender: {
@@ -124,7 +134,9 @@ describe('SpreadComparePanel', () => {
       },
     })
     rerender(<SpreadComparePanel defenderName="Gliscor" />)
-    fireEvent.click(screen.getByRole('button', { name: /pin current defender/i }))
+    fireEvent.click(
+      screen.getByRole('button', { name: /pin current defender/i }),
+    )
     await waitFor(() => expect(screen.getByText('Gliscor')).toBeInTheDocument())
   })
 })

@@ -408,18 +408,10 @@ export async function exportResultImage(
   ctx.textBaseline = 'top'
 
   ctx.fillStyle = ARENA_PLASMA
-  ctx.fillText(
-    input.attacker.name ?? '—',
-    atkSpriteCX,
-    nameY,
-  )
+  ctx.fillText(input.attacker.name ?? '—', atkSpriteCX, nameY)
 
   ctx.fillStyle = ARENA_CYAN
-  ctx.fillText(
-    input.defender.name ?? '—',
-    defSpriteCX,
-    nameY,
-  )
+  ctx.fillText(input.defender.name ?? '—', defSpriteCX, nameY)
 
   // Type chips under name
   const atkTypes = input.attacker.types.slice(0, 2)
@@ -427,10 +419,20 @@ export async function exportResultImage(
   const chipY = nameY + 22
 
   atkTypes.forEach((t, ti) => {
-    drawTypeChip(ctx, t, atkSpriteCX - (atkTypes.length * 60) / 2 + ti * 62, chipY)
+    drawTypeChip(
+      ctx,
+      t,
+      atkSpriteCX - (atkTypes.length * 60) / 2 + ti * 62,
+      chipY,
+    )
   })
   defTypes.forEach((t, ti) => {
-    drawTypeChip(ctx, t, defSpriteCX - (defTypes.length * 60) / 2 + ti * 62, chipY)
+    drawTypeChip(
+      ctx,
+      t,
+      defSpriteCX - (defTypes.length * 60) / 2 + ti * 62,
+      chipY,
+    )
   })
 
   // ── VS arrow in center ───────────────────────────────────────────────────────

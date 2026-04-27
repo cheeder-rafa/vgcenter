@@ -7,8 +7,13 @@ import {
 import { useCalculatorStore } from '../store/useCalculatorStore'
 
 function restoreEntry(entry: HistoryEntry) {
-  const { setAttacker, setDefender, setField, setAttackerSide, setDefenderSide } =
-    useCalculatorStore.getState()
+  const {
+    setAttacker,
+    setDefender,
+    setField,
+    setAttackerSide,
+    setDefenderSide,
+  } = useCalculatorStore.getState()
   const { snapshot } = entry
   setAttacker(snapshot.attacker)
   setDefender(snapshot.defender)
@@ -22,7 +27,10 @@ function restoreEntry(entry: HistoryEntry) {
 }
 
 function formatTime(ts: number): string {
-  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function HistoryPanel() {
@@ -83,7 +91,9 @@ export function HistoryPanel() {
                   <span className="truncate font-display text-xs font-semibold text-white/85">
                     {entry.attackerName ?? entry.attackerSpeciesId}
                   </span>
-                  <span className="font-mono text-[0.6rem] text-white/30 shrink-0">→</span>
+                  <span className="font-mono text-[0.6rem] text-white/30 shrink-0">
+                    →
+                  </span>
                   <span className="truncate font-display text-xs font-semibold text-white/85">
                     {entry.defenderName ?? entry.defenderSpeciesId}
                   </span>

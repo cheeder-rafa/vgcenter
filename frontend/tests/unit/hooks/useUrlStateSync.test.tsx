@@ -22,7 +22,12 @@ const COMBATANT = {
     { moveId: null },
     { moveId: null },
     { moveId: null },
-  ] as [{ moveId: string | null }, { moveId: string | null }, { moveId: string | null }, { moveId: string | null }],
+  ] as [
+    { moveId: string | null },
+    { moveId: string | null },
+    { moveId: string | null },
+    { moveId: string | null },
+  ],
   baseStats: null,
   finalStats: null,
   types: null,
@@ -47,12 +52,22 @@ describe('useUrlStateSync', () => {
       defender: { ...COMBATANT, speciesId: 'flutter-mane' },
       field: { weather: 'SUN', terrain: 'NONE', room: 'NONE' },
       attackerSide: {
-        reflect: false, lightScreen: false, auroraVeil: false,
-        friendGuard: false, helpingHand: true, tailwind: false, protect: false,
+        reflect: false,
+        lightScreen: false,
+        auroraVeil: false,
+        friendGuard: false,
+        helpingHand: true,
+        tailwind: false,
+        protect: false,
       },
       defenderSide: {
-        reflect: false, lightScreen: false, auroraVeil: false,
-        friendGuard: false, helpingHand: false, tailwind: false, protect: false,
+        reflect: false,
+        lightScreen: false,
+        auroraVeil: false,
+        friendGuard: false,
+        helpingHand: false,
+        tailwind: false,
+        protect: false,
       },
       criticalHit: false,
       targets: 1,
@@ -84,7 +99,9 @@ describe('useUrlStateSync', () => {
       </MemoryRouter>,
     )
 
-    expect(useCalculatorStore.getState().attacker.speciesId).toBe(defaultSpeciesId)
+    expect(useCalculatorStore.getState().attacker.speciesId).toBe(
+      defaultSpeciesId,
+    )
   })
 
   it('does not modify store when ?s= param is corrupted', () => {
@@ -98,17 +115,26 @@ describe('useUrlStateSync', () => {
       </MemoryRouter>,
     )
 
-    expect(useCalculatorStore.getState().attacker.speciesId).toBe(defaultSpeciesId)
+    expect(useCalculatorStore.getState().attacker.speciesId).toBe(
+      defaultSpeciesId,
+    )
   })
 
   it('copyShareLink writes URL to clipboard', async () => {
     const user = userEvent.setup()
     const writeMock = vi.fn().mockResolvedValue(undefined)
-    vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText: writeMock } })
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      clipboard: { writeText: writeMock },
+    })
 
     function ShareButton() {
       const { copyShareLink } = useUrlStateSync()
-      return <button type="button" onClick={copyShareLink}>Share</button>
+      return (
+        <button type="button" onClick={copyShareLink}>
+          Share
+        </button>
+      )
     }
 
     render(

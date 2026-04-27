@@ -97,7 +97,9 @@ describe('TopNav', () => {
     renderTopNavAt('/calc')
 
     const speedLink = screen.getByRole('link', { name: /speed tiers/i })
-    expect(speedLink.querySelector('[data-testid="new-badge"]')).toBeInTheDocument()
+    expect(
+      speedLink.querySelector('[data-testid="new-badge"]'),
+    ).toBeInTheDocument()
   })
 
   it('renders a patch notes button', () => {

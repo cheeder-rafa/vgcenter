@@ -167,7 +167,7 @@ export function SpeciesSelect({
           {(draftQuery !== '' || selectedEntry !== null) && (
             <button
               type="button"
-              className="absolute right-2 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-sm text-white/55 transition hover:bg-white/10 hover:text-white"
+              className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-sm text-white/55 transition hover:bg-white/10 hover:text-white"
               aria-label="Clear species"
               onClick={clearSelection}
             >
