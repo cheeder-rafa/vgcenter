@@ -21,15 +21,40 @@ import { SpeedTierPage } from '../../../src/pages/SpeedTierPage'
 const EMPTY_RAIL = [null, null, null, null, null, null] as const
 
 const BASE_ROWS = [
-  { speciesId: 'flutter-mane', speciesName: 'Flutter Mane', finalSpeed: 186, userTeam: false, isMega: false },
-  { speciesId: 'incineroar', speciesName: 'Incineroar', finalSpeed: 80, userTeam: true, isMega: false },
-  { speciesId: 'garchomp', speciesName: 'Garchomp', finalSpeed: 122, userTeam: false, isMega: false },
-  { speciesId: 'garchomp-mega', speciesName: 'Garchomp Mega', finalSpeed: 92, userTeam: false, isMega: true },
+  {
+    speciesId: 'flutter-mane',
+    speciesName: 'Flutter Mane',
+    finalSpeed: 186,
+    userTeam: false,
+    isMega: false,
+  },
+  {
+    speciesId: 'incineroar',
+    speciesName: 'Incineroar',
+    finalSpeed: 80,
+    userTeam: true,
+    isMega: false,
+  },
+  {
+    speciesId: 'garchomp',
+    speciesName: 'Garchomp',
+    finalSpeed: 122,
+    userTeam: false,
+    isMega: false,
+  },
+  {
+    speciesId: 'garchomp-mega',
+    speciesName: 'Garchomp Mega',
+    finalSpeed: 92,
+    userTeam: false,
+    isMega: true,
+  },
 ]
 
 beforeEach(() => {
-  mocks.useTeamsStore.mockImplementation((selector: (s: { mine: readonly (null)[] }) => unknown) =>
-    selector({ mine: EMPTY_RAIL }),
+  mocks.useTeamsStore.mockImplementation(
+    (selector: (s: { mine: readonly null[] }) => unknown) =>
+      selector({ mine: EMPTY_RAIL }),
   )
   mocks.buildSpeedTiers.mockResolvedValue({ rows: BASE_ROWS })
 })
@@ -41,7 +66,9 @@ describe('SpeedTierPage', () => {
         <SpeedTierPage />
       </MemoryRouter>,
     )
-    expect(screen.getByRole('heading', { name: /speed tier sheet/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /speed tier sheet/i }),
+    ).toBeInTheDocument()
   })
 
   it('shows idle empty state on initial render before data loads', () => {
@@ -61,7 +88,9 @@ describe('SpeedTierPage', () => {
       </MemoryRouter>,
     )
 
-    await waitFor(() => expect(screen.getByText('Flutter Mane')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText('Flutter Mane')).toBeInTheDocument(),
+    )
     expect(screen.getByText('Incineroar')).toBeInTheDocument()
     expect(screen.getByText('Garchomp')).toBeInTheDocument()
     expect(screen.getByText('Garchomp Mega')).toBeInTheDocument()
@@ -78,7 +107,9 @@ describe('SpeedTierPage', () => {
       </MemoryRouter>,
     )
 
-    await waitFor(() => expect(screen.getByText('Incineroar')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText('Incineroar')).toBeInTheDocument(),
+    )
     expect(screen.getByText('Incineroar')).toHaveClass('text-arena-cyan')
   })
 
@@ -106,8 +137,20 @@ describe('SpeedTierPage', () => {
     )
     mocks.buildSpeedTiers.mockResolvedValue({
       rows: [
-        { speciesId: 'garchomp', speciesName: 'Garchomp', finalSpeed: 170, userTeam: true, isMega: false },
-        { speciesId: 'garchomp-mega', speciesName: 'Garchomp Mega', finalSpeed: 92, userTeam: true, isMega: true },
+        {
+          speciesId: 'garchomp',
+          speciesName: 'Garchomp',
+          finalSpeed: 170,
+          userTeam: true,
+          isMega: false,
+        },
+        {
+          speciesId: 'garchomp-mega',
+          speciesName: 'Garchomp Mega',
+          finalSpeed: 92,
+          userTeam: true,
+          isMega: true,
+        },
       ],
     })
 
@@ -128,7 +171,9 @@ describe('SpeedTierPage', () => {
       )
     })
 
-    await waitFor(() => expect(screen.getByText('Garchomp')).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText('Garchomp')).toBeInTheDocument(),
+    )
     expect(screen.getByText('Garchomp')).toHaveClass('text-arena-cyan')
     expect(screen.getByText('Garchomp Mega')).toHaveClass('text-arena-cyan')
   })
@@ -144,5 +189,20 @@ describe('SpeedTierPage', () => {
     const tailwindBtn = screen.getByRole('button', { name: /tailwind/i })
     await user.click(tailwindBtn)
     expect(tailwindBtn).toHaveClass('bg-arena-cyan/15')
+  })
+
+  it('speed table wrapper has overflow-x-auto for narrow screens', async () => {
+    render(
+      <MemoryRouter>
+        <SpeedTierPage />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() =>
+      expect(screen.getByText('Flutter Mane')).toBeInTheDocument(),
+    )
+
+    const table = screen.getByRole('table', { name: /speed tier table/i })
+    expect(table.className).toContain('overflow-x-auto')
   })
 })

@@ -445,7 +445,7 @@ function CompactHeader({
           type="button"
           onClick={onShare}
           aria-label="Copy shareable link to clipboard"
-          className="arena-button flex w-full items-center justify-center gap-1.5 text-arena-violet sm:w-auto"
+          className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-violet sm:w-auto"
         >
           <span aria-hidden="true">⬡</span>
           Share Link
@@ -454,7 +454,7 @@ function CompactHeader({
           type="button"
           onClick={onExportDiscord}
           aria-label="Copy damage report for Discord"
-          className="arena-button flex w-full items-center justify-center gap-1.5 text-arena-cyan sm:w-auto"
+          className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-cyan sm:w-auto"
         >
           <span aria-hidden="true">#</span>
           Discord
@@ -463,7 +463,7 @@ function CompactHeader({
           type="button"
           onClick={onExportPng}
           aria-label="Export result panel as PNG"
-          className="arena-button flex w-full items-center justify-center gap-1.5 text-arena-plasma sm:w-auto"
+          className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-plasma sm:w-auto"
         >
           <span aria-hidden="true">⊡</span>
           Export PNG
