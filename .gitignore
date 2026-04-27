@@ -1,6 +1,9 @@
 # --- AI tooling (local-only) ---
 .claude/settings.local.json
+.claude/skills/
+.agents/skills/
 .codex
+skills-lock.json
 
 # --- OS / editors ---
 .DS_Store
