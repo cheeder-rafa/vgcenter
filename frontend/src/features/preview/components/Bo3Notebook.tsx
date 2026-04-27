@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 
+import { useTeamsStore } from '../../../store/useTeamsStore'
 import { classifyAdaptation } from '../lib/bo3Guidance'
 import { exportAsJson, exportAsMarkdown } from '../lib/bo3Export'
 import type {
@@ -143,6 +144,59 @@ function emptyForm(): FormState {
   }
 }
 
+function RosterChipPicker({
+  label,
+  roster,
+  value,
+  separator,
+  emptyHint,
+  onChange,
+}: {
+  label: string
+  roster: string[]
+  value: string
+  separator: string
+  emptyHint: string
+  onChange: (v: string) => void
+}) {
+  const selected = value
+    ? value.split(separator).map((s) => s.trim()).filter(Boolean)
+    : []
+
+  function toggle(name: string) {
+    const next = selected.includes(name)
+      ? selected.filter((n) => n !== name)
+      : [...selected, name]
+    onChange(next.join(separator))
+  }
+
+  return (
+    <div role="group" aria-label={label} className="grid gap-1.5">
+      <span className="arena-label text-white/55">{label}</span>
+      {roster.length === 0 ? (
+        <p className="text-xs text-white/40 italic">{emptyHint}</p>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {roster.map((name) => {
+            const active = selected.includes(name)
+            return (
+              <button
+                key={name}
+                type="button"
+                onClick={() => toggle(name)}
+                className={`arena-chip cursor-pointer transition ${active ? 'text-arena-cyan bg-white/10' : 'text-white/55 hover:text-white/85'}`}
+                aria-pressed={active}
+              >
+                {name}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AddGameForm({
   gameNumber,
   onSave,
@@ -152,6 +206,13 @@ function AddGameForm({
 }) {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState<FormState>(emptyForm)
+
+  const myRoster = useTeamsStore((s) => s.mine)
+    .filter((p) => p !== null)
+    .map((p) => p!.speciesName)
+  const opponentRoster = useTeamsStore((s) => s.opponent)
+    .filter((p) => p !== null)
+    .map((p) => p!.speciesName)
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -201,53 +262,41 @@ function AddGameForm({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1.5">
-          <span className="arena-label text-white/55">My leads</span>
-          <input
-            type="text"
-            className={inputClass}
-            aria-label="My leads"
-            placeholder="e.g. Tornadus + Urshifu"
-            value={form.myLeads}
-            onChange={(e) => set('myLeads', e.target.value)}
-          />
-        </label>
+        <RosterChipPicker
+          label="My leads"
+          roster={myRoster}
+          value={form.myLeads}
+          separator=" + "
+          emptyHint="Add Pokémon to your team rail in the Calculator first."
+          onChange={(v) => set('myLeads', v)}
+        />
 
-        <label className="grid gap-1.5">
-          <span className="arena-label text-white/55">Opponent leads</span>
-          <input
-            type="text"
-            className={inputClass}
-            aria-label="Opponent leads"
-            placeholder="e.g. Rillaboom + Flutter Mane"
-            value={form.opponentLeads}
-            onChange={(e) => set('opponentLeads', e.target.value)}
-          />
-        </label>
+        <RosterChipPicker
+          label="Opponent leads"
+          roster={opponentRoster}
+          value={form.opponentLeads}
+          separator=" + "
+          emptyHint="Add Pokémon to the opponent rail in the Calculator first."
+          onChange={(v) => set('opponentLeads', v)}
+        />
 
-        <label className="grid gap-1.5">
-          <span className="arena-label text-white/55">I brought</span>
-          <input
-            type="text"
-            className={inputClass}
-            aria-label="I brought"
-            placeholder="e.g. Tornadus, Urshifu, Iron Hands, Landorus"
-            value={form.myBrought}
-            onChange={(e) => set('myBrought', e.target.value)}
-          />
-        </label>
+        <RosterChipPicker
+          label="I brought"
+          roster={myRoster}
+          value={form.myBrought}
+          separator=", "
+          emptyHint="Add Pokémon to your team rail in the Calculator first."
+          onChange={(v) => set('myBrought', v)}
+        />
 
-        <label className="grid gap-1.5">
-          <span className="arena-label text-white/55">Opponent brought</span>
-          <input
-            type="text"
-            className={inputClass}
-            aria-label="Opponent brought"
-            placeholder="e.g. Rillaboom, Flutter Mane, Incineroar, Cresselia"
-            value={form.opponentBrought}
-            onChange={(e) => set('opponentBrought', e.target.value)}
-          />
-        </label>
+        <RosterChipPicker
+          label="Opponent brought"
+          roster={opponentRoster}
+          value={form.opponentBrought}
+          separator=", "
+          emptyHint="Add Pokémon to the opponent rail in the Calculator first."
+          onChange={(v) => set('opponentBrought', v)}
+        />
       </div>
 
       <label className="grid gap-1.5">

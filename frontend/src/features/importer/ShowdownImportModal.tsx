@@ -27,6 +27,7 @@ export function ShowdownImportModal({
       submitLabel="Import Team"
       title="Import From Showdown"
       triggerLabel="Import Showdown"
+      sessionKey="showdown"
       multiline
       onImport={importShowdown}
       onImportTeam={onImportTeam}

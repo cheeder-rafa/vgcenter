@@ -5,6 +5,7 @@ import type {
   ImportedPokemon,
   ImportedTeamResponse,
 } from '../calculator/types/api'
+import { useImportSessionStore } from './useImportSessionStore'
 
 type Props = {
   activeSide: 'attacker' | 'defender'
@@ -16,6 +17,7 @@ type Props = {
   submitLabel: string
   title: string
   triggerLabel: string
+  sessionKey: string
   multiline?: boolean
   validateInput?: (value: string) => string | null
   onImport: (value: string) => Promise<ImportedTeamResponse>
@@ -36,6 +38,7 @@ export function ImportTeamModal({
   submitLabel,
   title,
   triggerLabel,
+  sessionKey,
   multiline = false,
   validateInput,
   onImport,
@@ -47,9 +50,11 @@ export function ImportTeamModal({
   const [value, setValue] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [team, setTeam] = useState<ImportedPokemon[]>([])
-  const importTargetLabel =
-    activeSide === 'attacker' ? 'Left Side' : 'Right Side'
+  const [selectedSide, setSelectedSide] = useState<'attacker' | 'defender'>(activeSide)
+
+  const sessions = useImportSessionStore((s) => s.sessions)
+  const setSession = useImportSessionStore((s) => s.setSession)
+  const team = sessions[sessionKey] ?? []
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -58,7 +63,7 @@ export function ImportTeamModal({
       const validationError = validateInput(value)
       if (validationError) {
         setErrorMessage(validationError)
-        setTeam([])
+        setSession(sessionKey, [])
         return
       }
     }
@@ -68,15 +73,15 @@ export function ImportTeamModal({
     try {
       const imported = await onImport(value)
       if (imported.team.length > 0) {
-        onImportTeam(activeSide, imported.team)
+        onImportTeam(selectedSide, imported.team)
         setOpen(false)
         setValue('')
-        setTeam([])
+        setSession(sessionKey, [])
         return
       }
-      setTeam(imported.team)
+      setSession(sessionKey, imported.team)
     } catch (error) {
-      setTeam([])
+      setSession(sessionKey, [])
       setErrorMessage(error instanceof Error ? error.message : 'Import failed.')
     } finally {
       setLoading(false)
@@ -88,7 +93,6 @@ export function ImportTeamModal({
     setOpen(false)
     setValue('')
     setErrorMessage(null)
-    setTeam([])
   }
 
   return (
@@ -129,9 +133,24 @@ export function ImportTeamModal({
                         <span className="arena-label text-arena-cyan">
                           Import Target
                         </span>
-                        <span className="arena-chip text-arena-cyan">
-                          {importTargetLabel}
-                        </span>
+                        <div className="flex gap-1" role="group" aria-label="Import target side">
+                          <button
+                            type="button"
+                            className={`arena-chip cursor-pointer transition ${selectedSide === 'attacker' ? 'text-arena-cyan bg-white/10' : 'text-white/44 hover:text-white/72'}`}
+                            onClick={() => setSelectedSide('attacker')}
+                            aria-pressed={selectedSide === 'attacker'}
+                          >
+                            Left Side
+                          </button>
+                          <button
+                            type="button"
+                            className={`arena-chip cursor-pointer transition ${selectedSide === 'defender' ? 'text-arena-cyan bg-white/10' : 'text-white/44 hover:text-white/72'}`}
+                            onClick={() => setSelectedSide('defender')}
+                            aria-pressed={selectedSide === 'defender'}
+                          >
+                            Right Side
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <button
