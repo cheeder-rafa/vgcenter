@@ -18,6 +18,7 @@ import { SpriteBadge } from './SpriteBadge'
 import { StatTable } from './StatTable'
 import { MEGA_STONE_MAP } from '../data/megaStoneMap'
 import { STATUS_OPTIONS } from './shared'
+import { SpreadLibraryDropdown } from './SpreadLibraryDropdown'
 import { getTypeChipClasses } from './typeColors'
 
 const DEFAULT_SPREAD: CombatantBuild['sp'] = {
@@ -356,6 +357,22 @@ export function PokemonPanel({
           accent={accent}
           onChange={handleSpeciesChange}
         />
+
+        {combatant.speciesId !== null && (
+          <SpreadLibraryDropdown
+            speciesId={combatant.speciesId}
+            currentBuild={combatant}
+            onLoad={(spread) => {
+              setCombatant({
+                sp: spread.sp,
+                natureId: spread.natureId,
+                abilityId: spread.abilityId,
+                itemId: spread.itemId,
+                moves: spread.moves,
+              })
+            }}
+          />
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
