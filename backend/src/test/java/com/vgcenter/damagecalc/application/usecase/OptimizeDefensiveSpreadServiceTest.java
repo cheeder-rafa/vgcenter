@@ -153,6 +153,8 @@ class OptimizeDefensiveSpreadServiceTest {
                 "M-A",
                 "unknown-species",
                 "HARDY",
+                null,
+                null,
                 "garchomp",
                 "JOLLY",
                 zeroSp(),
@@ -166,6 +168,79 @@ class OptimizeDefensiveSpreadServiceTest {
                 false);
 
         assertThatThrownBy(() -> service.optimize(cmd)).isInstanceOf(SpeciesNotFoundException.class);
+    }
+
+    @Test
+    void alwaysSurvive_withHighKoChance_returnsNoCandidates() {
+        // Stub: returns 81.25% KO chance — meetsGoal(ALWAYS_SURVIVE) must reject this
+        CalculateDamageUseCase calc = cmd -> {
+            int hp = cmd.defender().stats().hp();
+            int minDmg = (int) (hp * 0.85);
+            int maxDmg = hp + 1;
+            int[] r = rolls(minDmg, maxDmg);
+            return new CalculateDamageResult(
+                    r,
+                    minDmg,
+                    maxDmg,
+                    minDmg * 100.0 / hp,
+                    maxDmg * 100.0 / hp,
+                    new KoChanceResult("81.25% OHKO", 0.8125, 13));
+        };
+        var service = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calc);
+        var result = service.optimize(command("ALWAYS_SURVIVE"));
+
+        assertThat(result.candidates()).isEmpty();
+    }
+
+    @Test
+    void alwaysSurvive_requiresZeroKoChance() {
+        // Stub: mix — 0 KO at high HP, 12.5% KO at low HP
+        CalculateDamageUseCase calc = cmd -> {
+            int hp = cmd.defender().stats().hp();
+            boolean survives = hp >= 240;
+            int minDmg = (int) (hp * 0.85);
+            int maxDmg = survives ? (hp - 1) : (hp + 1);
+            int[] r = rolls(minDmg, maxDmg);
+            double prob = survives ? 0.0 : 0.125;
+            return new CalculateDamageResult(
+                    r,
+                    minDmg,
+                    maxDmg,
+                    minDmg * 100.0 / hp,
+                    maxDmg * 100.0 / hp,
+                    new KoChanceResult(prob == 0 ? "survival" : "partial", prob, prob == 0 ? 0 : 2));
+        };
+        var service = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calc);
+        var result = service.optimize(command("ALWAYS_SURVIVE"));
+
+        assertThat(result.candidates()).isNotEmpty();
+        // All returned candidates must have zero KO chance
+        assertThat(result.candidates()).allMatch(c -> c.koChanceProbability() == 0.0);
+    }
+
+    @Test
+    void candidatesSortedByKoChanceThenTotalSp() {
+        // Return varying KO chances based on HP (simulate spread differences)
+        CalculateDamageUseCase calc = cmd -> {
+            int hp = cmd.defender().stats().hp();
+            int minDmg = (int) (hp * 0.10);
+            int maxDmg = (int) (hp * 0.87);
+            int[] r = rolls(minDmg, maxDmg);
+            return new CalculateDamageResult(
+                    r,
+                    minDmg,
+                    maxDmg,
+                    minDmg * 100.0 / hp,
+                    maxDmg * 100.0 / hp,
+                    new KoChanceResult("survival", 0.0, 0));
+        };
+        var service = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calc);
+        var result = service.optimize(command("ALWAYS_SURVIVE"));
+
+        // First result in the tier must be at minimum totalSp
+        assertThat(result.candidates()).isNotEmpty();
+        int firstTotal = result.candidates().get(0).totalSp();
+        assertThat(result.candidates()).allMatch(c -> c.totalSp() == firstTotal);
     }
 
     @Test
@@ -203,6 +278,8 @@ class OptimizeDefensiveSpreadServiceTest {
                 "M-A",
                 "snorlax",
                 "HARDY",
+                null,
+                null,
                 "garchomp",
                 "JOLLY",
                 zeroSp(),

@@ -106,8 +106,8 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
                                             VGC_LEVEL,
                                             toStatsCommand(defenderStats),
                                             defenderTypes,
-                                            null,
-                                            null,
+                                            command.defenderAbilityId(),
+                                            command.defenderItemId(),
                                             "NONE",
                                             Map.of(),
                                             false,
@@ -147,8 +147,9 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
 
                 if (!tierPassing.isEmpty()) {
                     return new OptimizeDefenseResult(tierPassing.stream()
-                            .sorted(Comparator.comparingInt(DefenseSpreadCandidate::spHp)
-                                    .reversed())
+                            .sorted(Comparator.comparingDouble(DefenseSpreadCandidate::koChanceProbability)
+                                    .thenComparingInt(DefenseSpreadCandidate::totalSp)
+                                    .thenComparing((a, b) -> Integer.compare(b.spHp(), a.spHp())))
                             .limit(MAX_RESULTS)
                             .toList());
                 }
@@ -160,9 +161,9 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
 
     private static boolean meetsGoal(CalculateDamageResult result, String goal) {
         return switch (goal) {
-            case "ALWAYS_SURVIVE" -> result.minPct() < 100.0;
+            case "ALWAYS_SURVIVE" -> result.koChance().probability() == 0.0;
             case "SURVIVE_87_5" -> result.koChance().probability() <= 0.125;
-            case "SURVIVE_FULL_HP" -> result.minPct() < 100.0;
+            case "SURVIVE_FULL_HP" -> result.koChance().probability() == 0.0;
             default -> throw new IllegalArgumentException("Unknown goal: " + goal);
         };
     }

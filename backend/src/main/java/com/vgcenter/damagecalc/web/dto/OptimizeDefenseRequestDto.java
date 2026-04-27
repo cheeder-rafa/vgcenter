@@ -7,6 +7,8 @@ public record OptimizeDefenseRequestDto(
         @NotBlank String regulation,
         @NotBlank String defenderSpeciesId,
         @NotBlank String defenderNatureId,
+        String defenderAbilityId,
+        String defenderItemId,
         @NotBlank String attackerSpeciesId,
         @NotBlank String attackerNatureId,
         @Valid SpDto attackerSp,

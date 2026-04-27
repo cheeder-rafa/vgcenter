@@ -6,6 +6,8 @@ public record OptimizeDefenseCommand(
         String regulation,
         String defenderSpeciesId,
         String defenderNatureId,
+        String defenderAbilityId,
+        String defenderItemId,
         String attackerSpeciesId,
         String attackerNatureId,
         SpCommand attackerSp,
