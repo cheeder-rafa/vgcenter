@@ -10,6 +10,7 @@ import type {
   PokedexEntry,
   StatusCondition,
 } from '../types/api'
+import { computeBattleStats } from '../lib/computeBattleStats'
 import { MoveSummaryStrip } from './MoveSummaryStrip'
 import { MoveSlotRow } from './MoveSlotRow'
 import { SpeciesSelect } from './SpeciesSelect'
@@ -186,7 +187,7 @@ export function PokemonPanel({
       status: 'NONE',
       moves: EMPTY_MOVE_SLOTS,
       baseStats: entry.baseStats,
-      finalStats: null,
+      finalStats: computeBattleStats(entry.baseStats, DEFAULT_SPREAD, null),
       types: nextTypes,
       grounded: isGrounded(nextTypes, nextAbilityId),
       currentHp: entry.baseStats.hp,
@@ -206,6 +207,8 @@ export function PokemonPanel({
       ? megaForm.abilityId
       : (speciesEntry.abilityIds[0] ?? combatant.abilityId)
     const nextTypes: [string, string | null] = [primary, secondary ?? null]
+    const nextBaseStats = next ? megaForm.baseStats : speciesEntry.baseStats
+    const currentNature = natures.find((n) => n.id === combatant.natureId) ?? null
     setCombatant({
       megaActive: next,
       megaFormId: next ? megaForm.id : combatant.megaFormId,
@@ -213,8 +216,8 @@ export function PokemonPanel({
       itemId: next
         ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId)
         : combatant.itemId,
-      baseStats: next ? megaForm.baseStats : speciesEntry.baseStats,
-      finalStats: null,
+      baseStats: nextBaseStats,
+      finalStats: computeBattleStats(nextBaseStats, combatant.sp, currentNature),
       types: nextTypes,
       grounded: isGrounded(nextTypes, nextAbilityId),
     })
@@ -232,13 +235,14 @@ export function PokemonPanel({
     }
     const [primary, secondary] = megaForm.types
     const nextTypes: [string, string | null] = [primary, secondary ?? null]
+    const currentNature = natures.find((n) => n.id === combatant.natureId) ?? null
     setCombatant({
       megaFormId: nextMegaFormId,
       megaActive: true,
       itemId: MEGA_STONE_MAP[nextMegaFormId] ?? combatant.itemId,
       abilityId: megaForm.abilityId,
       baseStats: megaForm.baseStats,
-      finalStats: null,
+      finalStats: computeBattleStats(megaForm.baseStats, combatant.sp, currentNature),
       types: nextTypes,
       grounded: isGrounded(nextTypes, megaForm.abilityId),
     })
@@ -425,9 +429,15 @@ export function PokemonPanel({
               id={ids.nature}
               className="arena-select"
               value={combatant.natureId}
-              onChange={(event) =>
-                setCombatant({ natureId: event.target.value, finalStats: null })
-              }
+              onChange={(event) => {
+                const nextNatureId = event.target.value
+                const nextNature = natures.find((n) => n.id === nextNatureId) ?? null
+                const nextFinalStats =
+                  combatant.baseStats !== null
+                    ? computeBattleStats(combatant.baseStats, combatant.sp, nextNature)
+                    : null
+                setCombatant({ natureId: nextNatureId, finalStats: nextFinalStats })
+              }}
             >
               {natures.map((nature) => (
                 <option
@@ -500,7 +510,15 @@ export function PokemonPanel({
           finalStats={combatant.finalStats}
           status={combatant.status}
           accent={accent}
-          onSpChange={(patch) => setCombatant({ sp: patch, finalStats: null })}
+          onSpChange={(patch) => {
+            const nextSp = { ...combatant.sp, ...patch }
+            const currentNature = natures.find((n) => n.id === combatant.natureId) ?? null
+            const nextFinalStats =
+              combatant.baseStats !== null
+                ? computeBattleStats(combatant.baseStats, nextSp, currentNature)
+                : null
+            setCombatant({ sp: nextSp, finalStats: nextFinalStats })
+          }}
           onStageChange={(patch) => setCombatant({ stages: patch })}
         />
 
