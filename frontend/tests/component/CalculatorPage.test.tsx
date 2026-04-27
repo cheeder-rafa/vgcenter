@@ -190,10 +190,10 @@ describe('CalculatorPage', () => {
     const brandGroup = screen.getByTestId('calculator-header-brand')
     const actionGroup = screen.getByTestId('calculator-header-actions')
 
-    expect(header.className).toContain('xl:grid-cols-[minmax(0,1fr)_auto]')
-    expect(brandGroup.className).toContain('min-w-0')
-    expect(actionGroup.className).toContain('xl:justify-self-end')
-    // Feedback link lives in TopNav, not in the calculator header.
+    expect(header.className).toContain('border-b')
+    expect(brandGroup.className).toContain('items-center')
+    expect(actionGroup.className).toContain('border-l')
+    // Share menu collapses three actions; feedback link lives in TopNav, not in the calculator header.
     expect(
       screen.queryByRole('link', { name: /send feedback/i }),
     ).not.toBeInTheDocument()
@@ -457,12 +457,8 @@ describe('CalculatorPage', () => {
     expect(
       screen.getByRole('button', { name: /load incineroar for attacker/i }),
     ).toBeInTheDocument()
-    expect(useSavedTeamStore.getState().mine[0]?.speciesId).toBe(
-      'charizard',
-    )
-    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe(
-      'pelipper',
-    )
+    expect(useSavedTeamStore.getState().mine[0]?.speciesId).toBe('charizard')
+    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe('pelipper')
 
     await user.click(
       screen.getByRole('button', { name: /load amoonguss for attacker/i }),
@@ -723,12 +719,8 @@ describe('CalculatorPage', () => {
     expect(
       screen.queryByRole('button', { name: /load stale two for attacker/i }),
     ).not.toBeInTheDocument()
-    expect(useSavedTeamStore.getState().mine[0]?.speciesId).toBe(
-      'charizard',
-    )
-    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe(
-      'pelipper',
-    )
+    expect(useSavedTeamStore.getState().mine[0]?.speciesId).toBe('charizard')
+    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe('pelipper')
   })
 
   it('updates the import target copy when the active side changes', async () => {
@@ -866,7 +858,7 @@ describe('CalculatorPage', () => {
 
     expect(shell.className).toContain('gap-3')
     expect(shell.className).toContain('py-4')
-    expect(header.className).toContain('pb-2')
+    expect(header.className).toContain('pb-3')
     expect(mainGrid.className).toContain('gap-3')
     expect(fieldPanel.className).toContain('p-4')
     expect(readout?.className).toContain('px-3')
