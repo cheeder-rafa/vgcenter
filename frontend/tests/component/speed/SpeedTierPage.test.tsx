@@ -78,7 +78,9 @@ describe('SpeedTierPage', () => {
         <SpeedTierPage />
       </MemoryRouter>,
     )
-    expect(screen.getByText(/no tiers loaded yet/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/add pokémon to your team rail/i),
+    ).toBeInTheDocument()
   })
 
   it('displays base and mega rows in a single unified list', async () => {

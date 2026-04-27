@@ -161,7 +161,7 @@ function StatRow({
       <div role="cell" className="flex items-center gap-1">
         <button
           type="button"
-          className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
           aria-label={`${row.label} SP decrease`}
           onClick={() => onChange(Math.max(0, sp - 1))}
         >
@@ -184,7 +184,7 @@ function StatRow({
         />
         <button
           type="button"
-          className="flex h-6 w-5 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
+          className="flex h-8 w-8 items-center justify-center rounded-[2px] bg-white/5 font-mono text-[0.75rem] text-white/55 transition hover:bg-white/10 hover:text-white/80 active:scale-95"
           aria-label={`${row.label} SP increase`}
           onClick={() => onChange(Math.min(MAX_SP_PER_STAT, sp + 1))}
         >

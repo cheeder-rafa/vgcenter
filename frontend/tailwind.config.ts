@@ -23,6 +23,10 @@ export default {
           violet: '#a78bfa',
         },
       },
+      fontSize: {
+        'arena-2xs': ['0.625rem', { lineHeight: '1rem' }],
+        'arena-xs': ['0.6875rem', { lineHeight: '1.1rem' }],
+      },
       boxShadow: {
         neon: '0 0 0 1px rgba(255,43,142,0.35), 0 10px 60px -10px rgba(255,43,142,0.55)',
         cyan: '0 0 0 1px rgba(34,211,238,0.35), 0 10px 60px -10px rgba(34,211,238,0.55)',

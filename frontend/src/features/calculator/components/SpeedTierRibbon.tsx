@@ -32,7 +32,7 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
         data-testid="speed-ribbon-empty"
         className="flex h-7 items-center justify-center rounded-sm border border-white/[0.07] bg-white/[0.03]"
       >
-        <span className="font-mono text-[0.6rem] uppercase tracking-[0.28em] text-white/20">
+        <span className="font-mono text-arena-2xs uppercase tracking-[0.28em] text-white/20">
           Speed tier · select both Pokémon
         </span>
       </div>
@@ -58,7 +58,7 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
     >
       <span
         data-testid="speed-attacker-effective"
-        className="w-[3ch] shrink-0 text-right font-mono text-[0.7rem] tabular-nums"
+        className="w-[3ch] shrink-0 text-right font-mono text-arena-xs tabular-nums"
         style={{
           color: atkWins
             ? winnerColor
@@ -75,14 +75,14 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
         {isTie ? (
           <span
             data-testid="speed-tie"
-            className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-white/35"
+            className="font-mono text-arena-2xs uppercase tracking-[0.22em] text-white/35"
           >
             Speed tie
           </span>
         ) : (
           <>
             <span
-              className="truncate font-mono text-[0.65rem]"
+              className="truncate font-mono text-arena-xs"
               style={{ color: loserColor }}
             >
               {loser?.name}
@@ -114,12 +114,12 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
             </svg>
             <span
               data-testid="speed-winner"
-              className="truncate font-mono text-[0.65rem] font-semibold"
+              className="truncate font-mono text-arena-xs font-semibold"
               style={{ color: winnerColor }}
             >
               {winner?.name}
             </span>
-            <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-white/45">
+            <span className="shrink-0 font-mono text-arena-2xs uppercase tracking-[0.18em] text-white/45">
               moves first
             </span>
           </>
@@ -127,7 +127,7 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
         {trickRoom && (
           <span
             data-testid="trick-room-indicator"
-            className="ml-1 shrink-0 rounded-[2px] bg-[rgba(167,139,250,0.18)] px-1 font-mono text-[0.55rem] uppercase tracking-[0.15em] text-[rgba(167,139,250,0.85)]"
+            className="ml-1 shrink-0 rounded-[2px] bg-arena-violet/18 px-1 font-mono text-arena-2xs uppercase tracking-[0.15em] text-arena-violet/85"
           >
             TR
           </span>
@@ -136,7 +136,7 @@ export function SpeedTierRibbon({ attacker, defender, trickRoom }: Props) {
 
       <span
         data-testid="speed-defender-effective"
-        className="w-[3ch] shrink-0 font-mono text-[0.7rem] tabular-nums"
+        className="w-[3ch] shrink-0 font-mono text-arena-xs tabular-nums"
         style={{
           color: !atkWins
             ? winnerColor
