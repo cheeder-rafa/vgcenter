@@ -226,6 +226,45 @@ body {
     appearance: textfield;
   }
 
+  /* ── Speed Tier Animations ──────────────────────── */
+  .speed-row {
+    animation: speed-row-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .speed-row--mega {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .speed-row--mega::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 48px;
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.22), transparent);
+    transform: translateX(-48px);
+    animation: mega-scan-line 4s linear infinite;
+    pointer-events: none;
+  }
+
+  .speed-omega-glyph {
+    animation: omega-breath 3s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .speed-row {
+      animation: none;
+    }
+    .speed-row--mega::after {
+      display: none;
+    }
+    .speed-omega-glyph {
+      animation: none;
+    }
+  }
+
   .arena-divider {
     height: 1px;
     background: linear-gradient(
@@ -244,4 +283,25 @@ body {
       transparent 1px 3px
     );
   }
+}
+
+@keyframes speed-row-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes mega-scan-line {
+  from { transform: translateX(-48px); }
+  to { transform: translateX(calc(100vw + 48px)); }
+}
+
+@keyframes omega-breath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.38; }
 }

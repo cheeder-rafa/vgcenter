@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { MEGA_STONE_MAP } from '../../calculator/data/megaStoneMap'
 import { useTeamsStore } from '../../../store/useTeamsStore'
 import { buildSpeedTiers } from '../api/speedApi'
-import type { SpeedTierModifiers, SpeedTierRow } from '../types'
+import type { SpeedTierEntry, SpeedTierModifiers, SpeedTierRow } from '../types'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -26,12 +27,29 @@ export function useSpeedTiers() {
 
   const userTeam = mine
     .filter((p): p is NonNullable<typeof p> => p !== null)
-    .map((p) => ({
-      speciesId: p.speciesId ?? p.speciesName,
-      speciesName: p.speciesName,
-      spSpeed: p.sp.spe ?? 0,
-      natureId: p.natureId,
-    }))
+    .flatMap((p): SpeedTierEntry[] => {
+      const base: SpeedTierEntry = {
+        speciesId: p.speciesId ?? p.speciesName,
+        speciesName: p.speciesName,
+        spSpeed: p.sp.spe ?? 0,
+        natureId: p.natureId,
+      }
+      const entries: SpeedTierEntry[] = [base]
+      // Also flag the mega form so both rows appear highlighted
+      if (
+        p.megaFormId !== null &&
+        p.itemId !== null &&
+        MEGA_STONE_MAP[p.megaFormId] === p.itemId
+      ) {
+        entries.push({
+          speciesId: p.megaFormId,
+          speciesName: `${p.speciesName} Mega`,
+          spSpeed: p.sp.spe ?? 0,
+          natureId: p.natureId,
+        })
+      }
+      return entries
+    })
 
   useEffect(() => {
     if (debounceRef.current !== null) {

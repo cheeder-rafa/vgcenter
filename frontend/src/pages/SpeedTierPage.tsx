@@ -12,9 +12,6 @@ export function SpeedTierPage() {
     ? rows.filter((r) => r.userTeam || META_TOP_IDS.has(r.speciesId))
     : rows
 
-  const baseRows = displayRows.filter((r) => !r.isMega)
-  const megaRows = displayRows.filter((r) => r.isMega)
-
   return (
     <main className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden bg-arena-gradient text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05] [background-size:48px_48px]" />
@@ -79,7 +76,7 @@ export function SpeedTierPage() {
                 </div>
                 {rows.length > 0 && (
                   <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/45">
-                    {displayRows.length} entries
+                    {status === 'loading' ? 'updating…' : `${displayRows.length} entries`}
                   </span>
                 )}
               </div>
@@ -98,22 +95,10 @@ export function SpeedTierPage() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <SpeedSection
-                    label="Base Forms"
-                    rows={baseRows}
-                    modifiers={modifiers}
-                    loading={status === 'loading'}
-                  />
-                  {megaRows.length > 0 && (
-                    <SpeedSection
-                      label="Mega Evolutions"
-                      rows={megaRows}
-                      modifiers={modifiers}
-                      loading={status === 'loading'}
-                    />
-                  )}
-                </div>
+                <SpeedSection
+                  rows={displayRows}
+                  modifiers={modifiers}
+                />
               )}
             </div>
           </div>
@@ -192,6 +177,10 @@ function SpeedLegend() {
         <span className="h-2 w-2 rounded-full border border-arena-cyan/60 bg-arena-cyan/20" />
         Your team
       </span>
+      <span className="flex items-center gap-1.5 text-arena-violet">
+        <span className="font-black">Ω</span>
+        Mega form
+      </span>
       <span className="flex items-center gap-1.5 text-white/55">
         <span className="h-2 w-2 rounded-full border border-white/20 bg-white/[0.04]" />
         Roster
@@ -201,30 +190,26 @@ function SpeedLegend() {
 }
 
 function SpeedSection({
-  label,
   rows,
   modifiers,
-  loading,
 }: {
-  label: string
   rows: SpeedTierRow[]
   modifiers: SpeedTierModifiers
-  loading: boolean
 }) {
-  const grouped = groupBySpeed(rows)
+  const grouped = groupBySpeed(rows, modifiers.trickRoom)
+
+  type GroupWithOffset = { speed: number; entries: SpeedTierRow[]; offset: number }
+  const groupsWithOffset = grouped.reduce<GroupWithOffset[]>((acc, group) => {
+    const offset = acc.length === 0 ? 0 : acc[acc.length - 1].offset + acc[acc.length - 1].entries.length
+    return [...acc, { ...group, offset }]
+  }, [])
 
   return (
     <div>
-      <p className="mb-2 arena-label text-white/40 uppercase tracking-[0.18em] text-xs">
-        {label}
-        {loading && (
-          <span className="ml-2 text-white/25">updating…</span>
-        )}
-      </p>
       <div
         className="max-h-[calc(100vh-22rem)] overflow-y-auto rounded border border-white/10"
         role="table"
-        aria-label={`${label} speed tier table`}
+        aria-label="Speed tier table"
       >
         <div role="rowgroup">
           <div
@@ -245,8 +230,8 @@ function SpeedSection({
         </div>
 
         <div role="rowgroup">
-          {grouped.map(({ speed, entries }) => (
-            <SpeedGroup key={speed} speed={speed} entries={entries} />
+          {groupsWithOffset.map(({ speed, entries, offset }) => (
+            <SpeedGroup key={speed} speed={speed} entries={entries} rowOffset={offset} />
           ))}
         </div>
       </div>
@@ -254,14 +239,28 @@ function SpeedSection({
   )
 }
 
-function SpeedGroup({ speed, entries }: { speed: number; entries: SpeedTierRow[] }) {
+function SpeedGroup({
+  speed,
+  entries,
+  rowOffset = 0,
+}: {
+  speed: number
+  entries: SpeedTierRow[]
+  rowOffset?: number
+}) {
   return (
     <>
-      {entries.map((row, idx) => (
+      {entries.map((row, idx) => {
+        const globalIdx = rowOffset + idx
+        const delay = Math.min(globalIdx * 18, 480)
+        return (
         <div
           key={`${row.speciesId}-${row.userTeam}`}
           role="row"
-          className={`grid grid-cols-[5rem_32px_1fr_auto] items-center gap-x-3 border-b border-white/[0.06] px-4 py-2 transition-colors ${
+          style={{ animationDelay: `${delay}ms` }}
+          className={`speed-row grid grid-cols-[5rem_32px_1fr_auto] items-center gap-x-3 border-b border-white/[0.06] px-4 py-2 transition-colors ${
+            row.isMega ? 'speed-row--mega' : ''
+          } ${
             row.userTeam
               ? 'bg-arena-cyan/[0.06] hover:bg-arena-cyan/10'
               : 'hover:bg-white/[0.03]'
@@ -277,6 +276,14 @@ function SpeedGroup({ speed, entries }: { speed: number; entries: SpeedTierRow[]
             {row.userTeam && (
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-arena-cyan" />
             )}
+            {row.isMega && (
+              <span
+                className="speed-omega-glyph shrink-0 font-mono text-[0.6rem] font-black leading-none text-arena-violet"
+                aria-hidden="true"
+              >
+                Ω
+              </span>
+            )}
             <span
               className={`text-sm font-semibold ${
                 row.userTeam ? 'text-arena-cyan' : 'text-white/78'
@@ -289,7 +296,8 @@ function SpeedGroup({ speed, entries }: { speed: number; entries: SpeedTierRow[]
             {speed}
           </div>
         </div>
-      ))}
+        )
+      })}
     </>
   )
 }
@@ -310,9 +318,15 @@ function MiniSprite({ speciesId, name }: { speciesId: string; name: string }) {
   )
 }
 
-function groupBySpeed(rows: SpeedTierRow[]): { speed: number; entries: SpeedTierRow[] }[] {
+function groupBySpeed(
+  rows: SpeedTierRow[],
+  trickRoom: boolean,
+): { speed: number; entries: SpeedTierRow[] }[] {
+  const sorted = [...rows].sort((a, b) =>
+    trickRoom ? a.finalSpeed - b.finalSpeed : b.finalSpeed - a.finalSpeed,
+  )
   const map = new Map<number, SpeedTierRow[]>()
-  for (const row of rows) {
+  for (const row of sorted) {
     const bucket = map.get(row.finalSpeed) ?? []
     bucket.push(row)
     map.set(row.finalSpeed, bucket)
