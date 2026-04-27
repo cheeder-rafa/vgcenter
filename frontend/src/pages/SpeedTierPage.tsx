@@ -23,7 +23,9 @@ export function SpeedTierPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-arena-cyan">
             Regulation M-A
           </p>
-          <h1 className="text-2xl font-black tracking-wide sm:text-3xl">Speed Tier Sheet</h1>
+          <h1 className="text-2xl font-black tracking-wide sm:text-3xl">
+            Speed Tier Sheet
+          </h1>
         </header>
 
         <div className="grid gap-4 xl:grid-cols-[minmax(280px,0.3fr)_1fr]">
@@ -32,7 +34,8 @@ export function SpeedTierPage() {
               <div>
                 <p className="arena-label text-arena-cyan">Controls</p>
                 <p className="mt-2 text-sm leading-6 text-white/68">
-                  Toggle modifiers to update the sheet. Your team's speeds are highlighted.
+                  Toggle modifiers to update the sheet. Your team's speeds are
+                  highlighted.
                 </p>
               </div>
 
@@ -52,7 +55,9 @@ export function SpeedTierPage() {
                 >
                   <span
                     className={`absolute top-0.5 h-4 w-4 rounded-full transition-all ${
-                      metaOnly ? 'left-[18px] bg-arena-cyan' : 'left-0.5 bg-white/40'
+                      metaOnly
+                        ? 'left-[18px] bg-arena-cyan'
+                        : 'left-0.5 bg-white/40'
                     }`}
                   />
                 </button>
@@ -72,11 +77,15 @@ export function SpeedTierPage() {
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="arena-label text-arena-sun">Full roster</p>
-                  <h2 className="mt-1 text-lg font-black text-white">Speed Tiers</h2>
+                  <h2 className="mt-1 text-lg font-black text-white">
+                    Speed Tiers
+                  </h2>
                 </div>
                 {rows.length > 0 && (
                   <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/45">
-                    {status === 'loading' ? 'updating…' : `${displayRows.length} entries`}
+                    {status === 'loading'
+                      ? 'updating…'
+                      : `${displayRows.length} entries`}
                   </span>
                 )}
               </div>
@@ -85,20 +94,22 @@ export function SpeedTierPage() {
 
               {status === 'loading' && rows.length === 0 ? (
                 <div className="flex items-center justify-center py-16">
-                  <p className="text-sm text-white/45">Computing speed tiers…</p>
+                  <p className="text-sm text-white/45">
+                    Computing speed tiers…
+                  </p>
                 </div>
               ) : rows.length === 0 ? (
                 <div className="rounded border border-white/10 bg-black/16 p-6">
-                  <p className="text-sm font-medium text-white/62">No tiers loaded yet</p>
+                  <p className="text-sm font-medium text-white/62">
+                    No tiers loaded yet
+                  </p>
                   <p className="mt-1 text-xs leading-5 text-white/40">
-                    Speed tiers load automatically. Add Pokémon to your team to see them highlighted.
+                    Speed tiers load automatically. Add Pokémon to your team to
+                    see them highlighted.
                   </p>
                 </div>
               ) : (
-                <SpeedSection
-                  rows={displayRows}
-                  modifiers={modifiers}
-                />
+                <SpeedSection rows={displayRows} modifiers={modifiers} />
               )}
             </div>
           </div>
@@ -198,16 +209,23 @@ function SpeedSection({
 }) {
   const grouped = groupBySpeed(rows, modifiers.trickRoom)
 
-  type GroupWithOffset = { speed: number; entries: SpeedTierRow[]; offset: number }
+  type GroupWithOffset = {
+    speed: number
+    entries: SpeedTierRow[]
+    offset: number
+  }
   const groupsWithOffset = grouped.reduce<GroupWithOffset[]>((acc, group) => {
-    const offset = acc.length === 0 ? 0 : acc[acc.length - 1].offset + acc[acc.length - 1].entries.length
+    const offset =
+      acc.length === 0
+        ? 0
+        : acc[acc.length - 1].offset + acc[acc.length - 1].entries.length
     return [...acc, { ...group, offset }]
   }, [])
 
   return (
     <div>
       <div
-        className="max-h-[calc(100vh-22rem)] overflow-y-auto rounded border border-white/10"
+        className="max-h-[calc(100vh-22rem)] overflow-x-auto overflow-y-auto rounded border border-white/10"
         role="table"
         aria-label="Speed tier table"
       >
@@ -231,7 +249,12 @@ function SpeedSection({
 
         <div role="rowgroup">
           {groupsWithOffset.map(({ speed, entries, offset }) => (
-            <SpeedGroup key={speed} speed={speed} entries={entries} rowOffset={offset} />
+            <SpeedGroup
+              key={speed}
+              speed={speed}
+              entries={entries}
+              rowOffset={offset}
+            />
           ))}
         </div>
       </div>
@@ -254,48 +277,54 @@ function SpeedGroup({
         const globalIdx = rowOffset + idx
         const delay = Math.min(globalIdx * 18, 480)
         return (
-        <div
-          key={`${row.speciesId}-${row.userTeam}`}
-          role="row"
-          style={{ animationDelay: `${delay}ms` }}
-          className={`speed-row grid grid-cols-[5rem_32px_1fr_auto] items-center gap-x-3 border-b border-white/[0.06] px-4 py-2 transition-colors ${
-            row.isMega ? 'speed-row--mega' : ''
-          } ${
-            row.userTeam
-              ? 'bg-arena-cyan/[0.06] hover:bg-arena-cyan/10'
-              : 'hover:bg-white/[0.03]'
-          }`}
-        >
-          <div role="cell" className="font-mono text-sm font-black tabular-nums text-white/30">
-            {idx === 0 && speed}
-          </div>
-          <div role="cell" className="flex items-center justify-center">
-            <MiniSprite speciesId={row.speciesId} name={row.speciesName} />
-          </div>
-          <div role="cell" className="flex items-center gap-2">
-            {row.userTeam && (
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-arena-cyan" />
-            )}
-            {row.isMega && (
-              <span
-                className="speed-omega-glyph shrink-0 font-mono text-[0.6rem] font-black leading-none text-arena-violet"
-                aria-hidden="true"
-              >
-                Ω
-              </span>
-            )}
-            <span
-              className={`text-sm font-semibold ${
-                row.userTeam ? 'text-arena-cyan' : 'text-white/78'
-              }`}
+          <div
+            key={`${row.speciesId}-${row.userTeam}`}
+            role="row"
+            style={{ animationDelay: `${delay}ms` }}
+            className={`speed-row grid grid-cols-[5rem_32px_1fr_auto] items-center gap-x-3 border-b border-white/[0.06] px-4 py-2 transition-colors ${
+              row.isMega ? 'speed-row--mega' : ''
+            } ${
+              row.userTeam
+                ? 'bg-arena-cyan/[0.06] hover:bg-arena-cyan/10'
+                : 'hover:bg-white/[0.03]'
+            }`}
+          >
+            <div
+              role="cell"
+              className="font-mono text-sm font-black tabular-nums text-white/30"
             >
-              {row.speciesName}
-            </span>
+              {idx === 0 && speed}
+            </div>
+            <div role="cell" className="flex items-center justify-center">
+              <MiniSprite speciesId={row.speciesId} name={row.speciesName} />
+            </div>
+            <div role="cell" className="flex items-center gap-2">
+              {row.userTeam && (
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-arena-cyan" />
+              )}
+              {row.isMega && (
+                <span
+                  className="speed-omega-glyph shrink-0 font-mono text-[0.6rem] font-black leading-none text-arena-violet"
+                  aria-hidden="true"
+                >
+                  Ω
+                </span>
+              )}
+              <span
+                className={`text-sm font-semibold ${
+                  row.userTeam ? 'text-arena-cyan' : 'text-white/78'
+                }`}
+              >
+                {row.speciesName}
+              </span>
+            </div>
+            <div
+              role="cell"
+              className="font-mono text-sm font-black tabular-nums text-white/62"
+            >
+              {speed}
+            </div>
           </div>
-          <div role="cell" className="font-mono text-sm font-black tabular-nums text-white/62">
-            {speed}
-          </div>
-        </div>
         )
       })}
     </>

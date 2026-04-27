@@ -179,6 +179,7 @@ body {
     letter-spacing: 0.2em;
     text-transform: uppercase;
     font-size: 0.72rem;
+    min-height: 2.75rem;
     padding: 0.55rem 1rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     background: linear-gradient(
@@ -243,7 +244,12 @@ body {
     bottom: 0;
     left: 0;
     width: 48px;
-    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.22), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(167, 139, 250, 0.22),
+      transparent
+    );
     transform: translateX(-48px);
     animation: mega-scan-line 4s linear infinite;
     pointer-events: none;
@@ -297,11 +303,20 @@ body {
 }
 
 @keyframes mega-scan-line {
-  from { transform: translateX(-48px); }
-  to { transform: translateX(calc(100vw + 48px)); }
+  from {
+    transform: translateX(-48px);
+  }
+  to {
+    transform: translateX(calc(100vw + 48px));
+  }
 }
 
 @keyframes omega-breath {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.38; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.38;
+  }
 }
