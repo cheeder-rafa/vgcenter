@@ -9,7 +9,15 @@ export function SpeedTierPage() {
   const [metaOnly, setMetaOnly] = useState(false)
 
   const displayRows = metaOnly
-    ? rows.filter((r) => r.userTeam || META_TOP_IDS.has(r.speciesId))
+    ? rows.filter((r) => {
+        if (r.userTeam) return true
+        if (META_TOP_IDS.has(r.speciesId)) return true
+        if (r.isMega) {
+          const baseId = r.speciesId.replace(/-mega.*$/, '')
+          return META_TOP_IDS.has(baseId)
+        }
+        return false
+      })
     : rows
 
   return (
@@ -46,6 +54,7 @@ export function SpeedTierPage() {
                   type="button"
                   role="switch"
                   aria-checked={metaOnly}
+                  aria-label="Top-30 meta only"
                   onClick={() => setMetaOnly((v) => !v)}
                   className={`relative h-5 w-9 rounded-full border transition ${
                     metaOnly

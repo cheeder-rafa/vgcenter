@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.vgcenter.damagecalc.application.port.NatureRepository;
 import com.vgcenter.damagecalc.application.port.PokedexRepository;
+import com.vgcenter.damagecalc.domain.mega.MegaForm;
 import com.vgcenter.damagecalc.domain.model.Nature;
 import com.vgcenter.damagecalc.domain.model.PokemonSpecies;
 import com.vgcenter.damagecalc.domain.model.Stats;
@@ -129,6 +130,35 @@ class BuildSpeedTiersServiceTest {
         assertThat(speeds).isEqualTo(sorted);
     }
 
+    @Test
+    void rosterIncludesMegaRow_whenSpeciesHasMegaForm() {
+        // Venusaur base speed 80 → (80+20)=100; Mega Venusaur speed 80 → 100 (same but isMega=true)
+        PokedexRepository pokedexWithMega = _reg -> List.of(venusaurWithMega());
+        BuildSpeedTiersService svc = new BuildSpeedTiersService(pokedexWithMega, natures);
+
+        var result = svc.buildTiers(new SpeedTiersCommand("M-A", List.of(), noModifiers()));
+
+        List<SpeedTierRow> megaRows =
+                result.rows().stream().filter(SpeedTierRow::isMega).toList();
+        assertThat(megaRows).hasSize(1);
+        assertThat(megaRows.get(0).speciesId()).isEqualTo("venusaur-mega");
+        assertThat(megaRows.get(0).speciesName()).isEqualTo("Mega Venusaur");
+        assertThat(megaRows.get(0).finalSpeed()).isEqualTo(100);
+    }
+
+    @Test
+    void megaRowAppliesModifiers() {
+        PokedexRepository pokedexWithMega = _reg -> List.of(venusaurWithMega());
+        BuildSpeedTiersService svc = new BuildSpeedTiersService(pokedexWithMega, natures);
+
+        // Mega Venusaur base speed 80 → 100 at L50; tailwind: 100*2=200
+        var result = svc.buildTiers(new SpeedTiersCommand("M-A", List.of(), modifiers(true, false, false, false, 0)));
+
+        SpeedTierRow megaRow =
+                result.rows().stream().filter(SpeedTierRow::isMega).findFirst().orElseThrow();
+        assertThat(megaRow.finalSpeed()).isEqualTo(200);
+    }
+
     // --- helpers ---
 
     private static SpeedTierEntryCommand entry(String speciesId, int spSpeed, String natureId) {
@@ -162,6 +192,23 @@ class BuildSpeedTiersServiceTest {
                 new Stats(95, 115, 90, 80, 90, 60),
                 List.of("blaze", "intimidate"),
                 List.of("flare-blitz"));
+    }
+
+    private static PokemonSpecies venusaurWithMega() {
+        MegaForm megaVenusaur = new MegaForm(
+                "venusaur-mega",
+                "Mega Venusaur",
+                List.of(Type.GRASS, Type.POISON),
+                new Stats(80, 100, 123, 122, 120, 80),
+                "thick-fat");
+        return new PokemonSpecies(
+                "venusaur",
+                "Venusaur",
+                List.of(Type.GRASS, Type.POISON),
+                new Stats(80, 82, 83, 100, 100, 80),
+                List.of("overgrow"),
+                List.of("petal-blizzard"),
+                megaVenusaur);
     }
 
     private static String capitalize(String s) {
