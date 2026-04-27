@@ -1128,3 +1128,18 @@ After each implementation branch is ready to publish:
 ```
 Use github:yeet to publish the branch and open a PR targeting develop. Do not merge it.
 ```
+
+---
+
+## v1.1 Candidates (wishlist — not scheduled)
+
+These items were deferred during the v1 build. Capture here for future prioritisation; no implementation until explicitly scoped.
+
+- **URL-share state** — encode calculator inputs (species, SP, moves, field) into a shareable URL so users can link a specific matchup.
+- **Side-by-side spread compare** — show two defender spreads in parallel columns so the user can compare bulk trade-offs at a glance.
+- **Calc history** — a session-scoped log of recent calculations the user ran, allowing quick re-load of any prior matchup.
+- **Mobile / tablet pass** — audit and adapt the calculator and Preview Coach layouts for viewports below 768px; no functionality cut.
+- **Discord / PNG export** — render a damage result or team plan as a shareable image or formatted Discord embed.
+- **Spread library** — save and name favourite spreads per species; load them back into the calculator in one click.
+- **Matchup heatmap** — a grid view showing how a full 6-mon roster fares against a set of benchmark threats (damage output + bulk in one matrix).
+- **Practice mode** — a quiz-style drill where the user guesses whether a move KOs or 2HKOs before the result is revealed.
