@@ -10,6 +10,8 @@ import {
 import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
 import { EvOptimizerPanel } from '../features/calculator/components/EvOptimizerPanel'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
+import { useCalcHistorySync } from '../features/calculator/hooks/useCalcHistorySync'
+import { HistoryPanel } from '../features/calculator/components/HistoryPanel'
 import { FieldPanel } from '../features/calculator/components/FieldPanel'
 import { MatchupPinStrip } from '../features/calculator/components/MatchupPinStrip'
 import { PokemonPanel } from '../features/calculator/components/PokemonPanel'
@@ -64,6 +66,7 @@ export function CalculatorPage() {
   useBuildStatsSync('defender', pokedex)
   useReactiveDamage()
   const { copyShareLink } = useUrlStateSync()
+  useCalcHistorySync()
 
   useEffect(() => {
     let active = true
@@ -223,10 +226,13 @@ export function CalculatorPage() {
           onShare={copyShareLink}
         />
 
-        <MatchupPinStrip
-          onLoadPin={handleLoadPin}
-          onCurrentPin={handleCurrentPin}
-        />
+        <div className="flex items-center gap-3">
+          <MatchupPinStrip
+            onLoadPin={handleLoadPin}
+            onCurrentPin={handleCurrentPin}
+          />
+          <HistoryPanel />
+        </div>
 
         <section
           className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]"
