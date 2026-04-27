@@ -138,50 +138,54 @@ A milestone is done only when all of these hold:
 - Any user-facing behavior is documented in `README.md`.
 - The human maintainer has reviewed and merged the PR.
 
-## Active work after M10 — Damage Calculator Corrections Pass
+## Completed work (reference)
 
-M0 → M10 are complete. The next work item is the **Damage Calculator Corrections Pass** defined in `PLAN.md` under the section "Corrections Pass (post-M10) — Damage Calculator UX Overhaul". Read that section before starting any task in this phase.
+- **M0–M10**: damage formula, dataset pipeline, all core calculator features — done.
+- **Corrections Pass**: reactive damage, stat table, portal fix, sprites — done.
+- **Sub-project 2 — Preview Coach** (Phases A–D): `/preview` page, Lead Lab, Team Plan, BO3 Notebook — done.
+- **Speed tier unification**: single sorted list, mega highlight when stone held — done (merged to develop).
+- **URL-share state**: base64url codec, Share Link button, round-trip tests — done (merged to develop).
+- **Calc history**: session ring buffer (N=10), `HistoryPanel`, `useCalcHistorySync` — done (merged to develop).
+- **Spread library**: `useSpreadLibraryStore` (localStorage), `SpreadLibraryDropdown` in PokemonPanel — done (merged to develop).
 
-Scope summary (full details in `PLAN.md`):
+## Active work — v1.1 Wishlist (3 items remaining)
 
-1. Import modal popups render *under* the calculator — fix with `createPortal` to `document.body`.
-2. Remove the "Calculate Damage" button; damage must update reactively (debounced ~200 ms) on any input change.
-3. Result readout must show min–max range + HP% + KO chance *and* the 16 rolls simultaneously — no toggle.
-4. Species-first inputs: pick a Reg M-A species, auto-populate types/base stats/legal abilities/legal moves. User distributes SP (0–32) + nature; UI shows `Base → SP → Final`. **Level is locked to 50** — no level input in the UI. Four move slots per side with inline per-move damage; both sides are full combatants.
-5. Bundle sprites under `frontend/public/sprites/` via a one-off download script (PokéAPI official-artwork). Legends Z-A Mega sprites are manually placed.
-6. Widen the container (`max-w-[1600px]`), slim the header (≤ 80 px) so the first calculation fits above the fold at 1080p.
+Three wishlist items are not yet started. Each gets its own feature branch off `develop` and its own PR. Do not mix them in a single branch.
 
-**Reference**: `/nerd-calc.png` at the repo root illustrates the target two-way, inline-per-move readout. Do not copy the visual styling — keep the existing `arena-*` Tailwind theme.
+**Item 6 — Side-by-side defender spread compare** (`feature/spread-compare`)
 
-**Rules for this pass:**
-- Branch from `develop` as `feature/calc-corrections` (or split into `feature/calc-ux-corrections` + `feature/calc-sprites` if the diff grows large). Target `develop`.
-- Do **not** modify the damage formula, the dataset JSON (`backend/src/main/resources/data/regulation-m-a/`), the clean-architecture boundaries, or the existing golden tests.
-- Backend gets one new endpoint: `POST /api/v1/dataset/build-stats` that reuses `Stats.toBattleStats(Sp, Nature, level)`. Do not duplicate the SP formula in TypeScript.
-- TDD applies: write tests first for `BuildStatsUseCase`, `useReactiveDamage`, `StatTable`, and the portal regression.
-- Execute the plan in four bounded sessions (Phase A backend → Phase B+D data layer + modal portal → Phase C UI rewrite → Phase E sprites). After each, run the verification commands, commit per concern with Conventional Commits, and stop for review.
-- Ready-to-paste prompts for each phase are at the end of `PLAN.md`'s Corrections Pass section.
+New collapsible panel below `EvOptimizerPanel` that lets the user pin up to 4 defender builds and compare damage intake side-by-side from the current attacker.
 
-## Active work after the Corrections Pass — Sub-project 2: Preview Coach
+- New store: `frontend/src/features/calculator/store/useCompareStore.ts` — session-only (no persist), max 4 `PinnedDefender = { id, label, build: CombatantBuild }`. Pattern: copy from `usePinStore.ts`.
+- New component: `frontend/src/features/calculator/components/SpreadComparePanel.tsx` — collapsible, "Pin current defender" snapshots the active defender build. Each column calls `calculateDamage` (damageApi), shows `minPct–maxPct`, `koChance`, reuses `DamageBar`.
+- Wire into `CalculatorPage.tsx` below `<EvOptimizerPanel />`.
+- Tests: `tests/unit/store/useCompareStore.test.ts`, `tests/component/calculator/SpreadComparePanel.test.tsx`.
+- **Zustand selector gotcha**: never use `?? []` inline in a selector — use a module-level `const EMPTY: T[] = []` constant, or Zustand will see a new reference every render and loop infinitely. This bug was already fixed in `SpreadLibraryDropdown`; apply the same pattern here.
 
-The rejected **Gameplan Lab** experiment is deprecated. Ignore it as product direction, and delete `/gameplan` in Phase A of the new plan. The next work item is **Sub-project 2 — Preview Coach**, defined in `PLAN.md` under that section. Read it before starting any task in this phase.
+**Item 7 — Discord text + PNG export** (`feature/share-export`)
 
-Preview Coach helps VGC players choose which 4 of 6 Pokémon to bring, which 2 to lead, what each plan pressures, what each plan risks, and how to adapt in a best-of-3 set. It must reuse exact calculator damage and stats; it must not become a turn simulator.
+Two new header buttons alongside the existing Share Link button.
 
-Scope summary (full details in `PLAN.md`):
+- Add dep: `pnpm add html-to-image` (frontend only, no backend changes).
+- New module: `frontend/src/features/calculator/share/exportDiscord.ts` — pure `formatDiscordReport(...)` function, no DOM. Outputs a Discord code-block with attacker→defender heading, move rows (name, min%–max%, KO%), 16 rolls. Null move slots are skipped.
+- New module: `frontend/src/features/calculator/share/exportImage.ts` — `exportResultImage(el: HTMLElement): Promise<void>`. Uses `toPng` from html-to-image, copies via `ClipboardItem`; download fallback if clipboard API unavailable. Fires `useToastStore` toast.
+- `CalculatorPage.tsx`: add `ref` to `data-testid="detailed-result-span"` div; pass `onExportDiscord` and `onExportPng` to `CompactHeader`; buttons use `arena-button` class.
+- Tests: `tests/unit/exportDiscord.test.ts` (pure formatter — no DOM mocks needed). Skip `exportImage` unit test (DOM capture unreliable in happy-dom; note in commit body).
 
-1. Replace `/gameplan` with `/preview`. Preserve only reusable shell/navigation/team-store work that still serves the calculator and future tools.
-2. Phase A removes the rejected Gameplan implementation and adds a themed `/preview` placeholder.
-3. Phase B builds **Lead Lab**: selected lead pair versus all 15 opponent lead pairs, with KO/2HKO pressure, double-up pressure, incoming danger, speed comparison, must-react labels, and turn-1 annotations.
-4. Phase C builds **Team Preview Coach**: bring-4 + lead-order recommendations explained as arguments, including covered modes, risky modes, left-out Pokémon rationale, win-condition support, and prediction burden.
-5. Phase D builds **BO3 Adaptation Notebook**: game notes, revealed information, adjustment guidance, and markdown/JSON export.
+**Item 8 — Mobile / tablet responsive pass** (`feature/mobile-pass`)
 
-**Rules for this sub-project:**
-- Branch from `develop` as `feature/preview-<slug>`. Target `develop`. Never push directly; never target `main`.
-- `/gameplan` is deprecated and should be deleted in Phase A. Do not add new behavior to it.
-- `/preview` replaces `/gameplan` for all new Preview Coach work.
-- Do **not** modify the damage formula, dataset JSON (`backend/src/main/resources/data/regulation-m-a/`), clean-architecture boundaries, or existing golden tests.
-- All damage must flow through existing calculator use cases and APIs. Do not add inline damage math in frontend code.
-- Frontend work must keep the existing calculator theme and design language: `arena-*` Tailwind tokens, compact VGC workflow density, and readable damage evidence.
-- TDD applies: write failing tests first for every new behavior, then implement, then refactor.
-- Execute in **four bounded sessions** (Phase A remove Gameplan → Phase B Lead Lab → Phase C Team Preview Coach → Phase D BO3 Notebook). After each, run verification (`./mvnw verify` / `pnpm lint && pnpm typecheck && pnpm test` as applicable), commit per concern with Conventional Commits, and stop for review.
-- Ready-to-paste prompts for each phase are at the end of `PLAN.md`'s Sub-project 2 section.
+Makes `CalculatorPage`, `SpeedTierPage`, and `PreviewPage` usable at 375px–767px. No horizontal page scroll, no functionality cuts, tap targets ≥ 44px.
+
+- `CalculatorPage.tsx`: add `min-h-[44px]` to Share Link, export buttons, import modal triggers. Verify `SavedPokemonRail` stacking doesn't push content below fold on narrow screens.
+- `SpeedTierPage.tsx`: wrap speed list in `overflow-x-auto` if missing; sprite column must not overflow at 375px.
+- `PreviewPage` panels: verify stacking under `sm:` breakpoints.
+- CSS-only responsive changes; no new JS; no motion added on mobile.
+- Tests: viewport-width snapshot — render `CalculatorPage` in a 375px container, assert no horizontal overflow.
+- Skip overdrive skill on this item (motion is a liability on mobile). Use impeccable → polish only.
+
+**Rules for all three items:**
+- Branch from `develop`. Target `develop`. Never push directly.
+- TDD: write failing tests first, then implement, then run `pnpm lint && pnpm typecheck && pnpm test` from `frontend/`.
+- Conventional Commits. Never `--no-verify`.
+- Skills per frontend commit: `impeccable → overdrive → polish` (skip overdrive on mobile-pass).
+- One PR per item. Stop after each PR is opened and CI is green; do not self-merge.
