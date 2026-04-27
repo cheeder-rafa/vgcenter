@@ -44,7 +44,10 @@ import {
 } from '../features/calculator/store/usePinStore'
 import { useUrlStateSync } from '../features/calculator/share/useUrlStateSync'
 import { formatDiscordReport } from '../features/calculator/share/exportDiscord'
-import { exportResultImage } from '../features/calculator/share/exportImage'
+import {
+  exportResultImage,
+  type ExportImageInput,
+} from '../features/calculator/share/exportImage'
 import { useToastStore } from '../features/calculator/store/useToastStore'
 
 export function CalculatorPage() {
@@ -71,8 +74,6 @@ export function CalculatorPage() {
   useReactiveDamage()
   const { copyShareLink } = useUrlStateSync()
   useCalcHistorySync()
-
-  const resultPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -228,9 +229,26 @@ export function CalculatorPage() {
   }
 
   function handleExportPng() {
-    const el = resultPanelRef.current
-    if (el === null) return
-    void exportResultImage(el)
+    const input: ExportImageInput = {
+      attacker: {
+        name: attackerName,
+        speciesId: attacker.speciesId,
+        megaActive: attacker.megaActive,
+        megaFormId: attacker.megaFormId,
+        types: (attacker.types ?? []).flatMap((t) => (t !== null ? [t] : [])),
+      },
+      defender: {
+        name: defenderName,
+        speciesId: defender.speciesId,
+        megaActive: defender.megaActive,
+        megaFormId: defender.megaFormId,
+        types: (defender.types ?? []).flatMap((t) => (t !== null ? [t] : [])),
+      },
+      attackerMoves: attackerMoveEntries,
+      defenderMoves: defenderMoveEntries,
+      regulation,
+    }
+    void exportResultImage(input)
   }
 
   return (
@@ -267,7 +285,6 @@ export function CalculatorPage() {
           data-testid="detailed-result-grid"
         >
           <div
-            ref={resultPanelRef}
             className="xl:col-start-2 xl:col-end-5"
             data-testid="detailed-result-span"
           >
@@ -383,6 +400,116 @@ function useAllMoveEntries(
   })
 }
 
+function ShareMenu({
+  onShare,
+  onExportDiscord,
+  onExportPng,
+}: {
+  onShare: () => void
+  onExportDiscord: () => void
+  onExportPng: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  function action(fn: () => void) {
+    fn()
+    setOpen(false)
+  }
+
+  return (
+    <div ref={menuRef} className="relative" data-testid="share-menu">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Share and export options"
+        className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-violet sm:w-auto"
+      >
+        <span aria-hidden="true">⬡</span>
+        Share
+        <span
+          aria-hidden="true"
+          className={`ml-0.5 text-[0.6em] transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
+        >
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-50 mt-2 min-w-[190px] overflow-hidden rounded-sm border border-white/15 bg-[#0d0b1e] shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
+        >
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-arena-violet via-arena-plasma to-arena-cyan" />
+          <ul className="py-1">
+            <li>
+              <button
+                role="menuitem"
+                type="button"
+                onClick={() => action(onShare)}
+                aria-label="Copy shareable link to clipboard"
+                className="flex w-full items-center gap-3 px-4 py-2.5 font-display text-[0.65rem] uppercase tracking-[0.2em] text-arena-violet transition hover:bg-arena-violet/10"
+              >
+                <span aria-hidden="true" className="text-base leading-none">
+                  ⬡
+                </span>
+                Copy Link
+              </button>
+            </li>
+            <li>
+              <div className="mx-3 h-px bg-white/8" />
+            </li>
+            <li>
+              <button
+                role="menuitem"
+                type="button"
+                onClick={() => action(onExportDiscord)}
+                aria-label="Copy damage report for Discord"
+                className="flex w-full items-center gap-3 px-4 py-2.5 font-display text-[0.65rem] uppercase tracking-[0.2em] text-arena-cyan transition hover:bg-arena-cyan/10"
+              >
+                <span aria-hidden="true" className="text-base leading-none">
+                  #
+                </span>
+                Discord Text
+              </button>
+            </li>
+            <li>
+              <div className="mx-3 h-px bg-white/8" />
+            </li>
+            <li>
+              <button
+                role="menuitem"
+                type="button"
+                onClick={() => action(onExportPng)}
+                aria-label="Export result as PNG image"
+                className="flex w-full items-center gap-3 px-4 py-2.5 font-display text-[0.65rem] uppercase tracking-[0.2em] text-arena-plasma transition hover:bg-arena-plasma/10"
+              >
+                <span aria-hidden="true" className="text-base leading-none">
+                  ⊡
+                </span>
+                Export Image
+              </button>
+            </li>
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CompactHeader({
   activeSide,
   regulation,
@@ -400,36 +527,37 @@ function CompactHeader({
   onExportDiscord: () => void
   onExportPng: () => void
 }) {
-  const activeSideLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
+  const activeSideLabel = activeSide === 'attacker' ? 'Left' : 'Right'
+
   return (
     <header
-      className="grid gap-3 border-b border-white/10 pb-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center"
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-white/10 pb-3 sm:flex-nowrap"
       data-testid="calculator-header"
     >
+      {/* Zone 1: Identity */}
       <div
-        className="flex min-w-0 flex-wrap items-center gap-2.5 sm:gap-3"
+        className="flex min-w-0 flex-shrink-0 items-center gap-2.5"
         data-testid="calculator-header-brand"
       >
-        <span className="h-2 w-2 rounded-full bg-arena-plasma shadow-[0_0_12px_rgba(255,43,142,0.9)]" />
-        <h1 className="font-display text-lg font-extrabold tracking-tight text-white sm:text-2xl">
+        <span className="h-2 w-2 flex-shrink-0 rounded-full bg-arena-plasma shadow-[0_0_12px_rgba(255,43,142,0.9)]" />
+        <h1 className="font-display text-lg font-extrabold tracking-tight text-white sm:text-xl">
           {t('calculator.title')}
         </h1>
         <span
-          className="arena-chip text-arena-plasma"
+          className="arena-chip hidden text-arena-plasma sm:inline-flex"
           data-testid="regulation-chip"
         >
           Regulation {regulation}
         </span>
       </div>
+
+      {/* Zone 2: Import cluster */}
       <div
-        className="grid gap-2 sm:flex sm:flex-wrap sm:items-center xl:justify-self-end"
+        className="flex flex-1 flex-wrap items-center gap-2 border-l border-white/10 pl-4"
         data-testid="calculator-header-actions"
       >
-        <span className="hidden font-display text-xs tracking-[0.3em] text-arena-violet sm:inline">
-          IMPORT ⟶
-        </span>
-        <span className="arena-chip justify-center text-arena-cyan sm:justify-start">
-          Import Target: {activeSideLabel}
+        <span className="arena-chip justify-center text-arena-cyan">
+          {activeSideLabel}
         </span>
         <ShowdownImportModal
           activeSide={activeSide}
@@ -441,34 +569,17 @@ function CompactHeader({
           onImportTeam={onImportTeam}
           onLoadPokemon={onLoadPokemon}
         />
-        <button
-          type="button"
-          onClick={onShare}
-          aria-label="Copy shareable link to clipboard"
-          className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-violet sm:w-auto"
-        >
-          <span aria-hidden="true">⬡</span>
-          Share Link
-        </button>
-        <button
-          type="button"
-          onClick={onExportDiscord}
-          aria-label="Copy damage report for Discord"
-          className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-cyan sm:w-auto"
-        >
-          <span aria-hidden="true">#</span>
-          Discord
-        </button>
-        <button
-          type="button"
-          onClick={onExportPng}
-          aria-label="Export result panel as PNG"
-          className="arena-button min-h-[44px] flex w-full items-center justify-center gap-1.5 text-arena-plasma sm:w-auto"
-        >
-          <span aria-hidden="true">⊡</span>
-          Export PNG
-        </button>
+      </div>
+
+      {/* Zone 3: Share / export */}
+      <div className="flex-shrink-0">
+        <ShareMenu
+          onShare={onShare}
+          onExportDiscord={onExportDiscord}
+          onExportPng={onExportPng}
+        />
       </div>
     </header>
   )
 }
+

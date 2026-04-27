@@ -55,28 +55,22 @@ describe('CalculatorPage — mobile layout (≤375px)', () => {
     mocks.calculateDamage.mockResolvedValue(null)
   })
 
-  it('Share Link button has min-h-[44px] tap target', () => {
+  it('Share menu trigger has min-h-[44px] tap target', () => {
     renderCalcMobile()
+    // Share, Discord, and Export are collapsed into one Share menu trigger.
     const btn = screen.getByRole('button', {
-      name: /copy shareable link to clipboard/i,
+      name: /share and export options/i,
     })
     expect(btn.className).toContain('min-h-[44px]')
   })
 
-  it('Discord export button has min-h-[44px] tap target', () => {
+  it('Share menu is rendered with the correct trigger aria-label', () => {
     renderCalcMobile()
-    const btn = screen.getByRole('button', {
-      name: /copy damage report for discord/i,
-    })
-    expect(btn.className).toContain('min-h-[44px]')
-  })
-
-  it('Export PNG button has min-h-[44px] tap target', () => {
-    renderCalcMobile()
-    const btn = screen.getByRole('button', {
-      name: /export result panel as png/i,
-    })
-    expect(btn.className).toContain('min-h-[44px]')
+    // Share, Discord, and Export actions are collapsed into one Share menu.
+    expect(screen.getByTestId('share-menu')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /share and export options/i }),
+    ).toBeInTheDocument()
   })
 
   it('main grid stacks to single column below desktop breakpoint', () => {
