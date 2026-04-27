@@ -86,8 +86,12 @@ export function StatTable({
             <span role="columnheader">Stat</span>
             <span role="columnheader">Base</span>
             <span role="columnheader">SP 0–32</span>
-            <span role="columnheader" className="text-center">Stage</span>
-            <span role="columnheader" className="text-right">Final</span>
+            <span role="columnheader" className="text-center">
+              Stage
+            </span>
+            <span role="columnheader" className="text-right">
+              Final
+            </span>
           </div>
           {ROWS.map((row) => (
             <StatRow
@@ -193,9 +197,15 @@ function StatRow({
           data-testid={`stat-stage-${row.key}`}
           className="flex items-center justify-end gap-1"
         >
-          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">−</span>
-          <span className="w-6 text-center font-mono text-[0.7rem] text-white/22">—</span>
-          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">+</span>
+          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">
+            −
+          </span>
+          <span className="w-6 text-center font-mono text-[0.7rem] text-white/22">
+            —
+          </span>
+          <span className="w-5 text-center font-mono text-[0.65rem] text-transparent">
+            +
+          </span>
         </div>
       ) : (
         <StageControl

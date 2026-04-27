@@ -22,7 +22,8 @@ export function useSpeedTiers() {
   const [status, setStatus] = useState<Status>('idle')
   const [rows, setRows] = useState<SpeedTierRow[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [modifiers, setModifiers] = useState<SpeedTierModifiers>(DEFAULT_MODIFIERS)
+  const [modifiers, setModifiers] =
+    useState<SpeedTierModifiers>(DEFAULT_MODIFIERS)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const userTeam = mine
@@ -70,7 +71,11 @@ export function useSpeedTiers() {
       } catch (caught) {
         setRows([])
         setStatus('error')
-        setError(caught instanceof Error ? caught.message : 'Failed to load speed tiers')
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : 'Failed to load speed tiers',
+        )
       }
     }, DEBOUNCE_MS)
 
@@ -79,7 +84,7 @@ export function useSpeedTiers() {
         clearTimeout(debounceRef.current)
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modifiers, mine])
 
   return { status, rows, error, modifiers, setModifiers }

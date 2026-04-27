@@ -28,7 +28,11 @@ describe('classifyAdaptation', () => {
 
   it('suggests run-it-back after win with opponent running it back', () => {
     const result = classifyAdaptation([
-      makeGame({ gameNumber: 1, result: 'win', opponentBehavior: 'ran-it-back' }),
+      makeGame({
+        gameNumber: 1,
+        result: 'win',
+        opponentBehavior: 'ran-it-back',
+      }),
     ])
     expect(result.suggestions).toContain('run-it-back')
   })
@@ -56,7 +60,11 @@ describe('classifyAdaptation', () => {
 
   it('suggests change-lead-only and change-win-condition after loss with opponent running it back', () => {
     const result = classifyAdaptation([
-      makeGame({ gameNumber: 1, result: 'loss', opponentBehavior: 'ran-it-back' }),
+      makeGame({
+        gameNumber: 1,
+        result: 'loss',
+        opponentBehavior: 'ran-it-back',
+      }),
     ])
     expect(result.suggestions).toContain('change-lead-only')
     expect(result.suggestions).toContain('change-win-condition')
@@ -109,7 +117,11 @@ describe('classifyAdaptation', () => {
 
   it('handles 1-1 tiebreak going into game 3', () => {
     const result = classifyAdaptation([
-      makeGame({ gameNumber: 1, result: 'win', opponentBehavior: 'ran-it-back' }),
+      makeGame({
+        gameNumber: 1,
+        result: 'win',
+        opponentBehavior: 'ran-it-back',
+      }),
       makeGame({ gameNumber: 2, result: 'loss', opponentBehavior: 'adjusted' }),
     ])
     expect(result.suggestions.length).toBeGreaterThan(0)

@@ -3,7 +3,11 @@ import { useSearchParams } from 'react-router-dom'
 
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import { useToastStore } from '../store/useToastStore'
-import { decodeCalcState, encodeCalcState, type ShareableState } from './encodeState'
+import {
+  decodeCalcState,
+  encodeCalcState,
+  type ShareableState,
+} from './encodeState'
 
 const PARAM = 's'
 
@@ -63,7 +67,10 @@ export function useUrlStateSync() {
 
     navigator.clipboard.writeText(url).then(
       () => useToastStore.getState().push('Link copied to clipboard'),
-      () => useToastStore.getState().push('Could not copy — paste from address bar after sharing'),
+      () =>
+        useToastStore
+          .getState()
+          .push('Could not copy — paste from address bar after sharing'),
     )
   }
 

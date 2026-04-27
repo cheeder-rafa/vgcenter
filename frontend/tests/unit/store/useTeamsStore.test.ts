@@ -176,7 +176,14 @@ describe('useTeamsStore', () => {
       'vgcenter.teamsStore.v1',
       JSON.stringify({
         state: {
-          mine: [savedPokemonFactory({ speciesId: 'incineroar' }), null, null, null, null, null],
+          mine: [
+            savedPokemonFactory({ speciesId: 'incineroar' }),
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
           opponent: [null, null, null, null, null, null],
         },
         version: 1,
@@ -228,7 +235,9 @@ describe('useTeamsStore', () => {
     })
 
     expect(
-      useToastStore.getState().toasts.some((t) => /migrat|upgrad/i.test(t.message)),
+      useToastStore
+        .getState()
+        .toasts.some((t) => /migrat|upgrad/i.test(t.message)),
     ).toBe(true)
   })
 
@@ -238,10 +247,18 @@ describe('useTeamsStore', () => {
 
     const { useTeamsStore } = await import('../../../src/store/useTeamsStore')
 
-    useTeamsStore.getState().importTeam('attacker', [
-      savedPokemonFactory({ speciesId: 'amoonguss', speciesName: 'Amoonguss' }),
-      savedPokemonFactory({ speciesId: 'incineroar', speciesName: 'Incineroar' }),
-    ])
+    useTeamsStore
+      .getState()
+      .importTeam('attacker', [
+        savedPokemonFactory({
+          speciesId: 'amoonguss',
+          speciesName: 'Amoonguss',
+        }),
+        savedPokemonFactory({
+          speciesId: 'incineroar',
+          speciesName: 'Incineroar',
+        }),
+      ])
 
     expect(useTeamsStore.getState().mine).toEqual([
       expect.objectContaining({ speciesId: 'amoonguss' }),

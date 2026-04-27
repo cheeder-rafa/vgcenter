@@ -1,4 +1,9 @@
-import type { CombatantBuild, FieldRequest, Regulation, SideConditions } from '../types/api'
+import type {
+  CombatantBuild,
+  FieldRequest,
+  Regulation,
+  SideConditions,
+} from '../types/api'
 
 const VERSION = 1
 

@@ -21,7 +21,10 @@ export function Bo3Notebook({ games, onAddGame, onClear }: Props) {
   const hasGames = games.length > 0
 
   return (
-    <section className="arena-panel arena-panel--cyan p-4" aria-label="BO3 Adaptation Notebook">
+    <section
+      className="arena-panel arena-panel--cyan p-4"
+      aria-label="BO3 Adaptation Notebook"
+    >
       <div className="relative z-10 grid gap-4">
         <SectionHeader />
 
@@ -53,7 +56,9 @@ function SectionHeader() {
   return (
     <div>
       <p className="arena-label text-arena-cyan">Best of 3</p>
-      <h2 className="mt-1 text-xl font-black text-white">BO3 Adaptation Notebook</h2>
+      <h2 className="mt-1 text-xl font-black text-white">
+        BO3 Adaptation Notebook
+      </h2>
       <p className="mt-1 text-sm leading-6 text-white/68">
         Record each game. Get adaptation guidance for the next.
       </p>
@@ -72,7 +77,9 @@ function GameSummary({ game }: { game: GameRecord }) {
   return (
     <div className="rounded border border-white/10 bg-black/18 p-3 grid gap-2">
       <div className="flex items-center gap-3">
-        <span className="arena-label text-white/55">Game {game.gameNumber}</span>
+        <span className="arena-label text-white/55">
+          Game {game.gameNumber}
+        </span>
         {game.result ? (
           <span
             className={`inline-flex items-center rounded border px-2 py-0.5 font-mono text-[0.66rem] uppercase tracking-[0.18em] ${resultClass}`}
@@ -82,9 +89,7 @@ function GameSummary({ game }: { game: GameRecord }) {
         ) : null}
       </div>
 
-      {game.myLeads ? (
-        <InfoRow label="My leads" value={game.myLeads} />
-      ) : null}
+      {game.myLeads ? <InfoRow label="My leads" value={game.myLeads} /> : null}
       {game.opponentLeads ? (
         <InfoRow label="Opponent leads" value={game.opponentLeads} />
       ) : null}
@@ -184,7 +189,9 @@ function AddGameForm({
             className={inputClass}
             aria-label="Result"
             value={form.result ?? ''}
-            onChange={(e) => set('result', (e.target.value as GameResult) || null)}
+            onChange={(e) =>
+              set('result', (e.target.value as GameResult) || null)
+            }
           >
             <option value="">— select —</option>
             <option value="win">Win</option>
@@ -278,7 +285,9 @@ function AddGameForm({
       </label>
 
       <fieldset className="grid gap-2">
-        <legend className="arena-label text-white/55">Opponent between games</legend>
+        <legend className="arena-label text-white/55">
+          Opponent between games
+        </legend>
         <div className="flex flex-wrap gap-3">
           {(
             [
@@ -287,7 +296,10 @@ function AddGameForm({
               ['new-mode', 'Showed a new mode'],
             ] as [OpponentBehavior, string][]
           ).map(([value, label]) => (
-            <label key={value} className="flex cursor-pointer items-center gap-2 text-sm">
+            <label
+              key={value}
+              className="flex cursor-pointer items-center gap-2 text-sm"
+            >
               <input
                 type="radio"
                 name={`opponent-behavior-g${gameNumber}`}
@@ -344,7 +356,8 @@ const SUGGESTION_TONE: Record<AdaptationSuggestion, string> = {
   'run-it-back': 'border-arena-cyan/35 bg-arena-cyan/10 text-arena-cyan',
   'change-lead-only': 'border-arena-sun/35 bg-arena-sun/10 text-arena-sun',
   'change-backline': 'border-arena-sun/35 bg-arena-sun/10 text-arena-sun',
-  'change-win-condition': 'border-arena-plasma/35 bg-arena-plasma/10 text-white',
+  'change-win-condition':
+    'border-arena-plasma/35 bg-arena-plasma/10 text-white',
   'preserve-unrevealed': 'border-white/15 bg-white/[0.06] text-white/85',
   'calculated-risk': 'border-arena-plasma/35 bg-arena-plasma/10 text-white',
 }

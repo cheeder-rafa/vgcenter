@@ -59,10 +59,7 @@ export function usePlanRecommendation({
     setError(null)
 
     const controller = new AbortController()
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      RECOMMEND_TIMEOUT_MS,
-    )
+    const timeoutId = setTimeout(() => controller.abort(), RECOMMEND_TIMEOUT_MS)
 
     try {
       const nextResult = await recommendPlans(
@@ -145,4 +142,3 @@ function classifyError(caught: unknown): RecommendError {
     hint: 'Make sure both teams are saved with at least one damaging move each.',
   }
 }
-

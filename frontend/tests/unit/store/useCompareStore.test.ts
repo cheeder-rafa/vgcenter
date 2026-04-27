@@ -70,7 +70,9 @@ describe('useCompareStore', () => {
     for (let i = 0; i < 4; i++) useCompareStore.getState().pin(makePin(`p${i}`))
     useCompareStore.getState().pin(makePin('overflow'))
     expect(useCompareStore.getState().pins).toHaveLength(4)
-    expect(useCompareStore.getState().pins.some((p) => p.id === 'overflow')).toBe(false)
+    expect(
+      useCompareStore.getState().pins.some((p) => p.id === 'overflow'),
+    ).toBe(false)
   })
 
   it('unpins by id', () => {

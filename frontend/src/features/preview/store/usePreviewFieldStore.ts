@@ -34,8 +34,12 @@ type PreviewFieldState = {
   setRoom: (room: string) => void
   toggleSelectedTailwind: () => void
   toggleOpponentTailwind: () => void
-  toggleSelectedScreen: (screen: 'reflect' | 'lightScreen' | 'auroraVeil') => void
-  toggleOpponentScreen: (screen: 'reflect' | 'lightScreen' | 'auroraVeil') => void
+  toggleSelectedScreen: (
+    screen: 'reflect' | 'lightScreen' | 'auroraVeil',
+  ) => void
+  toggleOpponentScreen: (
+    screen: 'reflect' | 'lightScreen' | 'auroraVeil',
+  ) => void
   reset: () => void
 }
 
@@ -46,7 +50,10 @@ export const usePreviewFieldStore = create<PreviewFieldState>((set) => ({
     set((state) => ({
       field: {
         ...state.field,
-        field: { ...state.field.field, weather: weather as FieldRequest['weather'] },
+        field: {
+          ...state.field.field,
+          weather: weather as FieldRequest['weather'],
+        },
       },
     })),
 
@@ -54,7 +61,10 @@ export const usePreviewFieldStore = create<PreviewFieldState>((set) => ({
     set((state) => ({
       field: {
         ...state.field,
-        field: { ...state.field.field, terrain: terrain as FieldRequest['terrain'] },
+        field: {
+          ...state.field.field,
+          terrain: terrain as FieldRequest['terrain'],
+        },
       },
     })),
 

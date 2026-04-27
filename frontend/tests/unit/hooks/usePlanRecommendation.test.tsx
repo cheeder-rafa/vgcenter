@@ -136,8 +136,22 @@ function savedPokemon(speciesId: string): SavedPokemon {
       { moveId: null },
       { moveId: null },
     ],
-    baseStats: { hp: 155, attack: 120, defense: 100, specialAttack: 140, specialDefense: 100, speed: 135 },
-    finalStats: { hp: 155, attack: 120, defense: 100, specialAttack: 140, specialDefense: 100, speed: 135 },
+    baseStats: {
+      hp: 155,
+      attack: 120,
+      defense: 100,
+      specialAttack: 140,
+      specialDefense: 100,
+      speed: 135,
+    },
+    finalStats: {
+      hp: 155,
+      attack: 120,
+      defense: 100,
+      specialAttack: 140,
+      specialDefense: 100,
+      speed: 135,
+    },
     types: ['FAIRY', null],
     grounded: true,
     currentHp: 155,
@@ -148,5 +162,7 @@ function seedTeam(side: 'mine' | 'opponent', count: number) {
   const team = Array.from({ length: count }, (_, i) =>
     savedPokemon(`species-${side}-${i}`),
   )
-  useTeamsStore.getState().importTeam(side === 'mine' ? 'attacker' : 'defender', team)
+  useTeamsStore
+    .getState()
+    .importTeam(side === 'mine' ? 'attacker' : 'defender', team)
 }

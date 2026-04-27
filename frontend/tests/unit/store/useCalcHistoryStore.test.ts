@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { useCalcHistoryStore, type HistoryEntry } from '../../../src/features/calculator/store/useCalcHistoryStore'
+import {
+  useCalcHistoryStore,
+  type HistoryEntry,
+} from '../../../src/features/calculator/store/useCalcHistoryStore'
 
 function makeEntry(id: number): HistoryEntry {
   return {
@@ -14,8 +17,24 @@ function makeEntry(id: number): HistoryEntry {
       attacker: null as unknown as HistoryEntry['snapshot']['attacker'],
       defender: null as unknown as HistoryEntry['snapshot']['defender'],
       field: { weather: 'CLEAR', terrain: 'NONE', room: 'NONE' },
-      attackerSide: { reflect: false, lightScreen: false, auroraVeil: false, friendGuard: false, helpingHand: false, tailwind: false, protect: false },
-      defenderSide: { reflect: false, lightScreen: false, auroraVeil: false, friendGuard: false, helpingHand: false, tailwind: false, protect: false },
+      attackerSide: {
+        reflect: false,
+        lightScreen: false,
+        auroraVeil: false,
+        friendGuard: false,
+        helpingHand: false,
+        tailwind: false,
+        protect: false,
+      },
+      defenderSide: {
+        reflect: false,
+        lightScreen: false,
+        auroraVeil: false,
+        friendGuard: false,
+        helpingHand: false,
+        tailwind: false,
+        protect: false,
+      },
       criticalHit: false,
       targets: 1,
     },
@@ -50,7 +69,7 @@ describe('useCalcHistoryStore', () => {
     const { entries } = useCalcHistoryStore.getState()
     expect(entries).toHaveLength(10)
     expect(entries[0].id).toBe(12) // newest
-    expect(entries[9].id).toBe(3)  // oldest kept
+    expect(entries[9].id).toBe(3) // oldest kept
   })
 
   it('clear removes all entries', () => {

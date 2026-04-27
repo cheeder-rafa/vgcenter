@@ -16,9 +16,11 @@ function formatGameMarkdown(game: GameRecord): string {
   lines.push(`**Result:** ${game.result ?? 'not recorded'}`)
 
   if (game.myLeads) lines.push(`**My leads:** ${game.myLeads}`)
-  if (game.opponentLeads) lines.push(`**Opponent leads:** ${game.opponentLeads}`)
+  if (game.opponentLeads)
+    lines.push(`**Opponent leads:** ${game.opponentLeads}`)
   if (game.myBrought) lines.push(`**I brought:** ${game.myBrought}`)
-  if (game.opponentBrought) lines.push(`**Opponent brought:** ${game.opponentBrought}`)
+  if (game.opponentBrought)
+    lines.push(`**Opponent brought:** ${game.opponentBrought}`)
 
   if (game.scoutedInfo) {
     lines.push('')

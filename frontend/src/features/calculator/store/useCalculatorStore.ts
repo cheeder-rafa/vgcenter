@@ -175,7 +175,9 @@ function mergeCombatant(
     baseStats: nextBaseStats,
     finalStats: nextFinalStats,
     currentHp:
-      nextMaxHp === null ? requestedCurrentHp : Math.max(1, Math.min(requestedCurrentHp, nextMaxHp)),
+      nextMaxHp === null
+        ? requestedCurrentHp
+        : Math.max(1, Math.min(requestedCurrentHp, nextMaxHp)),
   }
 }
 

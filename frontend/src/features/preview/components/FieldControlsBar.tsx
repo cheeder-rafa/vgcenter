@@ -33,10 +33,18 @@ export function FieldControlsBar() {
   const setWeather = usePreviewFieldStore((s) => s.setWeather)
   const setTerrain = usePreviewFieldStore((s) => s.setTerrain)
   const setRoom = usePreviewFieldStore((s) => s.setRoom)
-  const toggleSelectedTailwind = usePreviewFieldStore((s) => s.toggleSelectedTailwind)
-  const toggleOpponentTailwind = usePreviewFieldStore((s) => s.toggleOpponentTailwind)
-  const toggleSelectedScreen = usePreviewFieldStore((s) => s.toggleSelectedScreen)
-  const toggleOpponentScreen = usePreviewFieldStore((s) => s.toggleOpponentScreen)
+  const toggleSelectedTailwind = usePreviewFieldStore(
+    (s) => s.toggleSelectedTailwind,
+  )
+  const toggleOpponentTailwind = usePreviewFieldStore(
+    (s) => s.toggleOpponentTailwind,
+  )
+  const toggleSelectedScreen = usePreviewFieldStore(
+    (s) => s.toggleSelectedScreen,
+  )
+  const toggleOpponentScreen = usePreviewFieldStore(
+    (s) => s.toggleOpponentScreen,
+  )
 
   const currentWeather = field.field.weather
   const currentTerrain = field.field.terrain

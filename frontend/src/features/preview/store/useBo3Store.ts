@@ -15,9 +15,10 @@ export const useBo3Store = create<Bo3State>()(
       games: [],
       addGame: (game) =>
         set((state) => ({
-          games: [...state.games.filter((g) => g.gameNumber !== game.gameNumber), game].sort(
-            (a, b) => a.gameNumber - b.gameNumber,
-          ),
+          games: [
+            ...state.games.filter((g) => g.gameNumber !== game.gameNumber),
+            game,
+          ].sort((a, b) => a.gameNumber - b.gameNumber),
         })),
       clear: () => set({ games: [] }),
     }),

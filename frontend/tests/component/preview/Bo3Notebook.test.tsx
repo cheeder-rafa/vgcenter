@@ -52,7 +52,13 @@ describe('Bo3Notebook', () => {
   it('shows recorded game result', () => {
     render(
       <Bo3Notebook
-        games={[makeGame({ gameNumber: 1, result: 'win', myLeads: 'Tornadus + Urshifu' })]}
+        games={[
+          makeGame({
+            gameNumber: 1,
+            result: 'win',
+            myLeads: 'Tornadus + Urshifu',
+          }),
+        ]}
         onAddGame={vi.fn()}
         onClear={vi.fn()}
       />,
@@ -63,7 +69,13 @@ describe('Bo3Notebook', () => {
   it('shows scouted info in recorded game', () => {
     render(
       <Bo3Notebook
-        games={[makeGame({ gameNumber: 1, result: 'loss', scoutedInfo: 'Flutter Mane: Timid' })]}
+        games={[
+          makeGame({
+            gameNumber: 1,
+            result: 'loss',
+            scoutedInfo: 'Flutter Mane: Timid',
+          }),
+        ]}
         onAddGame={vi.fn()}
         onClear={vi.fn()}
       />,
@@ -74,7 +86,13 @@ describe('Bo3Notebook', () => {
   it('shows adaptation guidance when games with results exist', () => {
     render(
       <Bo3Notebook
-        games={[makeGame({ gameNumber: 1, result: 'win', opponentBehavior: 'ran-it-back' })]}
+        games={[
+          makeGame({
+            gameNumber: 1,
+            result: 'win',
+            opponentBehavior: 'ran-it-back',
+          }),
+        ]}
         onAddGame={vi.fn()}
         onClear={vi.fn()}
       />,
@@ -90,8 +108,12 @@ describe('Bo3Notebook', () => {
         onClear={vi.fn()}
       />,
     )
-    expect(screen.getByRole('button', { name: /copy as markdown/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /copy as json/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /copy as markdown/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /copy as json/i }),
+    ).toBeInTheDocument()
   })
 
   it('does not show export buttons when no games recorded', () => {
@@ -105,7 +127,9 @@ describe('Bo3Notebook', () => {
     const onAddGame = vi.fn()
     render(<Bo3Notebook games={[]} onAddGame={onAddGame} onClear={vi.fn()} />)
 
-    await userEvent.click(screen.getByRole('button', { name: /record game 1/i }))
+    await userEvent.click(
+      screen.getByRole('button', { name: /record game 1/i }),
+    )
 
     const resultSelect = screen.getByRole('combobox', { name: /result/i })
     await userEvent.selectOptions(resultSelect, 'win')
@@ -133,7 +157,9 @@ describe('Bo3Notebook', () => {
 
   it('has accessible labels on all form fields', async () => {
     render(<Bo3Notebook games={[]} onAddGame={vi.fn()} onClear={vi.fn()} />)
-    await userEvent.click(screen.getByRole('button', { name: /record game 1/i }))
+    await userEvent.click(
+      screen.getByRole('button', { name: /record game 1/i }),
+    )
 
     expect(screen.getByLabelText(/result/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/my leads/i)).toBeInTheDocument()

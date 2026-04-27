@@ -152,13 +152,9 @@ describe('useSavedTeamStore (backward-compat alias)', () => {
     )
 
     expect(
-      useSavedTeamStore
-        .getState()
-        .mine.filter((entry) => entry !== null),
+      useSavedTeamStore.getState().mine.filter((entry) => entry !== null),
     ).toHaveLength(6)
-    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe(
-      'charizard-5',
-    )
+    expect(useSavedTeamStore.getState().mine[5]?.speciesId).toBe('charizard-5')
     expect(useToastStore.getState().toasts.at(-1)?.message).toMatch(/full/i)
   })
 

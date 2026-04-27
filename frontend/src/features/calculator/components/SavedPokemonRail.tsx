@@ -1,8 +1,5 @@
 import type { CombatantBuild } from '../types/api'
-import {
-  useTeamsStore,
-  type SavedPokemon,
-} from '../../../store/useTeamsStore'
+import { useTeamsStore, type SavedPokemon } from '../../../store/useTeamsStore'
 import type { CalculatorSide } from '../store/useCalculatorStore'
 import { SavedPokemonCard } from './SavedPokemonCard'
 

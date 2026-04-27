@@ -113,10 +113,7 @@ function PlanCard({
 
         <ReadDifficulty burden={plan.predictionBurden} />
 
-        <ModesSection
-          covered={plan.modesCovered}
-          atRisk={plan.modesAtRisk}
-        />
+        <ModesSection covered={plan.modesCovered} atRisk={plan.modesAtRisk} />
 
         {plan.leftOutRationale.length > 0 ? (
           <LeftOutSection rationale={plan.leftOutRationale} />
@@ -136,7 +133,9 @@ function PlanCard({
 
 function PlanSummary({ summary }: { summary: string }) {
   return (
-    <p className="break-words text-sm font-semibold leading-6 text-white">{summary}</p>
+    <p className="break-words text-sm font-semibold leading-6 text-white">
+      {summary}
+    </p>
   )
 }
 
@@ -244,7 +243,11 @@ function ModesSection({
 
 function LeftOutSection({ rationale }: { rationale: string[] }) {
   return (
-    <ReadoutList title="Bench decisions" items={rationale} accentClass="text-white/45" />
+    <ReadoutList
+      title="Bench decisions"
+      items={rationale}
+      accentClass="text-white/45"
+    />
   )
 }
 
@@ -274,7 +277,8 @@ function ReadoutList({
 function EmptyState() {
   return (
     <div className="rounded border border-white/10 bg-arena-panel/85 p-6 text-center text-sm text-white/62">
-      No recommendations available. Save both full teams and run recommendations.
+      No recommendations available. Save both full teams and run
+      recommendations.
     </div>
   )
 }

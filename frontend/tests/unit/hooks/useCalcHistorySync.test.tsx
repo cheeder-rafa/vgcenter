@@ -6,7 +6,9 @@ import { useCalcHistoryStore } from '../../../src/features/calculator/store/useC
 import { useCalcHistorySync } from '../../../src/features/calculator/hooks/useCalcHistorySync'
 
 vi.mock('../../../src/features/calculator/api/damageApi', () => ({
-  calculateDamage: vi.fn().mockResolvedValue({ rolls: [], minPct: 0, maxPct: 0, koChance: 0 }),
+  calculateDamage: vi
+    .fn()
+    .mockResolvedValue({ rolls: [], minPct: 0, maxPct: 0, koChance: 0 }),
 }))
 
 function seedCalcStore() {

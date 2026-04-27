@@ -32,7 +32,9 @@ describe('useSpreadLibraryStore', () => {
   })
 
   it('saves a spread for a species', () => {
-    useSpreadLibraryStore.getState().saveSpread('garchomp', makeSpread('Sash Lead'))
+    useSpreadLibraryStore
+      .getState()
+      .saveSpread('garchomp', makeSpread('Sash Lead'))
     const spreads = useSpreadLibraryStore.getState().getSpreads('garchomp')
     expect(spreads).toHaveLength(1)
     expect(spreads[0].name).toBe('Sash Lead')
@@ -42,12 +44,18 @@ describe('useSpreadLibraryStore', () => {
     const store = useSpreadLibraryStore.getState()
     store.saveSpread('garchomp', makeSpread('Sash Lead'))
     store.saveSpread('garchomp', makeSpread('Lum Sweeper'))
-    expect(useSpreadLibraryStore.getState().getSpreads('garchomp')).toHaveLength(2)
+    expect(
+      useSpreadLibraryStore.getState().getSpreads('garchomp'),
+    ).toHaveLength(2)
   })
 
   it('keeps spreads per species isolated', () => {
-    useSpreadLibraryStore.getState().saveSpread('garchomp', makeSpread('Sash Lead'))
-    expect(useSpreadLibraryStore.getState().getSpreads('gliscor')).toHaveLength(0)
+    useSpreadLibraryStore
+      .getState()
+      .saveSpread('garchomp', makeSpread('Sash Lead'))
+    expect(useSpreadLibraryStore.getState().getSpreads('gliscor')).toHaveLength(
+      0,
+    )
   })
 
   it('deletes a specific spread by id', () => {
@@ -56,11 +64,17 @@ describe('useSpreadLibraryStore', () => {
     store.saveSpread('garchomp', makeSpread('Lum Sweeper'))
     const [first] = useSpreadLibraryStore.getState().getSpreads('garchomp')
     store.deleteSpread('garchomp', first.id)
-    expect(useSpreadLibraryStore.getState().getSpreads('garchomp')).toHaveLength(1)
+    expect(
+      useSpreadLibraryStore.getState().getSpreads('garchomp'),
+    ).toHaveLength(1)
   })
 
   it('persists via localStorage (persist key present)', () => {
-    const storeAny = useSpreadLibraryStore as unknown as { persist?: { getOptions?: () => { name?: string } } }
-    expect(storeAny.persist?.getOptions?.()?.name).toBe('vgcenter.spreadLibrary.v1')
+    const storeAny = useSpreadLibraryStore as unknown as {
+      persist?: { getOptions?: () => { name?: string } }
+    }
+    expect(storeAny.persist?.getOptions?.()?.name).toBe(
+      'vgcenter.spreadLibrary.v1',
+    )
   })
 })
