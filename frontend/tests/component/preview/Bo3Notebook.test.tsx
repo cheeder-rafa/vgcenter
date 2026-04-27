@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { Bo3Notebook } from '../../../src/features/preview/components/Bo3Notebook'
 import type { GameRecord } from '../../../src/features/preview/types'
+import { useTeamsStore } from '../../../src/store/useTeamsStore'
 
 function makeGame(overrides: Partial<GameRecord> = {}): GameRecord {
   return {
@@ -20,6 +21,10 @@ function makeGame(overrides: Partial<GameRecord> = {}): GameRecord {
     ...overrides,
   }
 }
+
+afterEach(() => {
+  useTeamsStore.getState().reset()
+})
 
 describe('Bo3Notebook', () => {
   it('renders the section heading', () => {
@@ -166,5 +171,92 @@ describe('Bo3Notebook', () => {
     expect(screen.getByLabelText(/opponent leads/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/scouted info/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/unrevealed info/i)).toBeInTheDocument()
+  })
+
+  it('shows hint when roster is empty', async () => {
+    render(<Bo3Notebook games={[]} onAddGame={vi.fn()} onClear={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /record game 1/i }))
+
+    expect(screen.getAllByText(/add pokémon to your team rail/i).length).toBeGreaterThan(0)
+  })
+
+  it('shows roster chips when team is loaded', async () => {
+    const makePokemon = (speciesName: string) =>
+      ({
+        speciesId: speciesName.toLowerCase(),
+        speciesName,
+        spriteId: null,
+        natureId: 'hardy',
+        sp: { hp: 0, attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0 },
+        stages: { attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0 },
+        abilityId: null,
+        itemId: null,
+        status: 'NONE' as const,
+        megaActive: false,
+        megaFormId: null,
+        moves: [{ moveId: null }, { moveId: null }, { moveId: null }, { moveId: null }] as [{ moveId: string | null }, { moveId: string | null }, { moveId: string | null }, { moveId: string | null }],
+        baseStats: null,
+        finalStats: null,
+        types: null,
+        grounded: true,
+        currentHp: 100,
+      })
+
+    useTeamsStore.setState({
+      mine: [makePokemon('Urshifu'), makePokemon('Tornadus'), null, null, null, null],
+      opponent: [makePokemon('Incineroar'), null, null, null, null, null],
+    })
+
+    render(<Bo3Notebook games={[]} onAddGame={vi.fn()} onClear={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /record game 1/i }))
+
+    expect(screen.getAllByRole('button', { name: 'Urshifu' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: 'Tornadus' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('button', { name: 'Incineroar' }).length).toBeGreaterThan(0)
+  })
+
+  it('saves game with selected roster chips as joined string', async () => {
+    const makePokemon = (speciesName: string) =>
+      ({
+        speciesId: speciesName.toLowerCase(),
+        speciesName,
+        spriteId: null,
+        natureId: 'hardy',
+        sp: { hp: 0, attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0 },
+        stages: { attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0 },
+        abilityId: null,
+        itemId: null,
+        status: 'NONE' as const,
+        megaActive: false,
+        megaFormId: null,
+        moves: [{ moveId: null }, { moveId: null }, { moveId: null }, { moveId: null }] as [{ moveId: string | null }, { moveId: string | null }, { moveId: string | null }, { moveId: string | null }],
+        baseStats: null,
+        finalStats: null,
+        types: null,
+        grounded: true,
+        currentHp: 100,
+      })
+
+    useTeamsStore.setState({
+      mine: [makePokemon('Urshifu'), makePokemon('Tornadus'), null, null, null, null],
+      opponent: [null, null, null, null, null, null],
+    })
+
+    const onAddGame = vi.fn()
+    render(<Bo3Notebook games={[]} onAddGame={onAddGame} onClear={vi.fn()} />)
+
+    await userEvent.click(screen.getByRole('button', { name: /record game 1/i }))
+    await userEvent.selectOptions(screen.getByRole('combobox', { name: /result/i }), 'win')
+
+    // Click Urshifu and Tornadus chips in "My leads"
+    const urshifuButtons = screen.getAllByRole('button', { name: 'Urshifu' })
+    const tornadusButtons = screen.getAllByRole('button', { name: 'Tornadus' })
+    await userEvent.click(urshifuButtons[0])
+    await userEvent.click(tornadusButtons[0])
+
+    await userEvent.click(screen.getByRole('button', { name: /save game 1/i }))
+
+    const saved = onAddGame.mock.calls[0][0] as GameRecord
+    expect(saved.myLeads).toBe('Urshifu + Tornadus')
   })
 })
