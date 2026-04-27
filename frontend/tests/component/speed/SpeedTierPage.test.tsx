@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   buildSpeedTiers: vi.fn(),
@@ -17,6 +17,7 @@ vi.mock('../../../src/store/useTeamsStore', () => ({
 }))
 
 import { SpeedTierPage } from '../../../src/pages/SpeedTierPage'
+import { useSpeedTierStore } from '../../../src/features/speed/store/useSpeedTierStore'
 
 const EMPTY_RAIL = [null, null, null, null, null, null] as const
 
@@ -52,11 +53,16 @@ const BASE_ROWS = [
 ]
 
 beforeEach(() => {
+  useSpeedTierStore.setState({ baseRows: [], status: 'idle', error: null })
   mocks.useTeamsStore.mockImplementation(
     (selector: (s: { mine: readonly null[] }) => unknown) =>
       selector({ mine: EMPTY_RAIL }),
   )
   mocks.buildSpeedTiers.mockResolvedValue({ rows: BASE_ROWS })
+})
+
+afterEach(() => {
+  useSpeedTierStore.setState({ baseRows: [], status: 'idle', error: null })
 })
 
 describe('SpeedTierPage', () => {
@@ -191,6 +197,46 @@ describe('SpeedTierPage', () => {
     const tailwindBtn = screen.getByRole('button', { name: /tailwind/i })
     await user.click(tailwindBtn)
     expect(tailwindBtn).toHaveClass('bg-arena-cyan/15')
+  })
+
+  it('shows "Paralysis" label without division symbol', () => {
+    render(
+      <MemoryRouter>
+        <SpeedTierPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('button', { name: /^paralysis$/i })).toBeInTheDocument()
+    expect(screen.queryByText(/paralysis ÷2/i)).not.toBeInTheDocument()
+  })
+
+  it('tailwind applies only to userTeam rows, not to non-team rows', async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <SpeedTierPage />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() =>
+      expect(screen.getByText('Flutter Mane')).toBeInTheDocument(),
+    )
+
+    // Speed values only render in [role="cell"] divs (first row of each group)
+    const getSpeedCell = (speed: number) => {
+      const matches = screen.queryAllByText(speed.toString())
+      return matches.find((el) => el.closest('[role="cell"]') !== null)
+    }
+
+    expect(getSpeedCell(80)).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: /tailwind/i }))
+
+    // Flutter Mane (non-team) should still show 186 in a cell
+    expect(getSpeedCell(186)).toBeTruthy()
+    // Incineroar (userTeam: true) should now show 160 (80 × 2)
+    expect(getSpeedCell(160)).toBeTruthy()
+    // 80 should no longer appear in a cell
+    expect(getSpeedCell(80)).toBeFalsy()
   })
 
   it('speed table wrapper has overflow-x-auto for narrow screens', async () => {

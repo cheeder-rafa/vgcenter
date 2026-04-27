@@ -148,7 +148,7 @@ function ModifierToggles({
           [
             { key: 'tailwind', label: 'Tailwind ×2' },
             { key: 'trickRoom', label: 'Trick Room' },
-            { key: 'paralysis', label: 'Paralysis ÷2' },
+            { key: 'paralysis', label: 'Paralysis' },
             { key: 'choiceScarf', label: 'Choice Scarf ×1.5' },
           ] as const
         ).map(({ key, label }) => (

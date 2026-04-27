@@ -2,10 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { MEGA_STONE_MAP } from '../../calculator/data/megaStoneMap'
 import { useTeamsStore } from '../../../store/useTeamsStore'
-import { buildSpeedTiers } from '../api/speedApi'
+import { useSpeedTierStore } from '../store/useSpeedTierStore'
 import type { SpeedTierEntry, SpeedTierModifiers, SpeedTierRow } from '../types'
-
-type Status = 'idle' | 'loading' | 'success' | 'error'
 
 const DEFAULT_MODIFIERS: SpeedTierModifiers = {
   tailwind: false,
@@ -17,13 +15,30 @@ const DEFAULT_MODIFIERS: SpeedTierModifiers = {
 
 const DEBOUNCE_MS = 150
 
+function applyUserTeamModifiers(
+  rows: SpeedTierRow[],
+  modifiers: SpeedTierModifiers,
+): SpeedTierRow[] {
+  const scarfMult = modifiers.choiceScarf ? 1.5 : 1
+  const tailwindMult = modifiers.tailwind ? 2 : 1
+  if (scarfMult === 1 && tailwindMult === 1) return rows
+  return rows.map((row) => {
+    if (!row.userTeam) return row
+    return {
+      ...row,
+      finalSpeed: Math.floor(row.finalSpeed * scarfMult * tailwindMult),
+    }
+  })
+}
+
 export function useSpeedTiers() {
   const mine = useTeamsStore((state) => state.mine)
-  const [status, setStatus] = useState<Status>('idle')
-  const [rows, setRows] = useState<SpeedTierRow[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [modifiers, setModifiers] =
-    useState<SpeedTierModifiers>(DEFAULT_MODIFIERS)
+  const baseRows = useSpeedTierStore((s) => s.baseRows)
+  const status = useSpeedTierStore((s) => s.status)
+  const error = useSpeedTierStore((s) => s.error)
+  const fetchBase = useSpeedTierStore((s) => s.fetchBase)
+
+  const [modifiers, setModifiers] = useState<SpeedTierModifiers>(DEFAULT_MODIFIERS)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const userTeam = useMemo(
@@ -55,40 +70,35 @@ export function useSpeedTiers() {
     [mine],
   )
 
+  // Global modifiers (trickRoom, paralysis, stages) go to the backend.
+  // Tailwind and choiceScarf are applied client-side to userTeam rows only.
+  const globalModifiers = useMemo<SpeedTierModifiers>(
+    () => ({
+      tailwind: false,
+      trickRoom: modifiers.trickRoom,
+      paralysis: modifiers.paralysis,
+      choiceScarf: false,
+      stages: modifiers.stages,
+    }),
+    [modifiers.trickRoom, modifiers.paralysis, modifiers.stages],
+  )
+
   useEffect(() => {
-    if (debounceRef.current !== null) {
-      clearTimeout(debounceRef.current)
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      setStatus('loading')
-      setError(null)
-      try {
-        const result = await buildSpeedTiers({
-          regulation: 'M-A',
-          userTeam,
-          modifiers,
-        })
-        setRows(result.rows)
-        setStatus('success')
-      } catch (caught) {
-        setRows([])
-        setStatus('error')
-        setError(
-          caught instanceof Error
-            ? caught.message
-            : 'Failed to load speed tiers',
-        )
-      }
+    if (debounceRef.current !== null) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      fetchBase(userTeam, globalModifiers)
     }, DEBOUNCE_MS)
-
     return () => {
-      if (debounceRef.current !== null) {
-        clearTimeout(debounceRef.current)
-      }
+      if (debounceRef.current !== null) clearTimeout(debounceRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modifiers, mine])
+  }, [globalModifiers, mine])
+
+  // Tailwind/scarf applied client-side only to userTeam rows
+  const rows = useMemo(
+    () => applyUserTeamModifiers(baseRows, modifiers),
+    [baseRows, modifiers],
+  )
 
   return { status, rows, error, modifiers, setModifiers }
 }
