@@ -247,16 +247,18 @@ describe('useTeamsStore', () => {
 
     const { useTeamsStore } = await import('../../../src/store/useTeamsStore')
 
-    useTeamsStore.getState().importTeam('attacker', [
-      savedPokemonFactory({
-        speciesId: 'amoonguss',
-        speciesName: 'Amoonguss',
-      }),
-      savedPokemonFactory({
-        speciesId: 'incineroar',
-        speciesName: 'Incineroar',
-      }),
-    ])
+    useTeamsStore
+      .getState()
+      .importTeam('attacker', [
+        savedPokemonFactory({
+          speciesId: 'amoonguss',
+          speciesName: 'Amoonguss',
+        }),
+        savedPokemonFactory({
+          speciesId: 'incineroar',
+          speciesName: 'Incineroar',
+        }),
+      ])
 
     expect(useTeamsStore.getState().mine).toEqual([
       expect.objectContaining({ speciesId: 'amoonguss' }),
