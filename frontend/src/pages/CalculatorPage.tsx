@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   fetchAbilities,
@@ -43,6 +43,9 @@ import {
   type MatchupPin,
 } from '../features/calculator/store/usePinStore'
 import { useUrlStateSync } from '../features/calculator/share/useUrlStateSync'
+import { formatDiscordReport } from '../features/calculator/share/exportDiscord'
+import { exportResultImage } from '../features/calculator/share/exportImage'
+import { useToastStore } from '../features/calculator/store/useToastStore'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
@@ -68,6 +71,8 @@ export function CalculatorPage() {
   useReactiveDamage()
   const { copyShareLink } = useUrlStateSync()
   useCalcHistorySync()
+
+  const resultPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -208,6 +213,26 @@ export function CalculatorPage() {
     [pokedex, abilities, items, moves, natures],
   )
 
+  function handleExportDiscord() {
+    const text = formatDiscordReport({
+      attackerName,
+      defenderName,
+      attackerMoves: attackerMoveEntries,
+      defenderMoves: defenderMoveEntries,
+    })
+    navigator.clipboard.writeText(text).then(
+      () => useToastStore.getState().push('Discord report copied to clipboard'),
+      () =>
+        useToastStore.getState().push('Could not copy — clipboard unavailable'),
+    )
+  }
+
+  function handleExportPng() {
+    const el = resultPanelRef.current
+    if (el === null) return
+    void exportResultImage(el)
+  }
+
   return (
     <main className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden bg-arena-gradient text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05] [background-size:48px_48px]" />
@@ -225,6 +250,8 @@ export function CalculatorPage() {
           onImportTeam={handleImportTeam}
           onLoadPokemon={handleLoadImportedPokemon}
           onShare={copyShareLink}
+          onExportDiscord={handleExportDiscord}
+          onExportPng={handleExportPng}
         />
 
         <div className="flex items-center gap-3">
@@ -240,6 +267,7 @@ export function CalculatorPage() {
           data-testid="detailed-result-grid"
         >
           <div
+            ref={resultPanelRef}
             className="xl:col-start-2 xl:col-end-5"
             data-testid="detailed-result-span"
           >
@@ -361,12 +389,16 @@ function CompactHeader({
   onImportTeam,
   onLoadPokemon,
   onShare,
+  onExportDiscord,
+  onExportPng,
 }: {
   activeSide: CalculatorSide
   regulation: string
   onImportTeam: (side: CalculatorSide, team: ImportedPokemon[]) => void
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
   onShare: () => void
+  onExportDiscord: () => void
+  onExportPng: () => void
 }) {
   const activeSideLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
   return (
@@ -388,7 +420,6 @@ function CompactHeader({
         >
           Regulation {regulation}
         </span>
-
       </div>
       <div
         className="grid gap-2 sm:flex sm:flex-wrap sm:items-center xl:justify-self-end"
@@ -418,6 +449,24 @@ function CompactHeader({
         >
           <span aria-hidden="true">⬡</span>
           Share Link
+        </button>
+        <button
+          type="button"
+          onClick={onExportDiscord}
+          aria-label="Copy damage report for Discord"
+          className="arena-button flex w-full items-center justify-center gap-1.5 text-arena-cyan sm:w-auto"
+        >
+          <span aria-hidden="true">#</span>
+          Discord
+        </button>
+        <button
+          type="button"
+          onClick={onExportPng}
+          aria-label="Export result panel as PNG"
+          className="arena-button flex w-full items-center justify-center gap-1.5 text-arena-plasma sm:w-auto"
+        >
+          <span aria-hidden="true">⊡</span>
+          Export PNG
         </button>
       </div>
     </header>
