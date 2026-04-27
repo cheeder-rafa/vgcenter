@@ -28,6 +28,7 @@ export function PokepasteImportModal({
       submitLabel="Import Team"
       title="Import From Pokepaste"
       triggerLabel="Import Pokepaste"
+      sessionKey="pokepaste"
       validateInput={validatePokepasteUrl}
       onImport={importPokepaste}
       onImportTeam={onImportTeam}
