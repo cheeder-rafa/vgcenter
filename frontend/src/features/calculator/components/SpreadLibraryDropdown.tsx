@@ -32,10 +32,7 @@ function buildToSpread(id: string, name: string, build: CombatantBuild): NamedSp
 }
 
 export function SpreadLibraryDropdown({ speciesId, currentBuild, onLoad }: Props) {
-  const spreads = useSpreadLibraryStore(
-    (s) => s.library[speciesId] ?? EMPTY,
-    (a, b) => a === b || (a.length === 0 && b.length === 0),
-  )
+  const spreads = useSpreadLibraryStore((s) => s.library[speciesId] ?? EMPTY)
   const saveSpread = useSpreadLibraryStore((s) => s.saveSpread)
   const deleteSpread = useSpreadLibraryStore((s) => s.deleteSpread)
   const [open, setOpen] = useState(false)
