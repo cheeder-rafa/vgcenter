@@ -61,6 +61,8 @@ export function EvOptimizerPanel() {
         regulation: 'M-A',
         defenderSpeciesId: defender.speciesId!,
         defenderNatureId: defender.natureId.toUpperCase(),
+        defenderAbilityId: defender.abilityId,
+        defenderItemId: defender.itemId,
         attackerSpeciesId: attacker.speciesId!,
         attackerNatureId: attacker.natureId.toUpperCase(),
         attackerSp: spreadToApiSp(attacker.sp),

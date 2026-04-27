@@ -41,8 +41,8 @@ class SpeedTiersControllerTest {
     @Test
     void returnsSpeedTiersForAValidRequest() throws Exception {
         speedTiersUseCase.nextResult = new SpeedTiersResult(List.of(
-                new SpeedTierRow("garchomp", "Garchomp", 169, true),
-                new SpeedTierRow("incineroar", "Incineroar", 80, false)));
+                new SpeedTierRow("garchomp", "Garchomp", 169, true, false),
+                new SpeedTierRow("incineroar", "Incineroar", 80, false, false)));
 
         mockMvc.perform(post("/api/v1/preview/speed-tiers")
                         .contentType(APPLICATION_JSON)

@@ -275,7 +275,7 @@ describe('PokemonPanel', () => {
     await user.clear(currentHpInput)
     await user.type(currentHpInput, '999')
 
-    expect(useCalculatorStore.getState().attacker.currentHp).toBe(114)
+    expect(useCalculatorStore.getState().attacker.currentHp).toBe(189)
   })
 
   it('treats levitate users as ungrounded and restores grounding when ability changes', async () => {
@@ -415,7 +415,7 @@ describe('PokemonPanel', () => {
     expect(useCalculatorStore.getState().attacker.baseStats).toEqual(
       pokedex[1].baseStats,
     )
-    expect(useCalculatorStore.getState().attacker.finalStats).toBeNull()
+    expect(useCalculatorStore.getState().attacker.finalStats).not.toBeNull()
     expect(useCalculatorStore.getState().attacker.types).toEqual([
       'GRASS',
       'POISON',

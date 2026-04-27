@@ -180,7 +180,7 @@ public class PreviewWebMapper {
 
     public SpeedTiersResponseDto toSpeedTiersResponse(SpeedTiersResult result) {
         return new SpeedTiersResponseDto(result.rows().stream()
-                .map(r -> new SpeedTierRowDto(r.speciesId(), r.speciesName(), r.finalSpeed(), r.userTeam()))
+                .map(r -> new SpeedTierRowDto(r.speciesId(), r.speciesName(), r.finalSpeed(), r.userTeam(), r.isMega()))
                 .toList());
     }
 

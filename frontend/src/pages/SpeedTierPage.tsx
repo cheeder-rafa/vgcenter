@@ -5,12 +5,15 @@ import { META_TOP_IDS } from '../features/speed/data/meta-top'
 import type { SpeedTierModifiers, SpeedTierRow } from '../features/speed/types'
 
 export function SpeedTierPage() {
-  const { status, rows, error, modifiers, setModifiers, fetch } = useSpeedTiers()
+  const { status, rows, error, modifiers, setModifiers } = useSpeedTiers()
   const [metaOnly, setMetaOnly] = useState(false)
 
   const displayRows = metaOnly
     ? rows.filter((r) => r.userTeam || META_TOP_IDS.has(r.speciesId))
     : rows
+
+  const baseRows = displayRows.filter((r) => !r.isMega)
+  const megaRows = displayRows.filter((r) => r.isMega)
 
   return (
     <main className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden bg-arena-gradient text-white">
@@ -32,7 +35,7 @@ export function SpeedTierPage() {
               <div>
                 <p className="arena-label text-arena-cyan">Controls</p>
                 <p className="mt-2 text-sm leading-6 text-white/68">
-                  Toggle modifiers, then load the sheet. Your team's speeds are highlighted.
+                  Toggle modifiers to update the sheet. Your team's speeds are highlighted.
                 </p>
               </div>
 
@@ -59,15 +62,6 @@ export function SpeedTierPage() {
                 <span className="text-sm text-white/70">Top-30 meta only</span>
               </div>
 
-              <button
-                type="button"
-                className="arena-button h-11 w-full justify-center text-white disabled:cursor-not-allowed disabled:opacity-45"
-                disabled={status === 'loading'}
-                onClick={fetch}
-              >
-                {status === 'loading' ? 'Loading tiers…' : 'Load speed tiers'}
-              </button>
-
               {status === 'error' && error ? (
                 <p className="rounded border border-arena-plasma/30 bg-arena-plasma/10 px-3 py-2 text-sm text-white/78">
                   {error}
@@ -92,10 +86,34 @@ export function SpeedTierPage() {
 
               <SpeedLegend />
 
-              {rows.length === 0 ? (
-                <EmptyState status={status} />
+              {status === 'loading' && rows.length === 0 ? (
+                <div className="flex items-center justify-center py-16">
+                  <p className="text-sm text-white/45">Computing speed tiers…</p>
+                </div>
+              ) : rows.length === 0 ? (
+                <div className="rounded border border-white/10 bg-black/16 p-6">
+                  <p className="text-sm font-medium text-white/62">No tiers loaded yet</p>
+                  <p className="mt-1 text-xs leading-5 text-white/40">
+                    Speed tiers load automatically. Add Pokémon to your team to see them highlighted.
+                  </p>
+                </div>
               ) : (
-                <SpeedTable rows={displayRows} modifiers={modifiers} />
+                <div className="space-y-6">
+                  <SpeedSection
+                    label="Base Forms"
+                    rows={baseRows}
+                    modifiers={modifiers}
+                    loading={status === 'loading'}
+                  />
+                  {megaRows.length > 0 && (
+                    <SpeedSection
+                      label="Mega Evolutions"
+                      rows={megaRows}
+                      modifiers={modifiers}
+                      loading={status === 'loading'}
+                    />
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -182,42 +200,55 @@ function SpeedLegend() {
   )
 }
 
-function SpeedTable({
+function SpeedSection({
+  label,
   rows,
   modifiers,
+  loading,
 }: {
+  label: string
   rows: SpeedTierRow[]
   modifiers: SpeedTierModifiers
+  loading: boolean
 }) {
   const grouped = groupBySpeed(rows)
 
   return (
-    <div
-      className="max-h-[calc(100vh-18rem)] overflow-y-auto rounded border border-white/10"
-      role="table"
-      aria-label="Speed tier table"
-    >
-      <div role="rowgroup">
-        <div
-          role="row"
-          className="grid grid-cols-[5rem_1fr_auto] gap-x-4 border-b border-white/10 bg-white/[0.03] px-4 py-2"
-        >
-          <span role="columnheader" className="arena-label text-white/45">
-            {modifiers.trickRoom ? 'Slowest first' : 'Fastest first'}
-          </span>
-          <span role="columnheader" className="arena-label text-white/45">
-            Species
-          </span>
-          <span role="columnheader" className="arena-label text-white/45">
-            Speed
-          </span>
+    <div>
+      <p className="mb-2 arena-label text-white/40 uppercase tracking-[0.18em] text-xs">
+        {label}
+        {loading && (
+          <span className="ml-2 text-white/25">updating…</span>
+        )}
+      </p>
+      <div
+        className="max-h-[calc(100vh-22rem)] overflow-y-auto rounded border border-white/10"
+        role="table"
+        aria-label={`${label} speed tier table`}
+      >
+        <div role="rowgroup">
+          <div
+            role="row"
+            className="grid grid-cols-[5rem_32px_1fr_auto] gap-x-3 border-b border-white/10 bg-white/[0.03] px-4 py-2"
+          >
+            <span role="columnheader" className="arena-label text-white/45">
+              {modifiers.trickRoom ? 'Slowest first' : 'Fastest first'}
+            </span>
+            <span role="columnheader" />
+            <span role="columnheader" className="arena-label text-white/45">
+              Species
+            </span>
+            <span role="columnheader" className="arena-label text-white/45">
+              Speed
+            </span>
+          </div>
         </div>
-      </div>
 
-      <div role="rowgroup">
-        {grouped.map(({ speed, entries }) => (
-          <SpeedGroup key={speed} speed={speed} entries={entries} />
-        ))}
+        <div role="rowgroup">
+          {grouped.map(({ speed, entries }) => (
+            <SpeedGroup key={speed} speed={speed} entries={entries} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -226,19 +257,21 @@ function SpeedTable({
 function SpeedGroup({ speed, entries }: { speed: number; entries: SpeedTierRow[] }) {
   return (
     <>
-      {entries.map((row) => (
+      {entries.map((row, idx) => (
         <div
           key={`${row.speciesId}-${row.userTeam}`}
           role="row"
-          className={`grid grid-cols-[5rem_1fr_auto] items-center gap-x-4 border-b border-white/[0.06] px-4 py-2.5 transition-colors ${
+          className={`grid grid-cols-[5rem_32px_1fr_auto] items-center gap-x-3 border-b border-white/[0.06] px-4 py-2 transition-colors ${
             row.userTeam
               ? 'bg-arena-cyan/[0.06] hover:bg-arena-cyan/10'
               : 'hover:bg-white/[0.03]'
           }`}
         >
           <div role="cell" className="font-mono text-sm font-black tabular-nums text-white/30">
-            {/* Show speed only for first entry in a tier */}
-            {entries.indexOf(row) === 0 && speed}
+            {idx === 0 && speed}
+          </div>
+          <div role="cell" className="flex items-center justify-center">
+            <MiniSprite speciesId={row.speciesId} name={row.speciesName} />
           </div>
           <div role="cell" className="flex items-center gap-2">
             {row.userTeam && (
@@ -251,11 +284,6 @@ function SpeedGroup({ speed, entries }: { speed: number; entries: SpeedTierRow[]
             >
               {row.speciesName}
             </span>
-            {row.userTeam && (
-              <span className="rounded bg-arena-cyan/10 px-1 py-px font-mono text-[0.55rem] uppercase tracking-[0.08em] text-arena-cyan/70">
-                your team
-              </span>
-            )}
           </div>
           <div role="cell" className="font-mono text-sm font-black tabular-nums text-white/62">
             {speed}
@@ -266,22 +294,19 @@ function SpeedGroup({ speed, entries }: { speed: number; entries: SpeedTierRow[]
   )
 }
 
-function EmptyState({ status }: { status: 'idle' | 'loading' | 'success' | 'error' }) {
-  if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <p className="text-sm text-white/45">Computing speed tiers…</p>
-      </div>
-    )
-  }
+function MiniSprite({ speciesId, name }: { speciesId: string; name: string }) {
   return (
-    <div className="rounded border border-white/10 bg-black/16 p-6">
-      <p className="text-sm font-medium text-white/62">No tiers loaded yet</p>
-      <p className="mt-1 text-xs leading-5 text-white/40">
-        Select modifiers and click "Load speed tiers" to see the full Regulation M-A speed
-        landscape with your team highlighted.
-      </p>
-    </div>
+    <img
+      src={`/sprites/${speciesId}.png`}
+      alt={name}
+      width={28}
+      height={28}
+      className="h-7 w-7 object-contain"
+      onError={(e) => {
+        const img = e.currentTarget
+        img.style.display = 'none'
+      }}
+    />
   )
 }
 

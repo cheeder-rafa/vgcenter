@@ -34,7 +34,14 @@ public final class BuildSpeedTiersService implements BuildSpeedTiersUseCase {
             int baseSpeed = species.baseStats()
                     .toBattleStats(ZERO_SP, Nature.HARDY, VGC_LEVEL)
                     .speed();
-            rows.add(new SpeedTierRow(species.id(), species.name(), applyModifiers(baseSpeed, modifiers), false));
+            rows.add(
+                    new SpeedTierRow(species.id(), species.name(), applyModifiers(baseSpeed, modifiers), false, false));
+            for (var mega : species.megaForms()) {
+                int megaSpeed = mega.baseStats()
+                        .toBattleStats(ZERO_SP, Nature.HARDY, VGC_LEVEL)
+                        .speed();
+                rows.add(new SpeedTierRow(mega.id(), mega.name(), applyModifiers(megaSpeed, modifiers), false, true));
+            }
         }
 
         for (SpeedTierEntryCommand entry : command.userTeam()) {
@@ -47,7 +54,8 @@ public final class BuildSpeedTiersService implements BuildSpeedTiersUseCase {
             Sp sp = new Sp(0, 0, 0, 0, 0, entry.spSpeed());
             int finalSpeed =
                     species.baseStats().toBattleStats(sp, nature, VGC_LEVEL).speed();
-            rows.add(new SpeedTierRow(species.id(), species.name(), applyModifiers(finalSpeed, modifiers), true));
+            rows.add(
+                    new SpeedTierRow(species.id(), species.name(), applyModifiers(finalSpeed, modifiers), true, false));
         }
 
         Comparator<SpeedTierRow> order = modifiers.trickRoom()

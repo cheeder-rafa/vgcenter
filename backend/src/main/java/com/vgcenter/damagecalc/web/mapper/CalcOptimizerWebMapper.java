@@ -23,6 +23,8 @@ public class CalcOptimizerWebMapper {
                 dto.regulation(),
                 dto.defenderSpeciesId(),
                 dto.defenderNatureId(),
+                dto.defenderAbilityId(),
+                dto.defenderItemId(),
                 dto.attackerSpeciesId(),
                 dto.attackerNatureId(),
                 toSpCommand(dto.attackerSp()),

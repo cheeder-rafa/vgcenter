@@ -5,6 +5,8 @@ export type OptimizeDefenseRequest = {
   regulation: string
   defenderSpeciesId: string
   defenderNatureId: string
+  defenderAbilityId: string | null
+  defenderItemId: string | null
   attackerSpeciesId: string
   attackerNatureId: string
   attackerSp: {
