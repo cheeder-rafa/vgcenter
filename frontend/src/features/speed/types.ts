@@ -24,6 +24,7 @@ export type SpeedTierRow = {
   speciesName: string
   finalSpeed: number
   userTeam: boolean
+  isMega: boolean
 }
 
 export type SpeedTiersResponse = {

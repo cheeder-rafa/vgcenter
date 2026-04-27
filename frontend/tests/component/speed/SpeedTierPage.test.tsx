@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -12,24 +12,24 @@ describe('SpeedTierPage', () => {
   beforeEach(() => {
     vi.mocked(speedApi.buildSpeedTiers).mockResolvedValue({
       rows: [
-        { speciesId: 'flutter-mane', speciesName: 'Flutter Mane', finalSpeed: 186, userTeam: false },
-        { speciesId: 'incineroar', speciesName: 'Incineroar', finalSpeed: 80, userTeam: true },
-        { speciesId: 'garchomp', speciesName: 'Garchomp', finalSpeed: 122, userTeam: false },
+        { speciesId: 'flutter-mane', speciesName: 'Flutter Mane', finalSpeed: 186, userTeam: false, isMega: false },
+        { speciesId: 'incineroar', speciesName: 'Incineroar', finalSpeed: 80, userTeam: true, isMega: false },
+        { speciesId: 'garchomp', speciesName: 'Garchomp', finalSpeed: 122, userTeam: false, isMega: false },
       ],
     })
   })
 
-  it('renders heading and load button', () => {
+  it('renders heading', () => {
     render(
       <MemoryRouter>
         <SpeedTierPage />
       </MemoryRouter>,
     )
     expect(screen.getByRole('heading', { name: /speed tier sheet/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /load speed tiers/i })).toBeInTheDocument()
   })
 
-  it('shows empty state before loading', () => {
+  it('shows idle empty state on initial render before data loads', () => {
+    vi.mocked(speedApi.buildSpeedTiers).mockReturnValue(new Promise(() => {})) // never resolves
     render(
       <MemoryRouter>
         <SpeedTierPage />
@@ -38,33 +38,28 @@ describe('SpeedTierPage', () => {
     expect(screen.getByText(/no tiers loaded yet/i)).toBeInTheDocument()
   })
 
-  it('displays rows sorted by speed after loading', async () => {
-    const user = userEvent.setup()
+  it('displays rows after auto-loading', async () => {
     render(
       <MemoryRouter>
         <SpeedTierPage />
       </MemoryRouter>,
     )
 
-    await user.click(screen.getByRole('button', { name: /load speed tiers/i }))
-
-    expect(screen.getByText('Flutter Mane')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('Flutter Mane')).toBeInTheDocument())
     expect(screen.getByText('Incineroar')).toBeInTheDocument()
     expect(screen.getByText('Garchomp')).toBeInTheDocument()
   })
 
-  it('marks user team entries with a badge', async () => {
-    const user = userEvent.setup()
+  it('highlights user-team row in cyan', async () => {
     render(
       <MemoryRouter>
         <SpeedTierPage />
       </MemoryRouter>,
     )
 
-    await user.click(screen.getByRole('button', { name: /load speed tiers/i }))
-
-    // The user-team row for Incineroar should have a "your team" badge
-    expect(screen.getAllByText(/your team/i).length).toBeGreaterThanOrEqual(1)
+    await waitFor(() => expect(screen.getByText('Incineroar')).toBeInTheDocument())
+    // Incineroar is userTeam — its name should have the cyan class
+    expect(screen.getByText('Incineroar')).toHaveClass('text-arena-cyan')
   })
 
   it('toggles tailwind modifier', async () => {
