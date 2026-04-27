@@ -48,8 +48,12 @@ export function EvOptimizerPanel() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const attackerMoves = attacker.moves
+    .map((s) => s.moveId)
+    .filter((id): id is string => id !== null)
+
   const canOptimize =
-    moveId.trim().length > 0 && !!defender.speciesId && !!attacker.speciesId
+    moveId.length > 0 && !!defender.speciesId && !!attacker.speciesId
 
   async function handleOptimize() {
     if (!canOptimize) return
@@ -68,7 +72,7 @@ export function EvOptimizerPanel() {
         attackerSp: spreadToApiSp(attacker.sp),
         attackerAbilityId: attacker.abilityId,
         attackerItemId: attacker.itemId,
-        moveId: moveId.trim(),
+        moveId,
         goal,
         field: field ?? DEFAULT_FIELD,
         attackerSide: attackerSide ?? NO_SIDE,
@@ -94,14 +98,24 @@ export function EvOptimizerPanel() {
       </h2>
 
       <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
-        <input
-          type="text"
+        <select
           value={moveId}
           onChange={(e) => setMoveId(e.target.value)}
-          placeholder="Move ID (e.g. earthquake)"
-          aria-label="Move ID"
-          className="arena-input w-full font-mono text-xs"
-        />
+          aria-label="Move"
+          disabled={attackerMoves.length === 0}
+          className="arena-input w-full font-mono text-xs disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value="">
+            {attackerMoves.length === 0
+              ? 'Select moves on the attacker first'
+              : 'Pick a move…'}
+          </option>
+          {attackerMoves.map((id) => (
+            <option key={id} value={id}>
+              {id}
+            </option>
+          ))}
+        </select>
         <select
           value={goal}
           onChange={(e) => setGoal(e.target.value as Goal)}
