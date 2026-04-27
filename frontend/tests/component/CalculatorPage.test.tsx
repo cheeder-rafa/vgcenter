@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -36,6 +37,14 @@ import { CalculatorPage } from '../../src/pages/CalculatorPage'
 import { useCalculatorStore } from '../../src/features/calculator/store/useCalculatorStore'
 import { useSavedTeamStore } from '../../src/features/calculator/store/useSavedTeamStore'
 import { useToastStore } from '../../src/features/calculator/store/useToastStore'
+
+function renderCalc() {
+  return render(
+    <MemoryRouter>
+      <CalculatorPage />
+    </MemoryRouter>,
+  )
+}
 
 describe('CalculatorPage', () => {
   beforeEach(() => {
@@ -137,7 +146,7 @@ describe('CalculatorPage', () => {
   })
 
   it('renders the compact header and the three-column arena', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     expect(
       screen.getByRole('heading', {
@@ -162,7 +171,7 @@ describe('CalculatorPage', () => {
   })
 
   it('exposes the Showdown and Pokepaste import entry points', () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     expect(
       screen.getByRole('button', { name: /showdown/i }),
@@ -175,7 +184,7 @@ describe('CalculatorPage', () => {
   it('keeps the header layout stable (feedback link has moved to TopNav)', () => {
     vi.stubEnv('VITE_FEEDBACK_URL', 'https://tally.so/r/vgcenter-feedback')
 
-    render(<CalculatorPage />)
+    renderCalc()
 
     const header = screen.getByTestId('calculator-header')
     const brandGroup = screen.getByTestId('calculator-header-brand')
@@ -191,14 +200,14 @@ describe('CalculatorPage', () => {
   })
 
   it('does not render the obsolete Calculate Damage button', () => {
-    render(<CalculatorPage />)
+    renderCalc()
     expect(
       screen.queryByRole('button', { name: /calculate damage/i }),
     ).not.toBeInTheDocument()
   })
 
   it('rendersDetailedResultAboveMainGrid', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 
@@ -215,7 +224,7 @@ describe('CalculatorPage', () => {
   })
 
   it('detailedResultWidthMatchesMiddleColumns', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 
@@ -231,7 +240,7 @@ describe('CalculatorPage', () => {
   })
 
   it('stacks the calculator shell into one column before the desktop breakpoint', () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     const mainGrid = screen.getByTestId('calculator-main-grid')
 
@@ -409,7 +418,7 @@ describe('CalculatorPage', () => {
       ],
     })
 
-    render(<CalculatorPage />)
+    renderCalc()
     const user = userEvent.setup()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
@@ -690,7 +699,7 @@ describe('CalculatorPage', () => {
       },
     } as never)
 
-    render(<CalculatorPage />)
+    renderCalc()
     const user = userEvent.setup()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
@@ -723,7 +732,7 @@ describe('CalculatorPage', () => {
   })
 
   it('updates the import target copy when the active side changes', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
     const user = userEvent.setup()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
@@ -811,7 +820,7 @@ describe('CalculatorPage', () => {
       },
     ])
 
-    render(<CalculatorPage />)
+    renderCalc()
     const user = userEvent.setup()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
@@ -841,7 +850,7 @@ describe('CalculatorPage', () => {
   })
 
   it('fitsWithin1080pViewportHeight', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     await waitFor(() => expect(mocks.fetchPokedex).toHaveBeenCalled())
 

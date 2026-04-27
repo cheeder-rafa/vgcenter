@@ -39,6 +39,7 @@ import {
   usePinStore,
   type MatchupPin,
 } from '../features/calculator/store/usePinStore'
+import { useUrlStateSync } from '../features/calculator/share/useUrlStateSync'
 
 export function CalculatorPage() {
   const regulation = useCalculatorStore((s) => s.regulation)
@@ -62,6 +63,7 @@ export function CalculatorPage() {
   useBuildStatsSync('attacker', pokedex)
   useBuildStatsSync('defender', pokedex)
   useReactiveDamage()
+  const { copyShareLink } = useUrlStateSync()
 
   useEffect(() => {
     let active = true
@@ -218,6 +220,7 @@ export function CalculatorPage() {
           regulation={regulation}
           onImportTeam={handleImportTeam}
           onLoadPokemon={handleLoadImportedPokemon}
+          onShare={copyShareLink}
         />
 
         <MatchupPinStrip
@@ -348,11 +351,13 @@ function CompactHeader({
   regulation,
   onImportTeam,
   onLoadPokemon,
+  onShare,
 }: {
   activeSide: CalculatorSide
   regulation: string
   onImportTeam: (side: CalculatorSide, team: ImportedPokemon[]) => void
   onLoadPokemon: (side: CalculatorSide, pokemon: ImportedPokemon) => void
+  onShare: () => void
 }) {
   const activeSideLabel = activeSide === 'attacker' ? 'Left Side' : 'Right Side'
   return (
@@ -396,6 +401,15 @@ function CompactHeader({
           onImportTeam={onImportTeam}
           onLoadPokemon={onLoadPokemon}
         />
+        <button
+          type="button"
+          onClick={onShare}
+          aria-label="Copy shareable link to clipboard"
+          className="arena-button flex w-full items-center justify-center gap-1.5 text-arena-violet sm:w-auto"
+        >
+          <span aria-hidden="true">⬡</span>
+          Share Link
+        </button>
       </div>
     </header>
   )

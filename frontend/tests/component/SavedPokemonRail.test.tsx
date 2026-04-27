@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
@@ -29,6 +30,14 @@ import { CalculatorPage } from '../../src/pages/CalculatorPage'
 import { useCalculatorStore } from '../../src/features/calculator/store/useCalculatorStore'
 import { useSavedTeamStore } from '../../src/features/calculator/store/useSavedTeamStore'
 import { useToastStore } from '../../src/features/calculator/store/useToastStore'
+
+function renderCalc() {
+  return render(
+    <MemoryRouter>
+      <CalculatorPage />
+    </MemoryRouter>,
+  )
+}
 
 describe('SavedPokemonRail', () => {
   beforeEach(() => {
@@ -63,7 +72,7 @@ describe('SavedPokemonRail', () => {
   })
 
   it('saves the current side and loads it back into the panel when a card is clicked', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
     const user = userEvent.setup()
     const attackerRail = screen.getByLabelText(/attacker saved rail/i)
 
@@ -162,7 +171,7 @@ describe('SavedPokemonRail', () => {
   })
 
   it('saveButtonLabelFitsWithoutClip', async () => {
-    render(<CalculatorPage />)
+    renderCalc()
     const attackerRail = screen.getByLabelText(/attacker saved rail/i)
 
     const button = within(attackerRail).getByRole('button', { name: /^save$/i })
@@ -172,7 +181,7 @@ describe('SavedPokemonRail', () => {
   })
 
   it('keeps saved rails visible as a horizontal tray on mobile', () => {
-    render(<CalculatorPage />)
+    renderCalc()
 
     const attackerRail = screen.getByLabelText(/attacker saved rail/i)
 
