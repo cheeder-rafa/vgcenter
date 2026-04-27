@@ -9,6 +9,7 @@ import {
 } from '../features/calculator/api/datasetApi'
 import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
 import { EvOptimizerPanel } from '../features/calculator/components/EvOptimizerPanel'
+import { SpreadComparePanel } from '../features/calculator/components/SpreadComparePanel'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { useCalcHistorySync } from '../features/calculator/hooks/useCalcHistorySync'
 import { HistoryPanel } from '../features/calculator/components/HistoryPanel'
@@ -305,6 +306,8 @@ export function CalculatorPage() {
         </section>
 
         <EvOptimizerPanel />
+
+        <SpreadComparePanel defenderName={defenderName} />
 
         <footer className="pb-1 text-center font-mono text-[0.7rem] uppercase tracking-[0.4em] text-white/35">
           VGCenter · Champions Circuit · Regulation M-A
