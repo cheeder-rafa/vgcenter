@@ -2,20 +2,34 @@ import { useState } from 'react'
 
 import {
   type DefenseSpreadCandidate,
+  type OptimizeAgainstThreatsGoal,
+  type OptimizeAgainstThreatsResponse,
   type OptimizeDefenseRequest,
+  optimizeAgainstThreats,
   optimizeDefense,
   spreadToApiSp,
 } from '../api/optimizerApi'
 import { computeBattleStats } from '../lib/computeBattleStats'
 import { useCalculatorStore } from '../store/useCalculatorStore'
+import {
+  EMPTY_PINNED_THREATS,
+  usePinnedThreatsStore,
+} from '../store/usePinnedThreatsStore'
 import type { NatureResponse } from '../types/api'
 
 type Goal = OptimizeDefenseRequest['goal']
+type Tab = 'single' | 'multi'
 
 const GOAL_LABELS: Record<Goal, string> = {
   ALWAYS_SURVIVE: 'Always survive (0% KO)',
   SURVIVE_87_5: 'Survive 87.5%+ (≤12.5% KO)',
   SURVIVE_FULL_HP: 'Survive from full HP',
+}
+
+const MULTI_GOAL_LABELS: Record<OptimizeAgainstThreatsGoal, string> = {
+  EXPECTED_DAMAGE_SUM: 'Lowest expected damage',
+  WORST_CASE_KO: 'Lowest worst-case KO',
+  SURVIVE_ALL: 'Survive all threats',
 }
 
 const DEFAULT_FIELD: OptimizeDefenseRequest['field'] = {
@@ -45,27 +59,48 @@ export function SpreadOptimizerPanel({ natures }: Props) {
   const setDefender = useCalculatorStore((s) => s.setDefender)
 
   const moveCatalog = useCalculatorStore((s) => s.moveCatalog)
+  const threats = usePinnedThreatsStore(
+    (s) => s.threats ?? EMPTY_PINNED_THREATS,
+  )
+  const pinThreat = usePinnedThreatsStore((s) => s.pin)
+  const unpinThreat = usePinnedThreatsStore((s) => s.unpin)
+  const updateThreatMove = usePinnedThreatsStore((s) => s.updateMove)
+  const updateThreatAbility = usePinnedThreatsStore((s) => s.updateAbility)
+  const updateThreatItem = usePinnedThreatsStore((s) => s.updateItem)
 
   const attackerMoves = attacker.moves
     .map((s) => s.moveId)
     .filter((id): id is string => id !== null)
 
+  const [tab, setTab] = useState<Tab>('single')
   const [moveId, setMoveId] = useState('')
   const [goal, setGoal] = useState<Goal>('ALWAYS_SURVIVE')
+  const [multiGoal, setMultiGoal] = useState<OptimizeAgainstThreatsGoal>(
+    'EXPECTED_DAMAGE_SUM',
+  )
 
   // If attacker changes and drops the previously selected move, fall back to empty
   const effectiveMoveId = attackerMoves.includes(moveId) ? moveId : ''
   const [candidates, setCandidates] = useState<DefenseSpreadCandidate[] | null>(
     null,
   )
+  const [multiResult, setMultiResult] =
+    useState<OptimizeAgainstThreatsResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const canOptimize =
     effectiveMoveId.length > 0 && !!defender.speciesId && !!attacker.speciesId
+  const firstThreatMoveId =
+    attacker.moves.find((move) => move.moveId !== null)?.moveId ?? null
+  const canPinThreat =
+    !!attacker.speciesId && !!firstThreatMoveId && threats.length < 4
+  const canOptimizeThreats = !!defender.speciesId && threats.length > 0
 
   const hasNatureSuggestion =
-    candidates !== null && candidates.some((c) => c.suggestedNatureId !== null)
+    (candidates !== null &&
+      candidates.some((c) => c.suggestedNatureId !== null)) ||
+    multiResult?.best?.suggestedNatureId !== null
 
   async function handleOptimize() {
     if (!canOptimize) return
@@ -100,6 +135,65 @@ export function SpreadOptimizerPanel({ natures }: Props) {
     }
   }
 
+  async function handleOptimizeThreats() {
+    if (!canOptimizeThreats) return
+    setLoading(true)
+    setError(null)
+    setMultiResult(null)
+    try {
+      const result = await optimizeAgainstThreats({
+        regulation: 'M-A',
+        defender: {
+          speciesId: defender.speciesId!,
+          natureId: defender.natureId.toUpperCase(),
+          abilityId: defender.abilityId,
+          itemId: defender.itemId,
+        },
+        threats: threats.map((threat) => ({
+          attackerSpeciesId: threat.build.speciesId!,
+          attackerNatureId: threat.build.natureId.toUpperCase(),
+          attackerSp: spreadToApiSp(threat.build.sp),
+          attackerAbilityId: threat.build.abilityId,
+          attackerItemId: threat.build.itemId,
+          moveId: threat.moveId,
+        })),
+        goal: multiGoal,
+        field: field ?? DEFAULT_FIELD,
+        attackerSide: attackerSide ?? NO_SIDE,
+        defenderSide: defenderSide ?? NO_SIDE,
+        criticalHit: false,
+      })
+      setMultiResult(result)
+    } catch {
+      setError('Multi-threat optimization failed. Check pinned threats.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handlePinThreat() {
+    if (!canPinThreat || !firstThreatMoveId || !attacker.speciesId) return
+    pinThreat({
+      id: `${attacker.speciesId}-${firstThreatMoveId}-${Date.now()}`,
+      label: attacker.speciesId,
+      build: {
+        ...attacker,
+        sp: { ...attacker.sp },
+        stages: { ...attacker.stages },
+        moves: attacker.moves.map((move) => ({
+          ...move,
+        })) as typeof attacker.moves,
+        baseStats: attacker.baseStats ? { ...attacker.baseStats } : null,
+        finalStats: attacker.finalStats ? { ...attacker.finalStats } : null,
+        types: attacker.types
+          ? ([...attacker.types] as typeof attacker.types)
+          : null,
+      },
+      moveId: firstThreatMoveId,
+    })
+    setTab('multi')
+  }
+
   function handleApply(c: DefenseSpreadCandidate) {
     const nextSp = { ...defender.sp, hp: c.spHp, def: c.spDef, spd: c.spSpd }
     const natureId = c.suggestedNatureId
@@ -122,60 +216,216 @@ export function SpreadOptimizerPanel({ natures }: Props) {
       className="rounded-sm border border-white/10 bg-arena-void/60 p-4"
       aria-label="Spread Optimizer"
     >
-      <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-arena-plasma">
-        Spread Optimizer
-      </h2>
-
-      <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
-        <select
-          value={effectiveMoveId}
-          onChange={(e) => setMoveId(e.target.value)}
-          aria-label="Move ID"
-          disabled={attackerMoves.length === 0}
-          className="arena-input w-full font-mono text-xs"
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-sm font-bold uppercase tracking-[0.2em] text-arena-plasma">
+          Spread Optimizer
+        </h2>
+        <div
+          role="tablist"
+          aria-label="Optimizer mode"
+          className="rounded border border-white/10 bg-white/[0.03] p-0.5"
         >
-          <option value="">
-            {attackerMoves.length === 0 ? 'No moves set on attacker' : 'Select move…'}
-          </option>
-          {attackerMoves.map((id) => (
-            <option key={id} value={id}>
-              {moveCatalog.find((m) => m.id === id)?.name ?? id}
-            </option>
-          ))}
-        </select>
-        <select
-          value={goal}
-          onChange={(e) => setGoal(e.target.value as Goal)}
-          aria-label="Survival goal"
-          className="arena-input font-mono text-xs"
-        >
-          {(Object.keys(GOAL_LABELS) as Goal[]).map((g) => (
-            <option key={g} value={g}>
-              {GOAL_LABELS[g]}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={handleOptimize}
-          disabled={!canOptimize || loading}
-          aria-label="Optimize"
-          className="arena-chip cursor-pointer px-4 text-arena-cyan transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {loading ? 'Working…' : 'Optimize'}
-        </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'single'}
+            onClick={() => setTab('single')}
+            className={`px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan ${tab === 'single' ? 'bg-arena-cyan/15 text-arena-cyan' : 'text-white/35 hover:text-white/70'}`}
+          >
+            Single
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'multi'}
+            onClick={() => setTab('multi')}
+            className={`px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.18em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan ${tab === 'multi' ? 'bg-arena-cyan/15 text-arena-cyan' : 'text-white/35 hover:text-white/70'}`}
+          >
+            Multi-threat
+          </button>
+        </div>
       </div>
+
+      {tab === 'single' ? (
+        <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
+          <select
+            value={effectiveMoveId}
+            onChange={(e) => setMoveId(e.target.value)}
+            aria-label="Move ID"
+            name="single-threat-move"
+            disabled={attackerMoves.length === 0}
+            className="arena-input w-full font-mono text-xs"
+          >
+            <option value="">
+              {attackerMoves.length === 0
+                ? 'No moves set on attacker'
+                : 'Select move…'}
+            </option>
+            {attackerMoves.map((id) => (
+              <option key={id} value={id}>
+                {moveCatalog.find((m) => m.id === id)?.name ?? id}
+              </option>
+            ))}
+          </select>
+          <select
+            value={goal}
+            onChange={(e) => setGoal(e.target.value as Goal)}
+            aria-label="Survival goal"
+            name="single-threat-goal"
+            className="arena-input font-mono text-xs"
+          >
+            {(Object.keys(GOAL_LABELS) as Goal[]).map((g) => (
+              <option key={g} value={g}>
+                {GOAL_LABELS[g]}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={handleOptimize}
+            disabled={!canOptimize || loading}
+            aria-label="Optimize"
+            className="arena-chip cursor-pointer px-4 text-arena-cyan transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+          >
+            {loading ? 'Working…' : 'Optimize'}
+          </button>
+        </div>
+      ) : (
+        <div className="mb-4 flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePinThreat}
+              disabled={!canPinThreat}
+              className="arena-chip cursor-pointer text-arena-cyan transition hover:bg-arena-cyan/10 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+            >
+              + Add current attacker as threat
+            </button>
+            <select
+              value={multiGoal}
+              onChange={(e) =>
+                setMultiGoal(e.target.value as OptimizeAgainstThreatsGoal)
+              }
+              aria-label="Multi-threat goal"
+              name="multi-threat-goal"
+              className="arena-input font-mono text-xs"
+            >
+              {(
+                Object.keys(MULTI_GOAL_LABELS) as OptimizeAgainstThreatsGoal[]
+              ).map((g) => (
+                <option key={g} value={g}>
+                  {MULTI_GOAL_LABELS[g]}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleOptimizeThreats}
+              disabled={!canOptimizeThreats || loading}
+              className="arena-chip cursor-pointer px-4 text-arena-plasma transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+            >
+              {loading ? 'Working…' : 'Optimize threats'}
+            </button>
+            <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-white/30">
+              {threats.length} / 4 pinned
+            </span>
+          </div>
+          {threats.length === 0 ? (
+            <p className="text-xs text-white/40">
+              Pin attackers to optimize one defender spread against a threat
+              list.
+            </p>
+          ) : (
+            <ul role="list" className="grid gap-2">
+              {threats.map((threat) => (
+                <li
+                  key={threat.id}
+                  className="grid gap-2 rounded border border-white/10 bg-white/[0.03] p-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-display text-xs font-semibold text-white/85">
+                      {threat.label}
+                    </p>
+                    <p className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-white/30">
+                      {moveCatalog.find((m) => m.id === threat.moveId)?.name ??
+                        threat.moveId}
+                    </p>
+                  </div>
+                  <select
+                    value={threat.moveId}
+                    onChange={(e) =>
+                      updateThreatMove(threat.id, e.target.value)
+                    }
+                    aria-label={`Move for ${threat.label}`}
+                    name={`threat-${threat.id}-move`}
+                    className="arena-input font-mono text-xs"
+                  >
+                    {threat.build.moves
+                      .map((slot) => slot.moveId)
+                      .filter((id): id is string => id !== null)
+                      .map((id) => (
+                        <option key={id} value={id}>
+                          {moveCatalog.find((m) => m.id === id)?.name ?? id}
+                        </option>
+                      ))}
+                  </select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      aria-label={`Ability for ${threat.label}`}
+                      name={`threat-${threat.id}-ability`}
+                      autoComplete="off"
+                      spellCheck={false}
+                      value={threat.build.abilityId ?? ''}
+                      onChange={(e) =>
+                        updateThreatAbility(
+                          threat.id,
+                          e.target.value.trim() || null,
+                        )
+                      }
+                      className="arena-input font-mono text-xs"
+                      placeholder="ability…"
+                    />
+                    <input
+                      aria-label={`Item for ${threat.label}`}
+                      name={`threat-${threat.id}-item`}
+                      autoComplete="off"
+                      spellCheck={false}
+                      value={threat.build.itemId ?? ''}
+                      onChange={(e) =>
+                        updateThreatItem(
+                          threat.id,
+                          e.target.value.trim() || null,
+                        )
+                      }
+                      className="arena-input font-mono text-xs"
+                      placeholder="item…"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => unpinThreat(threat.id)}
+                    aria-label={`Remove ${threat.label}`}
+                    className="arena-chip cursor-pointer text-white/40 transition hover:text-arena-plasma focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
 
-      {candidates !== null && candidates.length === 0 && (
+      {tab === 'single' && candidates !== null && candidates.length === 0 && (
         <p className="text-xs text-white/40">
           No spread found — no HP/Def/SpD allocation up to 66 SP total / 32 SP
           per stat meets the goal against this attacker.
         </p>
       )}
 
-      {candidates !== null && candidates.length > 0 && (
+      {tab === 'single' && candidates !== null && candidates.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-left font-mono text-xs">
             <thead>
@@ -220,7 +470,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
                         c.suggestedNatureId ? 'Apply with nature' : 'Apply'
                       }
                       onClick={() => handleApply(c)}
-                      className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white"
+                      className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
                     >
                       {c.suggestedNatureId ? 'Apply + Nature' : 'Apply'}
                     </button>
@@ -229,6 +479,66 @@ export function SpreadOptimizerPanel({ natures }: Props) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {tab === 'multi' && multiResult !== null && multiResult.best === null && (
+        <p className="text-xs text-white/40">
+          No spread found for those threats and objective.
+        </p>
+      )}
+      {tab === 'multi' && multiResult?.best && (
+        <div className="mt-3 flex flex-col gap-4">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <tbody>
+                <tr className="border-b border-white/5 text-white/75">
+                  <td className="py-1 pr-4 text-arena-cyan">
+                    {multiResult.best.totalSp} SP
+                  </td>
+                  <td className="py-1 pr-4">
+                    {multiResult.best.minDamagePct.toFixed(1)}–
+                    {multiResult.best.maxDamagePct.toFixed(1)}%
+                  </td>
+                  <td className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => handleApply(multiResult.best!)}
+                      className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+                    >
+                      Apply
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="overflow-x-auto rounded border border-white/10 bg-white/[0.025] p-3">
+            <h3 className="mb-2 font-display text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+              Per-threat damage
+            </h3>
+            <table className="w-full text-left font-mono text-xs">
+              <tbody>
+                {multiResult.threats.map((threat) => (
+                  <tr
+                    key={`${threat.attackerSpeciesId}-${threat.moveId}`}
+                    className="border-b border-white/5 text-white/70"
+                  >
+                    <td className="py-1 pr-4">{threat.attackerSpeciesId}</td>
+                    <td className="py-1 pr-4">
+                      {moveCatalog.find((m) => m.id === threat.moveId)?.name ??
+                        threat.moveId}
+                    </td>
+                    <td className="py-1 pr-4 text-arena-cyan">
+                      {threat.expectedDamagePct.toFixed(1)}%
+                    </td>
+                    <td className="py-1 text-white/45">
+                      {threat.koChanceDescription}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </section>

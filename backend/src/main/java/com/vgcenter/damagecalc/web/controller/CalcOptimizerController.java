@@ -1,6 +1,9 @@
 package com.vgcenter.damagecalc.web.controller;
 
+import com.vgcenter.damagecalc.application.usecase.OptimizeAgainstThreatsUseCase;
 import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadUseCase;
+import com.vgcenter.damagecalc.web.dto.OptimizeAgainstThreatsRequestDto;
+import com.vgcenter.damagecalc.web.dto.OptimizeAgainstThreatsResponseDto;
 import com.vgcenter.damagecalc.web.dto.OptimizeDefenseRequestDto;
 import com.vgcenter.damagecalc.web.dto.OptimizeDefenseResponseDto;
 import com.vgcenter.damagecalc.web.mapper.CalcOptimizerWebMapper;
@@ -16,11 +19,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class CalcOptimizerController {
 
     private final OptimizeDefensiveSpreadUseCase optimizeDefensiveSpreadUseCase;
+    private final OptimizeAgainstThreatsUseCase optimizeAgainstThreatsUseCase;
     private final CalcOptimizerWebMapper mapper;
 
     public CalcOptimizerController(
-            OptimizeDefensiveSpreadUseCase optimizeDefensiveSpreadUseCase, CalcOptimizerWebMapper mapper) {
+            OptimizeDefensiveSpreadUseCase optimizeDefensiveSpreadUseCase,
+            OptimizeAgainstThreatsUseCase optimizeAgainstThreatsUseCase,
+            CalcOptimizerWebMapper mapper) {
         this.optimizeDefensiveSpreadUseCase = optimizeDefensiveSpreadUseCase;
+        this.optimizeAgainstThreatsUseCase = optimizeAgainstThreatsUseCase;
         this.mapper = mapper;
     }
 
@@ -28,5 +35,11 @@ public class CalcOptimizerController {
     public ResponseEntity<OptimizeDefenseResponseDto> optimizeDefense(
             @Valid @RequestBody OptimizeDefenseRequestDto request) {
         return ResponseEntity.ok(mapper.toResponse(optimizeDefensiveSpreadUseCase.optimize(mapper.toCommand(request))));
+    }
+
+    @PostMapping("/optimize-against-threats")
+    public ResponseEntity<OptimizeAgainstThreatsResponseDto> optimizeAgainstThreats(
+            @Valid @RequestBody OptimizeAgainstThreatsRequestDto request) {
+        return ResponseEntity.ok(mapper.toResponse(optimizeAgainstThreatsUseCase.optimize(mapper.toCommand(request))));
     }
 }
