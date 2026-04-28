@@ -5,6 +5,7 @@ import { AppShell } from './components/shell/AppShell'
 import { useSpeedTierStore } from './features/speed/store/useSpeedTierStore'
 import { CalculatorPage } from './pages/CalculatorPage'
 import { PreviewPage } from './pages/PreviewPage'
+import { ReplayPage } from './pages/ReplayPage'
 import { SpeedTierPage } from './pages/SpeedTierPage'
 
 function App() {
@@ -13,7 +14,13 @@ function App() {
 
   useEffect(() => {
     if (speedStatus === 'idle') {
-      fetchBase([], { tailwind: false, trickRoom: false, paralysis: false, choiceScarf: false, stages: 0 })
+      fetchBase([], {
+        tailwind: false,
+        trickRoom: false,
+        paralysis: false,
+        choiceScarf: false,
+        stages: 0,
+      })
     }
   }, [fetchBase, speedStatus])
 
@@ -24,6 +31,7 @@ function App() {
         <Route path="/calc" element={<CalculatorPage />} />
         <Route path="/preview" element={<PreviewPage />} />
         <Route path="/speed" element={<SpeedTierPage />} />
+        <Route path="/replay" element={<ReplayPage />} />
       </Route>
     </Routes>
   )
