@@ -27,7 +27,7 @@ public final class UrlAllowlist {
     private final boolean allowPrivateAddresses;
     private final HostResolver hostResolver;
 
-    UrlAllowlist(
+    public UrlAllowlist(
             Set<String> allowedSchemes,
             Set<String> allowedHosts,
             Set<Integer> allowedPorts,
@@ -52,6 +52,16 @@ public final class UrlAllowlist {
                 Set.of("pokepast.es", "www.pokepast.es"),
                 Set.of(-1, 443),
                 DEFAULT_PATH_PATTERN,
+                false,
+                SYSTEM_RESOLVER);
+    }
+
+    public static UrlAllowlist defaultShowdownReplay() {
+        return new UrlAllowlist(
+                Set.of("https"),
+                Set.of("replay.pokemonshowdown.com"),
+                Set.of(-1, 443),
+                Pattern.compile("^/[A-Za-z0-9_-]{3,128}(\\.json)?/?$"),
                 false,
                 SYSTEM_RESOLVER);
     }
