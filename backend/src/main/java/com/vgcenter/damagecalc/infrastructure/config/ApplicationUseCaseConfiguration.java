@@ -20,6 +20,8 @@ import com.vgcenter.damagecalc.application.usecase.DatasetCatalogService;
 import com.vgcenter.damagecalc.application.usecase.DatasetCatalogUseCase;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsService;
 import com.vgcenter.damagecalc.application.usecase.EvaluateLeadsUseCase;
+import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsService;
+import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsUseCase;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
 import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadService;
@@ -89,5 +91,13 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     ParseReplayUseCase parseReplayUseCase(ReplayParser replayParser, ReplaySource replaySource) {
         return new ParseReplayService(replayParser, replaySource);
+    }
+
+    @Bean
+    EvaluateReplayDecisionsUseCase evaluateReplayDecisionsUseCase(
+            PokedexRepository pokedexRepository,
+            MoveRepository moveRepository,
+            CalculateDamageUseCase calculateDamageUseCase) {
+        return new EvaluateReplayDecisionsService(pokedexRepository, moveRepository, calculateDamageUseCase);
     }
 }
