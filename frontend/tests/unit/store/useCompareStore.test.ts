@@ -38,8 +38,8 @@ function makeBuild(speciesId: string): CombatantBuild {
   }
 }
 
-function makePin(id: string, label = id): PinnedDefender {
-  return { id, label, build: makeBuild(id) }
+function makePin(id: string, label = id, moveId = 'earthquake'): PinnedDefender {
+  return { id, label, build: makeBuild(id), attackerBuild: makeBuild('attacker'), moveId }
 }
 
 describe('useCompareStore', () => {
@@ -94,5 +94,13 @@ describe('useCompareStore', () => {
   it('has no persist middleware (session-only)', () => {
     const storeAny = useCompareStore as unknown as { persist?: unknown }
     expect(storeAny.persist).toBeUndefined()
+  })
+
+  it('stores independent moveId snapshots for consecutive pins', () => {
+    useCompareStore.getState().pin(makePin('a', 'a', 'earthquake'))
+    useCompareStore.getState().pin(makePin('b', 'b', 'flamethrower'))
+    const { pins } = useCompareStore.getState()
+    expect(pins.find((p) => p.id === 'a')?.moveId).toBe('earthquake')
+    expect(pins.find((p) => p.id === 'b')?.moveId).toBe('flamethrower')
   })
 })
