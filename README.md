@@ -6,7 +6,7 @@ VGCenter is a hub of tools for competitive Pokemon VGC players. Sub-project 1 is
 
 The v1 calculator is at milestone M10:
 
-- `backend/` serves the Regulation M-A API for damage calculation, dataset lookup, and Showdown/Pokepaste imports.
+- `backend/` serves the Regulation M-A API for damage calculation, dataset lookup, Showdown/Pokepaste imports, and replay timeline parsing.
 - `frontend/` is a React calculator UI with live API-backed results and importer modals.
 - `/preview` is the Preview Coach shell for the next VGC team-preview workflow.
 - Dockerfiles exist for both applications, and root `docker-compose.yml` runs the full stack.
@@ -152,6 +152,7 @@ Detailed steps live in [docs/hosting-beta.md](docs/hosting-beta.md).
 - `POST /api/v1/dataset/build-stats` (Regulation M-A, level 50 locked server-side)
 - `POST /api/v1/import/showdown`
 - `POST /api/v1/import/pokepaste`
+- `POST /api/v1/replay/parse`
 
 Validation failures return RFC 7807 Problem Details with a `violations` map keyed by request field.
 

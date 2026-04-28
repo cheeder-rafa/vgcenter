@@ -7,6 +7,8 @@ import com.vgcenter.damagecalc.application.port.NatureCatalogRepository;
 import com.vgcenter.damagecalc.application.port.NatureRepository;
 import com.vgcenter.damagecalc.application.port.PokedexRepository;
 import com.vgcenter.damagecalc.application.port.PokepasteClient;
+import com.vgcenter.damagecalc.application.port.ReplayParser;
+import com.vgcenter.damagecalc.application.port.ReplaySource;
 import com.vgcenter.damagecalc.application.port.TeamParser;
 import com.vgcenter.damagecalc.application.usecase.BuildSpeedTiersService;
 import com.vgcenter.damagecalc.application.usecase.BuildSpeedTiersUseCase;
@@ -22,6 +24,8 @@ import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
 import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadService;
 import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadUseCase;
+import com.vgcenter.damagecalc.application.usecase.ParseReplayService;
+import com.vgcenter.damagecalc.application.usecase.ParseReplayUseCase;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansService;
 import com.vgcenter.damagecalc.application.usecase.RecommendPlansUseCase;
 import org.springframework.context.annotation.Bean;
@@ -80,5 +84,10 @@ public class ApplicationUseCaseConfiguration {
     @Bean
     ImportTeamUseCase importTeamUseCase(TeamParser teamParser, PokepasteClient pokepasteClient) {
         return new ImportTeamService(teamParser, pokepasteClient);
+    }
+
+    @Bean
+    ParseReplayUseCase parseReplayUseCase(ReplayParser replayParser, ReplaySource replaySource) {
+        return new ParseReplayService(replayParser, replaySource);
     }
 }
