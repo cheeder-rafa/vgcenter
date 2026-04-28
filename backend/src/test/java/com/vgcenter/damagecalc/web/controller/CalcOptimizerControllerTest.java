@@ -41,7 +41,7 @@ class CalcOptimizerControllerTest {
     @Test
     void returnsOptimizedCandidatesForValidRequest() throws Exception {
         optimizeUseCase.nextResult = new OptimizeDefenseResult(
-                List.of(new DefenseSpreadCandidate(4, 0, 0, 4, 28, 82.5, 95.0, 0.0, "guaranteed survival")));
+                List.of(new DefenseSpreadCandidate(4, 0, 0, 4, 28, 82.5, 95.0, 0.0, "guaranteed survival", null)));
 
         mockMvc.perform(post("/api/v1/calc/optimize-defense")
                         .contentType(APPLICATION_JSON)

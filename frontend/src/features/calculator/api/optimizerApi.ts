@@ -37,6 +37,7 @@ export type DefenseSpreadCandidate = {
   maxDamagePct: number
   koChanceProbability: number
   koChanceDescription: string
+  suggestedNatureId: string | null
 }
 
 export type OptimizeDefenseResponse = {

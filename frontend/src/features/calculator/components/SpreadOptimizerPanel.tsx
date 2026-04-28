@@ -6,7 +6,9 @@ import {
   optimizeDefense,
   spreadToApiSp,
 } from '../api/optimizerApi'
+import { computeBattleStats } from '../lib/computeBattleStats'
 import { useCalculatorStore } from '../store/useCalculatorStore'
+import type { NatureResponse } from '../types/api'
 
 type Goal = OptimizeDefenseRequest['goal']
 
@@ -32,13 +34,15 @@ const NO_SIDE: OptimizeDefenseRequest['attackerSide'] = {
   protect: false,
 }
 
-export function EvOptimizerPanel() {
+type Props = { natures: NatureResponse[] }
+
+export function SpreadOptimizerPanel({ natures }: Props) {
   const defender = useCalculatorStore((s) => s.defender)
   const attacker = useCalculatorStore((s) => s.attacker)
   const field = useCalculatorStore((s) => s.field)
   const attackerSide = useCalculatorStore((s) => s.attackerSide)
   const defenderSide = useCalculatorStore((s) => s.defenderSide)
-  const applyDefensiveSpread = useCalculatorStore((s) => s.applyDefensiveSpread)
+  const setDefender = useCalculatorStore((s) => s.setDefender)
 
   const [moveId, setMoveId] = useState('')
   const [goal, setGoal] = useState<Goal>('ALWAYS_SURVIVE')
@@ -48,12 +52,11 @@ export function EvOptimizerPanel() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const attackerMoves = attacker.moves
-    .map((s) => s.moveId)
-    .filter((id): id is string => id !== null)
-
   const canOptimize =
-    moveId.length > 0 && !!defender.speciesId && !!attacker.speciesId
+    moveId.trim().length > 0 && !!defender.speciesId && !!attacker.speciesId
+
+  const hasNatureSuggestion =
+    candidates !== null && candidates.some((c) => c.suggestedNatureId !== null)
 
   async function handleOptimize() {
     if (!canOptimize) return
@@ -72,7 +75,7 @@ export function EvOptimizerPanel() {
         attackerSp: spreadToApiSp(attacker.sp),
         attackerAbilityId: attacker.abilityId,
         attackerItemId: attacker.itemId,
-        moveId,
+        moveId: moveId.trim(),
         goal,
         field: field ?? DEFAULT_FIELD,
         attackerSide: attackerSide ?? NO_SIDE,
@@ -88,34 +91,41 @@ export function EvOptimizerPanel() {
     }
   }
 
+  function handleApply(c: DefenseSpreadCandidate) {
+    const nextSp = { ...defender.sp, hp: c.spHp, def: c.spDef, spd: c.spSpd }
+    const natureId = c.suggestedNatureId
+      ? c.suggestedNatureId.toLowerCase()
+      : defender.natureId
+    const natureObj = natures.find((n) => n.id === natureId) ?? null
+    const finalStats =
+      defender.baseStats !== null
+        ? computeBattleStats(defender.baseStats, nextSp, natureObj)
+        : null
+    setDefender({
+      sp: nextSp,
+      ...(c.suggestedNatureId ? { natureId } : {}),
+      finalStats,
+    })
+  }
+
   return (
     <section
       className="rounded-sm border border-white/10 bg-arena-void/60 p-4"
-      aria-label="EV Optimizer"
+      aria-label="Spread Optimizer"
     >
       <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-[0.2em] text-arena-plasma">
-        EV Optimizer
+        Spread Optimizer
       </h2>
 
       <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
-        <select
+        <input
+          type="text"
           value={moveId}
           onChange={(e) => setMoveId(e.target.value)}
-          aria-label="Move"
-          disabled={attackerMoves.length === 0}
-          className="arena-input w-full font-mono text-xs disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <option value="">
-            {attackerMoves.length === 0
-              ? 'Select moves on the attacker first'
-              : 'Pick a move…'}
-          </option>
-          {attackerMoves.map((id) => (
-            <option key={id} value={id}>
-              {id}
-            </option>
-          ))}
-        </select>
+          placeholder="Move ID (e.g. earthquake)"
+          aria-label="Move ID"
+          className="arena-input w-full font-mono text-xs"
+        />
         <select
           value={goal}
           onChange={(e) => setGoal(e.target.value as Goal)}
@@ -143,8 +153,8 @@ export function EvOptimizerPanel() {
 
       {candidates !== null && candidates.length === 0 && (
         <p className="text-xs text-white/40">
-          No spread found — no HP/Def/SpD allocation up to 32 SP meets the goal
-          against this attacker.
+          No spread found — no HP/Def/SpD allocation up to 66 SP total / 32 SP
+          per stat meets the goal against this attacker.
         </p>
       )}
 
@@ -161,6 +171,7 @@ export function EvOptimizerPanel() {
                 <th className="pb-1 pr-4">Min%</th>
                 <th className="pb-1 pr-4">Max%</th>
                 <th className="pb-1 pr-4">KO%</th>
+                {hasNatureSuggestion && <th className="pb-1 pr-4">Nature</th>}
                 <th className="pb-1" />
               </tr>
             </thead>
@@ -177,16 +188,24 @@ export function EvOptimizerPanel() {
                   <td className="py-1 pr-4 text-white/50">
                     {(c.koChanceProbability * 100).toFixed(1)}%
                   </td>
+                  {hasNatureSuggestion && (
+                    <td className="py-1 pr-4 text-arena-plasma">
+                      {c.suggestedNatureId
+                        ? c.suggestedNatureId.charAt(0).toUpperCase() +
+                          c.suggestedNatureId.slice(1).toLowerCase()
+                        : '—'}
+                    </td>
+                  )}
                   <td className="py-1">
                     <button
                       type="button"
-                      aria-label="Apply"
-                      onClick={() =>
-                        applyDefensiveSpread(c.spHp, c.spDef, c.spSpd)
+                      aria-label={
+                        c.suggestedNatureId ? 'Apply with nature' : 'Apply'
                       }
+                      onClick={() => handleApply(c)}
                       className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white"
                     >
-                      Apply
+                      {c.suggestedNatureId ? 'Apply + Nature' : 'Apply'}
                     </button>
                   </td>
                 </tr>

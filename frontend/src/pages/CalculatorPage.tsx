@@ -8,7 +8,7 @@ import {
   fetchPokedex,
 } from '../features/calculator/api/datasetApi'
 import { DualMoveReadout } from '../features/calculator/components/DualMoveReadout'
-import { EvOptimizerPanel } from '../features/calculator/components/EvOptimizerPanel'
+import { SpreadOptimizerPanel } from '../features/calculator/components/SpreadOptimizerPanel'
 import { SpreadComparePanel } from '../features/calculator/components/SpreadComparePanel'
 import { useBuildStatsSync } from '../features/calculator/hooks/useBuildStatsSync'
 import { useCalcHistorySync } from '../features/calculator/hooks/useCalcHistorySync'
@@ -350,7 +350,7 @@ export function CalculatorPage() {
           </div>
         </section>
 
-        <EvOptimizerPanel />
+        <SpreadOptimizerPanel natures={natures} />
 
         <SpreadComparePanel defenderName={defenderName} />
 

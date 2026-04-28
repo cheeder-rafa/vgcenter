@@ -20,7 +20,15 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
 
     private static final int VGC_LEVEL = 50;
     private static final int MAX_SP = 32;
+    private static final int MAX_TOTAL_SP = 66;
     private static final int MAX_RESULTS = 5;
+
+    // Defensive nature fallbacks by move category — natures that drop neither
+    // defensive stat come first so the tidiest suggestion wins.
+    private static final List<Nature> PHYSICAL_FALLBACKS =
+            List.of(Nature.BOLD, Nature.IMPISH, Nature.RELAXED, Nature.LAX);
+    private static final List<Nature> SPECIAL_FALLBACKS =
+            List.of(Nature.CALM, Nature.CAREFUL, Nature.SASSY, Nature.GENTLE);
 
     private final PokedexRepository pokedexRepository;
     private final NatureRepository natureRepository;
@@ -73,90 +81,137 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
                 move.doublePowerWhenUserStatused(),
                 move.ignoreBurnPenaltyWhenUserStatused());
 
-        // Iterate totalSp tier-by-tier (0 → MAX_SP) and stop at the first tier
-        // that contains at least one passing candidate. Each tier's combos run in
-        // parallel via virtual threads, matching the EvaluateLeadsService pattern.
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            for (int tier = 0; tier <= MAX_SP; tier++) {
-                List<DefenseSpreadCandidate> tierPassing = new CopyOnWriteArrayList<>();
-                List<CompletableFuture<Void>> futures = new ArrayList<>();
+            // Try the requested nature first; no suggestion needed.
+            List<DefenseSpreadCandidate> result = searchSpread(
+                    defender,
+                    attackerStatsCmd,
+                    attackerTypes,
+                    defenderTypes,
+                    moveCmd,
+                    defenderNature,
+                    null,
+                    command,
+                    executor);
+            if (!result.isEmpty()) return new OptimizeDefenseResult(result);
 
-                for (int spHp = 0; spHp <= tier; spHp++) {
-                    for (int spDef = 0; spDef <= tier - spHp; spDef++) {
-                        int spSpd = tier - spHp - spDef;
-                        final int fHp = spHp, fDef = spDef, fSpd = spSpd, fTier = tier;
-
-                        futures.add(CompletableFuture.runAsync(
-                                () -> {
-                                    Sp defenderSp = new Sp(fHp, 0, fDef, 0, fSpd, 0);
-                                    Stats defenderStats =
-                                            defender.baseStats().toBattleStats(defenderSp, defenderNature, VGC_LEVEL);
-
-                                    CombatantCommand attackerCmd = new CombatantCommand(
-                                            VGC_LEVEL,
-                                            attackerStatsCmd,
-                                            attackerTypes,
-                                            command.attackerAbilityId(),
-                                            command.attackerItemId(),
-                                            "NONE",
-                                            Map.of(),
-                                            false,
-                                            attackerStats.hp());
-                                    CombatantCommand defenderCmd = new CombatantCommand(
-                                            VGC_LEVEL,
-                                            toStatsCommand(defenderStats),
-                                            defenderTypes,
-                                            command.defenderAbilityId(),
-                                            command.defenderItemId(),
-                                            "NONE",
-                                            Map.of(),
-                                            false,
-                                            defenderStats.hp());
-
-                                    CalculateDamageResult result =
-                                            calculateDamageUseCase.calculate(new CalculateDamageCommand(
-                                                    command.regulation(),
-                                                    attackerCmd,
-                                                    defenderCmd,
-                                                    moveCmd,
-                                                    command.field(),
-                                                    command.attackerSide(),
-                                                    command.defenderSide(),
-                                                    command.criticalHit(),
-                                                    1));
-
-                                    if (meetsGoal(result, command.goal())) {
-                                        tierPassing.add(new DefenseSpreadCandidate(
-                                                fHp,
-                                                fDef,
-                                                fSpd,
-                                                fTier,
-                                                MAX_SP - fTier,
-                                                result.minPct(),
-                                                result.maxPct(),
-                                                result.koChance().probability(),
-                                                result.koChance().description()));
-                                    }
-                                },
-                                executor));
-                    }
-                }
-
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                        .join();
-
-                if (!tierPassing.isEmpty()) {
-                    return new OptimizeDefenseResult(tierPassing.stream()
-                            .sorted(Comparator.comparingDouble(DefenseSpreadCandidate::koChanceProbability)
-                                    .thenComparingInt(DefenseSpreadCandidate::totalSp)
-                                    .thenComparing((a, b) -> Integer.compare(b.spHp(), a.spHp())))
-                            .limit(MAX_RESULTS)
-                            .toList());
-                }
+            // Try defensive fallback natures based on move category.
+            for (Nature fallback : getFallbackNatures(move.category())) {
+                if (fallback == defenderNature) continue;
+                result = searchSpread(
+                        defender,
+                        attackerStatsCmd,
+                        attackerTypes,
+                        defenderTypes,
+                        moveCmd,
+                        fallback,
+                        fallback.name(),
+                        command,
+                        executor);
+                if (!result.isEmpty()) return new OptimizeDefenseResult(result);
             }
         }
 
         return new OptimizeDefenseResult(List.of());
+    }
+
+    private List<DefenseSpreadCandidate> searchSpread(
+            PokemonSpecies defender,
+            StatsCommand attackerStatsCmd,
+            List<String> attackerTypes,
+            List<String> defenderTypes,
+            MoveCommand moveCmd,
+            Nature defenderNature,
+            String suggestedNatureId,
+            OptimizeDefenseCommand command,
+            ExecutorService executor) {
+
+        // Iterate total-SP tier by tier (0 → MAX_TOTAL_SP), stopping at first tier
+        // with passing candidates. Each per-stat value is capped at MAX_SP (32).
+        for (int tier = 0; tier <= MAX_TOTAL_SP; tier++) {
+            List<DefenseSpreadCandidate> tierPassing = new CopyOnWriteArrayList<>();
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+            for (int spHp = 0; spHp <= Math.min(tier, MAX_SP); spHp++) {
+                for (int spDef = 0; spDef <= Math.min(tier - spHp, MAX_SP); spDef++) {
+                    int spSpd = tier - spHp - spDef;
+                    if (spSpd > MAX_SP) continue;
+                    final int fHp = spHp, fDef = spDef, fSpd = spSpd, fTier = tier;
+
+                    futures.add(CompletableFuture.runAsync(
+                            () -> {
+                                Sp defenderSp = new Sp(fHp, 0, fDef, 0, fSpd, 0);
+                                Stats defenderStats =
+                                        defender.baseStats().toBattleStats(defenderSp, defenderNature, VGC_LEVEL);
+
+                                CombatantCommand attackerCmd = new CombatantCommand(
+                                        VGC_LEVEL,
+                                        attackerStatsCmd,
+                                        attackerTypes,
+                                        command.attackerAbilityId(),
+                                        command.attackerItemId(),
+                                        "NONE",
+                                        Map.of(),
+                                        false,
+                                        attackerStatsCmd.hp());
+                                CombatantCommand defenderCmd = new CombatantCommand(
+                                        VGC_LEVEL,
+                                        toStatsCommand(defenderStats),
+                                        defenderTypes,
+                                        command.defenderAbilityId(),
+                                        command.defenderItemId(),
+                                        "NONE",
+                                        Map.of(),
+                                        false,
+                                        defenderStats.hp());
+
+                                CalculateDamageResult result =
+                                        calculateDamageUseCase.calculate(new CalculateDamageCommand(
+                                                command.regulation(),
+                                                attackerCmd,
+                                                defenderCmd,
+                                                moveCmd,
+                                                command.field(),
+                                                command.attackerSide(),
+                                                command.defenderSide(),
+                                                command.criticalHit(),
+                                                1));
+
+                                if (meetsGoal(result, command.goal())) {
+                                    tierPassing.add(new DefenseSpreadCandidate(
+                                            fHp,
+                                            fDef,
+                                            fSpd,
+                                            fTier,
+                                            MAX_TOTAL_SP - fTier,
+                                            result.minPct(),
+                                            result.maxPct(),
+                                            result.koChance().probability(),
+                                            result.koChance().description(),
+                                            suggestedNatureId));
+                                }
+                            },
+                            executor));
+                }
+            }
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            if (!tierPassing.isEmpty()) {
+                return tierPassing.stream()
+                        .sorted(Comparator.comparingDouble(DefenseSpreadCandidate::koChanceProbability)
+                                .thenComparingInt(DefenseSpreadCandidate::totalSp)
+                                .thenComparing((a, b) -> Integer.compare(b.spHp(), a.spHp())))
+                        .limit(MAX_RESULTS)
+                        .toList();
+            }
+        }
+
+        return List.of();
+    }
+
+    private static List<Nature> getFallbackNatures(String moveCategory) {
+        return "PHYSICAL".equals(moveCategory) ? PHYSICAL_FALLBACKS : SPECIAL_FALLBACKS;
     }
 
     private static boolean meetsGoal(CalculateDamageResult result, String goal) {
