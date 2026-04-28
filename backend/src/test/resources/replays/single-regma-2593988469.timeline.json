@@ -174,7 +174,7 @@
           "speciesName" : "Kingambit",
           "hpCurrent" : 94,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -301,7 +301,7 @@
           "speciesName" : "Kingambit",
           "hpCurrent" : 21,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -317,7 +317,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 90,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -444,7 +444,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 84,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -571,7 +571,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 79,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -718,7 +718,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 67,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -857,7 +857,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 42,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -1008,7 +1008,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 26,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,

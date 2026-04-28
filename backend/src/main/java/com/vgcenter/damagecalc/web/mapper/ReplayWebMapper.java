@@ -52,7 +52,8 @@ public class ReplayWebMapper {
         } else {
             throw new IllegalArgumentException("Replay evaluate request must provide timeline or timelines");
         }
-        return new EvaluateReplayDecisionsCommand(request.regulation(), timelines, toWeights(request.objective()));
+        return new EvaluateReplayDecisionsCommand(
+                request.regulation(), timelines, toWeights(request.objective()), request.userPlayer());
     }
 
     public ReplayTimelineDto toResponse(ReplayTimeline timeline) {

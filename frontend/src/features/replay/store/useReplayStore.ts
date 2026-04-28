@@ -8,7 +8,7 @@ import type {
   ReplayTimeline,
 } from '../types'
 
-type Status = 'idle' | 'loading' | 'ready' | 'error'
+type Status = 'idle' | 'parsing' | 'evaluating' | 'ready' | 'error'
 
 type ReplayState = {
   rawInput: string
@@ -18,10 +18,13 @@ type ReplayState = {
   evaluation: ReplayEvaluateResponse | null
   inputErrors: string[]
   errorMessage: string | null
+  userPlayer: 'P1' | 'P2'
 
   setRawInput: (value: string) => void
+  setUserPlayer: (player: 'P1' | 'P2') => void
   reset: () => void
   analyze: () => Promise<void>
+  reEvaluate: () => Promise<void>
 }
 
 const EMPTY_TIMELINES: ReplayTimeline[] = []
@@ -35,8 +38,17 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
   evaluation: null,
   inputErrors: EMPTY_ERRORS,
   errorMessage: null,
+  userPlayer: 'P1',
 
   setRawInput: (value) => set({ rawInput: value }),
+
+  setUserPlayer: (player) => {
+    set({ userPlayer: player })
+    const { timelines } = get()
+    if (timelines.length > 0) {
+      get().reEvaluate()
+    }
+  },
 
   reset: () =>
     set({
@@ -47,6 +59,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
       evaluation: null,
       inputErrors: EMPTY_ERRORS,
       errorMessage: null,
+      userPlayer: 'P1',
     }),
 
   analyze: async () => {
@@ -66,7 +79,7 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
     set({
       mode: parsed.mode,
       inputErrors: parsed.errors,
-      status: 'loading',
+      status: 'parsing',
       errorMessage: null,
     })
 
@@ -78,19 +91,37 @@ export const useReplayStore = create<ReplayState>((set, get) => ({
           ),
         ),
       )
+      set({ timelines, status: 'evaluating' })
+
+      const { userPlayer } = get()
       const request =
         parsed.mode === 'bo3'
-          ? { regulation: 'M-A' as const, timelines }
-          : { regulation: 'M-A' as const, timeline: timelines[0] }
+          ? { regulation: 'M-A' as const, timelines, userPlayer }
+          : { regulation: 'M-A' as const, timeline: timelines[0], userPlayer }
       const evaluation = await evaluateReplay(request)
-      set({
-        status: 'ready',
-        timelines,
-        evaluation,
-      })
+      set({ status: 'ready', evaluation })
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Replay analysis failed'
+      set({ status: 'error', errorMessage: message })
+    }
+  },
+
+  reEvaluate: async () => {
+    const { timelines, mode, userPlayer } = get()
+    if (timelines.length === 0) return
+
+    set({ status: 'evaluating', evaluation: null, errorMessage: null })
+    try {
+      const request =
+        mode === 'bo3'
+          ? { regulation: 'M-A' as const, timelines, userPlayer }
+          : { regulation: 'M-A' as const, timeline: timelines[0], userPlayer }
+      const evaluation = await evaluateReplay(request)
+      set({ status: 'ready', evaluation })
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Replay evaluation failed'
       set({ status: 'error', errorMessage: message })
     }
   },

@@ -5,7 +5,7 @@ import type { ReplayInputMode } from '../types'
 type Props = {
   rawInput: string
   mode: ReplayInputMode
-  status: 'idle' | 'loading' | 'ready' | 'error'
+  status: 'idle' | 'parsing' | 'evaluating' | 'ready' | 'error'
   inputErrors: string[]
   errorMessage: string | null
   onChange: (value: string) => void
@@ -25,7 +25,7 @@ export function ReplayInputPanel({
   onAnalyze,
   onReset,
 }: Props) {
-  const loading = status === 'loading'
+  const loading = status === 'parsing' || status === 'evaluating'
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!loading) onAnalyze()
@@ -86,7 +86,11 @@ export function ReplayInputPanel({
           disabled={loading || rawInput.trim().length === 0}
           className="rounded-full bg-arena-plasma/90 px-5 py-2 font-display text-arena-xs uppercase tracking-[0.14em] text-white transition hover:bg-arena-plasma disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {loading ? 'Analyzing…' : 'Run Autopsy'}
+          {status === 'parsing'
+            ? 'Fetching…'
+            : status === 'evaluating'
+              ? 'Scoring…'
+              : 'Run Autopsy'}
         </button>
         <button
           type="button"

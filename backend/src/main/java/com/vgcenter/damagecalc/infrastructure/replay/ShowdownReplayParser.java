@@ -92,7 +92,8 @@ public class ShowdownReplayParser implements ReplayParser {
             }
             case "detailschange" -> battleState.active(parts[2]).speciesName = parseSpeciesName(parts[3]);
             case "-damage", "-heal" -> applyCondition(battleState.active(parts[2]), parts[3]);
-            case "-status" -> battleState.active(parts[2]).status = parts[3];
+            case "-status" ->
+                battleState.active(parts[2]).status = ShowdownStatusMapper.toStatusConditionToken(parts[3]);
             case "-curestatus" -> battleState.active(parts[2]).status = null;
             case "-boost" -> battleState.active(parts[2]).adjustBoost(parts[3], parseAmount(parts[4]));
             case "-unboost" -> battleState.active(parts[2]).adjustBoost(parts[3], -parseAmount(parts[4]));
@@ -144,7 +145,7 @@ public class ShowdownReplayParser implements ReplayParser {
                 pokemon.hpCurrent = 0;
                 pokemon.fainted = true;
             } else if (!token.startsWith("[")) {
-                pokemon.status = token;
+                pokemon.status = ShowdownStatusMapper.toStatusConditionToken(token);
             }
         }
     }

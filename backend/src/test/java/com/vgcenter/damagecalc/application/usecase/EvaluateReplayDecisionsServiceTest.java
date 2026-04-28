@@ -61,7 +61,7 @@ class EvaluateReplayDecisionsServiceTest {
                                 move("p2b: Delta", "Counter", "p1b: Beta")))));
 
         EvaluateReplayDecisionsResult result =
-                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS));
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
 
         assertThat(result.games()).hasSize(1);
         TurnReview review = result.games().getFirst().turnReviews().getFirst();
@@ -95,8 +95,8 @@ class EvaluateReplayDecisionsServiceTest {
         ReplayTimeline gameOne = trimToOpeningTurn(loadTimeline("bo3-game1-2586638266.timeline.json"));
         ReplayTimeline gameTwo = trimToOpeningTurn(loadTimeline("bo3-game2-2586642583.timeline.json"));
 
-        EvaluateReplayDecisionsResult result =
-                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(gameOne, gameTwo), DEFAULT_WEIGHTS));
+        EvaluateReplayDecisionsResult result = service.evaluate(
+                new EvaluateReplayDecisionsCommand("M-A", List.of(gameOne, gameTwo), DEFAULT_WEIGHTS, "P1"));
 
         assertThat(result.games()).hasSize(2);
         assertThat(result.adaptationFlags())

@@ -8,4 +8,5 @@ public record ReplayEvaluateRequestDto(
         @NotBlank String regulation,
         @Valid ReplayTimelineDto timeline,
         @Valid List<ReplayTimelineDto> timelines,
-        @Valid ReplayScoringWeightsDto objective) {}
+        @Valid ReplayScoringWeightsDto objective,
+        String userPlayer) {}
