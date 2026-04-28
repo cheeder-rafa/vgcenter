@@ -44,8 +44,17 @@ export function SpreadOptimizerPanel({ natures }: Props) {
   const defenderSide = useCalculatorStore((s) => s.defenderSide)
   const setDefender = useCalculatorStore((s) => s.setDefender)
 
+  const moveCatalog = useCalculatorStore((s) => s.moveCatalog)
+
+  const attackerMoves = attacker.moves
+    .map((s) => s.moveId)
+    .filter((id): id is string => id !== null)
+
   const [moveId, setMoveId] = useState('')
   const [goal, setGoal] = useState<Goal>('ALWAYS_SURVIVE')
+
+  // If attacker changes and drops the previously selected move, fall back to empty
+  const effectiveMoveId = attackerMoves.includes(moveId) ? moveId : ''
   const [candidates, setCandidates] = useState<DefenseSpreadCandidate[] | null>(
     null,
   )
@@ -53,7 +62,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const canOptimize =
-    moveId.trim().length > 0 && !!defender.speciesId && !!attacker.speciesId
+    effectiveMoveId.length > 0 && !!defender.speciesId && !!attacker.speciesId
 
   const hasNatureSuggestion =
     candidates !== null && candidates.some((c) => c.suggestedNatureId !== null)
@@ -75,7 +84,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
         attackerSp: spreadToApiSp(attacker.sp),
         attackerAbilityId: attacker.abilityId,
         attackerItemId: attacker.itemId,
-        moveId: moveId.trim(),
+        moveId: effectiveMoveId,
         goal,
         field: field ?? DEFAULT_FIELD,
         attackerSide: attackerSide ?? NO_SIDE,
@@ -118,14 +127,22 @@ export function SpreadOptimizerPanel({ natures }: Props) {
       </h2>
 
       <div className="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
-        <input
-          type="text"
-          value={moveId}
+        <select
+          value={effectiveMoveId}
           onChange={(e) => setMoveId(e.target.value)}
-          placeholder="Move ID (e.g. earthquake)"
           aria-label="Move ID"
+          disabled={attackerMoves.length === 0}
           className="arena-input w-full font-mono text-xs"
-        />
+        >
+          <option value="">
+            {attackerMoves.length === 0 ? 'No moves set on attacker' : 'Select move…'}
+          </option>
+          {attackerMoves.map((id) => (
+            <option key={id} value={id}>
+              {moveCatalog.find((m) => m.id === id)?.name ?? id}
+            </option>
+          ))}
+        </select>
         <select
           value={goal}
           onChange={(e) => setGoal(e.target.value as Goal)}

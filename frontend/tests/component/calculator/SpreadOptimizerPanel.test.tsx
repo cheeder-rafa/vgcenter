@@ -9,6 +9,31 @@ import { useCalculatorStore } from '../../../src/features/calculator/store/useCa
 
 vi.mock('../../../src/features/calculator/api/optimizerApi')
 
+const MOCK_MOVES = [
+  {
+    id: 'earthquake',
+    name: 'Earthquake',
+    type: 'GROUND',
+    category: 'PHYSICAL' as const,
+    basePower: 100,
+    spread: true,
+    contact: false,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+  {
+    id: 'ice-punch',
+    name: 'Ice Punch',
+    type: 'ICE',
+    category: 'PHYSICAL' as const,
+    basePower: 75,
+    spread: false,
+    contact: true,
+    doublePowerWhenUserStatused: false,
+    ignoreBurnPenaltyWhenUserStatused: false,
+  },
+]
+
 const mockNatures = [
   { id: 'hardy', name: 'Hardy', increasedStat: null, decreasedStat: null },
   { id: 'bold', name: 'Bold', increasedStat: 'DEFENSE', decreasedStat: 'ATTACK' },
@@ -58,7 +83,14 @@ describe('SpreadOptimizerPanel', () => {
         ...useCalculatorStore.getState().attacker,
         speciesId: 'garchomp',
         natureId: 'jolly',
+        moves: [
+          { moveId: 'earthquake' },
+          { moveId: 'ice-punch' },
+          { moveId: null },
+          { moveId: null },
+        ],
       },
+      moveCatalog: MOCK_MOVES,
     })
   })
 
@@ -75,13 +107,32 @@ describe('SpreadOptimizerPanel', () => {
     expect(screen.getByRole('button', { name: /optimize/i })).toBeDisabled()
   })
 
-  it('shows results after clicking optimize', async () => {
+  it('renders a select dropdown populated with attacker moves', () => {
+    renderPanel()
+    const select = screen.getByRole('combobox', { name: /move id/i })
+    expect(select.tagName).toBe('SELECT')
+    expect(screen.getByRole('option', { name: /earthquake/i })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /ice punch/i })).toBeInTheDocument()
+  })
+
+  it('select is disabled with placeholder when attacker has no moves', () => {
+    useCalculatorStore.setState({
+      attacker: {
+        ...useCalculatorStore.getState().attacker,
+        moves: [{ moveId: null }, { moveId: null }, { moveId: null }, { moveId: null }],
+      },
+    })
+    renderPanel()
+    const select = screen.getByRole('combobox', { name: /move id/i })
+    expect(select).toBeDisabled()
+    expect(screen.getByRole('option', { name: /no moves set/i })).toBeInTheDocument()
+  })
+
+  it('shows results after selecting move and clicking optimize', async () => {
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'earthquake')
-
+    await user.selectOptions(screen.getByRole('combobox', { name: /move id/i }), 'earthquake')
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
     await waitFor(() => {
@@ -96,9 +147,7 @@ describe('SpreadOptimizerPanel', () => {
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'flare-blitz')
-
+    await user.selectOptions(screen.getByRole('combobox', { name: /move id/i }), 'earthquake')
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
     await waitFor(() => {
@@ -110,8 +159,7 @@ describe('SpreadOptimizerPanel', () => {
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'earthquake')
+    await user.selectOptions(screen.getByRole('combobox', { name: /move id/i }), 'earthquake')
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
     await waitFor(() => screen.getByText(/4 SP/i))
@@ -132,8 +180,7 @@ describe('SpreadOptimizerPanel', () => {
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'blizzard')
+    await user.selectOptions(screen.getByRole('combobox', { name: /move id/i }), 'earthquake')
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
     await waitFor(() => {
@@ -149,8 +196,7 @@ describe('SpreadOptimizerPanel', () => {
     const user = userEvent.setup()
     renderPanel()
 
-    const moveInput = screen.getByPlaceholderText(/move id/i)
-    await user.type(moveInput, 'blizzard')
+    await user.selectOptions(screen.getByRole('combobox', { name: /move id/i }), 'earthquake')
     await user.click(screen.getByRole('button', { name: /optimize/i }))
 
     await waitFor(() => screen.getByRole('button', { name: /apply with nature/i }))
@@ -159,5 +205,26 @@ describe('SpreadOptimizerPanel', () => {
     const defender = useCalculatorStore.getState().defender
     expect(defender.natureId).toBe('bold')
     expect(defender.sp.hp).toBe(4)
+  })
+
+  it('resets selected move when attacker changes and move no longer available', async () => {
+    const user = userEvent.setup()
+    renderPanel()
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /move id/i }), 'earthquake')
+    // earthquake selected — optimize button should be enabled
+    expect(screen.getByRole('button', { name: /optimize/i })).not.toBeDisabled()
+
+    // Remove earthquake from attacker
+    useCalculatorStore.setState({
+      attacker: {
+        ...useCalculatorStore.getState().attacker,
+        moves: [{ moveId: 'ice-punch' }, { moveId: null }, { moveId: null }, { moveId: null }],
+      },
+    })
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /optimize/i })).toBeDisabled()
+    })
   })
 })
