@@ -347,6 +347,8 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         return switch (rawStatus.toLowerCase(java.util.Locale.ROOT)) {
             case "brn" -> "BURN";
             case "par" -> "PARALYSIS";
+            // sleep, freeze, poison, and toxic are not modelled in the damage formula
+            case "slp", "frz", "psn", "tox" -> "none";
             default -> "none";
         };
     }
