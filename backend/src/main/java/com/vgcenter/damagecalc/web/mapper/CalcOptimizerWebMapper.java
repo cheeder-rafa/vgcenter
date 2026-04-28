@@ -54,7 +54,8 @@ public class CalcOptimizerWebMapper {
                 c.minDamagePct(),
                 c.maxDamagePct(),
                 c.koChanceProbability(),
-                c.koChanceDescription());
+                c.koChanceDescription(),
+                c.suggestedNatureId());
     }
 
     private static SpCommand toSpCommand(SpDto dto) {

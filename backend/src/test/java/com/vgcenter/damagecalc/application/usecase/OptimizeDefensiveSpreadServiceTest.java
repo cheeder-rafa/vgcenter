@@ -19,7 +19,17 @@ class OptimizeDefensiveSpreadServiceTest {
     // Garchomp: attacker
     private final PokedexRepository pokedex = _reg -> List.of(snorlax(), garchomp());
 
-    private final NatureRepository natures = _reg -> List.of(Nature.JOLLY, Nature.HARDY);
+    private final NatureRepository natures = _reg -> List.of(
+            Nature.JOLLY,
+            Nature.HARDY,
+            Nature.BOLD,
+            Nature.IMPISH,
+            Nature.RELAXED,
+            Nature.LAX,
+            Nature.CALM,
+            Nature.CAREFUL,
+            Nature.SASSY,
+            Nature.GENTLE);
 
     private final MoveRepository moves = new MoveRepository() {
         @Override
@@ -134,7 +144,7 @@ class OptimizeDefensiveSpreadServiceTest {
         var result = service.optimize(command("ALWAYS_SURVIVE"));
 
         assertThat(result.candidates()).isNotEmpty();
-        result.candidates().forEach(c -> assertThat(c.remainingSp()).isEqualTo(32 - c.totalSp()));
+        result.candidates().forEach(c -> assertThat(c.remainingSp()).isEqualTo(66 - c.totalSp()));
     }
 
     @Test
@@ -143,7 +153,7 @@ class OptimizeDefensiveSpreadServiceTest {
         var result = service.optimize(command("ALWAYS_SURVIVE"));
 
         result.candidates()
-                .forEach(c -> assertThat(c.spHp() + c.spDef() + c.spSpd()).isLessThanOrEqualTo(32));
+                .forEach(c -> assertThat(c.spHp() + c.spDef() + c.spSpd()).isLessThanOrEqualTo(66));
     }
 
     @Test
@@ -264,6 +274,72 @@ class OptimizeDefensiveSpreadServiceTest {
 
         // 0.125 ≤ 0.125 → meets the goal
         assertThat(result.candidates()).isNotEmpty();
+    }
+
+    @Test
+    void whenHardyCannotSurvive_fallsBackToDefensiveNatureAndSetsSuggestedNatureId() {
+        // Snorlax base Def 65. Hardy max def (sp=32): 65+32+20 = 117.
+        // Bold max def (sp=32): floor(117 * 1.1) = 128.
+        // Threshold 118 → Hardy always fails; Bold reaches 118 at spDef=23.
+        CalculateDamageUseCase calc = cmd -> {
+            int def = cmd.defender().stats().defense();
+            boolean survives = def >= 118;
+            int hp = cmd.defender().stats().hp();
+            int minDmg = survives ? (int) (hp * 0.75) : (int) (hp * 1.05);
+            int maxDmg = survives ? (int) (hp * 0.90) : (int) (hp * 1.20);
+            int[] r = rolls(minDmg, maxDmg);
+            double prob = survives ? 0.0 : 1.0;
+            return new CalculateDamageResult(
+                    r,
+                    minDmg,
+                    maxDmg,
+                    minDmg * 100.0 / hp,
+                    maxDmg * 100.0 / hp,
+                    new KoChanceResult(survives ? "guaranteed survival" : "guaranteed OHKO", prob, survives ? 0 : 1));
+        };
+        var service = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calc);
+        var result = service.optimize(command("ALWAYS_SURVIVE"));
+
+        assertThat(result.candidates()).isNotEmpty();
+        assertThat(result.candidates()).allMatch(c -> "BOLD".equals(c.suggestedNatureId()));
+    }
+
+    @Test
+    void whenHardyAlreadySurvives_suggestedNatureIdIsNull() {
+        var service = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calcAlwaysSurvives);
+        var result = service.optimize(command("ALWAYS_SURVIVE"));
+
+        assertThat(result.candidates()).isNotEmpty();
+        assertThat(result.candidates()).allMatch(c -> c.suggestedNatureId() == null);
+    }
+
+    @Test
+    void totalSpCanExceed32WhenNeeded() {
+        // Survives only when hp + defense >= 355.
+        // At tier 32 with Hardy, best combo is spHp=32 → hp=267, def=85, sum=352 < 355.
+        // Requires a multi-stat spread beyond tier 32 (e.g. spHp=32, spDef=4 → sum=356).
+        // Old code (tier capped at 32) would return empty; new code (cap 66) finds it.
+        CalculateDamageUseCase calc = cmd -> {
+            int hp = cmd.defender().stats().hp();
+            int def = cmd.defender().stats().defense();
+            boolean survives = hp + def >= 355;
+            int minDmg = survives ? (int) (hp * 0.75) : (int) (hp * 1.05);
+            int maxDmg = survives ? (int) (hp * 0.90) : (int) (hp * 1.20);
+            int[] r = rolls(minDmg, maxDmg);
+            double prob = survives ? 0.0 : 1.0;
+            return new CalculateDamageResult(
+                    r,
+                    minDmg,
+                    maxDmg,
+                    minDmg * 100.0 / hp,
+                    maxDmg * 100.0 / hp,
+                    new KoChanceResult(survives ? "survival" : "OHKO", prob, survives ? 0 : 1));
+        };
+        var service = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calc);
+        var result = service.optimize(command("ALWAYS_SURVIVE"));
+
+        assertThat(result.candidates()).isNotEmpty();
+        assertThat(result.candidates()).allMatch(c -> c.totalSp() > 32);
     }
 
     // --- helpers ---

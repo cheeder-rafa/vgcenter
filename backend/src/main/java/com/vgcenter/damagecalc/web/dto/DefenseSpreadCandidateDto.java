@@ -9,4 +9,5 @@ public record DefenseSpreadCandidateDto(
         double minDamagePct,
         double maxDamagePct,
         double koChanceProbability,
-        String koChanceDescription) {}
+        String koChanceDescription,
+        String suggestedNatureId) {}
