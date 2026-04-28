@@ -43,6 +43,7 @@ function toMoveRequest(move: MoveDefinition) {
 function buildCompareRequest(
   attacker: CombatantBuild,
   pinned: CombatantBuild,
+  pinnedMoveId: string,
   state: {
     regulation: string
     moveCatalog: MoveDefinition[]
@@ -53,8 +54,6 @@ function buildCompareRequest(
     targets: number
   },
 ): DamageCalculationRequest | null {
-  const moveSlot = attacker.moves.find((m) => m.moveId !== null)
-  if (!moveSlot?.moveId) return null
   if (
     !attacker.finalStats ||
     !attacker.types ||
@@ -63,7 +62,7 @@ function buildCompareRequest(
   )
     return null
 
-  const move = state.moveCatalog.find((m) => m.id === moveSlot.moveId)
+  const move = state.moveCatalog.find((m) => m.id === pinnedMoveId)
   if (!move || move.category === 'STATUS' || move.basePower <= 0) return null
 
   return {
@@ -109,7 +108,6 @@ function PinnedDefenderColumn({
   pin: PinnedDefender
   onUnpin: (id: string) => void
 }) {
-  const attacker = useCalculatorStore((s) => s.attacker)
   const field = useCalculatorStore((s) => s.field)
   const attackerSide = useCalculatorStore((s) => s.attackerSide)
   const defenderSide = useCalculatorStore((s) => s.defenderSide)
@@ -118,11 +116,7 @@ function PinnedDefenderColumn({
   const regulation = useCalculatorStore((s) => s.regulation)
   const moveCatalog = useCalculatorStore((s) => s.moveCatalog)
 
-  const firstMoveId =
-    attacker.moves.find((m) => m.moveId !== null)?.moveId ?? null
-  const moveName = firstMoveId
-    ? (moveCatalog.find((m) => m.id === firstMoveId)?.name ?? null)
-    : null
+  const moveName = moveCatalog.find((m) => m.id === pin.moveId)?.name ?? null
 
   const [colStatus, setColStatus] = useState<ColStatus>({ kind: 'loading' })
 
@@ -141,7 +135,7 @@ function PinnedDefenderColumn({
     let cancelled = false
 
     void (async () => {
-      const request = buildCompareRequest(attacker, pin.build, {
+      const request = buildCompareRequest(pin.attackerBuild, pin.build, pin.moveId, {
         regulation,
         moveCatalog,
         field,
@@ -167,8 +161,9 @@ function PinnedDefenderColumn({
       cancelled = true
     }
   }, [
-    attacker,
+    pin.attackerBuild,
     pin.build,
+    pin.moveId,
     field,
     attackerSide,
     defenderSide,
@@ -258,21 +253,25 @@ export function SpreadComparePanel({ defenderName }: Props) {
   const reduced = useReducedMotion()
 
   const defender = useCalculatorStore((s) => s.defender)
+  const attacker = useCalculatorStore((s) => s.attacker)
 
   const panelId = useId()
   const columnsId = `${panelId}-columns`
 
-  const canPin = !!defender.speciesId && pins.length < 4
+  const firstMoveId = attacker.moves.find((m) => m.moveId !== null)?.moveId ?? null
+  const canPin = !!defender.speciesId && !!firstMoveId && pins.length < 4
   const atMax = pins.length >= 4
   const showColumns = open && pins.length > 0
 
   function handlePin() {
-    if (!canPin) return
+    if (!canPin || !firstMoveId) return
     const id = `${defender.speciesId ?? 'def'}-${Date.now()}`
     pinDefender({
       id,
       label: defenderName ?? (defender.speciesId as string),
       build: { ...defender },
+      attackerBuild: { ...attacker, moves: attacker.moves.map((m) => ({ ...m })) as typeof attacker.moves },
+      moveId: firstMoveId,
     })
     setOpen(true)
   }

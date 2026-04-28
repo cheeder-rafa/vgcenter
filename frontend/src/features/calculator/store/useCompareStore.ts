@@ -6,6 +6,8 @@ export type PinnedDefender = {
   id: string
   label: string
   build: CombatantBuild
+  attackerBuild: CombatantBuild
+  moveId: string
 }
 
 type CompareStore = {
