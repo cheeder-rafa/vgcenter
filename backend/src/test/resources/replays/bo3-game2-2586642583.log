@@ -1,0 +1,165 @@
+|j|☆n00syz
+|j|☆vianova
+|html|<table width="100%"><tr><td align="left">n00syz</td><td align="right">vianova</tr><tr><td align="left"><i class="fa fa-circle-o"></i> <i class="fa fa-circle-o"></i> </td><td align="right"><i class="fa fa-circle-o"></i> <i class="fa fa-circle"></i> </tr></table>
+|uhtml|bestof|<h2><strong>Game 2</strong> of <a href="/game-bestof3-gen9championsvgc2026regmabo3-2586638265-eru1cc889r8bj0s9xa4an1rskrflq12pw">a best-of-3</a></h2>
+|t:|1776448906
+|gametype|doubles
+|player|p1|n00syz|pokemaniac|1109
+|player|p2|vianova|266|1202
+|gen|9
+|tier|[Gen 9 Champions] VGC 2026 Reg M-A (Bo3)
+|rated|
+|rule|Species Clause: Limit one of each Pokémon
+|rule|Item Clause: Limit 1 of each item
+|clearpoke
+|poke|p1|Greninja-*, L50, F|
+|poke|p1|Pelipper, L50, M|
+|poke|p1|Archaludon, L50, F|
+|poke|p1|Incineroar, L50, M|
+|poke|p1|Sneasler, L50, M|
+|poke|p1|Tsareena, L50, F|
+|poke|p2|Aerodactyl, L50, F|
+|poke|p2|Floette-Eternal, L50, F|
+|poke|p2|Incineroar, L50, F|
+|poke|p2|Charizard, L50, F|
+|poke|p2|Kingambit, L50, M|
+|poke|p2|Sneasler, L50, M|
+|teampreview|4
+|showteam|p1|Greninja||Greninjite|Protean|Protect,Extrasensory,IceBeam,WeatherBall|||F|||50|]Pelipper||FocusSash|Drizzle|Protect,Tailwind,Hurricane,WeatherBall|||M|||50|]Archaludon||Magnet|Sturdy|Protect,ElectroShot,FlashCannon,DragonPulse|||F|||50|]Incineroar||SitrusBerry|Intimidate|FakeOut,PartingShot,WillOWisp,DarkestLariat|||M|||50|]Sneasler||WhiteHerb|Unburden|Protect,DireClaw,CloseCombat,FakeOut|||M|||50|]Tsareena||MiracleSeed|QueenlyMajesty|Protect,Uturn,TripleAxel,TropKick|||F|||50|
+|showteam|p2|Aerodactyl||FocusSash|Unnerve|RockSlide,DualWingbeat,Tailwind,Protect|||F|||50|]Floette-Eternal||Floettite|FlowerVeil|Moonblast,DazzlingGleam,CalmMind,Protect|||F|||50|]Incineroar||ShucaBerry|Intimidate|FlareBlitz,ThroatChop,PartingShot,FakeOut|||F|||50|]Charizard||CharizarditeY|Blaze|HeatWave,WeatherBall,SolarBeam,Protect|||F|||50|]Kingambit||BlackGlasses|Defiant|KowtowCleave,SuckerPunch,LowKick,Protect|||M|||50|]Sneasler||WhiteHerb|Unburden|CloseCombat,DireClaw,FakeOut,Protect|||M|||50|
+|inactive|Battle timer is ON: inactive players will automatically lose when time's up. (requested by n00syz)
+|inactive|vianova has 60 seconds left.
+|
+|t:|1776448943
+|teamsize|p1|4
+|teamsize|p2|4
+|start
+|switch|p1a: Sneasler|Sneasler, L50, M|100/100
+|switch|p1b: Greninja|Greninja, L50, F|100/100
+|switch|p2a: Aerodactyl|Aerodactyl, L50, F, shiny|100/100
+|switch|p2b: Floette|Floette-Eternal, L50, F|100/100
+|-ability|p2a: Aerodactyl|Unnerve
+|turn|1
+|
+|t:|1776448967
+|move|p2a: Aerodactyl|Protect|p2a: Aerodactyl
+|-singleturn|p2a: Aerodactyl|Protect
+|move|p2b: Floette|Protect|p2b: Floette
+|-singleturn|p2b: Floette|Protect
+|move|p1a: Sneasler|Fake Out|p2a: Aerodactyl
+|-activate|p2a: Aerodactyl|move: Protect
+|move|p1b: Greninja|Ice Beam|p2a: Aerodactyl
+|-start|p1b: Greninja|typechange|Ice|[from] ability: Protean
+|-activate|p2a: Aerodactyl|move: Protect
+|
+|upkeep
+|turn|2
+|inactive|vianova has 30 seconds left.
+|
+|t:|1776448993
+|switch|p1a: Pelipper|Pelipper, L50, M|100/100
+|-weather|RainDance|[from] ability: Drizzle|[of] p1a: Pelipper
+|detailschange|p1b: Greninja|Greninja-Mega, L50, F
+|-mega|p1b: Greninja|Greninja|Greninjite
+|move|p1b: Greninja|Weather Ball|p2a: Aerodactyl
+|-start|p1b: Greninja|typechange|Water|[from] ability: Protean
+|-supereffective|p2a: Aerodactyl|1
+|-enditem|p2a: Aerodactyl|Focus Sash
+|-damage|p2a: Aerodactyl|1/100
+|move|p2a: Aerodactyl|Dual Wingbeat|p1a: Pelipper
+|-damage|p1a: Pelipper|84/100
+|-damage|p1a: Pelipper|68/100
+|-hitcount|p1a: Pelipper|2
+|move|p2b: Floette|Calm Mind|p2b: Floette
+|-boost|p2b: Floette|spa|1
+|-boost|p2b: Floette|spd|1
+|
+|-weather|RainDance|[upkeep]
+|upkeep
+|turn|3
+|inactive|vianova has 30 seconds left.
+|
+|t:|1776449027
+|move|p1b: Greninja|Weather Ball|p2a: Aerodactyl
+|-supereffective|p2a: Aerodactyl|1
+|-damage|p2a: Aerodactyl|0 fnt
+|faint|p2a: Aerodactyl
+|move|p2b: Floette|Moonblast|p1a: Pelipper
+|-damage|p1a: Pelipper|0 fnt
+|faint|p1a: Pelipper
+|
+|-weather|RainDance|[upkeep]
+|upkeep
+|
+|t:|1776449036
+|switch|p2a: Charizard|Charizard, L50, F|100/100
+|switch|p1a: Sneasler|Sneasler, L50, M|100/100
+|turn|4
+|
+|t:|1776449048
+|switch|p1b: Tsareena|Tsareena, L50, F|100/100
+|move|p2a: Charizard|Protect|p2a: Charizard
+|-singleturn|p2a: Charizard|Protect
+|move|p2b: Floette|Protect|p2b: Floette
+|-singleturn|p2b: Floette|Protect
+|move|p1a: Sneasler|Fake Out|p2a: Charizard
+|-activate|p2a: Charizard|move: Protect
+|
+|-weather|RainDance|[upkeep]
+|upkeep
+|turn|5
+|
+|t:|1776449061
+|switch|p2b: Kingambit|Kingambit, L50, M|100/100
+|detailschange|p2a: Charizard|Charizard-Mega-Y, L50, F
+|-mega|p2a: Charizard|Charizard|Charizardite Y
+|-weather|SunnyDay|[from] ability: Drought|[of] p2a: Charizard
+|move|p1a: Sneasler|Dire Claw|p2b: Kingambit
+|-immune|p2b: Kingambit
+|move|p2a: Charizard|Heat Wave|p1a: Sneasler|[spread] p1b
+|-miss|p2a: Charizard|p1a: Sneasler
+|-supereffective|p1b: Tsareena|1
+|-damage|p1b: Tsareena|0 fnt
+|faint|p1b: Tsareena
+|
+|-weather|SunnyDay|[upkeep]
+|upkeep
+|
+|t:|1776449072
+|switch|p1b: Greninja|Greninja-Mega, L50, F|100/100
+|turn|6
+|
+|t:|1776449087
+|move|p2b: Kingambit|Protect|p2b: Kingambit
+|-singleturn|p2b: Kingambit|Protect
+|move|p1b: Greninja|Weather Ball|p2b: Kingambit
+|-start|p1b: Greninja|typechange|Fire|[from] ability: Protean
+|-activate|p2b: Kingambit|move: Protect
+|move|p1a: Sneasler|Dire Claw|p2a: Charizard
+|-crit|p2a: Charizard
+|-damage|p2a: Charizard|19/100
+|move|p2a: Charizard|Weather Ball|p1a: Sneasler
+|-damage|p1a: Sneasler|0 fnt
+|faint|p1a: Sneasler
+|
+|-weather|SunnyDay|[upkeep]
+|upkeep
+|turn|7
+|
+|t:|1776449097
+|move|p2b: Kingambit|Sucker Punch|p1b: Greninja
+|-damage|p1b: Greninja|30/100
+|move|p1b: Greninja|Weather Ball|p2b: Kingambit
+|-supereffective|p2b: Kingambit|1
+|-damage|p2b: Kingambit|0 fnt
+|faint|p2b: Kingambit
+|move|p2a: Charizard|Weather Ball|p1b: Greninja
+|-resisted|p1b: Greninja|1
+|-damage|p1b: Greninja|0 fnt
+|faint|p1b: Greninja
+|
+|win|vianova
+|raw|n00syz's rating: 1109 &rarr; <strong>1091</strong><br />(-18 for losing)
+|raw|vianova's rating: 1202 &rarr; <strong>1220</strong><br />(+18 for winning)
+|l|☆n00syz
+|player|p1|

@@ -1,0 +1,245 @@
+|j|☆slippybingus
+|j|☆vianova
+|t:|1777145517
+|gametype|doubles
+|player|p1|slippybingus|170|1257
+|player|p2|vianova|170|1335
+|gen|9
+|tier|[Gen 9 Champions] VGC 2026 Reg M-A
+|rated|
+|rule|Species Clause: Limit one of each Pokémon
+|rule|Item Clause: Limit 1 of each item
+|clearpoke
+|poke|p1|Sneasler, L50, M|
+|poke|p1|Tyranitar, L50, M|
+|poke|p1|Rotom-Wash, L50|
+|poke|p1|Excadrill, L50, F|
+|poke|p1|Dragapult, L50, F|
+|poke|p1|Venusaur, L50, M|
+|poke|p2|Sneasler, L50, F|
+|poke|p2|Kingambit, L50, F|
+|poke|p2|Basculegion, L50, M|
+|poke|p2|Froslass, L50, F|
+|poke|p2|Milotic, L50, F|
+|poke|p2|Dragonite, L50, F|
+|teampreview|4
+|inactive|Battle timer is ON: inactive players will automatically lose when time's up. (requested by slippybingus)
+|inactive|vianova has 60 seconds left.
+|
+|t:|1777145585
+|teamsize|p1|4
+|teamsize|p2|4
+|start
+|switch|p1a: Venusaur|Venusaur, L50, M|100/100
+|switch|p1b: Dragapult|Dragapult, L50, F|100/100
+|switch|p2a: Kingambit|Kingambit, L50, F|100/100
+|switch|p2b: Milotic|Milotic, L50, F|100/100
+|turn|1
+|
+|t:|1777145603
+|switch|p2b: Dragonite|Dragonite, L50, F|100/100
+|detailschange|p1a: Venusaur|Venusaur-Mega, L50, M
+|-mega|p1a: Venusaur|Venusaur|Venusaurite
+|move|p2a: Kingambit|Sucker Punch||[still]
+|-fail|p2a: Kingambit
+|move|p1b: Dragapult|Will-O-Wisp|p2a: Kingambit
+|-status|p2a: Kingambit|brn
+|move|p1a: Venusaur|Giga Drain|p2b: Dragonite
+|-resisted|p2b: Dragonite|2
+|-damage|p2b: Dragonite|96/100
+|
+|-damage|p2a: Kingambit|94/100 brn|[from] brn
+|upkeep
+|turn|2
+|
+|t:|1777145619
+|move|p1b: Dragapult|Will-O-Wisp|p2b: Dragonite
+|-status|p2b: Dragonite|brn
+|move|p2b: Dragonite|Tailwind|p2b: Dragonite
+|-sidestart|p2: vianova|move: Tailwind
+|move|p2a: Kingambit|Kowtow Cleave|p1b: Dragapult
+|-supereffective|p1b: Dragapult|1
+|-enditem|p1b: Dragapult|Colbur Berry|[eat]
+|-enditem|p1b: Dragapult|Colbur Berry|[weaken]
+|-damage|p1b: Dragapult|68/100
+|move|p1a: Venusaur|Earth Power|p2a: Kingambit
+|-supereffective|p2a: Kingambit|1
+|-damage|p2a: Kingambit|27/100 brn
+|
+|-damage|p2b: Dragonite|90/100 brn|[from] brn
+|-damage|p2a: Kingambit|21/100 brn|[from] brn
+|upkeep
+|turn|3
+|inactive|slippybingus has 30 seconds left.
+|
+|t:|1777145647
+|move|p1b: Dragapult|Protect|p1b: Dragapult
+|-singleturn|p1b: Dragapult|Protect
+|move|p2b: Dragonite|Dragon Claw|p1a: Venusaur
+|-damage|p1a: Venusaur|78/100
+|move|p2a: Kingambit|Kowtow Cleave|p1a: Venusaur
+|-damage|p1a: Venusaur|60/100
+|move|p1a: Venusaur|Earth Power|p2a: Kingambit
+|-supereffective|p2a: Kingambit|1
+|-damage|p2a: Kingambit|0 fnt
+|faint|p2a: Kingambit
+|
+|-damage|p2b: Dragonite|84/100 brn|[from] brn
+|upkeep
+|
+|t:|1777145655
+|switch|p2a: Froslass|Froslass, L50, F|100/100
+|turn|4
+|
+|t:|1777145679
+|detailschange|p2a: Froslass|Froslass-Mega, L50, F
+|-mega|p2a: Froslass|Froslass|Froslassite
+|-weather|Snowscape|[from] ability: Snow Warning|[of] p2a: Froslass
+|move|p1a: Venusaur|Protect|p1a: Venusaur
+|-singleturn|p1a: Venusaur|Protect
+|move|p2a: Froslass|Blizzard|p1b: Dragapult|[spread] p1b
+|-activate|p1a: Venusaur|move: Protect
+|-supereffective|p1b: Dragapult|1
+|-damage|p1b: Dragapult|0 fnt
+|faint|p1b: Dragapult
+|move|p2b: Dragonite|Low Kick|p1a: Venusaur
+|-activate|p1a: Venusaur|move: Protect
+|
+|-weather|Snowscape|[upkeep]
+|-damage|p2b: Dragonite|79/100 brn|[from] brn
+|upkeep
+|
+|t:|1777145691
+|switch|p1b: Tyranitar|Tyranitar, L50, M|100/100
+|-weather|Sandstorm|[from] ability: Sand Stream|[of] p1b: Tyranitar
+|turn|5
+|inactive|vianova has 30 seconds left.
+|
+|t:|1777145717
+|switch|p2a: Milotic|Milotic, L50, F|100/100
+|switch|p1b: Rotom|Rotom-Wash, L50|100/100
+|move|p2b: Dragonite|Low Kick|p1b: Rotom
+|-damage|p1b: Rotom|97/100
+|move|p1a: Venusaur|Giga Drain|p2a: Milotic
+|-supereffective|p2a: Milotic|1
+|-damage|p2a: Milotic|43/100
+|-heal|p1a: Venusaur|91/100|[from] drain|[of] p2a: Milotic
+|-enditem|p2a: Milotic|Sitrus Berry|[eat]
+|-heal|p2a: Milotic|68/100|[from] item: Sitrus Berry
+|
+|-weather|Sandstorm|[upkeep]
+|-damage|p2a: Milotic|62/100|[from] Sandstorm
+|-damage|p2b: Dragonite|73/100 brn|[from] Sandstorm
+|-damage|p1b: Rotom|91/100|[from] Sandstorm
+|-damage|p1a: Venusaur|85/100|[from] Sandstorm
+|-damage|p2b: Dragonite|67/100 brn|[from] brn
+|-sideend|p2: vianova|move: Tailwind
+|upkeep
+|turn|6
+|
+|t:|1777145734
+|move|p2a: Milotic|Protect|p2a: Milotic
+|-singleturn|p2a: Milotic|Protect
+|move|p1b: Rotom|Electroweb|p2b: Dragonite|[spread] p2b
+|-activate|p2a: Milotic|move: Protect
+|-damage|p2b: Dragonite|53/100 brn
+|-unboost|p2b: Dragonite|spe|1
+|move|p1a: Venusaur|Giga Drain|p2a: Milotic
+|-activate|p2a: Milotic|move: Protect
+|move|p2b: Dragonite|Tailwind|p2b: Dragonite
+|-sidestart|p2: vianova|move: Tailwind
+|
+|-weather|Sandstorm|[upkeep]
+|-damage|p2a: Milotic|56/100|[from] Sandstorm
+|-damage|p2b: Dragonite|48/100 brn|[from] Sandstorm
+|-damage|p1b: Rotom|85/100|[from] Sandstorm
+|-damage|p1a: Venusaur|79/100|[from] Sandstorm
+|-damage|p2b: Dragonite|42/100 brn|[from] brn
+|upkeep
+|turn|7
+|
+|t:|1777145756
+|move|p2a: Milotic|Life Dew|p2a: Milotic|[spread] p2a,p2b
+|-heal|p2a: Milotic|81/100
+|-heal|p2b: Dragonite|67/100 brn
+|move|p2b: Dragonite|Dragon Claw|p1a: Venusaur
+|-damage|p1a: Venusaur|58/100
+|move|p1b: Rotom|Thunderbolt|p2b: Dragonite
+|-damage|p2b: Dragonite|38/100 brn
+|move|p1a: Venusaur|Giga Drain|p2a: Milotic
+|-supereffective|p2a: Milotic|1
+|-damage|p2a: Milotic|30/100
+|-heal|p1a: Venusaur|85/100|[from] drain|[of] p2a: Milotic
+|
+|-weather|Sandstorm|[upkeep]
+|-damage|p2a: Milotic|24/100|[from] Sandstorm
+|-damage|p2b: Dragonite|32/100 brn|[from] Sandstorm
+|-damage|p1b: Rotom|79/100|[from] Sandstorm
+|-damage|p1a: Venusaur|79/100|[from] Sandstorm
+|-damage|p2b: Dragonite|26/100 brn|[from] brn
+|upkeep
+|turn|8
+|
+|t:|1777145776
+|move|p2a: Milotic|Icy Wind|p1b: Rotom|[spread] p1a,p1b
+|-supereffective|p1a: Venusaur|1
+|-resisted|p1b: Rotom|1
+|-damage|p1a: Venusaur|72/100
+|-damage|p1b: Rotom|74/100
+|-unboost|p1a: Venusaur|spe|1
+|-unboost|p1b: Rotom|spe|1
+|move|p2b: Dragonite|Dragon Claw|p1b: Rotom
+|-damage|p1b: Rotom|50/100
+|-enditem|p1b: Rotom|Sitrus Berry|[eat]
+|-heal|p1b: Rotom|75/100|[from] item: Sitrus Berry
+|move|p1b: Rotom|Thunderbolt|p2b: Dragonite
+|-damage|p2b: Dragonite|0 fnt
+|faint|p2b: Dragonite
+|move|p1a: Venusaur|Giga Drain|p2a: Milotic
+|-supereffective|p2a: Milotic|1
+|-damage|p2a: Milotic|0 fnt
+|-heal|p1a: Venusaur|84/100|[from] drain|[of] p2a: Milotic
+|faint|p2a: Milotic
+|
+|-weather|Sandstorm|[upkeep]
+|-damage|p1b: Rotom|69/100|[from] Sandstorm
+|-damage|p1a: Venusaur|79/100|[from] Sandstorm
+|upkeep
+|
+|t:|1777145784
+|switch|p2b: Froslass|Froslass-Mega, L50, F|100/100
+|-weather|Snowscape|[from] ability: Snow Warning|[of] p2b: Froslass
+|turn|9
+|
+|t:|1777145794
+|switch|p1b: Tyranitar|Tyranitar, L50, M|100/100
+|-weather|Sandstorm|[from] ability: Sand Stream|[of] p1b: Tyranitar
+|move|p2b: Froslass|Blizzard|p1b: Tyranitar|[spread] p1a,p1b
+|-supereffective|p1a: Venusaur|1
+|-damage|p1a: Venusaur|43/100
+|-damage|p1b: Tyranitar|76/100
+|move|p1a: Venusaur|Giga Drain|p2b: Froslass
+|-damage|p2b: Froslass|62/100
+|-heal|p1a: Venusaur|62/100|[from] drain|[of] p2b: Froslass
+|
+|-weather|Sandstorm|[upkeep]
+|-damage|p2b: Froslass|55/100|[from] Sandstorm
+|-damage|p1a: Venusaur|56/100|[from] Sandstorm
+|-sideend|p2: vianova|move: Tailwind
+|upkeep
+|turn|10
+|
+|t:|1777145808
+|move|p2b: Froslass|Blizzard|p1a: Venusaur|[spread] 
+|-miss|p2b: Froslass|p1a: Venusaur
+|-miss|p2b: Froslass|p1b: Tyranitar
+|move|p1b: Tyranitar|Knock Off|p2b: Froslass
+|-supereffective|p2b: Froslass|1
+|-damage|p2b: Froslass|0 fnt
+|faint|p2b: Froslass
+|
+|win|slippybingus
+|raw|slippybingus's rating: 1257 &rarr; <strong>1288</strong><br />(+31 for winning)
+|raw|vianova's rating: 1335 &rarr; <strong>1311</strong><br />(-24 for losing)
+|l|☆vianova
+|player|p2|
