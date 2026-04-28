@@ -51,7 +51,7 @@ public final class DamageFormula {
 
     long applyWeatherModifier(long damage, DamageContext context) {
         return switch (context.weather()) {
-            case CLEAR -> damage;
+            case NONE, CLEAR -> damage;
             case SUN ->
                 switch (context.move().type()) {
                     case FIRE -> applyMultiplier(damage, 3, 2);

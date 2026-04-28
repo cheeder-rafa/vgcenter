@@ -90,6 +90,14 @@ class DamageFormulaGoldenSetTest {
                 Arguments.of("physical stab", context(physicalAttacker, bulkyDefender, physicalStab), PHYSICAL_STAB),
                 Arguments.of("special stab", context(specialAttacker, grassDefender, specialFire), SPECIAL_STAB),
                 Arguments.of(
+                        "no weather (NONE) has no modifier",
+                        context(
+                                specialAttacker,
+                                grassDefender,
+                                specialFire,
+                                field(Weather.NONE, Terrain.NONE, Room.NONE)),
+                        SPECIAL_STAB),
+                Arguments.of(
                         "quad effectiveness",
                         context(specialAttacker, grassSteelDefender, specialFire),
                         QUAD_EFFECTIVE),
