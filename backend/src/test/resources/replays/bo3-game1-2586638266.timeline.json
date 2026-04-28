@@ -7,7 +7,7 @@
     "number" : 1,
     "boardStateAtStart" : {
       "weather" : "RAIN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -142,7 +142,7 @@
     "number" : 2,
     "boardStateAtStart" : {
       "weather" : "RAIN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -261,7 +261,7 @@
     "number" : 3,
     "boardStateAtStart" : {
       "weather" : "SUN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : true,
@@ -384,7 +384,7 @@
     "number" : 4,
     "boardStateAtStart" : {
       "weather" : "SUN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : true,
@@ -503,7 +503,7 @@
     "number" : 5,
     "boardStateAtStart" : {
       "weather" : "SUN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : true,
@@ -614,7 +614,7 @@
     "number" : 6,
     "boardStateAtStart" : {
       "weather" : "SUN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -733,7 +733,7 @@
     "number" : 7,
     "boardStateAtStart" : {
       "weather" : "SUN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -848,7 +848,7 @@
     "number" : 8,
     "boardStateAtStart" : {
       "weather" : "RAIN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -967,7 +967,7 @@
     "number" : 9,
     "boardStateAtStart" : {
       "weather" : "RAIN",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,

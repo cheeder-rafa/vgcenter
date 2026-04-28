@@ -7,7 +7,7 @@
     "number" : 1,
     "boardStateAtStart" : {
       "weather" : "NONE",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -122,7 +122,7 @@
     "number" : 2,
     "boardStateAtStart" : {
       "weather" : "NONE",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -249,7 +249,7 @@
     "number" : 3,
     "boardStateAtStart" : {
       "weather" : "NONE",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -376,7 +376,7 @@
     "number" : 4,
     "boardStateAtStart" : {
       "weather" : "NONE",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -503,7 +503,7 @@
     "number" : 5,
     "boardStateAtStart" : {
       "weather" : "SAND",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -650,7 +650,7 @@
     "number" : 6,
     "boardStateAtStart" : {
       "weather" : "SAND",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -789,7 +789,7 @@
     "number" : 7,
     "boardStateAtStart" : {
       "weather" : "SAND",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -940,7 +940,7 @@
     "number" : 8,
     "boardStateAtStart" : {
       "weather" : "SAND",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -1107,7 +1107,7 @@
     "number" : 9,
     "boardStateAtStart" : {
       "weather" : "SNOW",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -1242,7 +1242,7 @@
     "number" : 10,
     "boardStateAtStart" : {
       "weather" : "SAND",
-      "terrain" : "none",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,

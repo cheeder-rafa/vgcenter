@@ -98,8 +98,8 @@ public class ShowdownReplayParser implements ReplayParser {
             case "-boost" -> battleState.active(parts[2]).adjustBoost(parts[3], parseAmount(parts[4]));
             case "-unboost" -> battleState.active(parts[2]).adjustBoost(parts[3], -parseAmount(parts[4]));
             case "-weather" -> battleState.weather = ShowdownWeatherMapper.toWeatherToken(parts[2]);
-            case "-fieldstart" -> battleState.terrain = normalizeField(parts[2]);
-            case "-fieldend" -> battleState.terrain = "none";
+            case "-fieldstart" -> battleState.terrain = ShowdownTerrainMapper.toTerrainToken(normalizeField(parts[2]));
+            case "-fieldend" -> battleState.terrain = "NONE";
             case "-sidestart" -> battleState.sideFromToken(parts[2]).applySideCondition(parts[3], true);
             case "-sideend" -> battleState.sideFromToken(parts[2]).applySideCondition(parts[3], false);
             case "faint" -> {
@@ -155,7 +155,7 @@ public class ShowdownReplayParser implements ReplayParser {
         private final MutableSideState sideA = new MutableSideState();
         private final MutableSideState sideB = new MutableSideState();
         private String weather = "NONE";
-        private String terrain = "none";
+        private String terrain = "NONE";
         private String winner;
         private boolean tie;
 
