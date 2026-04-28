@@ -6,7 +6,7 @@
   "turns" : [ {
     "number" : 1,
     "boardStateAtStart" : {
-      "weather" : "none",
+      "weather" : "NONE",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",
@@ -109,7 +109,7 @@
   }, {
     "number" : 2,
     "boardStateAtStart" : {
-      "weather" : "none",
+      "weather" : "NONE",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",
@@ -240,7 +240,7 @@
   }, {
     "number" : 3,
     "boardStateAtStart" : {
-      "weather" : "RainDance",
+      "weather" : "RAIN",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",
@@ -363,7 +363,7 @@
   }, {
     "number" : 4,
     "boardStateAtStart" : {
-      "weather" : "RainDance",
+      "weather" : "RAIN",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",
@@ -470,7 +470,7 @@
   }, {
     "number" : 5,
     "boardStateAtStart" : {
-      "weather" : "RainDance",
+      "weather" : "RAIN",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",
@@ -589,7 +589,7 @@
   }, {
     "number" : 6,
     "boardStateAtStart" : {
-      "weather" : "SunnyDay",
+      "weather" : "SUN",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",
@@ -708,7 +708,7 @@
   }, {
     "number" : 7,
     "boardStateAtStart" : {
-      "weather" : "SunnyDay",
+      "weather" : "SUN",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "n00syz",

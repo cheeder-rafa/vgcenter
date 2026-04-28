@@ -6,7 +6,7 @@
   "turns" : [ {
     "number" : 1,
     "boardStateAtStart" : {
-      "weather" : "none",
+      "weather" : "NONE",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -121,7 +121,7 @@
   }, {
     "number" : 2,
     "boardStateAtStart" : {
-      "weather" : "none",
+      "weather" : "NONE",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -248,7 +248,7 @@
   }, {
     "number" : 3,
     "boardStateAtStart" : {
-      "weather" : "none",
+      "weather" : "NONE",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -375,7 +375,7 @@
   }, {
     "number" : 4,
     "boardStateAtStart" : {
-      "weather" : "none",
+      "weather" : "NONE",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -502,7 +502,7 @@
   }, {
     "number" : 5,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
+      "weather" : "SAND",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -649,7 +649,7 @@
   }, {
     "number" : 6,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
+      "weather" : "SAND",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -788,7 +788,7 @@
   }, {
     "number" : 7,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
+      "weather" : "SAND",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -939,7 +939,7 @@
   }, {
     "number" : 8,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
+      "weather" : "SAND",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -1106,7 +1106,7 @@
   }, {
     "number" : 9,
     "boardStateAtStart" : {
-      "weather" : "Snowscape",
+      "weather" : "SNOW",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",
@@ -1241,7 +1241,7 @@
   }, {
     "number" : 10,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
+      "weather" : "SAND",
       "terrain" : "none",
       "sideA" : {
         "playerName" : "slippybingus",

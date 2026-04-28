@@ -43,7 +43,7 @@ class ShowdownReplayParserTest {
                 .containsExactly("Venusaur", "Dragapult");
         assertThat(timeline.turns().get(6).boardStateAtStart().sideB().tailwind())
                 .isTrue();
-        assertThat(timeline.turns().get(8).boardStateAtStart().weather()).isEqualTo("Snowscape");
+        assertThat(timeline.turns().get(8).boardStateAtStart().weather()).isEqualTo("SNOW");
     }
 
     @Test
