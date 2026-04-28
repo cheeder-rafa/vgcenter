@@ -55,7 +55,14 @@ class ShowdownReplayParserPropertiesTest {
 
     @Provide
     Arbitrary<String> fixtureNames() {
-        return Arbitraries.of("single-regma-2593988469.log", "bo3-game1-2586638266.log", "bo3-game2-2586642583.log");
+        return Arbitraries.of(
+                "single-regma-2593988469.log",
+                "bo3-game1-2586638266.log",
+                "bo3-game2-2586642583.log",
+                "status-brn-par.log",
+                "status-slp-psn-tox.log",
+                "bo3-with-brn-game1.log",
+                "bo3-with-brn-game2.log");
     }
 
     private ReplayTimeline parseFixture(String fixtureName) throws IOException {
