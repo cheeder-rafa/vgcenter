@@ -147,45 +147,29 @@ A milestone is done only when all of these hold:
 - **URL-share state**: base64url codec, Share Link button, round-trip tests — done (merged to develop).
 - **Calc history**: session ring buffer (N=10), `HistoryPanel`, `useCalcHistorySync` — done (merged to develop).
 - **Spread library**: `useSpreadLibraryStore` (localStorage), `SpreadLibraryDropdown` in PokemonPanel — done (merged to develop).
+- **Side-by-side spread compare**: `useCompareStore`, `SpreadComparePanel` — done (#74).
+- **Discord + PNG export**: `share/exportDiscord.ts`, `share/exportImage.ts`, header buttons — done (#75, #77).
+- **Mobile / tablet responsive pass**: 375px–767px viewports across calculator, speed tiers, preview — done (#76).
 
-## Active work — v1.1 Wishlist (3 items remaining)
+## Active work — v1.2 Meta Intelligence Suite (3 milestones)
 
-Three wishlist items are not yet started. Each gets its own feature branch off `develop` and its own PR. Do not mix them in a single branch.
+Three new milestones close the gap vs Pikalytics / vgcmulticalc / Labmaus / frontier-delta by turning the calculator's per-matchup output into team-level and game-level insight. Each gets its own feature branch off `develop` and its own PR. Do not mix them in a single branch. Long-form spec lives in `PLAN.md` under `## Sub-project 3 — Meta Intelligence Suite (v1.2)`.
 
-**Item 6 — Side-by-side defender spread compare** (`feature/spread-compare`)
+**M11 — Replay Autopsy** (split into M11a parser, M11b evaluator, M11c frontend)
 
-New collapsible panel below `EvOptimizerPanel` that lets the user pin up to 4 defender builds and compare damage intake side-by-side from the current attacker.
+Paste a Pokémon Showdown replay URL (or up to three for a BO3 match) → tool reconstructs each turn's board state, recomputes the rolls that actually happened, and produces a per-turn decision review using `CalculateDamageUseCase` to score the played line vs every legal alternative move pair. New `infrastructure/replay/`, `EvaluateReplayDecisionsUseCase`, `/api/v1/replay/{parse,evaluate}`, and a `/replay` page that reuses `DamageBar`/`RollHeatmap`/`SpriteBadge`. Reference replays committed as fixtures (single Reg-MA, plus BO3 game 1 → game 2). No competitor ships replay-driven feedback — this is the moat.
 
-- New store: `frontend/src/features/calculator/store/useCompareStore.ts` — session-only (no persist), max 4 `PinnedDefender = { id, label, build: CombatantBuild }`. Pattern: copy from `usePinStore.ts`.
-- New component: `frontend/src/features/calculator/components/SpreadComparePanel.tsx` — collapsible, "Pin current defender" snapshots the active defender build. Each column calls `calculateDamage` (damageApi), shows `minPct–maxPct`, `koChance`, reuses `DamageBar`.
-- Wire into `CalculatorPage.tsx` below `<EvOptimizerPanel />`.
-- Tests: `tests/unit/store/useCompareStore.test.ts`, `tests/component/calculator/SpreadComparePanel.test.tsx`.
-- **Zustand selector gotcha**: never use `?? []` inline in a selector — use a module-level `const EMPTY: T[] = []` constant, or Zustand will see a new reference every render and loop infinitely. This bug was already fixed in `SpreadLibraryDropdown`; apply the same pattern here.
+**M12 — Multi-Threat Spread Optimizer** (`feature/m12-multi-threat-optimizer`)
 
-**Item 7 — Discord text + PNG export** (`feature/share-export`)
+Generalises `OptimizeDefensiveSpreadService` from "minimise KO chance vs *one* attacker" to "minimise total expected HP loss vs a *list* of attackers", subject to the 66 SP cap. New `OptimizeAgainstThreatsUseCase`, endpoint `POST /api/v1/calc/optimize-against-threats`, configurable goal (`WORST_CASE_KO | EXPECTED_DAMAGE_SUM | SURVIVE_ALL`). Frontend extends `SpreadOptimizerPanel` with a Multi-threat tab plus a `usePinnedThreatsStore` mirroring `useCompareStore` (apply the EMPTY-array selector pattern documented above to avoid the Zustand re-render bug).
 
-Two new header buttons alongside the existing Share Link button.
+**M13 — Threat Matrix** (`feature/m13-threat-matrix`)
 
-- Add dep: `pnpm add html-to-image` (frontend only, no backend changes).
-- New module: `frontend/src/features/calculator/share/exportDiscord.ts` — pure `formatDiscordReport(...)` function, no DOM. Outputs a Discord code-block with attacker→defender heading, move rows (name, min%–max%, KO%), 16 rolls. Null move slots are skipped.
-- New module: `frontend/src/features/calculator/share/exportImage.ts` — `exportResultImage(el: HTMLElement): Promise<void>`. Uses `toPng` from html-to-image, copies via `ClipboardItem`; download fallback if clipboard API unavailable. Fires `useToastStore` toast.
-- `CalculatorPage.tsx`: add `ref` to `data-testid="detailed-result-span"` div; pass `onExportDiscord` and `onExportPng` to `CompactHeader`; buttons use `arena-button` class.
-- Tests: `tests/unit/exportDiscord.test.ts` (pure formatter — no DOM mocks needed). Skip `exportImage` unit test (DOM capture unreliable in happy-dom; note in commit body).
+Paste two pokepastes → 6×6 damage heatmap; rows = your team, columns = opponent; cells = best-move min%/KO%. Toggle "damage I deal" / "damage I take". Click a cell → opens that matchup in `/calc` via the existing URL-share codec. Hover → full 16-roll distribution. New `BuildThreatMatrixUseCase`, `POST /api/v1/matchup/matrix`, `/matchup` route + feature slice. Performance budget: <500ms server-side for the full grid (asserted by a service test). Cell colouring must be colorblind-safe + AA contrast (verify via `web-design-guidelines` skill).
 
-**Item 8 — Mobile / tablet responsive pass** (`feature/mobile-pass`)
-
-Makes `CalculatorPage`, `SpeedTierPage`, and `PreviewPage` usable at 375px–767px. No horizontal page scroll, no functionality cuts, tap targets ≥ 44px.
-
-- `CalculatorPage.tsx`: add `min-h-[44px]` to Share Link, export buttons, import modal triggers. Verify `SavedPokemonRail` stacking doesn't push content below fold on narrow screens.
-- `SpeedTierPage.tsx`: wrap speed list in `overflow-x-auto` if missing; sprite column must not overflow at 375px.
-- `PreviewPage` panels: verify stacking under `sm:` breakpoints.
-- CSS-only responsive changes; no new JS; no motion added on mobile.
-- Tests: viewport-width snapshot — render `CalculatorPage` in a 375px container, assert no horizontal overflow.
-- Skip overdrive skill on this item (motion is a liability on mobile). Use impeccable → polish only.
-
-**Rules for all three items:**
+**Rules for all three milestones:**
 - Branch from `develop`. Target `develop`. Never push directly.
-- TDD: write failing tests first, then implement, then run `pnpm lint && pnpm typecheck && pnpm test` from `frontend/`.
+- TDD: write failing tests first, then implement, then run `./mvnw verify` (backend) and/or `pnpm lint && pnpm typecheck && pnpm test` (frontend).
 - Conventional Commits. Never `--no-verify`.
-- Skills per frontend commit: `impeccable → overdrive → polish` (skip overdrive on mobile-pass).
-- One PR per item. Stop after each PR is opened and CI is green; do not self-merge.
+- Skills per frontend commit: `impeccable → vercel-react-best-practices → vercel-composition-patterns → web-design-guidelines → polish`.
+- One PR per milestone (M11 splits into three sub-PRs: M11a → M11b → M11c, each targeting `develop`). Stop after each PR is opened and CI is green; do not self-merge.

@@ -1141,5 +1141,267 @@ These items were deferred during the v1 build. Capture here for future prioritis
 - **Mobile / tablet pass** — audit and adapt the calculator and Preview Coach layouts for viewports below 768px; no functionality cut.
 - **Discord / PNG export** — render a damage result or team plan as a shareable image or formatted Discord embed.
 - **Spread library** — save and name favourite spreads per species; load them back into the calculator in one click.
-- **Matchup heatmap** — a grid view showing how a full 6-mon roster fares against a set of benchmark threats (damage output + bulk in one matrix).
+- **Matchup heatmap** — a grid view showing how a full 6-mon roster fares against a set of benchmark threats (damage output + bulk in one matrix). *(Promoted to M13 under Sub-project 3 — Meta Intelligence Suite.)*
 - **Practice mode** — a quiz-style drill where the user guesses whether a move KOs or 2HKOs before the result is revealed.
+
+---
+
+# Sub-project 3 — Meta Intelligence Suite (v1.2)
+
+## Context
+
+The v1 calculator and v1.1 polish (URL share, history, spread library, side-by-side compare, Discord/PNG export, mobile pass) are shipped. Competing tools — Pikalytics (usage stats), vgcmulticalc (multi-target calc), Labmaus (team explorer / replay-derived stats), frontier-delta (teammate discovery), NCP-VGC (clean Honko fork) — all stop at *static* analysis: they tell you what spreads exist, what teammates pair with what, and how single matchups roll. **None ingests a real Showdown replay and overlays calc-grounded "what-if" feedback on each turn.** That gap, plus a generalised multi-target optimizer and a team-vs-team matrix that integrates the user's own SP-aware spreads, is the v1.2 thesis.
+
+Three new milestones, branched off `develop`, executed in this order (per user direction): **M11 → M12 → M13**. M11 (Replay Autopsy) is the most ambitious and is split into three sub-PRs (M11a parser, M11b evaluator, M11c frontend).
+
+## Scope
+
+### In scope (v1.2)
+- **M11 — Replay Autopsy.** Parse public Showdown replay logs into a turn-by-turn `ReplayTimeline`; for each turn, score the played move pair vs every legal alternative using the existing `CalculateDamageUseCase`. BO3 mode chains games and surfaces inter-game adaptation flags.
+- **M12 — Multi-Threat Spread Optimizer.** Generalise `OptimizeDefensiveSpreadService` from one attacker to a *list* of attackers, with selectable objective (`WORST_CASE_KO | EXPECTED_DAMAGE_SUM | SURVIVE_ALL`).
+- **M13 — Threat Matrix.** 6×6 damage heatmap from two pokepastes; click-through to `/calc`; speed-tier strip on both axes.
+
+### Out of scope (for v1.2)
+- Usage statistics scraping (no Pikalytics-style aggregated dataset; that's a separate sub-project).
+- Live battle-state coach / in-battle helper.
+- Battle turn simulator (still its own future sub-project).
+- Persisting replays or matrices server-side (stateless endpoints; clients keep history locally if they want it).
+
+## Why this isn't already in any competitor
+
+| Tool | Their edge | What v1.2 adds that they don't have |
+|---|---|---|
+| vgcmulticalc | One attacker → many defenders matrix | Bidirectional 6×6 with SP-aware spreads, abilities, items, click-through to a fully-stateful calc |
+| NCP-VGC | Clean Honko fork | Replay autopsy and multi-threat optimizer not present |
+| Pikalytics | Usage-aggregated spreads | No replay analysis; no per-build "stress test" against a custom threat list |
+| Labmaus | Team explorer, archetype clustering | Decision review per turn using a real damage formula, not just summary stats |
+| frontier-delta | Teammate correlations | Same — no per-turn evaluator |
+
+## Damage formula reuse
+
+All three milestones reuse `CalculateDamageUseCase` unchanged. No domain or formula edits are required for v1.2. The only domain additions are pure value objects: `ReplayTimeline`, `ReplayTurn`, `ReplayEvent`, `TurnReview`, `MatrixCell`, `ThreatList`. ArchUnit rules continue to forbid Spring/Jackson inside `domain` — replay parsing/HTTP lives in `infrastructure/replay/`.
+
+## Milestone specs
+
+### M11 — Replay Autopsy
+
+**Goal:** paste a Pokémon Showdown replay URL (or `.html` log paste, or up to three URLs for a BO3 match) → get a per-turn decision review that uses the existing `CalculateDamageUseCase` to score the moves played vs counterfactual lines.
+
+#### M11a — Replay parser (backend, no UI)
+
+- New package `infrastructure/replay/` with `ShowdownReplayParser` + `ReplayHttpClient` (port `ReplayParser` and `ReplaySource` in `application/port`).
+- Parses the public Showdown protocol log: `|move|`, `|switch|`, `|-damage|`, `|-heal|`, `|-status|`, `|-boost|`, `|-weather|`, `|-fieldstart|`, `|-fieldend|`, `|-sidestart|`, `|-sideend|`, `|faint|`, `|win|`, `|tie|`.
+- Output domain type `ReplayTimeline` = ordered list of `ReplayTurn { number, sideA, sideB, events[], boardStateAtStart }`. `boardStateAtStart` captures HP, status, stat boosts, weather, terrain, screens, tailwind for both sides.
+- Endpoint `POST /api/v1/replay/parse` → returns the timeline DTO (controller in `web/`, DTO mapping kept clean per ArchUnit rules).
+- Tests: golden-set fixtures committed under `backend/src/test/resources/replays/`; jqwik property tests on event ordering invariants (faint always follows the damage event that brought HP to 0; turn numbers are strictly increasing; etc.); ArchUnit unaffected.
+- **Reference replays the user supplied** (commit the saved `.log` of each, plus the parsed-timeline snapshot, as fixtures):
+  - Single game (Reg M-A): `https://replay.pokemonshowdown.com/gen9championsvgc2026regma-2593988469-t3cctf2g51jrek1gjpfiul2337uyqylpw`
+  - BO3 game 1: `https://replay.pokemonshowdown.com/gen9championsvgc2026regmabo3-2586638266-n4pe8e2dvfi211ry6l9a79u2p9xet9npw`
+  - BO3 game 2: `https://replay.pokemonshowdown.com/gen9championsvgc2026regmabo3-2586642583-yuoauq1ul4hs885nnbmosx3ru9m1r4epw`
+- Save each replay's raw protocol log via `?log` (Showdown's documented log endpoint) at fixture-creation time so the parser tests run fully offline; the `ReplayHttpClient` is exercised separately by an integration test guarded by `@Tag("net")`.
+
+#### M11b — Counterfactual evaluator (backend)
+
+- New use case `EvaluateReplayDecisionsUseCase` consuming a `ReplayTimeline`.
+- For each turn: rebuild `CombatantCommand` for all four active Pokémon from `boardStateAtStart`, invoke `CalculateDamageUseCase` for the move actually picked **and for every legal alternative move pair** the active mons could have selected.
+- Score each line with a configurable weighted objective: expected damage dealt − expected damage taken, plus KO/faint bonuses. Flag the played line as ✓ optimal / ◐ acceptable / ✗ suboptimal.
+- Endpoint `POST /api/v1/replay/evaluate` (request: a parsed timeline, or an ordered list of timelines for BO3 mode; response: list of `TurnReview { played, ranked alternatives, delta, narrative }` plus, for BO3 input, inter-game adaptation flags such as "opponent re-led X after losing G1" or "user changed win condition").
+- Coverage gates apply (≥85% on `domain` and `application`).
+- BO3 chaining: the two BO3 reference replays must round-trip as a *linked pair* and surface at least one adaptation flag, mirroring the existing BO3 Notebook (`Bo3Notebook.tsx`) so the autopsy can later feed BO3 adjustment guidance.
+
+#### M11c — Frontend Replay Autopsy page (`/replay`)
+
+- New route + feature slice `frontend/src/features/replay/`.
+- Input area accepts **one URL** (single-game) **or up to three URLs** (BO3 — auto-detect from the `regmabo3` slug); pasted raw logs also accepted. Calls `/parse` then `/evaluate`.
+- Page renders a turn-by-turn timeline; each turn card shows the played pair, top-3 alternatives with delta bars, and a one-sentence narrative ("Tailwind+Moonblast: +14% est. win equity vs played Protect+Moonblast").
+- Reuses `DamageBar`, `RollHeatmap`, `SpriteBadge` from the calculator slice.
+- Click any move row → opens that exact matchup in `/calc` with state pre-filled via the existing URL-share codec.
+- Tests: parser snapshot fixtures, unit tests on the evaluator's scoring function, RTL test that a sample timeline renders the expected number of turn cards.
+
+#### Verification (M11)
+
+Backend:
+```
+cd backend && ./mvnw spotless:apply && ./mvnw verify
+```
+
+Frontend:
+```
+cd frontend && pnpm lint && pnpm typecheck && pnpm test
+```
+
+End-to-end using the three user-supplied reference replays:
+1. Single Reg-MA replay (`...regma-2593988469...`) → timeline renders all turns; at least one turn shows a non-empty alternative list; clicking any move row opens `/calc` pre-filled.
+2. BO3 pair (`...regmabo3-2586638266...` then `...regmabo3-2586642583...`) → both games render in sequence; at least one inter-game adaptation flag is surfaced.
+
+---
+
+### M12 — Multi-Threat Spread Optimizer
+
+**Goal:** generalise `OptimizeDefensiveSpreadService` from "minimise KO chance vs *one* attacker" to "minimise total expected HP loss vs a *list* of attackers", subject to the existing 66 SP cap and offensive-stat constraints.
+
+#### Backend
+
+- New use case `OptimizeAgainstThreatsUseCase` in `application/usecase/`. Reuses the existing single-target service in a loop and aggregates with a configurable objective: `WORST_CASE_KO`, `EXPECTED_DAMAGE_SUM`, `SURVIVE_ALL`.
+- New endpoint `POST /api/v1/calc/optimize-against-threats` with request `{ defender, threats: AttackerCommand[], goal, field, sideConditions }`. Response: best `DefenseSpreadCandidate` plus per-threat KO chances for transparency.
+- Property tests: result must satisfy SP cap (≤ 66); for the `EXPECTED_DAMAGE_SUM` goal, the multi-threat result's average damage taken must be ≤ the single-threat optimum's average across the same threat list.
+
+#### Frontend
+
+- Extend `SpreadOptimizerPanel.tsx` with a "Multi-threat" tab.
+- New session store `frontend/src/features/calculator/store/usePinnedThreatsStore.ts` modelled on `useCompareStore` — but pins *attackers* instead of defenders (max 4). Apply the EMPTY-array selector pattern documented in `CLAUDE.md` to avoid the Zustand re-render bug.
+- "Add current attacker as threat" button mirrors the existing "Pin current defender" affordance.
+- Threats list editable: remove threat, edit move per threat, edit item/ability per threat.
+- Submit calls the new endpoint and shows the resulting spread plus a small per-threat damage table.
+
+#### Verification (M12)
+
+Backend + frontend full verification gates as above. End-to-end: pin 4 distinct meta attackers, run optimizer, confirm SP totals ≤ 66 and per-threat damage shown.
+
+---
+
+### M13 — Threat Matrix (team vs team)
+
+**Goal:** paste two pokepastes (or use stored team), see a 6×6 damage heatmap; rows = your team, columns = opponent. Each cell = best move's min%/KO% in the active direction (toggle attack/defend). Click → opens that matchup in `/calc`. Hover → full 16-roll distribution.
+
+#### Backend
+
+- New use case `BuildThreatMatrixUseCase` consuming two team imports + a field. Internally calls `CalculateDamageUseCase` for each (attacker, defender, move) triple and picks the cell-best move for each ordered pair.
+- Endpoint `POST /api/v1/matchup/matrix` returning `MatrixCell[][]`.
+- Performance budget: 6×6×4-moves×2-directions = 288 calc calls; must complete <500ms server-side. Add a service-level test asserting the budget on a representative reg-MA fixture.
+
+#### Frontend
+
+- New route `/matchup` + feature slice `frontend/src/features/matchup/`.
+- Two pokepaste-paste inputs at the top (reuse `ImportController` + existing import modal logic).
+- Grid renders cells coloured by KO band (`< 35%`, `35–50%`, `50–80%`, OHKO range, guaranteed OHKO) — palette must be colorblind-safe and meet AA contrast (verify via `web-design-guidelines` skill).
+- Toggle: "Damage I deal" vs "Damage I take" flips the matrix.
+- Speed-tier strip rendered along both axes (reuse `SpeedTierRibbon`).
+- Click any cell → opens matchup in `/calc` via URL-share codec.
+- Tests: store unit tests, RTL on the grid (hover → tooltip with rolls), snapshot on a fixture pair of teams.
+
+#### Verification (M13)
+
+Backend + frontend full verification gates. End-to-end: import two real reg-MA pastes, scan grid, click a cell, confirm `/calc` opens with correct attacker/defender/move/field.
+
+---
+
+## Critical files (per milestone)
+
+**M11a / M11b**
+- `backend/.../infrastructure/replay/{ShowdownReplayParser,ReplayHttpClient}.java`
+- `backend/.../application/port/{ReplaySource,ReplayParser}.java`
+- `backend/.../application/usecase/EvaluateReplayDecisionsUseCase.java`
+- `backend/.../web/controller/ReplayController.java` + DTOs
+- `backend/src/test/resources/replays/*.log` (golden fixtures from the three reference replays)
+
+**M11c**
+- `frontend/src/features/replay/{api,components,store,hooks}/`
+- `frontend/src/pages/ReplayPage.tsx`
+- App router entry under `App.tsx`
+
+**M12**
+- `backend/.../application/usecase/OptimizeAgainstThreatsUseCase.java`
+- `backend/.../web/controller/CalcOptimizerController.java` (extend, not replace)
+- `frontend/src/features/calculator/components/SpreadOptimizerPanel.tsx` (extend)
+- `frontend/src/features/calculator/store/usePinnedThreatsStore.ts`
+
+**M13**
+- `backend/.../application/usecase/BuildThreatMatrixUseCase.java`
+- `backend/.../web/controller/MatchupMatrixController.java` + DTOs
+- `frontend/src/features/matchup/{api,components,store}/`
+- `frontend/src/pages/MatchupPage.tsx`
+
+---
+
+## Ready-to-paste phase prompts
+
+**Prompt M11a — Replay parser**
+```
+Execute Milestone M11a from PLAN.md's Sub-project 3 (Meta Intelligence Suite).
+Branch from develop as m11a-replay-parser. TDD first — fetch the three
+reference replays' raw protocol logs (append `?log` to each URL — Showdown's
+documented log endpoint) and commit them under
+backend/src/test/resources/replays/ as:
+  single-regma-2593988469.log
+  bo3-game1-2586638266.log
+  bo3-game2-2586642583.log
+Source URLs:
+  https://replay.pokemonshowdown.com/gen9championsvgc2026regma-2593988469-t3cctf2g51jrek1gjpfiul2337uyqylpw
+  https://replay.pokemonshowdown.com/gen9championsvgc2026regmabo3-2586638266-n4pe8e2dvfi211ry6l9a79u2p9xet9npw
+  https://replay.pokemonshowdown.com/gen9championsvgc2026regmabo3-2586642583-yuoauq1ul4hs885nnbmosx3ru9m1r4epw
+Write the parser test against these fixtures before the parser. Build
+infrastructure/replay/ShowdownReplayParser plus a ReplayHttpClient behind a
+ReplayParser port in application/port. Add ReplayController at
+POST /api/v1/replay/parse returning a ReplayTimeline DTO; map domain → DTO at
+the web boundary (ArchUnit must stay green: no Spring/Jackson in domain).
+Run ./mvnw spotless:apply then ./mvnw verify until green. Conventional Commits
+per concern. Push and open a PR targeting develop. Stop.
+```
+
+**Prompt M11b — Replay evaluator**
+```
+Execute Milestone M11b from PLAN.md. Branch from develop as
+m11b-replay-evaluator after M11a is merged. TDD. Add
+EvaluateReplayDecisionsUseCase that, for each ReplayTurn, rebuilds
+CombatantCommand for the four active mons and calls CalculateDamageUseCase
+across every legal move pair. Score with a configurable weighted objective
+(damage dealt − damage taken, plus KO/faint bonuses). The use case must
+accept either a single ReplayTimeline or an ordered list (BO3 mode) and
+emit inter-game adaptation flags ("opponent re-led X after losing G1",
+"user changed win condition") for the BO3 reference replays
+(2586638266 → 2586642583). Add POST /api/v1/replay/evaluate. Maintain ≥85%
+JaCoCo coverage on domain+application. ArchUnit must stay green. Run full
+backend verification, push, open PR targeting develop, stop.
+```
+
+**Prompt M11c — Replay Autopsy frontend**
+```
+Execute Milestone M11c from PLAN.md. Branch from develop as
+m11c-replay-autopsy after M11b is merged. TDD. Build feature slice
+frontend/src/features/replay/ and a /replay route. Input area accepts one
+URL (single-game) or up to three URLs (BO3 — auto-detect from the
+`regmabo3` slug); pasted raw logs also accepted. Calls /api/v1/replay/parse
+then /api/v1/replay/evaluate. Render per-turn cards with played pair, top-3
+alternatives, delta bars, one-line narrative. Reuse DamageBar, RollHeatmap,
+SpriteBadge. Each row links to /calc via the existing URL-share codec. E2E
+with the three reference replays:
+  single: ...regma-2593988469...
+  bo3 g1: ...regmabo3-2586638266...
+  bo3 g2: ...regmabo3-2586642583...
+Skills per commit: impeccable → vercel-react-best-practices →
+vercel-composition-patterns → web-design-guidelines → polish. Run
+pnpm lint && pnpm typecheck && pnpm test. Open PR targeting develop, stop.
+```
+
+**Prompt M12 — Multi-threat spread optimizer**
+```
+Execute Milestone M12 from PLAN.md. Branch from develop as
+m12-multi-threat-optimizer. TDD. Backend: add OptimizeAgainstThreatsUseCase
+reusing OptimizeDefensiveSpreadService internally; configurable goal
+(WORST_CASE_KO | EXPECTED_DAMAGE_SUM | SURVIVE_ALL). Endpoint
+POST /api/v1/calc/optimize-against-threats. Property test: result respects
+the 66 SP cap and dominates the single-threat optimum on average. Frontend:
+extend SpreadOptimizerPanel with a Multi-threat tab plus a
+usePinnedThreatsStore mirroring useCompareStore (apply the EMPTY-array
+selector pattern documented in CLAUDE.md to avoid the Zustand re-render bug).
+Run full verification both sides. Open PR targeting develop, stop.
+```
+
+**Prompt M13 — Threat Matrix**
+```
+Execute Milestone M13 from PLAN.md. Branch from develop as m13-threat-matrix.
+TDD. Backend: BuildThreatMatrixUseCase + POST /api/v1/matchup/matrix.
+Service-level test asserts <500ms on a 6×6 reg-MA fixture. Frontend: new
+/matchup route, two pokepaste inputs (reuse ImportController), a 6×6 grid
+with KO-band colouring (colorblind-safe, AA contrast — verify via
+web-design-guidelines), direction toggle, SpeedTierRibbon along both axes,
+click → /calc via URL-share codec. Skills per FE commit: impeccable →
+vercel-react-best-practices → web-design-guidelines → polish. Run full
+verification both sides. Open PR targeting develop, stop.
+```
+
+After each implementation branch is ready to publish:
+```
+Use github:yeet to publish the branch and open a PR targeting develop. Do not merge it.
+```
