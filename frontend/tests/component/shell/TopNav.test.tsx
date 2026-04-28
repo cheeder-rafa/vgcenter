@@ -93,12 +93,12 @@ describe('TopNav', () => {
     expect(nav.className).toMatch(/fixed/)
   })
 
-  it('Speed Tiers link has a "new" badge', () => {
+  it('Replay Autopsy link has a "new" badge', () => {
     renderTopNavAt('/calc')
 
-    const speedLink = screen.getByRole('link', { name: /speed tiers/i })
+    const replayLink = screen.getByRole('link', { name: /replay autopsy/i })
     expect(
-      speedLink.querySelector('[data-testid="new-badge"]'),
+      replayLink.querySelector('[data-testid="new-badge"]'),
     ).toBeInTheDocument()
   })
 
