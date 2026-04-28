@@ -27,6 +27,36 @@ export type OptimizeDefenseRequest = {
   criticalHit: boolean
 }
 
+export type OptimizeAgainstThreatsGoal =
+  | 'WORST_CASE_KO'
+  | 'EXPECTED_DAMAGE_SUM'
+  | 'SURVIVE_ALL'
+
+export type OptimizeAgainstThreatRequest = {
+  attackerSpeciesId: string
+  attackerNatureId: string
+  attackerSp: OptimizeDefenseRequest['attackerSp']
+  attackerAbilityId: string | null
+  attackerItemId: string | null
+  moveId: string
+}
+
+export type OptimizeAgainstThreatsRequest = {
+  regulation: string
+  defender: {
+    speciesId: string
+    natureId: string
+    abilityId: string | null
+    itemId: string | null
+  }
+  threats: OptimizeAgainstThreatRequest[]
+  goal: OptimizeAgainstThreatsGoal
+  field: FieldRequest
+  attackerSide: SideConditions
+  defenderSide: SideConditions
+  criticalHit: boolean
+}
+
 export type DefenseSpreadCandidate = {
   spHp: number
   spDef: number
@@ -44,6 +74,21 @@ export type OptimizeDefenseResponse = {
   candidates: DefenseSpreadCandidate[]
 }
 
+export type OptimizeAgainstThreatResult = {
+  attackerSpeciesId: string
+  moveId: string
+  minDamagePct: number
+  maxDamagePct: number
+  expectedDamagePct: number
+  koChanceProbability: number
+  koChanceDescription: string
+}
+
+export type OptimizeAgainstThreatsResponse = {
+  best: DefenseSpreadCandidate | null
+  threats: OptimizeAgainstThreatResult[]
+}
+
 export function optimizeDefense(
   request: OptimizeDefenseRequest,
 ): Promise<OptimizeDefenseResponse> {
@@ -51,6 +96,18 @@ export function optimizeDefense(
     method: 'POST',
     body: JSON.stringify(request),
   })
+}
+
+export function optimizeAgainstThreats(
+  request: OptimizeAgainstThreatsRequest,
+): Promise<OptimizeAgainstThreatsResponse> {
+  return requestJson<OptimizeAgainstThreatsResponse>(
+    '/calc/optimize-against-threats',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+  )
 }
 
 export function spreadToApiSp(

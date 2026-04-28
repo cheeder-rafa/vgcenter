@@ -24,6 +24,8 @@ import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsServic
 import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsUseCase;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamService;
 import com.vgcenter.damagecalc.application.usecase.ImportTeamUseCase;
+import com.vgcenter.damagecalc.application.usecase.OptimizeAgainstThreatsService;
+import com.vgcenter.damagecalc.application.usecase.OptimizeAgainstThreatsUseCase;
 import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadService;
 import com.vgcenter.damagecalc.application.usecase.OptimizeDefensiveSpreadUseCase;
 import com.vgcenter.damagecalc.application.usecase.ParseReplayService;
@@ -81,6 +83,21 @@ public class ApplicationUseCaseConfiguration {
             CalculateDamageUseCase calculateDamageUseCase) {
         return new OptimizeDefensiveSpreadService(
                 pokedexRepository, natureRepository, moveRepository, calculateDamageUseCase);
+    }
+
+    @Bean
+    OptimizeAgainstThreatsUseCase optimizeAgainstThreatsUseCase(
+            PokedexRepository pokedexRepository,
+            NatureRepository natureRepository,
+            MoveRepository moveRepository,
+            CalculateDamageUseCase calculateDamageUseCase,
+            OptimizeDefensiveSpreadUseCase optimizeDefensiveSpreadUseCase) {
+        return new OptimizeAgainstThreatsService(
+                pokedexRepository,
+                natureRepository,
+                moveRepository,
+                calculateDamageUseCase,
+                optimizeDefensiveSpreadUseCase);
     }
 
     @Bean
