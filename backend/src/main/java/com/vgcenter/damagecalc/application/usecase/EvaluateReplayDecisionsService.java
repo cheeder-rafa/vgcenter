@@ -322,7 +322,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                         combatant.types().stream().map(Type::name).toList(),
                         resolvedSpecies.abilityId(),
                         "none",
-                        pokemon.status() == null ? "none" : pokemon.status(),
+                        mapShowdownStatus(pokemon.status()),
                         toStages(pokemon.boosts()),
                         combatant.grounded(),
                         currentHp));
@@ -338,6 +338,17 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         stages.put("accuracy", boosts.accuracy());
         stages.put("evasion", boosts.evasion());
         return stages;
+    }
+
+    private static String mapShowdownStatus(String rawStatus) {
+        if (rawStatus == null) {
+            return "none";
+        }
+        return switch (rawStatus.toLowerCase(java.util.Locale.ROOT)) {
+            case "brn" -> "BURN";
+            case "par" -> "PARALYSIS";
+            default -> "none";
+        };
     }
 
     private SideConditionsCommand toSideConditions(ReplaySideState side) {

@@ -86,6 +86,55 @@ class EvaluateReplayDecisionsServiceTest {
     }
 
     @Test
+    void toleratesShowdownStatusAbbreviationsWithoutThrowingParseError() {
+        RecordingCalculateDamageUseCase calculateDamageUseCase = new RecordingCalculateDamageUseCase();
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("slam")),
+                        species("gamma", "Gamma", Type.WATER, List.of("poke")))),
+                new StubMoveRepository(
+                        List.of(damagingMove("slam", "Slam", "NORMAL", 35), damagingMove("poke", "Poke", "WATER", 30))),
+                calculateDamageUseCase);
+
+        ReplayBoardState boardWithStatuses = new ReplayBoardState(
+                "none",
+                "none",
+                new ReplaySideState(
+                        "Alice",
+                        false,
+                        false,
+                        false,
+                        false,
+                        List.of(pokemonWithStatus("p1a", "Alpha", 50, 100, "brn"))),
+                new ReplaySideState(
+                        "Bob", false, false, false, false, List.of(pokemonWithStatus("p2a", "Gamma", 40, 100, "par"))));
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1,
+                        boardWithStatuses,
+                        List.of(move("p1a: Alpha", "Slam", "p2a: Gamma"), move("p2a: Gamma", "Poke", "p1a: Alpha")))));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS));
+
+        assertThat(result.games()).hasSize(1);
+        assertThat(calculateDamageUseCase.calls)
+                .anySatisfy(command -> assertThat(command.attacker().status()).isEqualTo("BURN"))
+                .anySatisfy(command -> assertThat(command.attacker().status()).isEqualTo("PARALYSIS"));
+    }
+
+    private static ReplayPokemonState pokemonWithStatus(
+            String slotId, String speciesName, int hpCurrent, int hpMax, String status) {
+        return new ReplayPokemonState(
+                slotId, speciesName, hpCurrent, hpMax, status, false, new ReplayBoostState(0, 0, 0, 0, 0, 0, 0));
+    }
+
+    @Test
     void emitsBo3AdaptationFlagsForReferenceReplayPair() throws IOException {
         EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
                 new StubPokedexRepository(referenceSpecies()),
