@@ -1,0 +1,1349 @@
+{
+  "sideAName" : "slippybingus",
+  "sideBName" : "",
+  "winner" : "slippybingus",
+  "tie" : false,
+  "turns" : [ {
+    "number" : 1,
+    "boardStateAtStart" : {
+      "weather" : "none",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Dragapult",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Kingambit",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Milotic",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "switch",
+      "arguments" : [ "p2b: Dragonite", "Dragonite, L50, F", "100/100" ],
+      "raw" : "|switch|p2b: Dragonite|Dragonite, L50, F|100/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Kingambit", "Sucker Punch", "", "[still]" ],
+      "raw" : "|move|p2a: Kingambit|Sucker Punch||[still]"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Dragapult", "Will-O-Wisp", "p2a: Kingambit" ],
+      "raw" : "|move|p1b: Dragapult|Will-O-Wisp|p2a: Kingambit"
+    }, {
+      "type" : "-status",
+      "arguments" : [ "p2a: Kingambit", "brn" ],
+      "raw" : "|-status|p2a: Kingambit|brn"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Giga Drain", "p2b: Dragonite" ],
+      "raw" : "|move|p1a: Venusaur|Giga Drain|p2b: Dragonite"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "96/100" ],
+      "raw" : "|-damage|p2b: Dragonite|96/100"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Kingambit", "94/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2a: Kingambit|94/100 brn|[from] brn"
+    } ]
+  }, {
+    "number" : 2,
+    "boardStateAtStart" : {
+      "weather" : "none",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Dragapult",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Kingambit",
+          "hpCurrent" : 94,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 96,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p1b: Dragapult", "Will-O-Wisp", "p2b: Dragonite" ],
+      "raw" : "|move|p1b: Dragapult|Will-O-Wisp|p2b: Dragonite"
+    }, {
+      "type" : "-status",
+      "arguments" : [ "p2b: Dragonite", "brn" ],
+      "raw" : "|-status|p2b: Dragonite|brn"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Tailwind", "p2b: Dragonite" ],
+      "raw" : "|move|p2b: Dragonite|Tailwind|p2b: Dragonite"
+    }, {
+      "type" : "-sidestart",
+      "arguments" : [ "p2: vianova", "move: Tailwind" ],
+      "raw" : "|-sidestart|p2: vianova|move: Tailwind"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Kingambit", "Kowtow Cleave", "p1b: Dragapult" ],
+      "raw" : "|move|p2a: Kingambit|Kowtow Cleave|p1b: Dragapult"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Dragapult", "68/100" ],
+      "raw" : "|-damage|p1b: Dragapult|68/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Earth Power", "p2a: Kingambit" ],
+      "raw" : "|move|p1a: Venusaur|Earth Power|p2a: Kingambit"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Kingambit", "27/100 brn" ],
+      "raw" : "|-damage|p2a: Kingambit|27/100 brn"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "90/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2b: Dragonite|90/100 brn|[from] brn"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Kingambit", "21/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2a: Kingambit|21/100 brn|[from] brn"
+    } ]
+  }, {
+    "number" : 3,
+    "boardStateAtStart" : {
+      "weather" : "none",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Dragapult",
+          "hpCurrent" : 68,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : true,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Kingambit",
+          "hpCurrent" : 21,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 90,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p1b: Dragapult", "Protect", "p1b: Dragapult" ],
+      "raw" : "|move|p1b: Dragapult|Protect|p1b: Dragapult"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Dragon Claw", "p1a: Venusaur" ],
+      "raw" : "|move|p2b: Dragonite|Dragon Claw|p1a: Venusaur"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "78/100" ],
+      "raw" : "|-damage|p1a: Venusaur|78/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Kingambit", "Kowtow Cleave", "p1a: Venusaur" ],
+      "raw" : "|move|p2a: Kingambit|Kowtow Cleave|p1a: Venusaur"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "60/100" ],
+      "raw" : "|-damage|p1a: Venusaur|60/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Earth Power", "p2a: Kingambit" ],
+      "raw" : "|move|p1a: Venusaur|Earth Power|p2a: Kingambit"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Kingambit", "0 fnt" ],
+      "raw" : "|-damage|p2a: Kingambit|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p2a: Kingambit" ],
+      "raw" : "|faint|p2a: Kingambit"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "84/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2b: Dragonite|84/100 brn|[from] brn"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p2a: Froslass", "Froslass, L50, F", "100/100" ],
+      "raw" : "|switch|p2a: Froslass|Froslass, L50, F|100/100"
+    } ]
+  }, {
+    "number" : 4,
+    "boardStateAtStart" : {
+      "weather" : "none",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 60,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Dragapult",
+          "hpCurrent" : 68,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : true,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Froslass",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 84,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "-weather",
+      "arguments" : [ "Snowscape", "[from] ability: Snow Warning", "[of] p2a: Froslass" ],
+      "raw" : "|-weather|Snowscape|[from] ability: Snow Warning|[of] p2a: Froslass"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Protect", "p1a: Venusaur" ],
+      "raw" : "|move|p1a: Venusaur|Protect|p1a: Venusaur"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Froslass", "Blizzard", "p1b: Dragapult", "[spread] p1b" ],
+      "raw" : "|move|p2a: Froslass|Blizzard|p1b: Dragapult|[spread] p1b"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Dragapult", "0 fnt" ],
+      "raw" : "|-damage|p1b: Dragapult|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p1b: Dragapult" ],
+      "raw" : "|faint|p1b: Dragapult"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Low Kick", "p1a: Venusaur" ],
+      "raw" : "|move|p2b: Dragonite|Low Kick|p1a: Venusaur"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Snowscape", "[upkeep]" ],
+      "raw" : "|-weather|Snowscape|[upkeep]"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "79/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2b: Dragonite|79/100 brn|[from] brn"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p1b: Tyranitar", "Tyranitar, L50, M", "100/100" ],
+      "raw" : "|switch|p1b: Tyranitar|Tyranitar, L50, M|100/100"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[from] ability: Sand Stream", "[of] p1b: Tyranitar" ],
+      "raw" : "|-weather|Sandstorm|[from] ability: Sand Stream|[of] p1b: Tyranitar"
+    } ]
+  }, {
+    "number" : 5,
+    "boardStateAtStart" : {
+      "weather" : "Sandstorm",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 60,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Tyranitar",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : true,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Froslass-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 79,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "switch",
+      "arguments" : [ "p2a: Milotic", "Milotic, L50, F", "100/100" ],
+      "raw" : "|switch|p2a: Milotic|Milotic, L50, F|100/100"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p1b: Rotom", "Rotom-Wash, L50", "100/100" ],
+      "raw" : "|switch|p1b: Rotom|Rotom-Wash, L50|100/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Low Kick", "p1b: Rotom" ],
+      "raw" : "|move|p2b: Dragonite|Low Kick|p1b: Rotom"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "97/100" ],
+      "raw" : "|-damage|p1b: Rotom|97/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Giga Drain", "p2a: Milotic" ],
+      "raw" : "|move|p1a: Venusaur|Giga Drain|p2a: Milotic"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Milotic", "43/100" ],
+      "raw" : "|-damage|p2a: Milotic|43/100"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p1a: Venusaur", "91/100", "[from] drain", "[of] p2a: Milotic" ],
+      "raw" : "|-heal|p1a: Venusaur|91/100|[from] drain|[of] p2a: Milotic"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p2a: Milotic", "68/100", "[from] item: Sitrus Berry" ],
+      "raw" : "|-heal|p2a: Milotic|68/100|[from] item: Sitrus Berry"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[upkeep]" ],
+      "raw" : "|-weather|Sandstorm|[upkeep]"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Milotic", "62/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2a: Milotic|62/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "73/100 brn", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2b: Dragonite|73/100 brn|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "91/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1b: Rotom|91/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "85/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1a: Venusaur|85/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "67/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2b: Dragonite|67/100 brn|[from] brn"
+    }, {
+      "type" : "-sideend",
+      "arguments" : [ "p2: vianova", "move: Tailwind" ],
+      "raw" : "|-sideend|p2: vianova|move: Tailwind"
+    } ]
+  }, {
+    "number" : 6,
+    "boardStateAtStart" : {
+      "weather" : "Sandstorm",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 85,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Rotom-Wash",
+          "hpCurrent" : 91,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Milotic",
+          "hpCurrent" : 62,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 67,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2a: Milotic", "Protect", "p2a: Milotic" ],
+      "raw" : "|move|p2a: Milotic|Protect|p2a: Milotic"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Rotom", "Electroweb", "p2b: Dragonite", "[spread] p2b" ],
+      "raw" : "|move|p1b: Rotom|Electroweb|p2b: Dragonite|[spread] p2b"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "53/100 brn" ],
+      "raw" : "|-damage|p2b: Dragonite|53/100 brn"
+    }, {
+      "type" : "-unboost",
+      "arguments" : [ "p2b: Dragonite", "spe", "1" ],
+      "raw" : "|-unboost|p2b: Dragonite|spe|1"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Giga Drain", "p2a: Milotic" ],
+      "raw" : "|move|p1a: Venusaur|Giga Drain|p2a: Milotic"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Tailwind", "p2b: Dragonite" ],
+      "raw" : "|move|p2b: Dragonite|Tailwind|p2b: Dragonite"
+    }, {
+      "type" : "-sidestart",
+      "arguments" : [ "p2: vianova", "move: Tailwind" ],
+      "raw" : "|-sidestart|p2: vianova|move: Tailwind"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[upkeep]" ],
+      "raw" : "|-weather|Sandstorm|[upkeep]"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Milotic", "56/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2a: Milotic|56/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "48/100 brn", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2b: Dragonite|48/100 brn|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "85/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1b: Rotom|85/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "79/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1a: Venusaur|79/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "42/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2b: Dragonite|42/100 brn|[from] brn"
+    } ]
+  }, {
+    "number" : 7,
+    "boardStateAtStart" : {
+      "weather" : "Sandstorm",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 79,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Rotom-Wash",
+          "hpCurrent" : 85,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : true,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Milotic",
+          "hpCurrent" : 56,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 42,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : -1,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2a: Milotic", "Life Dew", "p2a: Milotic", "[spread] p2a,p2b" ],
+      "raw" : "|move|p2a: Milotic|Life Dew|p2a: Milotic|[spread] p2a,p2b"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p2a: Milotic", "81/100" ],
+      "raw" : "|-heal|p2a: Milotic|81/100"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p2b: Dragonite", "67/100 brn" ],
+      "raw" : "|-heal|p2b: Dragonite|67/100 brn"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Dragon Claw", "p1a: Venusaur" ],
+      "raw" : "|move|p2b: Dragonite|Dragon Claw|p1a: Venusaur"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "58/100" ],
+      "raw" : "|-damage|p1a: Venusaur|58/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Rotom", "Thunderbolt", "p2b: Dragonite" ],
+      "raw" : "|move|p1b: Rotom|Thunderbolt|p2b: Dragonite"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "38/100 brn" ],
+      "raw" : "|-damage|p2b: Dragonite|38/100 brn"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Giga Drain", "p2a: Milotic" ],
+      "raw" : "|move|p1a: Venusaur|Giga Drain|p2a: Milotic"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Milotic", "30/100" ],
+      "raw" : "|-damage|p2a: Milotic|30/100"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p1a: Venusaur", "85/100", "[from] drain", "[of] p2a: Milotic" ],
+      "raw" : "|-heal|p1a: Venusaur|85/100|[from] drain|[of] p2a: Milotic"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[upkeep]" ],
+      "raw" : "|-weather|Sandstorm|[upkeep]"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Milotic", "24/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2a: Milotic|24/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "32/100 brn", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2b: Dragonite|32/100 brn|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "79/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1b: Rotom|79/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "79/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1a: Venusaur|79/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "26/100 brn", "[from] brn" ],
+      "raw" : "|-damage|p2b: Dragonite|26/100 brn|[from] brn"
+    } ]
+  }, {
+    "number" : 8,
+    "boardStateAtStart" : {
+      "weather" : "Sandstorm",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 79,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Rotom-Wash",
+          "hpCurrent" : 79,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : true,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Milotic",
+          "hpCurrent" : 24,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Dragonite",
+          "hpCurrent" : 26,
+          "hpMax" : 100,
+          "status" : "brn",
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : -1,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2a: Milotic", "Icy Wind", "p1b: Rotom", "[spread] p1a,p1b" ],
+      "raw" : "|move|p2a: Milotic|Icy Wind|p1b: Rotom|[spread] p1a,p1b"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "72/100" ],
+      "raw" : "|-damage|p1a: Venusaur|72/100"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "74/100" ],
+      "raw" : "|-damage|p1b: Rotom|74/100"
+    }, {
+      "type" : "-unboost",
+      "arguments" : [ "p1a: Venusaur", "spe", "1" ],
+      "raw" : "|-unboost|p1a: Venusaur|spe|1"
+    }, {
+      "type" : "-unboost",
+      "arguments" : [ "p1b: Rotom", "spe", "1" ],
+      "raw" : "|-unboost|p1b: Rotom|spe|1"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Dragonite", "Dragon Claw", "p1b: Rotom" ],
+      "raw" : "|move|p2b: Dragonite|Dragon Claw|p1b: Rotom"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "50/100" ],
+      "raw" : "|-damage|p1b: Rotom|50/100"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p1b: Rotom", "75/100", "[from] item: Sitrus Berry" ],
+      "raw" : "|-heal|p1b: Rotom|75/100|[from] item: Sitrus Berry"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Rotom", "Thunderbolt", "p2b: Dragonite" ],
+      "raw" : "|move|p1b: Rotom|Thunderbolt|p2b: Dragonite"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Dragonite", "0 fnt" ],
+      "raw" : "|-damage|p2b: Dragonite|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p2b: Dragonite" ],
+      "raw" : "|faint|p2b: Dragonite"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Giga Drain", "p2a: Milotic" ],
+      "raw" : "|move|p1a: Venusaur|Giga Drain|p2a: Milotic"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Milotic", "0 fnt" ],
+      "raw" : "|-damage|p2a: Milotic|0 fnt"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p1a: Venusaur", "84/100", "[from] drain", "[of] p2a: Milotic" ],
+      "raw" : "|-heal|p1a: Venusaur|84/100|[from] drain|[of] p2a: Milotic"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p2a: Milotic" ],
+      "raw" : "|faint|p2a: Milotic"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[upkeep]" ],
+      "raw" : "|-weather|Sandstorm|[upkeep]"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Rotom", "69/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1b: Rotom|69/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "79/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1a: Venusaur|79/100|[from] Sandstorm"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p2b: Froslass", "Froslass-Mega, L50, F", "100/100" ],
+      "raw" : "|switch|p2b: Froslass|Froslass-Mega, L50, F|100/100"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Snowscape", "[from] ability: Snow Warning", "[of] p2b: Froslass" ],
+      "raw" : "|-weather|Snowscape|[from] ability: Snow Warning|[of] p2b: Froslass"
+    } ]
+  }, {
+    "number" : 9,
+    "boardStateAtStart" : {
+      "weather" : "Snowscape",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 79,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : -1,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Rotom-Wash",
+          "hpCurrent" : 69,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : -1,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : true,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Milotic",
+          "hpCurrent" : 0,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : true,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Froslass-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "switch",
+      "arguments" : [ "p1b: Tyranitar", "Tyranitar, L50, M", "100/100" ],
+      "raw" : "|switch|p1b: Tyranitar|Tyranitar, L50, M|100/100"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[from] ability: Sand Stream", "[of] p1b: Tyranitar" ],
+      "raw" : "|-weather|Sandstorm|[from] ability: Sand Stream|[of] p1b: Tyranitar"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Froslass", "Blizzard", "p1b: Tyranitar", "[spread] p1a,p1b" ],
+      "raw" : "|move|p2b: Froslass|Blizzard|p1b: Tyranitar|[spread] p1a,p1b"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "43/100" ],
+      "raw" : "|-damage|p1a: Venusaur|43/100"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Tyranitar", "76/100" ],
+      "raw" : "|-damage|p1b: Tyranitar|76/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Venusaur", "Giga Drain", "p2b: Froslass" ],
+      "raw" : "|move|p1a: Venusaur|Giga Drain|p2b: Froslass"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Froslass", "62/100" ],
+      "raw" : "|-damage|p2b: Froslass|62/100"
+    }, {
+      "type" : "-heal",
+      "arguments" : [ "p1a: Venusaur", "62/100", "[from] drain", "[of] p2b: Froslass" ],
+      "raw" : "|-heal|p1a: Venusaur|62/100|[from] drain|[of] p2b: Froslass"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "Sandstorm", "[upkeep]" ],
+      "raw" : "|-weather|Sandstorm|[upkeep]"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Froslass", "55/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p2b: Froslass|55/100|[from] Sandstorm"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Venusaur", "56/100", "[from] Sandstorm" ],
+      "raw" : "|-damage|p1a: Venusaur|56/100|[from] Sandstorm"
+    }, {
+      "type" : "-sideend",
+      "arguments" : [ "p2: vianova", "move: Tailwind" ],
+      "raw" : "|-sideend|p2: vianova|move: Tailwind"
+    } ]
+  }, {
+    "number" : 10,
+    "boardStateAtStart" : {
+      "weather" : "Sandstorm",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "slippybingus",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Venusaur-Mega",
+          "hpCurrent" : 56,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : -1,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Tyranitar",
+          "hpCurrent" : 76,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Milotic",
+          "hpCurrent" : 0,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : true,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Froslass-Mega",
+          "hpCurrent" : 55,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2b: Froslass", "Blizzard", "p1a: Venusaur", "[spread] " ],
+      "raw" : "|move|p2b: Froslass|Blizzard|p1a: Venusaur|[spread] "
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Tyranitar", "Knock Off", "p2b: Froslass" ],
+      "raw" : "|move|p1b: Tyranitar|Knock Off|p2b: Froslass"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Froslass", "0 fnt" ],
+      "raw" : "|-damage|p2b: Froslass|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p2b: Froslass" ],
+      "raw" : "|faint|p2b: Froslass"
+    }, {
+      "type" : "win",
+      "arguments" : [ "slippybingus" ],
+      "raw" : "|win|slippybingus"
+    } ]
+  } ]
+}

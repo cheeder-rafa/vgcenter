@@ -1,0 +1,832 @@
+{
+  "sideAName" : "",
+  "sideBName" : "vianova",
+  "winner" : "vianova",
+  "tie" : false,
+  "turns" : [ {
+    "number" : 1,
+    "boardStateAtStart" : {
+      "weather" : "none",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Sneasler",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Greninja",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Aerodactyl",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Floette-Eternal",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2a: Aerodactyl", "Protect", "p2a: Aerodactyl" ],
+      "raw" : "|move|p2a: Aerodactyl|Protect|p2a: Aerodactyl"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Floette", "Protect", "p2b: Floette" ],
+      "raw" : "|move|p2b: Floette|Protect|p2b: Floette"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Sneasler", "Fake Out", "p2a: Aerodactyl" ],
+      "raw" : "|move|p1a: Sneasler|Fake Out|p2a: Aerodactyl"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Greninja", "Ice Beam", "p2a: Aerodactyl" ],
+      "raw" : "|move|p1b: Greninja|Ice Beam|p2a: Aerodactyl"
+    } ]
+  }, {
+    "number" : 2,
+    "boardStateAtStart" : {
+      "weather" : "none",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Sneasler",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Greninja",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Aerodactyl",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Floette-Eternal",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "switch",
+      "arguments" : [ "p1a: Pelipper", "Pelipper, L50, M", "100/100" ],
+      "raw" : "|switch|p1a: Pelipper|Pelipper, L50, M|100/100"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "RainDance", "[from] ability: Drizzle", "[of] p1a: Pelipper" ],
+      "raw" : "|-weather|RainDance|[from] ability: Drizzle|[of] p1a: Pelipper"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Greninja", "Weather Ball", "p2a: Aerodactyl" ],
+      "raw" : "|move|p1b: Greninja|Weather Ball|p2a: Aerodactyl"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Aerodactyl", "1/100" ],
+      "raw" : "|-damage|p2a: Aerodactyl|1/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Aerodactyl", "Dual Wingbeat", "p1a: Pelipper" ],
+      "raw" : "|move|p2a: Aerodactyl|Dual Wingbeat|p1a: Pelipper"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Pelipper", "84/100" ],
+      "raw" : "|-damage|p1a: Pelipper|84/100"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Pelipper", "68/100" ],
+      "raw" : "|-damage|p1a: Pelipper|68/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Floette", "Calm Mind", "p2b: Floette" ],
+      "raw" : "|move|p2b: Floette|Calm Mind|p2b: Floette"
+    }, {
+      "type" : "-boost",
+      "arguments" : [ "p2b: Floette", "spa", "1" ],
+      "raw" : "|-boost|p2b: Floette|spa|1"
+    }, {
+      "type" : "-boost",
+      "arguments" : [ "p2b: Floette", "spd", "1" ],
+      "raw" : "|-boost|p2b: Floette|spd|1"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "RainDance", "[upkeep]" ],
+      "raw" : "|-weather|RainDance|[upkeep]"
+    } ]
+  }, {
+    "number" : 3,
+    "boardStateAtStart" : {
+      "weather" : "RainDance",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Pelipper",
+          "hpCurrent" : 68,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Greninja-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Aerodactyl",
+          "hpCurrent" : 1,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Floette-Eternal",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 1,
+            "specialDefense" : 1,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p1b: Greninja", "Weather Ball", "p2a: Aerodactyl" ],
+      "raw" : "|move|p1b: Greninja|Weather Ball|p2a: Aerodactyl"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Aerodactyl", "0 fnt" ],
+      "raw" : "|-damage|p2a: Aerodactyl|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p2a: Aerodactyl" ],
+      "raw" : "|faint|p2a: Aerodactyl"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Floette", "Moonblast", "p1a: Pelipper" ],
+      "raw" : "|move|p2b: Floette|Moonblast|p1a: Pelipper"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Pelipper", "0 fnt" ],
+      "raw" : "|-damage|p1a: Pelipper|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p1a: Pelipper" ],
+      "raw" : "|faint|p1a: Pelipper"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "RainDance", "[upkeep]" ],
+      "raw" : "|-weather|RainDance|[upkeep]"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p2a: Charizard", "Charizard, L50, F", "100/100" ],
+      "raw" : "|switch|p2a: Charizard|Charizard, L50, F|100/100"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p1a: Sneasler", "Sneasler, L50, M", "100/100" ],
+      "raw" : "|switch|p1a: Sneasler|Sneasler, L50, M|100/100"
+    } ]
+  }, {
+    "number" : 4,
+    "boardStateAtStart" : {
+      "weather" : "RainDance",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Sneasler",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Greninja-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Charizard",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Floette-Eternal",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 1,
+            "specialDefense" : 1,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "switch",
+      "arguments" : [ "p1b: Tsareena", "Tsareena, L50, F", "100/100" ],
+      "raw" : "|switch|p1b: Tsareena|Tsareena, L50, F|100/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Charizard", "Protect", "p2a: Charizard" ],
+      "raw" : "|move|p2a: Charizard|Protect|p2a: Charizard"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2b: Floette", "Protect", "p2b: Floette" ],
+      "raw" : "|move|p2b: Floette|Protect|p2b: Floette"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Sneasler", "Fake Out", "p2a: Charizard" ],
+      "raw" : "|move|p1a: Sneasler|Fake Out|p2a: Charizard"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "RainDance", "[upkeep]" ],
+      "raw" : "|-weather|RainDance|[upkeep]"
+    } ]
+  }, {
+    "number" : 5,
+    "boardStateAtStart" : {
+      "weather" : "RainDance",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Sneasler",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Tsareena",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Charizard",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Floette-Eternal",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 1,
+            "specialDefense" : 1,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "switch",
+      "arguments" : [ "p2b: Kingambit", "Kingambit, L50, M", "100/100" ],
+      "raw" : "|switch|p2b: Kingambit|Kingambit, L50, M|100/100"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "SunnyDay", "[from] ability: Drought", "[of] p2a: Charizard" ],
+      "raw" : "|-weather|SunnyDay|[from] ability: Drought|[of] p2a: Charizard"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Sneasler", "Dire Claw", "p2b: Kingambit" ],
+      "raw" : "|move|p1a: Sneasler|Dire Claw|p2b: Kingambit"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Charizard", "Heat Wave", "p1a: Sneasler", "[spread] p1b" ],
+      "raw" : "|move|p2a: Charizard|Heat Wave|p1a: Sneasler|[spread] p1b"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Tsareena", "0 fnt" ],
+      "raw" : "|-damage|p1b: Tsareena|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p1b: Tsareena" ],
+      "raw" : "|faint|p1b: Tsareena"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "SunnyDay", "[upkeep]" ],
+      "raw" : "|-weather|SunnyDay|[upkeep]"
+    }, {
+      "type" : "switch",
+      "arguments" : [ "p1b: Greninja", "Greninja-Mega, L50, F", "100/100" ],
+      "raw" : "|switch|p1b: Greninja|Greninja-Mega, L50, F|100/100"
+    } ]
+  }, {
+    "number" : 6,
+    "boardStateAtStart" : {
+      "weather" : "SunnyDay",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Sneasler",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Greninja-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Charizard-Mega-Y",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Kingambit",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2b: Kingambit", "Protect", "p2b: Kingambit" ],
+      "raw" : "|move|p2b: Kingambit|Protect|p2b: Kingambit"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Greninja", "Weather Ball", "p2b: Kingambit" ],
+      "raw" : "|move|p1b: Greninja|Weather Ball|p2b: Kingambit"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1a: Sneasler", "Dire Claw", "p2a: Charizard" ],
+      "raw" : "|move|p1a: Sneasler|Dire Claw|p2a: Charizard"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2a: Charizard", "19/100" ],
+      "raw" : "|-damage|p2a: Charizard|19/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Charizard", "Weather Ball", "p1a: Sneasler" ],
+      "raw" : "|move|p2a: Charizard|Weather Ball|p1a: Sneasler"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1a: Sneasler", "0 fnt" ],
+      "raw" : "|-damage|p1a: Sneasler|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p1a: Sneasler" ],
+      "raw" : "|faint|p1a: Sneasler"
+    }, {
+      "type" : "-weather",
+      "arguments" : [ "SunnyDay", "[upkeep]" ],
+      "raw" : "|-weather|SunnyDay|[upkeep]"
+    } ]
+  }, {
+    "number" : 7,
+    "boardStateAtStart" : {
+      "weather" : "SunnyDay",
+      "terrain" : "none",
+      "sideA" : {
+        "playerName" : "n00syz",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p1a",
+          "speciesName" : "Sneasler",
+          "hpCurrent" : 0,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : true,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p1b",
+          "speciesName" : "Greninja-Mega",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      },
+      "sideB" : {
+        "playerName" : "vianova",
+        "tailwind" : false,
+        "reflect" : false,
+        "lightScreen" : false,
+        "auroraVeil" : false,
+        "activePokemon" : [ {
+          "slotId" : "p2a",
+          "speciesName" : "Charizard-Mega-Y",
+          "hpCurrent" : 19,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        }, {
+          "slotId" : "p2b",
+          "speciesName" : "Kingambit",
+          "hpCurrent" : 100,
+          "hpMax" : 100,
+          "status" : null,
+          "fainted" : false,
+          "boosts" : {
+            "attack" : 0,
+            "defense" : 0,
+            "specialAttack" : 0,
+            "specialDefense" : 0,
+            "speed" : 0,
+            "accuracy" : 0,
+            "evasion" : 0
+          }
+        } ]
+      }
+    },
+    "events" : [ {
+      "type" : "move",
+      "arguments" : [ "p2b: Kingambit", "Sucker Punch", "p1b: Greninja" ],
+      "raw" : "|move|p2b: Kingambit|Sucker Punch|p1b: Greninja"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Greninja", "30/100" ],
+      "raw" : "|-damage|p1b: Greninja|30/100"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p1b: Greninja", "Weather Ball", "p2b: Kingambit" ],
+      "raw" : "|move|p1b: Greninja|Weather Ball|p2b: Kingambit"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p2b: Kingambit", "0 fnt" ],
+      "raw" : "|-damage|p2b: Kingambit|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p2b: Kingambit" ],
+      "raw" : "|faint|p2b: Kingambit"
+    }, {
+      "type" : "move",
+      "arguments" : [ "p2a: Charizard", "Weather Ball", "p1b: Greninja" ],
+      "raw" : "|move|p2a: Charizard|Weather Ball|p1b: Greninja"
+    }, {
+      "type" : "-damage",
+      "arguments" : [ "p1b: Greninja", "0 fnt" ],
+      "raw" : "|-damage|p1b: Greninja|0 fnt"
+    }, {
+      "type" : "faint",
+      "arguments" : [ "p1b: Greninja" ],
+      "raw" : "|faint|p1b: Greninja"
+    }, {
+      "type" : "win",
+      "arguments" : [ "vianova" ],
+      "raw" : "|win|vianova"
+    } ]
+  } ]
+}
