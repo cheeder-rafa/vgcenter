@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsCommand;
+import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsResult;
+import com.vgcenter.damagecalc.application.usecase.EvaluateReplayDecisionsUseCase;
 import com.vgcenter.damagecalc.application.usecase.ParseReplayCommand;
 import com.vgcenter.damagecalc.application.usecase.ParseReplayUseCase;
 import com.vgcenter.damagecalc.domain.replay.ReplayTimeline;
@@ -23,12 +26,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class ReplayControllerTest {
 
     private final StubParseReplayUseCase parseReplayUseCase = new StubParseReplayUseCase();
+    private final StubEvaluateReplayDecisionsUseCase evaluateReplayDecisionsUseCase =
+            new StubEvaluateReplayDecisionsUseCase();
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        ReplayController controller = new ReplayController(parseReplayUseCase, new ReplayWebMapper());
+        ReplayController controller =
+                new ReplayController(parseReplayUseCase, evaluateReplayDecisionsUseCase, new ReplayWebMapper());
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ApiExceptionHandler())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(new ObjectMapper()))
@@ -93,6 +99,14 @@ class ReplayControllerTest {
                 throw new IllegalArgumentException("Replay parse request must provide either url or log");
             }
             return nextResult;
+        }
+    }
+
+    private static final class StubEvaluateReplayDecisionsUseCase implements EvaluateReplayDecisionsUseCase {
+
+        @Override
+        public EvaluateReplayDecisionsResult evaluate(EvaluateReplayDecisionsCommand command) {
+            throw new UnsupportedOperationException("not used in parse tests");
         }
     }
 }
