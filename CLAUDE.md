@@ -173,3 +173,43 @@ Paste two pokepastes → 6×6 damage heatmap; rows = your team, columns = oppone
 - Conventional Commits. Never `--no-verify`.
 - Skills per frontend commit: `impeccable → vercel-react-best-practices → vercel-composition-patterns → web-design-guidelines → polish`.
 - One PR per milestone (M11 splits into three sub-PRs: M11a → M11b → M11c, each targeting `develop`). Stop after each PR is opened and CI is green; do not self-merge.
+
+## Sub-project 4 — Scoring Systems Hardening (v1.3)
+
+Source of truth: `docs/scoring-systems.md` (system explainer) + `docs/scoring-systems-audit.md` (line-referenced audit with C/M/B IDs). Five milestones, each its own branch off `develop` and its own PR. The technical deep-dive doc (`docs/scoring-systems-technical.md`) is written **after** all five milestones land so it documents the post-fix behaviour, not the pre-fix behaviour.
+
+**M14a — Accuracy & crit in the damage core** (`m14a-accuracy-crit-core`) — covers C3, M2. Thread move accuracy through `DamageFormula` / `CalculateDamageService`; weight rolls by `(23/24)·normal + (1/24)·crit` (override 1.0 for always-crit moves). Expose `expectedDamageWithAccuracy`, `koProbabilityWithCrit` on `CalculateDamageResult` without removing legacy fields. Property tests: `expected(acc<1) ≤ expected(acc=1)`, `koProbWithCrit ≥ koProbNoCrit`.
+
+**M14b — Replay Autopsy correctness** (`m14b-replay-correctness`) — covers C1, C2, M4, M6, B3, B4. Wide/Quick Guard credit across both ally slots; `StatusMoveValueTable` so Tailwind/Trick Room/Helping Hand/Follow Me/Rage Powder/screens score non-zero; clamp `koProbability = 1 − ∏(1 − p_i)`; relative verdict thresholds (`delta / max(|best|, 1)`); switch as a candidate action with `−5` opportunity cost; recoil deducted from user HP.
+
+**M14c — Multi-Threat Optimizer modelling** (`m14c-optimizer-modelling`) — covers M1, M7, B1. Rename `worstKoChance` → `ohkoProbability` (DTO mapped via `web.dto`, never leaked from domain); add `nearKoMargin`; `SURVIVE_ALL` lookahead = 4 tiers past first survivor; drop redundant `spHp + spDef + spSpd` tiebreaker.
+
+**M14d — Preview Coach modelling** (`m14d-preview-modelling`) — covers M3, M5, B2, B5. `bestOutgoing/bestIncoming` score by `mean(rolls) × accuracy`, not `maxPct`; `koPressure` becomes probability-weighted (`koProb ≥ 0.5`); speed comparison reports `{faster, slower, tied}`; `RecommendPlansScoreWeightsTest` locks numeric weight outputs; `−4` mono-category penalty when ≥3/4 brought are physical-only or special-only.
+
+**M14e — Cleanup, technical doc, audit closure** (`m14e-cleanup-and-tech-doc`) — remove deprecated fields from M14a–M14d once consumers are migrated; write `docs/scoring-systems-technical.md` (~600–800 lines, file:line-referenced, post-fix behaviour); update `docs/scoring-systems.md` and strike through resolved items in `docs/scoring-systems-audit.md` with a "resolved in v1.3" pointer to the merge commits; update `README.md` for any user-facing behaviour changes.
+
+**Rules for all five milestones:**
+- Branch from `develop`. Target `develop`. Never push directly.
+- TDD: failing test first, then implement, then `./mvnw verify` (backend) and/or `pnpm lint && pnpm typecheck && pnpm test` (frontend).
+- Conventional Commits. Never `--no-verify`.
+- Skills per frontend commit: `impeccable → vercel-react-best-practices → vercel-composition-patterns → web-design-guidelines → polish`.
+- One PR per milestone, targeting `develop`. Stop after each PR is opened and CI is green; do not self-merge.
+
+### Codex kickoff prompt (paste verbatim into Codex CLI)
+
+```
+Read CLAUDE.md and AGENTS.md (identical). Then read, in order:
+  docs/scoring-systems.md
+  docs/scoring-systems-audit.md
+
+Execute milestone M14a (accuracy & crit in the damage core) end-to-end:
+  1. git checkout develop && git pull --ff-only && git checkout -b m14a-accuracy-crit-core
+  2. TDD: write failing tests in DamageFormulaPropertiesTest first.
+  3. Implement minimal changes in DamageFormula + CalculateDamageService + CalculateDamageResult.
+  4. ./mvnw spotless:apply && ./mvnw verify until green; JaCoCo on domain/application stays ≥85%.
+  5. Conventional Commits, never --no-verify.
+  6. Push and open a PR targeting develop using the repo template.
+  7. Stop and wait for human review. Do NOT start M14b.
+
+When M14a is merged, ask the user before continuing; then repeat for M14b → M14c → M14d → M14e in order. Each milestone is its own branch off develop and its own PR. Never push to main or develop, never self-merge. M14e includes writing docs/scoring-systems-technical.md based on the post-fix behaviour.
+```
