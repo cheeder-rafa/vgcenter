@@ -24,8 +24,15 @@ export function ReplayPage() {
 
   // Use first timeline's side names for the selector labels
   const firstTimeline = timelines[0]
-  const sideAName = firstTimeline?.sideAName ?? 'Player 1'
-  const sideBName = firstTimeline?.sideBName ?? 'Player 2'
+  const firstTurn = firstTimeline?.turns[0]
+  const sideAName =
+    firstTimeline?.sideAName ||
+    firstTurn?.boardStateAtStart.sideA.playerName ||
+    'Player 1'
+  const sideBName =
+    firstTimeline?.sideBName ||
+    firstTurn?.boardStateAtStart.sideB.playerName ||
+    'Player 2'
 
   const hasTimelines = timelines.length > 0
   const isLoading = status === 'parsing' || status === 'evaluating'
@@ -48,6 +55,10 @@ export function ReplayPage() {
           Paste a Pokémon Showdown replay URL (or up to three for a BO3 set) —
           or paste the raw protocol log. We rebuild every turn and score each
           played pair against the legal alternatives.
+        </p>
+        <p className="text-[0.72rem] text-white/45 sm:text-xs">
+          Decision score combines expected damage dealt, expected damage taken,
+          KO pressure, and faint risk.
         </p>
       </header>
 

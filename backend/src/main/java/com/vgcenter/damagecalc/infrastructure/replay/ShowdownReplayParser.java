@@ -89,7 +89,17 @@ public class ShowdownReplayParser implements ReplayParser {
 
     private static void applyBattleState(MutableBattleState battleState, String eventType, String[] parts) {
         switch (eventType) {
-            case "player" -> battleState.side(parts[2]).playerName = parts[3];
+            case "player" -> {
+                if (parts.length < 4) {
+                    break;
+                }
+                String playerName = parts[3] == null ? "" : parts[3].trim();
+                // Some Showdown logs emit trailing |player|pX| lines when a user leaves.
+                // Preserve the last non-blank player name instead of overwriting it with blank.
+                if (!playerName.isEmpty()) {
+                    battleState.side(parts[2]).playerName = playerName;
+                }
+            }
             case "switch" -> {
                 MutablePokemonState pokemon = battleState.active(parts[2]);
                 pokemon.speciesName = parseSpeciesName(parts[3]);

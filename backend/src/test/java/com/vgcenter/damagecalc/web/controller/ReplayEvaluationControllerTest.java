@@ -134,7 +134,7 @@ class ReplayEvaluationControllerTest {
                                 List.of(),
                                 0.0d,
                                 "optimal",
-                                "Played line already best.")))),
+                                "Played line already matches the best decision score.")))),
                 List.of("opponent re-led Aerodactyl + Floette-Eternal"));
     }
 
