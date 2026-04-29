@@ -33,6 +33,23 @@ class ShowdownReplayParserTest {
     }
 
     @Test
+    void preservesPlayerNamesWhenTrailingPlayerEventsAreBlank() throws IOException {
+        ReplayTimeline single =
+                parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("single-regma-2593988469.log")));
+        ReplayTimeline bo3Game1 =
+                parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("bo3-game1-2586638266.log")));
+        ReplayTimeline bo3Game2 =
+                parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("bo3-game2-2586642583.log")));
+
+        assertThat(single.sideAName()).isEqualTo("slippybingus");
+        assertThat(single.sideBName()).isEqualTo("vianova");
+        assertThat(bo3Game1.sideAName()).isEqualTo("n00syz");
+        assertThat(bo3Game1.sideBName()).isEqualTo("vianova");
+        assertThat(bo3Game2.sideAName()).isEqualTo("n00syz");
+        assertThat(bo3Game2.sideBName()).isEqualTo("vianova");
+    }
+
+    @Test
     void capturesBoardStateAtStartOfTurnBeforeEventsResolve() throws IOException {
         ReplayTimeline timeline =
                 parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("single-regma-2593988469.log")));

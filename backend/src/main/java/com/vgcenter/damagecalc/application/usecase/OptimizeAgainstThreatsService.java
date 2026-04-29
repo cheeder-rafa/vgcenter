@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 public final class OptimizeAgainstThreatsService implements OptimizeAgainstThreatsUseCase {
 
@@ -73,20 +74,11 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                         singleThreatOptimizer.optimize(toSingleThreatCommand(command, threat)).candidates().stream())
                 .toList();
 
-        List<ScoredSpread> allScored = new ArrayList<>();
-        for (Nature nature : candidateNatures(command.regulation(), command.defenderNatureId())) {
-            for (int tier = 0; tier <= MAX_TOTAL_SP; tier++) {
-                for (int spHp = 0; spHp <= Math.min(tier, MAX_SP); spHp++) {
-                    for (int spDef = 0; spDef <= Math.min(tier - spHp, MAX_SP); spDef++) {
-                        int spSpd = tier - spHp - spDef;
-                        if (spSpd > MAX_SP) continue;
-                        ScoredSpread scored =
-                                scoreSpread(defenderProfile, nature, command, threats, spHp, spDef, spSpd);
-                        allScored.add(scored);
-                    }
-                }
-            }
-        }
+        List<Nature> candidateNatures = candidateNatures(command.regulation(), command.defenderNatureId());
+        List<ScoredSpread> allScored = new ArrayList<>(
+                command.goal() == OptimizeAgainstThreatsGoal.SURVIVE_ALL
+                        ? scoreForSurviveAll(defenderProfile, command, threats, candidateNatures)
+                        : scoreAllSpreadsParallel(defenderProfile, command, threats, candidateNatures));
 
         for (DefenseSpreadCandidate seed : seedCandidates) {
             ScoredSpread scored = scoreCandidate(defenderProfile, requestedDefenderNature, seed, command, threats);
@@ -137,6 +129,76 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                 move.ignoreBurnPenaltyWhenUserStatused());
         return new PreparedThreat(
                 threat, toStatsCommand(attackerProfile.stats()), attackerProfile.types(), moveCommand);
+    }
+
+    private List<ScoredSpread> scoreForSurviveAll(
+            PreparedCombatant defenderProfile,
+            OptimizeAgainstThreatsCommand command,
+            List<PreparedThreat> threats,
+            List<Nature> natures) {
+        List<ScoredSpread> scored = new ArrayList<>();
+        for (int tier = 0; tier <= MAX_TOTAL_SP; tier++) {
+            List<ScoredSpread> tierScores = scoreTier(defenderProfile, command, threats, natures, tier);
+            scored.addAll(tierScores);
+            boolean tierHasSurvivor = tierScores.stream().anyMatch(candidate -> candidate.worstKoChance() == 0.0);
+            if (tierHasSurvivor) {
+                break;
+            }
+        }
+        return scored;
+    }
+
+    private List<ScoredSpread> scoreAllSpreadsParallel(
+            PreparedCombatant defenderProfile,
+            OptimizeAgainstThreatsCommand command,
+            List<PreparedThreat> threats,
+            List<Nature> natures) {
+        return natures.parallelStream()
+                .flatMap(nature -> scoreAllTiersForNature(defenderProfile, nature, command, threats).stream())
+                .toList();
+    }
+
+    private List<ScoredSpread> scoreAllTiersForNature(
+            PreparedCombatant defenderProfile,
+            Nature nature,
+            OptimizeAgainstThreatsCommand command,
+            List<PreparedThreat> threats) {
+        return IntStream.rangeClosed(0, MAX_TOTAL_SP)
+                .boxed()
+                .flatMap(tier -> scoreTierForNature(defenderProfile, nature, command, threats, tier).stream())
+                .toList();
+    }
+
+    private List<ScoredSpread> scoreTier(
+            PreparedCombatant defenderProfile,
+            OptimizeAgainstThreatsCommand command,
+            List<PreparedThreat> threats,
+            List<Nature> natures,
+            int tier) {
+        List<ScoredSpread> scored = new ArrayList<>();
+        for (Nature nature : natures) {
+            scored.addAll(scoreTierForNature(defenderProfile, nature, command, threats, tier));
+        }
+        return scored;
+    }
+
+    private List<ScoredSpread> scoreTierForNature(
+            PreparedCombatant defenderProfile,
+            Nature nature,
+            OptimizeAgainstThreatsCommand command,
+            List<PreparedThreat> threats,
+            int tier) {
+        List<ScoredSpread> scored = new ArrayList<>();
+        for (int spHp = 0; spHp <= Math.min(tier, MAX_SP); spHp++) {
+            for (int spDef = 0; spDef <= Math.min(tier - spHp, MAX_SP); spDef++) {
+                int spSpd = tier - spHp - spDef;
+                if (spSpd > MAX_SP) {
+                    continue;
+                }
+                scored.add(scoreSpread(defenderProfile, nature, command, threats, spHp, spDef, spSpd));
+            }
+        }
+        return scored;
     }
 
     private ScoredSpread scoreSpread(

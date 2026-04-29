@@ -76,7 +76,7 @@ export function TurnReviewCard({ review, turn }: Props) {
       {top3.length > 0 ? (
         <section className="flex flex-col gap-2">
           <h3 className="font-display text-arena-2xs uppercase tracking-[0.18em] text-white/45">
-            Top alternatives
+            Best alternatives
           </h3>
           <ol className="flex flex-col gap-2">
             {top3.map((alt, idx) =>
@@ -95,7 +95,7 @@ export function TurnReviewCard({ review, turn }: Props) {
         </section>
       ) : (
         <p className="text-arena-xs text-white/45">
-          No legal alternative move pairs.
+          No legal alternative move pairs were observed for this turn.
         </p>
       )}
 

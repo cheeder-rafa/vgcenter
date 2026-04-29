@@ -96,6 +96,15 @@ export function DecisionLineRow({
             faint ×{line.expectedFaints}
           </span>
         ) : null}
+        {!isPlayed ? (
+          <span className="text-white/40">
+            score gain{' '}
+            <span className="font-mono text-white/80">
+              {delta >= 0 ? '+' : ''}
+              {delta.toFixed(1)}
+            </span>
+          </span>
+        ) : null}
         <div className="ml-auto min-w-[120px]">
           <DeltaBar delta={delta} maxAbsDelta={maxAbsDelta} />
         </div>

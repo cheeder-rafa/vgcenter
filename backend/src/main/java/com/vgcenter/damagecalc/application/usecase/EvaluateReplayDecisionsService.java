@@ -557,13 +557,13 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
 
     private String narrative(ReplayDecisionLine played, List<ReplayDecisionLine> ranked, double delta) {
         if (ranked.isEmpty() || delta <= 0.01d) {
-            return "Played line already best.";
+            return "Played line already matches the best decision score.";
         }
         ReplayDecisionLine best = ranked.getFirst();
         String moves = best.choices().stream()
                 .map(ReplayMoveChoice::moveName)
                 .collect(java.util.stream.Collectors.joining(" + "));
-        return "Best alternative %s gains %.1f swing.".formatted(moves, delta);
+        return "Best alternative %s gains %.1f decision score.".formatted(moves, delta);
     }
 
     private double expectedDamage(CalculateDamageResult result) {
