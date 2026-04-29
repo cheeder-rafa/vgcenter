@@ -13,4 +13,5 @@ public record LeadMatchupResponseDto(
         List<String> mustReactLabels,
         List<String> turnOneAnnotations,
         List<HitEvidenceSummaryDto> outgoingEvidence,
-        List<HitEvidenceSummaryDto> incomingEvidence) {}
+        List<HitEvidenceSummaryDto> incomingEvidence,
+        String summary) {}

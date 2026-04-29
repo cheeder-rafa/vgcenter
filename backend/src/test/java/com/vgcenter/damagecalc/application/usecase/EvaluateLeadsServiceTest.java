@@ -34,6 +34,23 @@ class EvaluateLeadsServiceTest {
     }
 
     @Test
+    void populatesPerCellSummaryAndMatrixSummary() {
+        damageUseCase.nextResults = List.of(result(120, 130, "guaranteed OHKO", 1, 1.0d));
+
+        EvaluateLeadsResult result = service.evaluate(new EvaluateLeadsCommand(
+                "M-A", List.of(pokemon("flutter-mane", 200), pokemon("incineroar", 80)), opponentTeam(), field()));
+
+        for (LeadMatchupResult cell : result.matchups()) {
+            assertThat(cell.summary()).isNotBlank();
+        }
+        Verdict matrix = result.matrixSummary();
+        assertThat(matrix).isNotNull();
+        assertThat(matrix.headline()).contains("flutter-mane");
+        assertThat(matrix.headline().length()).isLessThanOrEqualTo(Verdict.HEADLINE_MAX);
+        assertThat(matrix.subline().length()).isLessThanOrEqualTo(Verdict.SUBLINE_MAX);
+    }
+
+    @Test
     void includesHitEvidenceSummariesInMatchupResult() {
         damageUseCase.nextResults = List.of(result(100, 120, "guaranteed OHKO", 1, 1.0d));
 

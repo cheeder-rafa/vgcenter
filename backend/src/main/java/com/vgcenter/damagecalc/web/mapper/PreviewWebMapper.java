@@ -53,7 +53,7 @@ public class PreviewWebMapper {
     }
 
     public EvaluateLeadsResponseDto toResponse(EvaluateLeadsResult result) {
-        return new EvaluateLeadsResponseDto(result.matchups().stream()
+        List<LeadMatchupResponseDto> dtos = result.matchups().stream()
                 .map(matchup -> new LeadMatchupResponseDto(
                         matchup.opponentLeadIds(),
                         matchup.opponentLeadNames(),
@@ -69,8 +69,14 @@ public class PreviewWebMapper {
                                 .toList(),
                         matchup.incomingEvidence().stream()
                                 .map(this::toEvidenceDto)
-                                .toList()))
-                .toList());
+                                .toList(),
+                        matchup.summary()))
+                .toList();
+        com.vgcenter.damagecalc.application.usecase.Verdict v = result.matrixSummary();
+        com.vgcenter.damagecalc.web.dto.VerdictDto matrixDto = v == null
+                ? null
+                : new com.vgcenter.damagecalc.web.dto.VerdictDto(v.headline(), v.subline(), v.callout());
+        return new EvaluateLeadsResponseDto(dtos, matrixDto);
     }
 
     private HitEvidenceSummaryDto toEvidenceDto(HitEvidenceSummary e) {

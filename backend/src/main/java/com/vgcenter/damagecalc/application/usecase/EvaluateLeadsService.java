@@ -66,15 +66,82 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
         List<LeadMatchupResult> matchups = new ArrayList<>();
         for (int first = 0; first < opponentTeam.size(); first++) {
             for (int second = first + 1; second < opponentTeam.size(); second++) {
-                matchups.add(evaluatePairFromMatrix(
+                LeadMatchupResult cell = evaluatePairFromMatrix(
                         selectedLeads,
                         selectedLeadIndices,
                         List.of(opponentTeam.get(first), opponentTeam.get(second)),
                         new int[] {first, second},
-                        matrix));
+                        matrix);
+                matchups.add(cell.withSummary(buildCellSummary(cell)));
             }
         }
-        return new EvaluateLeadsResult(matchups);
+        Verdict matrixSummary = buildMatrixSummary(selectedLeads, matchups);
+        return new EvaluateLeadsResult(matchups, matrixSummary);
+    }
+
+    private static String buildCellSummary(LeadMatchupResult cell) {
+        double your = cell.koPressure().value();
+        double combined = cell.doubleUpPressure().value();
+        double threats = cell.incomingDanger().value();
+        if (combined >= 1 && threats == 0) {
+            return "Clean focus KO on " + cell.opponentLeadNames().get(0) + ".";
+        }
+        if (your >= 1 && threats == 0) {
+            return "You OHKO; nothing OHKOs back.";
+        }
+        if (threats >= 2) {
+            return "Heavy pressure — they hit harder than you.";
+        }
+        if (your == 0 && threats == 0) {
+            return "Slow grind — neither side OHKOs.";
+        }
+        return "Trade — both sides have KO threats.";
+    }
+
+    private static Verdict buildMatrixSummary(
+            List<PreviewPokemonCommand> selectedLeads, List<LeadMatchupResult> cells) {
+        if (cells.isEmpty()) {
+            return null;
+        }
+        int total = cells.size();
+        int favored = (int) cells.stream()
+                .filter(c -> c.koPressure().value() + c.doubleUpPressure().value()
+                        > c.incomingDanger().value())
+                .count();
+        String leadStr = selectedLeads.size() >= 2
+                ? selectedLeads.get(0).displayName() + " + "
+                        + selectedLeads.get(1).displayName()
+                : "your leads";
+        String headline = clip(leadStr + " favored in " + favored + "/" + total + " matchups.", Verdict.HEADLINE_MAX);
+
+        LeadMatchupResult worst = cells.stream()
+                .max(Comparator.comparingDouble(c -> c.incomingDanger().value()))
+                .orElse(null);
+        LeadMatchupResult best = cells.stream()
+                .max(Comparator.comparingDouble(c -> c.koPressure().value()
+                        + c.doubleUpPressure().value()
+                        - c.incomingDanger().value()))
+                .orElse(null);
+
+        StringBuilder sub = new StringBuilder();
+        if (best != null && best.koPressure().value() + best.doubleUpPressure().value() > 0) {
+            sub.append("Best line: ")
+                    .append(String.join(" + ", best.opponentLeadNames()))
+                    .append('.');
+        }
+        if (worst != null && worst.incomingDanger().value() >= 2) {
+            if (sub.length() > 0) sub.append(' ');
+            sub.append("Danger: ")
+                    .append(String.join(" + ", worst.opponentLeadNames()))
+                    .append('.');
+        }
+        if (sub.length() == 0) sub.append("Neutral matchup spread.");
+        return new Verdict(headline, clip(sub.toString(), Verdict.SUBLINE_MAX), null);
+    }
+
+    private static String clip(String s, int max) {
+        if (s.length() <= max) return s;
+        return s.substring(0, max - 1).trim() + "…";
     }
 
     private LeadMatchupResult evaluatePairFromMatrix(
