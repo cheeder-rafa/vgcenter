@@ -38,6 +38,7 @@ describe('LeadLab', () => {
         matchup(['opponent-1', 'opponent-2'], ['Opponent 1', 'Opponent 2']),
         matchup(['opponent-3', 'opponent-4'], ['Opponent 3', 'Opponent 4']),
       ],
+      matrixSummary: null,
     }
 
     render(
@@ -99,5 +100,6 @@ function matchup(ids: [string, string], names: [string, string]) {
     turnOneAnnotations: ['Moonblast threatens Opponent 1'],
     outgoingEvidence: [],
     incomingEvidence: [],
+    summary: null,
   } satisfies LeadEvaluationResult['matchups'][number]
 }

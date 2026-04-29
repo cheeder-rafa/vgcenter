@@ -67,10 +67,18 @@ export type LeadMatchup = {
   turnOneAnnotations: string[]
   outgoingEvidence: DamageEvidenceEntry[]
   incomingEvidence: DamageEvidenceEntry[]
+  summary: string | null
+}
+
+export type Verdict = {
+  headline: string
+  subline: string
+  callout: string | null
 }
 
 export type LeadEvaluationResult = {
   matchups: LeadMatchup[]
+  matrixSummary: Verdict | null
 }
 
 export type LeadOption = {
@@ -83,6 +91,7 @@ export type PlanRecommendation = {
   bringIndices: number[]
   leadIndices: number[]
   summary: string
+  verdict: Verdict
   modesCovered: string[]
   modesAtRisk: string[]
   winConditionSupported: boolean
