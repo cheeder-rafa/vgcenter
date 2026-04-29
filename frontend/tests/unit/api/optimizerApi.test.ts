@@ -25,6 +25,8 @@ describe('optimizerApi', () => {
         natureId: 'HARDY',
         abilityId: 'thick-fat',
         itemId: null,
+        megaActive: false,
+        megaFormId: null,
       },
       threats: [
         {
@@ -41,6 +43,8 @@ describe('optimizerApi', () => {
           attackerAbilityId: 'rough-skin',
           attackerItemId: null,
           moveId: 'earthquake',
+          attackerMegaActive: false,
+          attackerMegaFormId: null,
         },
       ],
       goal: 'EXPECTED_DAMAGE_SUM',
@@ -65,7 +69,7 @@ describe('optimizerApi', () => {
       },
       criticalHit: false,
     }
-    const response = { best: null, threats: [] }
+    const response = { best: null, candidates: [], threats: [] }
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify(response), {
         status: 200,

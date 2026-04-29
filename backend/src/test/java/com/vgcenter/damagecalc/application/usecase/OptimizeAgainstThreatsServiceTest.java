@@ -71,6 +71,7 @@ class OptimizeAgainstThreatsServiceTest {
         var result = newService().optimize(command(OptimizeAgainstThreatsGoal.EXPECTED_DAMAGE_SUM, threats()));
 
         assertThat(result.best()).isNotNull();
+        assertThat(result.candidates()).isNotEmpty();
         assertThat(result.best().totalSp()).isLessThanOrEqualTo(66);
         assertThat(result.threats()).hasSize(2);
         assertThat(result.threats())
@@ -83,6 +84,7 @@ class OptimizeAgainstThreatsServiceTest {
         var result = newService().optimize(command(OptimizeAgainstThreatsGoal.SURVIVE_ALL, threats()));
 
         assertThat(result.best()).isNotNull();
+        assertThat(result.candidates()).isNotEmpty();
         assertThat(result.threats()).allMatch(t -> t.koChanceProbability() == 0.0);
     }
 
@@ -103,6 +105,7 @@ class OptimizeAgainstThreatsServiceTest {
         var result = service.optimize(command(OptimizeAgainstThreatsGoal.EXPECTED_DAMAGE_SUM, adjustedThreats));
 
         assertThat(result.best()).isNotNull();
+        assertThat(result.candidates()).isNotEmpty();
         assertThat(result.best().spHp() + result.best().spDef() + result.best().spSpd())
                 .isLessThanOrEqualTo(66);
 

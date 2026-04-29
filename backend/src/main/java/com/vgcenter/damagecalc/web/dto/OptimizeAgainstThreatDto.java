@@ -9,4 +9,6 @@ public record OptimizeAgainstThreatDto(
         @Valid SpDto attackerSp,
         String attackerAbilityId,
         String attackerItemId,
-        @NotBlank String moveId) {}
+        @NotBlank String moveId,
+        boolean attackerMegaActive,
+        String attackerMegaFormId) {}
