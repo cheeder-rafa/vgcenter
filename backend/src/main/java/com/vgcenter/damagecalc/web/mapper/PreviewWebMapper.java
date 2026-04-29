@@ -200,6 +200,10 @@ public class PreviewWebMapper {
                 plan.bringIndices(),
                 plan.leadIndices(),
                 plan.summary(),
+                new com.vgcenter.damagecalc.web.dto.VerdictDto(
+                        plan.verdict().headline(),
+                        plan.verdict().subline(),
+                        plan.verdict().callout()),
                 plan.modesCovered(),
                 plan.modesAtRisk(),
                 plan.winConditionSupported(),

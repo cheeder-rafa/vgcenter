@@ -6,6 +6,7 @@ public record PlanRecommendationDto(
         List<Integer> bringIndices,
         List<Integer> leadIndices,
         String summary,
+        VerdictDto verdict,
         List<String> modesCovered,
         List<String> modesAtRisk,
         boolean winConditionSupported,

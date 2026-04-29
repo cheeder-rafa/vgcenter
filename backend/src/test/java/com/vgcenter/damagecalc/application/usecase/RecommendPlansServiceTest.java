@@ -130,6 +130,43 @@ class RecommendPlansServiceTest {
     }
 
     @Test
+    void verdictHeadlineMentionsBothLeadsAndStaysBounded() {
+        evaluateLeadsUseCase.nextResult = emptyEvaluation();
+
+        RecommendPlansResult result =
+                service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), null, field()));
+
+        for (PlanRecommendation plan : result.plans()) {
+            Verdict v = plan.verdict();
+            assertThat(v.headline()).isNotBlank();
+            assertThat(v.headline().length()).isLessThanOrEqualTo(Verdict.HEADLINE_MAX);
+            assertThat(v.subline()).isNotNull();
+            assertThat(v.subline().length()).isLessThanOrEqualTo(Verdict.SUBLINE_MAX);
+            assertThat(v.headline()).startsWith("Lead ");
+        }
+    }
+
+    @Test
+    void verdictCalloutFlagsHighReadBurden() {
+        evaluateLeadsUseCase.nextResult = dangerousEvaluation();
+
+        RecommendPlansResult result =
+                service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), null, field()));
+
+        assertThat(result.plans().getFirst().verdict().callout()).isNotNull().contains("read");
+    }
+
+    @Test
+    void verdictCalloutNullWhenNoWarning() {
+        evaluateLeadsUseCase.nextResult = emptyEvaluation();
+
+        RecommendPlansResult result =
+                service.recommend(new RecommendPlansCommand("M-A", myTeam(6), opponentTeam(), null, field()));
+
+        assertThat(result.plans().getFirst().verdict().callout()).isNull();
+    }
+
+    @Test
     void summaryAndRationaleAreNonBlank() {
         evaluateLeadsUseCase.nextResult = emptyEvaluation();
 
