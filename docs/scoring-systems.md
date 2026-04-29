@@ -1,122 +1,212 @@
-# Scoring Systems — Preview Coach, Replay Autopsy, Multi-Threat Optimizer
+# Scoring Systems — Preview Coach, Replay Autopsy, Multi-Threat Optimizer (v1.3)
 
-## 1. Preview Coach — "Get Recommendation" (`RecommendPlansService`)
+Resumo funcional pós-fix (M14a–M14e). Para detalhamento técnico e `file:line`, ver [`scoring-systems-technical.md`](./scoring-systems-technical.md).
 
-Dado o time de 6 do usuário e o time adversário de 6, recomenda os 3 melhores planos de jogo (quais 4 trazer + lead de 2).
+---
+
+## 1) Damage core compartilhado
+
+Os três sistemas consomem o mesmo núcleo de cálculo (`CalculateDamageService` + `DamageFormula`).
+
+Em v1.3:
+- accuracy entra no dano esperado e na probabilidade de OHKO.
+- crit entra por média ponderada (`(1-critRate)*normal + critRate*crit`).
+- moves always-crit usam taxa de crit de 100%.
+
+Campos relevantes em `CalculateDamageResult` / API:
+- `accuracy`
+- `expectedDamageWithAccuracy`
+- `koProbabilityWithCrit`
+
+---
+
+## 2) Preview Coach (`RecommendPlansService` + `EvaluateLeadsService`)
 
 ### Pipeline
 
-**Passo 1 — Matriz de dano 6×6** (`buildMatrix`)
+1. **Matriz 6×6 (`buildMatrix`)**  
+   Para cada par (meu Pokémon, oponente), calcula melhor golpe de ida e volta.
 
-Para cada par (meu Pokémon i, adversário j), calcula em paralelo (virtual threads) o melhor golpe de i em j (`bestOutgoing`) e de j em i (`bestIncoming`). "Melhor" = move com maior `maxPct` de dano. Resultado: matriz 6×6 de `HitEvidence` precalculada.
+2. **Best move por expected × accuracy**  
+   "Melhor" não é mais `maxPct`; agora usa `mean(rolls) * accuracy`.
 
-**Passo 2 — Avaliação de todos os C(6,2)=15 leads**
+3. **Avaliação dos 15 leads adversários**  
+   Reusa a matriz, sem recalcular dano para cada cenário.
 
-Para cada par de leads possível do meu time, reusa a matriz (sem recalcular dano) e computa um `LeadMatchupResult` com 5 métricas:
+4. **Score de plano (bring-4 + lead-2)**  
+   Base:
+   - `offensive * 4`
+   - `safe * 1`
+   - `risky * -3`
 
-| Métrica | O que mede |
-|---|---|
-| `koPressure` | Quantos OHKOs eu consigo nessa lead vs cada lead adversária |
-| `twoHitKoPressure` | 2HKOs |
-| `doubleUpPressure` | Alvos que meu duo pode matar combinando dano |
-| `incomingDanger` | OHKOs + 2HKOs que o adversário ameaça em mim |
-| `speedComparison` | Quantos meus leads são mais rápidos |
+   Bônus:
+   - win condition no lead `+2`
+   - win condition no backline `+6`
+   - trouxe Mega `+5`
+   - Mega lidera `+2`
+   - sem Mega `-6`
+   - `speed-control` / `redirection` `+3` (cap total de suporte: `+6`)
+   - `screens` / `fake-out` / `defense-shred` `+2`
+   - `helping-hand` `+1`
 
-**Passo 3 — Score de cada plano** (`score`)
+   Penalidade:
+   - `-4` se 3/4 do bring for físico-only ou special-only.
 
-Para cada combinação de bring-4 (C(6,4)=15 combos) com o melhor lead-2 dentro dela:
+5. **Top-3 com diversidade**
+   - evita repetir lead pair.
+   - `mega escape valve` mantém opção sem Mega quando viável.
 
-```
-base = offensive × 4 + safe × 1 − risky × 3
-```
+### Métricas de matchup
 
-- `offensive` = matchups onde tenho OHKO ou double-up
-- `safe` = matchups com `incomingDanger == 0`
-- `risky` = matchups com `incomingDanger >= 2`
-
-Bônus adicionais:
-
-| Condição | Pontos |
-|---|---|
-| Win condition no lead | +2 |
-| Win condition no backline | +6 |
-| Trouxer o Mega | +5 |
-| Mega lidera | +2 adicional |
-| Não trouxer o Mega | −6 |
-| `speed-control` / `redirection` na bring | +3 cada (cap total +6) |
-| `screens` / `fake-out` / `defense-shred` | +2 cada |
-| `helping-hand` | +1 |
-
-**Passo 4 — Seleção dos top-3**
-
-Ordena por score descrescente. `selectDiverse` garante que nenhum par de leads se repita nos 3 planos. `applyMegaEscapeValve` substitui o pior plano por um sem Mega se todos os top-3 incluírem Mega e existir uma alternativa a no máximo 4 pontos de distância.
+- `koPressure` e `twoHitKoPressure` consideram probabilidade (`>= 0.5`), não só hits mínimos.
+- speed comparison diferencia `faster`, `slower` e `tied`.
 
 ---
 
-## 2. Replay Autopsy — Decision Review (`EvaluateReplayDecisionsService`)
-
-Para cada turno do replay, compara o que foi jogado com todas as alternativas possíveis e atribui um veredicto.
+## 3) Replay Autopsy (`EvaluateReplayDecisionsService`)
 
 ### Pipeline por turno
 
-**Reconstrução do estado:** HP atual, boosts, clima, terrain e screens são lidos diretamente do `ReplayTimeline` parsado.
+1. reconstrói estado do turno.
+2. lê linha jogada.
+3. enumera alternativas.
+4. pontua linhas.
+5. ordena e classifica veredicto.
 
-**Ações conhecidas vs enumeradas:**
-- *Played*: moves extraídos dos eventos `|move|` do replay.
-- *Candidates*: todas as permutações de (meu Pokémon × move × alvo adversário), incluindo Protect.
+### Ações candidatas
 
-**Score de uma linha** (`scoreLine`):
+- `ATTACK`
+- `PROTECT`
+- `WIDE_GUARD`
+- `QUICK_GUARD`
+- `STATUS`
+- `SWITCH`
 
-```
-score = (damageDealtWeight  × dealt)
-      − (damageTakenWeight  × effectiveTaken)
-      + (koBonus            × koProbability)
-      − (faintPenalty       × effectiveFaintProb)
-```
-
-Pesos default: `damageDealtWeight=1.0`, `damageTakenWeight=1.0`, `koBonus=30.0`, `faintPenalty=20.0`.
-
-`dealt` e `effectiveTaken` = média dos 16 rolls de dano. Se um Pokémon jogar **Protect**, o dano que seria tomado por aquele slot é subtraído de `effectiveTaken` — o Protect é avaliado pelo dano que evita.
-
-**Delta e veredicto:**
+### Score da linha
 
 ```
-delta = bestAlternativeScore − playedScore
+score = (damageDealtWeight × dealt)
+      - (damageTakenWeight × effectiveTaken)
+      + (koBonus × koProbabilityAnyKo)
+      - (faintPenalty × effectiveFaintProb)
+      + utilityBonus
 ```
 
-| Delta | Veredicto |
-|---|---|
-| ≤ 0.01 | `optimal` |
-| ≤ 25.0 | `acceptable` |
-| > 25.0 | `suboptimal` |
+Defaults:
+- `damageDealtWeight = 1.0`
+- `damageTakenWeight = 1.0`
+- `koBonus = 30.0`
+- `faintPenalty = 20.0`
 
-**Advisory:** dispara quando `faintProbability >= 0.8` **e** `bestScore <= 0.0` — o oponente tem >80% de chance de matar algo e nenhuma linha melhora o saldo. Feedback: "não há resposta vencedora — avalie se o bench cobre essa posição."
+### Correções de correctness/modelagem em v1.3
 
-**Adaptation flags (BO3):** compara os leads do oponente entre games. Registra se o adversário re-liderou o mesmo duo após ganhar ou perder, e se o usuário mudou seu lead entre games.
+- Wide Guard e Quick Guard agora creditam bloqueio correto por tipo de hit (spread/prioridade), não single-slot.
+- status moves relevantes têm valor não-zero (`tailwind`, `trickroom`, `helpinghand`, `followme`, `ragepowder`, telas, guards).
+- switch entrou na enumeração com custo de oportunidade de `-5`.
+- recoil é abatido do próprio usuário (inclui risco de faint por recoil).
+- probabilidade agregada usa união: `1 - Π(1 - p_i)`.
+- veredicto usa delta relativo (`delta / max(|best|, 1)`):
+  - `<= 0.01` optimal
+  - `<= 0.25` acceptable
+  - `> 0.25` suboptimal
+
+### Advisory
+
+Dispara quando:
+- pressão de faint alta (`>= 0.8`) e
+- melhor resposta ainda não positiva (`bestScore <= 0`).
 
 ---
 
-## 3. Multi-Threat Spread Optimizer (`OptimizeAgainstThreatsService`)
+## 4) Multi-Threat Spread Optimizer (`OptimizeAgainstThreatsService`)
 
-Encontra a distribuição de SPs (HP / Def / SpDef, cap 66 total, máx 32 por stat) que melhor sobrevive a uma lista de ameaças, conforme o objetivo escolhido.
+### Busca
 
-### Espaço de busca
+Enumera `SpreadTriple(spHp, spDef, spSpd)` com:
+- cada stat `<= 32`
+- total `<= 66`
 
-Enumera todas as `SpreadTriple(spHp, spDef, spSpd)` com `total ≤ 66` e cada stat `≤ 32`. Para cada spread, testa naturezas candidatas selecionadas com base em pressão física/especial das ameaças.
+Testa naturezas candidatas e calcula score contra lista de ameaças.
 
-### Score de um spread
+### Campos canônicos (v1.3)
 
-Para cada ameaça, calcula `CalculateDamageResult` e extrai:
+- `ohkoProbability` (substitui naming ambíguo antigo)
+- `nearKoMargin` (`100 - maxDamagePct`)
 
-- `worstKoChance`: `max(koChanceProbability)` entre todas as ameaças
-- `expectedDamageSum`: soma de `avgRoll / defHP × 100` de todas as ameaças
+`koChanceProbability` foi removido no cleanup de M14e.
 
-### Objetivos e comparador
+### Goals
 
-| Goal | Ordenação primária | Desempate |
-|---|---|---|
-| `WORST_CASE_KO` | minimize `worstKoChance` | `expectedDamageSum` → total SP |
-| `EXPECTED_DAMAGE_SUM` | minimize `expectedDamageSum` | `worstKoChance` → total SP |
-| `SURVIVE_ALL` | tier mínimo de SP com `worstKoChance == 0` | `expectedDamageSum` → total SP |
+- `WORST_CASE_KO`:
+  1. min `ohkoProbability`
+  2. min `expectedDamageSum`
+  3. min `totalSp`
 
-O modo `SURVIVE_ALL` percorre os spreads tier a tier (0 SP, 1 SP, …) e para assim que encontra um spread que garanta sobrevivência em todas as ameaças, evitando varrer o espaço inteiro. Retorna os 3 melhores spreads distintos.
+- `EXPECTED_DAMAGE_SUM`:
+  1. min `expectedDamageSum`
+  2. min `ohkoProbability`
+  3. min `totalSp`
+
+- `SURVIVE_ALL`:
+  1. min `expectedDamageSum`
+  2. max `nearKoMargin`
+  3. min `totalSp`
+
+### SURVIVE_ALL lookahead
+
+Após encontrar o primeiro tier com sobrevivente, a busca continua por mais 4 tiers para não parar cedo em solução frágil.
+
+---
+
+## 5) Contratos e compatibilidade
+
+### Damage API (`/api/v1/damage/calculate`)
+
+Exposição relevante:
+- `accuracy`
+- `expectedDamageWithAccuracy`
+- `koProbabilityWithCrit`
+- `koChance` (legado funcional mantido)
+
+### Optimizer API (`/api/v1/calc/optimize-against-threats`)
+
+Schema atual:
+- `ohkoProbability`
+- `nearKoMargin`
+
+Sem alias legado:
+- `koChanceProbability` removido.
+
+### Dataset
+
+`backend/src/main/resources/data/regulation-m-a/moves.json` segue como source of truth de:
+- `accuracy`
+- `alwaysCrit`
+
+---
+
+## 6) Testes que blindam regressão
+
+- Property tests do core:
+  - monotonicidade de accuracy no expected
+  - monotonicidade de crit na probabilidade de KO
+
+- Service tests:
+  - replay guards/status/switch/recoil/verdict relativo
+  - optimizer `ohkoProbability` + `nearKoMargin` + lookahead
+  - preview expected*accuracy + speed tie
+  - recommend plans com pesos numéricos e penalidade mono-categoria
+
+- Frontend component test:
+  - `SpreadOptimizerPanel` com schema atualizado (`ohkoProbability`, `nearKoMargin`)
+
+---
+
+## 7) Estado dos itens audit
+
+Todos os IDs C/M/B documentados no audit foram cobertos em M14a–M14d e fechados documentalmente em M14e.
+
+Para rastreio por commit e referência de código:
+- [`scoring-systems-audit.md`](./scoring-systems-audit.md)
+- [`scoring-systems-technical.md`](./scoring-systems-technical.md)
+
