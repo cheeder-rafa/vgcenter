@@ -32,12 +32,13 @@ describe('TopNav', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
   })
-  it('renders nav links for /calc, /preview, and /speed', () => {
+  it('renders nav links for the primary workflows', () => {
     renderTopNavAt('/calc')
 
     expect(
       screen.getByRole('link', { name: /calculator/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /team prep/i })).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: /preview coach/i }),
     ).toBeInTheDocument()
@@ -71,10 +72,14 @@ describe('TopNav', () => {
     renderTopNavAt('/calc')
 
     const calcLink = screen.getByRole('link', { name: /calculator/i })
+    const prepLink = screen.getByRole('link', { name: /team prep/i })
     const previewLink = screen.getByRole('link', { name: /preview coach/i })
 
     await user.tab()
     expect(document.activeElement).toBe(calcLink)
+
+    await user.tab()
+    expect(document.activeElement).toBe(prepLink)
 
     await user.tab()
     expect(document.activeElement).toBe(previewLink)
@@ -93,10 +98,10 @@ describe('TopNav', () => {
     expect(nav.className).toMatch(/fixed/)
   })
 
-  it('Replay Autopsy link has a "new" badge', () => {
+  it('Team Prep link has a "new" badge', () => {
     renderTopNavAt('/calc')
 
-    const replayLink = screen.getByRole('link', { name: /replay autopsy/i })
+    const replayLink = screen.getByRole('link', { name: /team prep/i })
     expect(
       replayLink.querySelector('[data-testid="new-badge"]'),
     ).toBeInTheDocument()

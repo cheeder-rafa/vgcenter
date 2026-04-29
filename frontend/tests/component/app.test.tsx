@@ -29,6 +29,18 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
+  it('renders the Team Prep workspace at /prep', () => {
+    render(
+      <MemoryRouter initialEntries={['/prep']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: /team prep/i }),
+    ).toBeInTheDocument()
+  })
+
   it('redirects / to /calc', () => {
     render(
       <MemoryRouter initialEntries={['/']}>

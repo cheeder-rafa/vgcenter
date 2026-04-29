@@ -8,6 +8,7 @@ The calculator stack is live with Scoring Systems Hardening (v1.3):
 
 - `backend/` serves the Regulation M-A API for damage calculation, dataset lookup, Showdown/Pokepaste imports, replay timeline parsing, and replay decision evaluation.
 - `frontend/` is a React calculator UI with live API-backed results and importer modals.
+- `/prep` is the Team Prep workspace that connects saved teams, threat watchlists, notes, and practice prompts.
 - `/preview` is the Preview Coach shell for the next VGC team-preview workflow.
 - Dockerfiles exist for both applications, and root `docker-compose.yml` runs the full stack.
 - GitHub Actions verify backend, frontend, and a `main`-targeted Docker smoke check.
@@ -92,6 +93,17 @@ Planned Preview Coach phases:
 - Lead Lab: compare selected leads into all 15 opponent lead pairs using calculator damage evidence.
 - Team Preview Coach: recommend bring-4 and lead-order plans with pressure, risk, and win-condition explanations.
 - BO3 Notebook: track revealed information and adjustment guidance across a best-of-3 set.
+
+## Team Prep
+
+Team Prep lives at `/prep` and uses the saved left/right team rails from the calculator as a scouting board. It shows team readiness, fastest Pokémon on each side, combined type tags, top opposing threats ranked by offensive pressure, a persistent threat watchlist, local prep notes for event/opponent/game-plan context, and a credited Meta Feed.
+
+Use Team Prep after importing teams in `/calc`; it links back into `/calc`, `/preview`, `/speed`, and `/replay` so prep can move from high-level scouting to exact rolls, lead selection, speed checks, and replay review.
+
+Meta Feed sources are credited in-product:
+
+- Limitless Tournament Platform completed VGC tournaments filtered to Regulation M-A online events with at least 40 players: `https://play.limitlesstcg.com/tournaments/completed?game=VGC&format=M-A&platform=all&type=online&time=4weeks`
+- Pikalytics Champions Tournaments usage data: `https://www.pikalytics.com/pokedex/championstournaments`
 
 ## Sprite Assets
 

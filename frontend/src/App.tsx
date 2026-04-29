@@ -7,6 +7,7 @@ import { CalculatorPage } from './pages/CalculatorPage'
 import { PreviewPage } from './pages/PreviewPage'
 import { ReplayPage } from './pages/ReplayPage'
 import { SpeedTierPage } from './pages/SpeedTierPage'
+import { TeamPrepPage } from './pages/TeamPrepPage'
 
 function App() {
   const fetchBase = useSpeedTierStore((s) => s.fetchBase)
@@ -29,6 +30,7 @@ function App() {
       <Route element={<AppShell />}>
         <Route index element={<Navigate to="/calc" replace />} />
         <Route path="/calc" element={<CalculatorPage />} />
+        <Route path="/prep" element={<TeamPrepPage />} />
         <Route path="/preview" element={<PreviewPage />} />
         <Route path="/speed" element={<SpeedTierPage />} />
         <Route path="/replay" element={<ReplayPage />} />

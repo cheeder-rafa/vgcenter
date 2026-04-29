@@ -1405,3 +1405,338 @@ After each implementation branch is ready to publish:
 ```
 Use github:yeet to publish the branch and open a PR targeting develop. Do not merge it.
 ```
+
+---
+
+## Sub-project 5 — Product Intelligence & Retention Suite (v1.4)
+
+### Context
+
+VGCenter has moved beyond a single damage calculator into a competitive prep workspace. The current Session 0 branch adds `/prep`, a Team Prep page that connects saved teams, threat watchlists, local notes, practice prompts, and a credited Meta Feed. The remaining v1.4 work turns that static workspace into a data-backed product loop: import teams, compare against the current meta, patch weaknesses, review replays, drill decisions, and return with less setup friction.
+
+This sub-project is intentionally split into **8 sessions**. Each session is its own branch from `develop`, its own PR targeting `develop`, and must stop after the PR is opened. Do not mix sessions in one branch except **Session 0**, which intentionally includes the already-implemented Team Prep feature plus this roadmap documentation in one commit.
+
+### Source-crediting policy
+
+Any feature using external tournament or usage data must visibly credit the source in-product and in docs. Do not make uncredited meta, usage, popularity, or tournament claims.
+
+Required source metadata for generated snapshots:
+
+- `sourceName`
+- `sourceUrl`
+- `checkedOn`
+- `filterPolicy`
+
+Approved v1.4 sources:
+
+- **Limitless Tournament Platform** — completed VGC Regulation M-A online tournaments from the last 4 weeks, filtered to tournaments with at least 40 players: `https://play.limitlesstcg.com/tournaments/completed?game=VGC&format=M-A&platform=all&type=online&time=4weeks`
+- **Pikalytics Champions Tournaments** — Pokemon Champions tournament usage data: `https://www.pikalytics.com/pokedex/championstournaments`
+
+### Sessions
+
+#### Session 0 — Publish Team Prep + roadmap
+
+Current branch: `feature/vgcenter-product-enhancements`.
+
+Scope:
+
+- Ship `/prep` Team Prep workspace with readiness summary, speed posture, type tags, practice prompts, threat ranking, persistent watchlist, local notebook, and credited Meta Feed.
+- Ship calculator FieldPanel active modifier summary and Reset Field action.
+- Update `PLAN.md`, `AGENTS.md`, and `CLAUDE.md` with this v1.4 roadmap.
+- Keep `AGENTS.md` and `CLAUDE.md` byte-identical.
+
+Verification:
+
+```bash
+pnpm --dir frontend lint
+pnpm --dir frontend typecheck
+pnpm --dir frontend test
+pnpm --dir frontend build
+cmp AGENTS.md CLAUDE.md
+rg "Sub-project 5|Session 1|Limitless|Pikalytics" PLAN.md AGENTS.md CLAUDE.md
+```
+
+Stop after opening the PR targeting `develop`.
+
+#### Session 1 — Meta data pipeline
+
+Goal: replace the static frontend Meta Feed snapshot with a generated, credited snapshot pipeline.
+
+Implementation:
+
+- Add a script under `scripts/` that fetches/parses Limitless and Pikalytics into a checked-in JSON snapshot.
+- Limitless parser filters completed online VGC Regulation M-A tournaments to `players >= 40`.
+- Pikalytics parser captures top usage entries plus enough metadata for future meta-set defaults.
+- Add generated snapshot under a stable repo path such as `frontend/src/features/prep/data/metaSnapshot.generated.json` or `backend/src/main/resources/data/meta/` if backend serving is chosen.
+- Preserve source names, URLs, `checkedOn`, and filter policy in the snapshot.
+- Team Prep consumes the generated snapshot and still renders visible source credits.
+
+Acceptance:
+
+- Parser/filter unit tests cover `players >= 40` inclusion/exclusion.
+- UI tests prove source credits remain visible.
+- No uncredited usage claims.
+
+#### Session 2 — Meta-aware defaults
+
+Goal: reduce setup friction by applying common tournament sets explicitly.
+
+Implementation:
+
+- Add explicit `Use Meta Set` / `Apply Common Moves` action to calculator Pokemon setup.
+- Use credited Pikalytics-derived common moves, items, and abilities.
+- Never silently overwrite user-edited builds; applying a meta set must be a deliberate user action.
+- Show the source credit near the action.
+
+Acceptance:
+
+- Tests prove meta-set application fills expected move/item/ability fields.
+- Tests prove user edits are not overwritten without explicit action.
+- Source credit is visible in the UI.
+
+#### Session 3 — Threat Matrix
+
+Goal: full team-vs-team heatmap.
+
+Implementation:
+
+- Backend `BuildThreatMatrixUseCase` and `POST /api/v1/matchup/matrix`.
+- Frontend `/matchup` route with two team inputs and a 6x6 matrix.
+- Toggle: `damage I deal` / `damage I take`.
+- Cell click opens `/calc` via existing URL-share codec.
+- Cell hover/focus shows full roll distribution.
+- Cell colors are colorblind-safe and meet AA contrast.
+
+Acceptance:
+
+- Backend service test asserts representative 6x6 matrix under 500ms.
+- Frontend tests cover grid rendering, direction toggle, tooltip, and click-through.
+- `web-design-guidelines` pass confirms accessibility and contrast.
+
+#### Session 4 — Counterfinder / Patch My Team
+
+Goal: turn meta and matchup data into explainable team repair suggestions.
+
+Implementation:
+
+- Inputs: saved team, watched threats, meta usage snapshot, and calculator/optimizer evidence.
+- Outputs: defensive spread suggestions, tech move suggestions, and replacement candidates.
+- Every recommendation includes a concise reason and the evidence source.
+- Avoid opaque AI-like scores without explanation.
+
+Acceptance:
+
+- Tests cover recommendation ranking and reason strings.
+- UI distinguishes spread, move, and replacement recommendations.
+- Recommendations link back to exact calc or optimizer evidence where possible.
+
+#### Session 5 — Replay findings into Team Prep
+
+Goal: connect Replay Autopsy to ongoing prep notes.
+
+Implementation:
+
+- Add `Save to Team Prep` action in Replay Autopsy.
+- Persist replay findings in the Team Prep notebook.
+- Supported finding types: turning point, missed KO, risky line, adaptation note.
+- Team Prep renders saved replay findings as prep cards.
+
+Acceptance:
+
+- Tests cover persistence and rendering.
+- Saved findings include replay source/turn reference.
+- Team Prep remains useful without any saved replay findings.
+
+#### Session 6 — Practice Mode
+
+Goal: create repeat-use drills from the user's own prep board.
+
+Implementation:
+
+- Add `/practice` route.
+- Generate drills from saved teams, watched threats, meta threats, and replay findings.
+- Initial drill types: `Does this survive?`, `Which move has best KO odds?`, `Which lead is safest?`.
+- Each answer includes calculator-backed explanation.
+- Store practice history locally only.
+
+Acceptance:
+
+- Tests cover drill generation and answer explanation.
+- Practice works with partial team data and gives a useful empty state.
+- No server persistence required.
+
+#### Session 7 — Onboarding and UX polish
+
+Goal: make the app easier to adopt and faster to use repeatedly.
+
+Implementation:
+
+- First-run path: import Pokepaste -> Team Prep -> Preview Coach -> Calc.
+- Mobile single-matchup calculator flow.
+- Keyboard shortcuts for search, swap sides, reset field, copy report.
+- Final design/accessibility pass.
+
+Acceptance:
+
+- First-run and mobile flows covered by component tests.
+- Shortcuts documented in UI.
+- Full frontend verification passes.
+
+### Required frontend skill sequence
+
+For any v1.4 frontend session, use:
+
+`impeccable -> vercel-react-best-practices -> vercel-composition-patterns -> web-design-guidelines -> polish`
+
+### Ready-to-paste session prompts
+
+#### Session 0 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md. Finish Session 0 on the current branch feature/vgcenter-product-enhancements.
+
+Scope:
+- Keep the current Team Prep / Meta Feed implementation.
+- Keep the FieldPanel Reset Field implementation.
+- Include PLAN.md, AGENTS.md, and CLAUDE.md roadmap updates in the same commit.
+- Do not create CODEX.md.
+
+Verification:
+  pnpm --dir frontend lint
+  pnpm --dir frontend typecheck
+  pnpm --dir frontend test
+  pnpm --dir frontend build
+  cmp AGENTS.md CLAUDE.md
+  rg "Sub-project 5|Session 1|Limitless|Pikalytics" PLAN.md AGENTS.md CLAUDE.md
+
+Commit with:
+  feat(prep): add team prep workspace and roadmap docs
+
+Push and open a PR targeting develop. Stop. Do not start Session 1.
+```
+
+#### Session 1 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 1: Meta data pipeline.
+
+Branch from develop:
+  git checkout develop && git pull --ff-only && git checkout -b feature/meta-data-pipeline
+
+TDD first. Add a generated, credited meta snapshot pipeline:
+- Limitless source: https://play.limitlesstcg.com/tournaments/completed?game=VGC&format=M-A&platform=all&type=online&time=4weeks
+- Filter Limitless tournaments to players >= 40.
+- Pikalytics source: https://www.pikalytics.com/pokedex/championstournaments
+- Preserve sourceName, sourceUrl, checkedOn, and filterPolicy.
+- Team Prep consumes generated data and renders visible source credits.
+
+Run full applicable verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```
+
+#### Session 2 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 2: Meta-aware defaults.
+
+Branch from develop after Session 1 merges:
+  git checkout develop && git pull --ff-only && git checkout -b feature/meta-aware-defaults
+
+TDD first. Add explicit meta-set application in the calculator:
+- Use credited Pikalytics-derived common moves/items/abilities.
+- Add Use Meta Set / Apply Common Moves action.
+- Never silently overwrite user edits without explicit action.
+- Show source credit near the action.
+
+Use frontend skills: impeccable -> vercel-react-best-practices -> vercel-composition-patterns -> web-design-guidelines -> polish.
+Run frontend verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```
+
+#### Session 3 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 3: Threat Matrix.
+
+Branch from develop:
+  git checkout develop && git pull --ff-only && git checkout -b feature/threat-matrix
+
+TDD first. Implement:
+- Backend BuildThreatMatrixUseCase.
+- POST /api/v1/matchup/matrix.
+- Frontend /matchup route.
+- 6x6 heatmap with damage I deal / damage I take toggle.
+- Hover/focus roll tooltip.
+- Click-through to /calc via URL-share codec.
+- Colorblind-safe AA contrast cells.
+- Representative backend 6x6 performance test under 500ms.
+
+Run backend and frontend verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```
+
+#### Session 4 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 4: Counterfinder / Patch My Team.
+
+Branch from develop:
+  git checkout develop && git pull --ff-only && git checkout -b feature/counterfinder
+
+TDD first. Implement explainable team repair recommendations:
+- Inputs: saved team, watched threats, meta usage snapshot, optimizer/calculator evidence.
+- Outputs: defensive spreads, tech moves, replacement candidates.
+- Every recommendation includes a concise reason and evidence link/source.
+- Avoid opaque scores without explanation.
+
+Run full applicable verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```
+
+#### Session 5 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 5: Replay findings into Team Prep.
+
+Branch from develop:
+  git checkout develop && git pull --ff-only && git checkout -b feature/replay-prep-findings
+
+TDD first. Implement:
+- Replay Autopsy Save to Team Prep action.
+- Persist findings in Team Prep notebook.
+- Finding types: turning point, missed KO, risky line, adaptation note.
+- Team Prep cards for saved replay findings.
+
+Run full applicable verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```
+
+#### Session 6 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 6: Practice Mode.
+
+Branch from develop:
+  git checkout develop && git pull --ff-only && git checkout -b feature/practice-mode
+
+TDD first. Add /practice:
+- Generate drills from saved teams, watched threats, meta threats, and replay findings.
+- Drill types: Does this survive? Which move has best KO odds? Which lead is safest?
+- Show calculator-backed answer explanations.
+- Store local practice history only.
+
+Run frontend verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```
+
+#### Session 7 prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 7: Onboarding and UX polish.
+
+Branch from develop:
+  git checkout develop && git pull --ff-only && git checkout -b feature/onboarding-ux-polish
+
+TDD first. Implement:
+- First-run flow: import Pokepaste -> Team Prep -> Preview Coach -> Calc.
+- Mobile single-matchup calculator flow.
+- Keyboard shortcuts for search, swap sides, reset field, copy report.
+- Final accessibility/design polish.
+
+Use frontend skills: impeccable -> vercel-react-best-practices -> vercel-composition-patterns -> web-design-guidelines -> polish.
+Run frontend verification. Conventional Commit. Push and open PR targeting develop. Stop.
+```

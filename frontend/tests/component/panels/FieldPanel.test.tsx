@@ -42,6 +42,26 @@ describe('FieldPanel', () => {
     expect(useCalculatorStore.getState().targets).toBe(2)
   })
 
+  it('summarizes active modifiers and clears them from the panel', async () => {
+    const store = useCalculatorStore.getState()
+    store.setField({ weather: 'SUN' })
+    store.setTargets(2)
+    store.setAttackerSide({ helpingHand: true })
+    store.setDefenderSide({ reflect: true })
+    render(<FieldPanel focusedSide="attacker" />)
+    const user = userEvent.setup()
+
+    expect(screen.getByText(/4 active/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /reset field/i }))
+
+    expect(screen.getByText(/clean field/i)).toBeInTheDocument()
+    expect(useCalculatorStore.getState().field.weather).toBe('CLEAR')
+    expect(useCalculatorStore.getState().targets).toBe(1)
+    expect(useCalculatorStore.getState().attackerSide.helpingHand).toBe(false)
+    expect(useCalculatorStore.getState().defenderSide.reflect).toBe(false)
+  })
+
   it('checking reflect updates the defender side', async () => {
     render(<FieldPanel focusedSide="attacker" />)
     const user = userEvent.setup()

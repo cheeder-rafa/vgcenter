@@ -152,6 +152,46 @@ describe('useCalculatorStore', () => {
     expect(state.resultsStatus).toBe('idle')
   })
 
+  it('resetFieldModifiers() clears only battle-field modifiers', () => {
+    const store = useCalculatorStore.getState()
+    store.setAttacker({ speciesId: 'charizard' })
+    store.setDefender({ speciesId: 'venusaur' })
+    store.setField({ weather: 'SUN', terrain: 'GRASSY', room: 'TRICK' })
+    store.setTargets(2)
+    store.setAttackerSide({ helpingHand: true, tailwind: true })
+    store.setDefenderSide({ reflect: true, friendGuard: true })
+
+    store.resetFieldModifiers()
+
+    const state = useCalculatorStore.getState()
+    expect(state.attacker.speciesId).toBe('charizard')
+    expect(state.defender.speciesId).toBe('venusaur')
+    expect(state.field).toEqual({
+      weather: 'CLEAR',
+      terrain: 'NONE',
+      room: 'NONE',
+    })
+    expect(state.targets).toBe(1)
+    expect(state.attackerSide).toEqual({
+      reflect: false,
+      lightScreen: false,
+      auroraVeil: false,
+      friendGuard: false,
+      helpingHand: false,
+      tailwind: false,
+      protect: false,
+    })
+    expect(state.defenderSide).toEqual({
+      reflect: false,
+      lightScreen: false,
+      auroraVeil: false,
+      friendGuard: false,
+      helpingHand: false,
+      tailwind: false,
+      protect: false,
+    })
+  })
+
   it('selectDamageRequestFor builds a backend payload with level fixed to 50', () => {
     const store = useCalculatorStore.getState()
     store.setMoveCatalog([

@@ -3,7 +3,7 @@ import { useId, useMemo } from 'react'
 import type { CalculatorSide } from '../store/useCalculatorStore'
 import { useCalculatorStore } from '../store/useCalculatorStore'
 import { ROOM_OPTIONS, TERRAIN_OPTIONS, WEATHER_OPTIONS } from './shared'
-import type { Room, Terrain, Weather } from '../types/api'
+import type { Room, SideConditions, Terrain, Weather } from '../types/api'
 import { SpeedTierRibbon, type SpeedCombatant } from './SpeedTierRibbon'
 
 function stagedSpeed(baseSpeed: number, spe: number): number {
@@ -29,6 +29,7 @@ export function FieldPanel({
   const setAttackerSide = useCalculatorStore((s) => s.setAttackerSide)
   const setDefenderSide = useCalculatorStore((s) => s.setDefenderSide)
   const setTargets = useCalculatorStore((s) => s.setTargets)
+  const resetFieldModifiers = useCalculatorStore((s) => s.resetFieldModifiers)
 
   const attackerRaw = useCalculatorStore((s) => s.attacker)
   const defenderRaw = useCalculatorStore((s) => s.defender)
@@ -83,6 +84,17 @@ export function FieldPanel({
     focusedSide === 'attacker' ? setAttackerSide : setDefenderSide
   const setDefendingConditions =
     focusedSide === 'attacker' ? setDefenderSide : setAttackerSide
+  const activeModifierLabels = useMemo(
+    () =>
+      getActiveModifierLabels({
+        field,
+        targets,
+        attackerSide,
+        defenderSide,
+      }),
+    [attackerSide, defenderSide, field, targets],
+  )
+  const activeModifierCount = activeModifierLabels.length
 
   return (
     <article
@@ -104,9 +116,28 @@ export function FieldPanel({
           trickRoom={field.room === 'TRICK'}
         />
 
-        <h2 className="font-display text-2xl font-bold tracking-wide text-white">
-          Modifiers
-        </h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="font-display text-2xl font-bold tracking-wide text-white">
+              Modifiers
+            </h2>
+            <p className="mt-1 font-body text-xs leading-5 text-white/50">
+              {activeModifierCount === 0
+                ? 'Clean field'
+                : `${activeModifierCount} active: ${activeModifierLabels
+                    .slice(0, 3)
+                    .join(', ')}${activeModifierCount > 3 ? ' +' : ''}`}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={resetFieldModifiers}
+            disabled={activeModifierCount === 0}
+            className="min-h-9 rounded-sm border border-white/10 bg-white/[0.04] px-3 font-display text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/65 transition hover:border-arena-ember/50 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-white/10 disabled:hover:text-white/65"
+          >
+            Reset Field
+          </button>
+        </div>
 
         <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
           <Select
@@ -224,6 +255,53 @@ export function FieldPanel({
       </div>
     </article>
   )
+}
+
+function getActiveModifierLabels({
+  field,
+  targets,
+  attackerSide,
+  defenderSide,
+}: {
+  field: { weather: Weather; terrain: Terrain; room: Room }
+  targets: number
+  attackerSide: SideConditions
+  defenderSide: SideConditions
+}): string[] {
+  const labels: string[] = []
+  const weather = labelForOption(WEATHER_OPTIONS, field.weather)
+  const terrain = labelForOption(TERRAIN_OPTIONS, field.terrain)
+  const room = labelForOption(ROOM_OPTIONS, field.room)
+
+  if (field.weather !== 'CLEAR') labels.push(weather)
+  if (field.terrain !== 'NONE') labels.push(terrain)
+  if (field.room !== 'NONE') labels.push(room)
+  if (targets > 1) labels.push('Spread')
+  collectSideLabels(labels, 'Atk', attackerSide)
+  collectSideLabels(labels, 'Def', defenderSide)
+
+  return labels
+}
+
+function labelForOption(
+  options: ReadonlyArray<{ value: string; label: string }>,
+  value: string,
+): string {
+  return options.find((option) => option.value === value)?.label ?? value
+}
+
+function collectSideLabels(
+  labels: string[],
+  prefix: 'Atk' | 'Def',
+  conditions: SideConditions,
+) {
+  if (conditions.helpingHand) labels.push(`${prefix} Helping Hand`)
+  if (conditions.tailwind) labels.push(`${prefix} Tailwind`)
+  if (conditions.reflect) labels.push(`${prefix} Reflect`)
+  if (conditions.lightScreen) labels.push(`${prefix} Light Screen`)
+  if (conditions.auroraVeil) labels.push(`${prefix} Veil`)
+  if (conditions.friendGuard) labels.push(`${prefix} Friend Guard`)
+  if (conditions.protect) labels.push(`${prefix} Protect`)
 }
 
 type SelectProps = {
