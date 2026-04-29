@@ -3,12 +3,22 @@ import { useMemo, useState } from 'react'
 import { useTeamsStore } from '../../../store/useTeamsStore'
 import { classifyAdaptation } from '../lib/bo3Guidance'
 import { exportAsJson, exportAsMarkdown } from '../lib/bo3Export'
+import { usePreviewModeStore } from '../store/usePreviewModeStore'
 import type {
   AdaptationSuggestion,
   GameRecord,
   GameResult,
   OpponentBehavior,
 } from '../types'
+
+const SUGGESTION_VERDICT: Record<AdaptationSuggestion, string> = {
+  'run-it-back': 'Run it back — keep the line that worked.',
+  'change-lead-only': 'Change lead only — preserve your win condition.',
+  'change-backline': 'Change backline — cover their new threat.',
+  'change-win-condition': 'Change win condition — the old one is exposed.',
+  'preserve-unrevealed': 'Preserve unrevealed info — keep your edge hidden.',
+  'calculated-risk': 'Take a calculated risk — commit and execute.',
+}
 
 type Props = {
   games: GameRecord[]
@@ -20,6 +30,16 @@ export function Bo3Notebook({ games, onAddGame, onClear }: Props) {
   const guidance = useMemo(() => classifyAdaptation(games), [games])
   const nextGameNumber = games.length === 0 ? 1 : games.length < 2 ? 2 : null
   const hasGames = games.length > 0
+  const mode = usePreviewModeStore((s) => s.mode)
+  const beginner = mode === 'beginner'
+  const [expanded, setExpanded] = useState(false)
+  const showBody = !beginner || hasGames || expanded
+
+  const verdict = hasGames
+    ? guidance.suggestions[0]
+      ? SUGGESTION_VERDICT[guidance.suggestions[0]]
+      : 'Log Game 1 to get adaptation guidance.'
+    : 'Played a Bo3 set? Record it for adaptation guidance.'
 
   return (
     <section
@@ -27,42 +47,60 @@ export function Bo3Notebook({ games, onAddGame, onClear }: Props) {
       aria-label="BO3 Adaptation Notebook"
     >
       <div className="relative z-10 grid gap-4">
-        <SectionHeader />
+        <SectionHeader verdict={beginner ? verdict : null} />
 
-        {games.map((game) => (
-          <GameSummary key={game.gameNumber} game={game} />
-        ))}
-
-        {nextGameNumber !== null ? (
-          <AddGameForm gameNumber={nextGameNumber} onSave={onAddGame} />
+        {beginner && !hasGames && !expanded ? (
+          <button
+            type="button"
+            className="arena-button h-10 w-fit justify-center px-4 text-white"
+            onClick={() => setExpanded(true)}
+          >
+            Start logging Game 1
+          </button>
         ) : null}
 
-        {guidance.suggestions.length > 0 ? (
-          <AdaptationGuidancePanel guidance={guidance} />
-        ) : null}
+        {showBody ? (
+          <>
+            {games.map((game) => (
+              <GameSummary key={game.gameNumber} game={game} />
+            ))}
 
-        {hasGames ? (
-          <ExportPanel
-            games={games}
-            guidance={guidance.suggestions.length > 0 ? guidance : null}
-            onClear={onClear}
-          />
+            {nextGameNumber !== null ? (
+              <AddGameForm gameNumber={nextGameNumber} onSave={onAddGame} />
+            ) : null}
+
+            {guidance.suggestions.length > 0 ? (
+              <AdaptationGuidancePanel guidance={guidance} />
+            ) : null}
+
+            {hasGames ? (
+              <ExportPanel
+                games={games}
+                guidance={guidance.suggestions.length > 0 ? guidance : null}
+                onClear={onClear}
+              />
+            ) : null}
+          </>
         ) : null}
       </div>
     </section>
   )
 }
 
-function SectionHeader() {
+function SectionHeader({ verdict }: { verdict: string | null }) {
   return (
     <div>
       <p className="arena-label text-arena-cyan">Best of 3</p>
       <h2 className="mt-1 text-xl font-black text-white">
         BO3 Adaptation Notebook
       </h2>
-      <p className="mt-1 text-sm leading-6 text-white/68">
-        Record each game. Get adaptation guidance for the next.
-      </p>
+      {verdict ? (
+        <p className="mt-1 text-sm leading-6 text-white">{verdict}</p>
+      ) : (
+        <p className="mt-1 text-sm leading-6 text-white/68">
+          Record each game. Get adaptation guidance for the next.
+        </p>
+      )}
     </div>
   )
 }

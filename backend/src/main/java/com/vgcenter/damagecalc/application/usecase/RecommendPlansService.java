@@ -258,17 +258,67 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
 
         String summary = buildSummary(bringIndices, leadWithinBring, myTeam, modesCovered, modesAtRisk);
         List<String> leftOutRationale = buildLeftOutRationale(bringIndices, myTeam);
+        Verdict verdict = buildVerdict(
+                bringIndices,
+                leadWithinBring,
+                myTeam,
+                modesCovered,
+                modesAtRisk,
+                predictionBurden,
+                winConditionRole,
+                winConditionIndex);
 
         return new PlanRecommendation(
                 bringIndices,
                 leadWithinBring,
                 summary,
+                verdict,
                 modesCovered,
                 modesAtRisk,
                 winConditionSupported,
                 leftOutRationale,
                 predictionBurden,
                 winConditionRole);
+    }
+
+    private Verdict buildVerdict(
+            List<Integer> bringIndices,
+            List<Integer> leadWithinBring,
+            List<PreviewPokemonCommand> myTeam,
+            List<String> modesCovered,
+            List<String> modesAtRisk,
+            String predictionBurden,
+            String winConditionRole,
+            Integer winConditionIndex) {
+        String lead0 = myTeam.get(bringIndices.get(leadWithinBring.get(0))).displayName();
+        String lead1 = myTeam.get(bringIndices.get(leadWithinBring.get(1))).displayName();
+        String headline = clip("Lead " + lead0 + " + " + lead1, Verdict.HEADLINE_MAX);
+
+        StringBuilder sub = new StringBuilder();
+        if (!modesCovered.isEmpty()) {
+            sub.append("Strong into ").append(modesCovered.get(0)).append('.');
+        }
+        if (!modesAtRisk.isEmpty()) {
+            if (sub.length() > 0) sub.append(' ');
+            sub.append("Watch out for ").append(modesAtRisk.get(0)).append('.');
+        }
+        if (sub.length() == 0) {
+            sub.append("Stable matchup profile.");
+        }
+        String subline = clip(sub.toString(), Verdict.SUBLINE_MAX);
+
+        String callout = null;
+        if ("high".equals(predictionBurden)) {
+            callout = "High read burden — many forced predictions this game.";
+        } else if ("benched".equals(winConditionRole) && winConditionIndex != null) {
+            callout = "Win condition (" + myTeam.get(winConditionIndex).displayName() + ") is left out.";
+        }
+        return new Verdict(headline, subline, callout);
+    }
+
+    private static String clip(String s, int max) {
+        if (s.length() <= max) return s;
+        return s.substring(0, max - 1).trim() + "…";
     }
 
     private String buildSummary(

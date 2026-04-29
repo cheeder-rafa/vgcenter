@@ -175,6 +175,8 @@ class PreviewControllerTest {
                 List.of(0, 1, 2, 3),
                 List.of(0, 1),
                 "Lead Flutter Mane + Incineroar. Strong into most of the field.",
+                new com.vgcenter.damagecalc.application.usecase.Verdict(
+                        "Lead Flutter Mane + Incineroar", "Strong into Opponent 1 + Opponent 2.", null),
                 List.of("Opponent 1 + Opponent 2"),
                 List.of(),
                 false,

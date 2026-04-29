@@ -1,11 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { usePreviewModeStore } from '../store/usePreviewModeStore'
 import type {
   LeadEvaluationResult,
   LeadMatchup,
   LeadOption,
   PreviewField,
+  Verdict,
 } from '../types'
 import { hydrateFromMatchup } from '../lib/hydrateFromMatchup'
 import { DamageEvidenceTable } from './DamageEvidenceTable'
@@ -117,6 +119,7 @@ export function LeadLab({
       <div className="grid gap-4">
         <LeadMatrix
           matchups={result?.matchups ?? []}
+          matrixSummary={result?.matrixSummary ?? null}
           activeKey={activeMatchup ? matchupKey(activeMatchup) : null}
           onSelect={setSelectedKey}
         />
@@ -163,26 +166,56 @@ function LeadSelect({
 
 function LeadMatrix({
   matchups,
+  matrixSummary,
   activeKey,
   onSelect,
 }: {
   matchups: LeadMatchup[]
+  matrixSummary: Verdict | null
   activeKey: string | null
   onSelect: (key: string) => void
 }) {
+  const mode = usePreviewModeStore((s) => s.mode)
+  const beginner = mode === 'beginner'
+  const [showNumbers, setShowNumbers] = useState(false)
+  const showPills = !beginner || showNumbers
+
   return (
     <div className="arena-panel arena-panel--plasma p-4">
       <div className="relative z-10">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="min-w-0">
             <p className="arena-label text-arena-plasma">All opponent pairs</p>
             <h3 className="mt-1 text-lg font-black text-white">Matrix</h3>
+            {matrixSummary ? (
+              <div className="mt-2 max-w-prose">
+                <p className="text-base font-semibold text-white">
+                  {matrixSummary.headline}
+                </p>
+                {matrixSummary.subline ? (
+                  <p className="mt-0.5 text-sm text-white/72">
+                    {matrixSummary.subline}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
           <span className="font-mono text-xs uppercase tracking-[0.2em] text-white/45">
             {matchups.length}/15
           </span>
         </div>
-        <ToneLegend />
+
+        {beginner && matchups.length > 0 ? (
+          <button
+            type="button"
+            aria-expanded={showNumbers}
+            onClick={() => setShowNumbers((v) => !v)}
+            className="mb-3 font-mono text-[0.66rem] uppercase tracking-[0.18em] text-arena-cyan/80 hover:text-arena-cyan"
+          >
+            {showNumbers ? 'Hide numbers' : 'Show numbers ▸'}
+          </button>
+        ) : null}
+        {showPills ? <ToneLegend /> : null}
 
         <div
           className="grid gap-2 md:grid-cols-2 2xl:grid-cols-3"
@@ -206,7 +239,7 @@ function LeadMatrix({
                 <button
                   key={key}
                   type="button"
-                  className={`min-h-[112px] rounded border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arena-cyan/35 ${
+                  className={`min-h-[96px] rounded border p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-arena-cyan/35 ${
                     key === activeKey
                       ? 'border-arena-cyan/70 bg-arena-cyan/12'
                       : 'border-white/10 bg-black/18 hover:border-white/24 hover:bg-white/[0.06]'
@@ -216,12 +249,18 @@ function LeadMatrix({
                   <p className="truncate text-sm font-black text-white">
                     {matchup.opponentLeadNames.join(' + ')}
                   </p>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <MetricPill metric={matchup.koPressure} compact />
-                    <MetricPill metric={matchup.incomingDanger} compact />
-                    <MetricPill metric={matchup.doubleUpPressure} compact />
-                    <MetricPill metric={matchup.speedComparison} compact />
-                  </div>
+                  {showPills ? (
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <MetricPill metric={matchup.koPressure} compact />
+                      <MetricPill metric={matchup.incomingDanger} compact />
+                      <MetricPill metric={matchup.doubleUpPressure} compact />
+                      <MetricPill metric={matchup.speedComparison} compact />
+                    </div>
+                  ) : matchup.summary ? (
+                    <p className="mt-2 text-xs leading-5 text-white/72">
+                      {matchup.summary}
+                    </p>
+                  ) : null}
                 </button>
               )
             })

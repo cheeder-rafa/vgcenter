@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { Bo3Notebook } from '../../../src/features/preview/components/Bo3Notebook'
+import { usePreviewModeStore } from '../../../src/features/preview/store/usePreviewModeStore'
 import type { GameRecord } from '../../../src/features/preview/types'
 import { useTeamsStore } from '../../../src/store/useTeamsStore'
 
@@ -27,6 +28,50 @@ afterEach(() => {
 })
 
 describe('Bo3Notebook', () => {
+  beforeEach(() => {
+    usePreviewModeStore.setState({ mode: 'expert' })
+  })
+
+  it('collapses the form in beginner mode until "Start logging" is clicked', async () => {
+    const user = userEvent.setup()
+    usePreviewModeStore.setState({ mode: 'beginner' })
+    render(<Bo3Notebook games={[]} onAddGame={vi.fn()} onClear={vi.fn()} />)
+
+    expect(
+      screen.queryByRole('button', { name: /record game 1/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByText(/played a bo3 set\? record it/i),
+    ).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', { name: /start logging game 1/i }),
+    )
+    expect(
+      screen.getByRole('button', { name: /record game 1/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows verdict from guidance once a game is logged in beginner mode', () => {
+    usePreviewModeStore.setState({ mode: 'beginner' })
+    render(
+      <Bo3Notebook
+        games={[
+          makeGame({
+            gameNumber: 1,
+            result: 'win',
+            opponentBehavior: 'ran-it-back',
+          }),
+        ]}
+        onAddGame={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+    expect(
+      screen.getByText(/run it back — keep the line that worked/i),
+    ).toBeInTheDocument()
+  })
+
   it('renders the section heading', () => {
     render(<Bo3Notebook games={[]} onAddGame={vi.fn()} onClear={vi.fn()} />)
     expect(

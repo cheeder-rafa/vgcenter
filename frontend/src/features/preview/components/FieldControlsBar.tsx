@@ -1,4 +1,7 @@
+import { useState } from 'react'
+
 import { usePreviewFieldStore } from '../store/usePreviewFieldStore'
+import { usePreviewModeStore } from '../store/usePreviewModeStore'
 
 const WEATHER_OPTIONS = [
   { value: 'CLEAR', label: 'Clear', symbol: '○' },
@@ -49,6 +52,10 @@ export function FieldControlsBar() {
   const currentWeather = field.field.weather
   const currentTerrain = field.field.terrain
   const currentRoom = field.field.room
+  const mode = usePreviewModeStore((s) => s.mode)
+  const beginner = mode === 'beginner'
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const showAll = !beginner || showAdvanced
 
   return (
     <div className="arena-panel overflow-hidden">
@@ -112,9 +119,20 @@ export function FieldControlsBar() {
           })}
         </ControlGroup>
 
-        <Divider />
+        {beginner && !showAdvanced ? (
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(true)}
+            className="ml-2 mr-3 shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-arena-cyan/80 hover:text-arena-cyan"
+          >
+            More field conditions ▸
+          </button>
+        ) : null}
+
+        {showAll ? <Divider /> : null}
 
         {/* Tailwind */}
+        {showAll ? (
         <ControlGroup label="Tailwind">
           <ToggleChip
             active={field.selectedSide.tailwind}
@@ -131,35 +149,40 @@ export function FieldControlsBar() {
             Opp TW
           </ToggleChip>
         </ControlGroup>
+        ) : null}
 
-        <Divider />
+        {showAll ? <Divider /> : null}
 
         {/* Screens */}
-        <ControlGroup label="Screens — Mine">
-          {SCREEN_OPTIONS.map(({ key, short }) => (
-            <ToggleChip
-              key={`my-${key}`}
-              active={field.selectedSide[key]}
-              activeClass="border-arena-cyan/60 bg-arena-cyan/12 text-arena-cyan"
-              onClick={() => toggleSelectedScreen(key)}
-            >
-              {short}
-            </ToggleChip>
-          ))}
-        </ControlGroup>
+        {showAll ? (
+          <>
+            <ControlGroup label="Screens — Mine">
+              {SCREEN_OPTIONS.map(({ key, short }) => (
+                <ToggleChip
+                  key={`my-${key}`}
+                  active={field.selectedSide[key]}
+                  activeClass="border-arena-cyan/60 bg-arena-cyan/12 text-arena-cyan"
+                  onClick={() => toggleSelectedScreen(key)}
+                >
+                  {short}
+                </ToggleChip>
+              ))}
+            </ControlGroup>
 
-        <ControlGroup label="Screens — Opp">
-          {SCREEN_OPTIONS.map(({ key, short }) => (
-            <ToggleChip
-              key={`opp-${key}`}
-              active={field.opponentSide[key]}
-              activeClass="border-arena-plasma/50 bg-arena-plasma/10 text-arena-plasma"
-              onClick={() => toggleOpponentScreen(key)}
-            >
-              {short}
-            </ToggleChip>
-          ))}
-        </ControlGroup>
+            <ControlGroup label="Screens — Opp">
+              {SCREEN_OPTIONS.map(({ key, short }) => (
+                <ToggleChip
+                  key={`opp-${key}`}
+                  active={field.opponentSide[key]}
+                  activeClass="border-arena-plasma/50 bg-arena-plasma/10 text-arena-plasma"
+                  onClick={() => toggleOpponentScreen(key)}
+                >
+                  {short}
+                </ToggleChip>
+              ))}
+            </ControlGroup>
+          </>
+        ) : null}
       </div>
     </div>
   )

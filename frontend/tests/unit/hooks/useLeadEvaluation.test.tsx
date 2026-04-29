@@ -52,8 +52,10 @@ describe('useLeadEvaluation', () => {
           speedComparison: { label: 'Speed control', value: 2, tone: 'high' },
           mustReactLabels: ['Cover immediate KO'],
           turnOneAnnotations: ['Moonblast threatens Opponent 1'],
+          summary: null,
         },
       ],
+      matrixSummary: null,
     })
   })
 

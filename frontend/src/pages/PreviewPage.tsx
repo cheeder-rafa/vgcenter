@@ -6,6 +6,7 @@ import { Bo3Notebook } from '../features/preview/components/Bo3Notebook'
 import { FieldControlsBar } from '../features/preview/components/FieldControlsBar'
 import { LeadLab } from '../features/preview/components/LeadLab'
 import { PlanCards } from '../features/preview/components/PlanCards'
+import { PreviewModeToggle } from '../features/preview/components/PreviewModeToggle'
 import { useLeadEvaluation } from '../features/preview/hooks/useLeadEvaluation'
 import { usePlanRecommendation } from '../features/preview/hooks/usePlanRecommendation'
 import { useBo3Store } from '../features/preview/store/useBo3Store'
@@ -88,13 +89,16 @@ export function PreviewPage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[4px] bg-gradient-to-r from-arena-plasma via-arena-sun to-arena-cyan shadow-[0_0_32px_rgba(255,43,142,0.7)]" />
 
       <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1600px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-4 xl:px-6">
-        <header className="flex min-h-16 flex-col justify-center border-b border-white/10 pb-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-arena-cyan">
-            Regulation M-A
-          </p>
-          <h1 className="text-2xl font-black tracking-wide sm:text-3xl">
-            Preview Coach
-          </h1>
+        <header className="flex min-h-16 flex-col justify-center gap-2 border-b border-white/10 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-arena-cyan">
+              Regulation M-A
+            </p>
+            <h1 className="text-2xl font-black tracking-wide sm:text-3xl">
+              Preview Coach
+            </h1>
+          </div>
+          <PreviewModeToggle />
         </header>
 
         <FieldControlsBar />

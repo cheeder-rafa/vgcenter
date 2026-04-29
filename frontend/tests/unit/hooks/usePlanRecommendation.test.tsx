@@ -33,6 +33,11 @@ const stubPlan = {
   bringIndices: [0, 1, 2, 3],
   leadIndices: [0, 1],
   summary: 'Lead Flutter Mane + Incineroar. Strong into most of the field.',
+  verdict: {
+    headline: 'Lead Flutter Mane + Incineroar',
+    subline: 'Strong into Opponent 1 + Opponent 2.',
+    callout: null,
+  },
   modesCovered: ['Opponent 1 + Opponent 2'],
   modesAtRisk: [],
   winConditionSupported: false,
