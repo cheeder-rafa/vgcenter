@@ -14,7 +14,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public final class OptimizeAgainstThreatsService implements OptimizeAgainstThreatsUseCase {
 
@@ -24,24 +23,22 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
     private static final int MAX_RESULTS = 3;
     private static final List<Nature> FALLBACK_NATURES =
             List.of(Nature.BOLD, Nature.IMPISH, Nature.RELAXED, Nature.LAX, Nature.CALM, Nature.CAREFUL, Nature.SASSY);
+    private static final List<SpreadTriple> LEGAL_SPREADS = legalSpreads();
 
     private final PokedexRepository pokedexRepository;
     private final NatureRepository natureRepository;
     private final MoveRepository moveRepository;
     private final CalculateDamageUseCase calculateDamageUseCase;
-    private final OptimizeDefensiveSpreadUseCase singleThreatOptimizer;
 
     public OptimizeAgainstThreatsService(
             PokedexRepository pokedexRepository,
             NatureRepository natureRepository,
             MoveRepository moveRepository,
-            CalculateDamageUseCase calculateDamageUseCase,
-            OptimizeDefensiveSpreadUseCase singleThreatOptimizer) {
+            CalculateDamageUseCase calculateDamageUseCase) {
         this.pokedexRepository = pokedexRepository;
         this.natureRepository = natureRepository;
         this.moveRepository = moveRepository;
         this.calculateDamageUseCase = calculateDamageUseCase;
-        this.singleThreatOptimizer = singleThreatOptimizer;
     }
 
     @Override
@@ -69,21 +66,11 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                     fixed.candidate(), List.of(fixed.candidate()), fixed.threatResults());
         }
 
-        List<DefenseSpreadCandidate> seedCandidates = command.threats().stream()
-                .flatMap(threat ->
-                        singleThreatOptimizer.optimize(toSingleThreatCommand(command, threat)).candidates().stream())
-                .toList();
-
-        List<Nature> candidateNatures = candidateNatures(command.regulation(), command.defenderNatureId());
+        List<Nature> candidateNatures = candidateNatures(defenderSpecies, requestedDefenderNature, threats);
         List<ScoredSpread> allScored = new ArrayList<>(
                 command.goal() == OptimizeAgainstThreatsGoal.SURVIVE_ALL
                         ? scoreForSurviveAll(defenderProfile, command, threats, candidateNatures)
                         : scoreAllSpreadsParallel(defenderProfile, command, threats, candidateNatures));
-
-        for (DefenseSpreadCandidate seed : seedCandidates) {
-            ScoredSpread scored = scoreCandidate(defenderProfile, requestedDefenderNature, seed, command, threats);
-            allScored.add(scored);
-        }
 
         List<ScoredSpread> eligible = allScored.stream()
                 .filter(scored ->
@@ -154,18 +141,9 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
             List<PreparedThreat> threats,
             List<Nature> natures) {
         return natures.parallelStream()
-                .flatMap(nature -> scoreAllTiersForNature(defenderProfile, nature, command, threats).stream())
-                .toList();
-    }
-
-    private List<ScoredSpread> scoreAllTiersForNature(
-            PreparedCombatant defenderProfile,
-            Nature nature,
-            OptimizeAgainstThreatsCommand command,
-            List<PreparedThreat> threats) {
-        return IntStream.rangeClosed(0, MAX_TOTAL_SP)
-                .boxed()
-                .flatMap(tier -> scoreTierForNature(defenderProfile, nature, command, threats, tier).stream())
+                .flatMap(nature -> LEGAL_SPREADS.stream()
+                        .map(spread -> scoreSpread(
+                                defenderProfile, nature, command, threats, spread.hp(), spread.def(), spread.spd())))
                 .toList();
     }
 
@@ -177,25 +155,12 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
             int tier) {
         List<ScoredSpread> scored = new ArrayList<>();
         for (Nature nature : natures) {
-            scored.addAll(scoreTierForNature(defenderProfile, nature, command, threats, tier));
-        }
-        return scored;
-    }
-
-    private List<ScoredSpread> scoreTierForNature(
-            PreparedCombatant defenderProfile,
-            Nature nature,
-            OptimizeAgainstThreatsCommand command,
-            List<PreparedThreat> threats,
-            int tier) {
-        List<ScoredSpread> scored = new ArrayList<>();
-        for (int spHp = 0; spHp <= Math.min(tier, MAX_SP); spHp++) {
-            for (int spDef = 0; spDef <= Math.min(tier - spHp, MAX_SP); spDef++) {
-                int spSpd = tier - spHp - spDef;
-                if (spSpd > MAX_SP) {
+            for (SpreadTriple spread : LEGAL_SPREADS) {
+                if (spread.total() != tier) {
                     continue;
                 }
-                scored.add(scoreSpread(defenderProfile, nature, command, threats, spHp, spDef, spSpd));
+                scored.add(scoreSpread(
+                        defenderProfile, nature, command, threats, spread.hp(), spread.def(), spread.spd()));
             }
         }
         return scored;
@@ -332,38 +297,14 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
         };
     }
 
-    private List<Nature> candidateNatures(String regulation, String requestedNatureId) {
-        Nature requested =
-                natureRepository.findById(regulation, requestedNatureId).orElse(Nature.HARDY);
-        List<Nature> natures = new ArrayList<>();
-        natures.add(requested);
-        for (Nature fallback : FALLBACK_NATURES) {
-            if (!natures.contains(fallback)) {
-                natures.add(fallback);
-            }
-        }
-        return natures;
-    }
-
-    private OptimizeDefenseCommand toSingleThreatCommand(
-            OptimizeAgainstThreatsCommand command, OptimizeAgainstThreatCommand threat) {
-        return new OptimizeDefenseCommand(
-                command.regulation(),
-                command.defenderSpeciesId(),
-                command.defenderNatureId(),
-                command.defenderAbilityId(),
-                command.defenderItemId(),
-                threat.attackerSpeciesId(),
-                threat.attackerNatureId(),
-                threat.attackerSp(),
-                threat.attackerAbilityId(),
-                threat.attackerItemId(),
-                threat.moveId(),
-                "ALWAYS_SURVIVE",
-                command.field(),
-                command.attackerSide(),
-                command.defenderSide(),
-                command.criticalHit());
+    private List<Nature> candidateNatures(
+            PokemonSpecies defenderSpecies, Nature requested, List<PreparedThreat> threats) {
+        boolean physicalPressure = threats.stream()
+                .anyMatch(threat -> "PHYSICAL".equals(threat.move().category()));
+        boolean specialPressure = threats.stream()
+                .anyMatch(threat -> "SPECIAL".equals(threat.move().category()));
+        return DefensiveNaturePolicy.candidates(
+                defenderSpecies, requested, FALLBACK_NATURES, physicalPressure, specialPressure);
     }
 
     private static String goalDescription(OptimizeAgainstThreatsGoal goal, double worstKo, double expectedSum) {
@@ -461,9 +402,33 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
 
     private record PreparedCombatant(Stats baseStats, Stats stats, List<String> types) {}
 
+    private record SpreadTriple(int hp, int def, int spd) {
+        int total() {
+            return hp + def + spd;
+        }
+    }
+
     private record ScoredSpread(
             DefenseSpreadCandidate candidate,
             List<OptimizeAgainstThreatResult> threatResults,
             double worstKoChance,
             double expectedDamageSum) {}
+
+    private static List<SpreadTriple> legalSpreads() {
+        List<SpreadTriple> spreads = new ArrayList<>();
+        for (int spHp = 0; spHp <= MAX_SP; spHp++) {
+            for (int spDef = 0; spDef <= MAX_SP; spDef++) {
+                for (int spSpd = 0; spSpd <= MAX_SP; spSpd++) {
+                    if (spHp + spDef + spSpd <= MAX_TOTAL_SP) {
+                        spreads.add(new SpreadTriple(spHp, spDef, spSpd));
+                    }
+                }
+            }
+        }
+        spreads.sort(Comparator.comparingInt(SpreadTriple::total)
+                .thenComparingInt(SpreadTriple::hp)
+                .thenComparingInt(SpreadTriple::def)
+                .thenComparingInt(SpreadTriple::spd));
+        return List.copyOf(spreads);
+    }
 }

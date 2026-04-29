@@ -403,6 +403,31 @@ describe('SpreadOptimizerPanel', () => {
     expect(screen.getByText(/53\.0%/i)).toBeInTheDocument()
   })
 
+  it('shows multi-threat request failure details when the API times out upstream', async () => {
+    vi.mocked(optimizerApi.optimizeAgainstThreats).mockRejectedValue(
+      new Error(
+        '[502] The response body is not available to scripts (reason: CORS Missing Allow Origin)',
+      ),
+    )
+    const user = userEvent.setup()
+    usePinnedThreatsStore.getState().pin({
+      id: 'snorlax-earthquake',
+      label: 'Snorlax',
+      build: { ...useCalculatorStore.getState().defender },
+      moveId: 'earthquake',
+    })
+    renderPanel()
+
+    await user.click(screen.getByRole('tab', { name: /multi-threat/i }))
+    await user.click(screen.getByRole('button', { name: /optimize threats/i }))
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/response body is not available/i),
+      ).toBeInTheDocument()
+    })
+  })
+
   it('renders multi-threat spread distribution, nature, and alternatives', async () => {
     const user = userEvent.setup()
     usePinnedThreatsStore.getState().pin({
@@ -418,7 +443,9 @@ describe('SpreadOptimizerPanel', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText(/^bold$/i).length).toBeGreaterThan(0)
-      expect(screen.getByText(/20 hp \/ 20\+ def \/ 16 spd/i)).toBeInTheDocument()
+      expect(
+        screen.getByText(/20 hp \/ 20\+ def \/ 16 spd/i),
+      ).toBeInTheDocument()
       expect(screen.getAllByText(/56 sp/i).length).toBeGreaterThan(0)
       expect(screen.getAllByRole('button', { name: /apply/i })).toHaveLength(3)
     })

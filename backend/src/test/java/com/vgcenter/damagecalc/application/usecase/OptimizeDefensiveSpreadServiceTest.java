@@ -277,10 +277,11 @@ class OptimizeDefensiveSpreadServiceTest {
     }
 
     @Test
-    void whenHardyCannotSurvive_fallsBackToDefensiveNatureAndSetsSuggestedNatureId() {
+    void whenHardyCannotSurvive_fallsBackToRelevantDefensiveNatureAndSetsSuggestedNatureId() {
         // Snorlax base Def 65. Hardy max def (sp=32): 65+32+20 = 117.
-        // Bold max def (sp=32): floor(117 * 1.1) = 128.
-        // Threshold 118 → Hardy always fails; Bold reaches 118 at spDef=23.
+        // Impish max def (sp=32): floor(117 * 1.1) = 128.
+        // Bold would also boost Defense, but it lowers Snorlax's stronger Attack.
+        // Threshold 118 → Hardy always fails; Impish reaches 118 at spDef=23.
         CalculateDamageUseCase calc = cmd -> {
             int def = cmd.defender().stats().defense();
             boolean survives = def >= 118;
@@ -301,7 +302,7 @@ class OptimizeDefensiveSpreadServiceTest {
         var result = service.optimize(command("ALWAYS_SURVIVE"));
 
         assertThat(result.candidates()).isNotEmpty();
-        assertThat(result.candidates()).allMatch(c -> "BOLD".equals(c.suggestedNatureId()));
+        assertThat(result.candidates()).allMatch(c -> "IMPISH".equals(c.suggestedNatureId()));
     }
 
     @Test

@@ -96,7 +96,13 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
             if (!result.isEmpty()) return new OptimizeDefenseResult(result);
 
             // Try defensive fallback natures based on move category.
-            for (Nature fallback : getFallbackNatures(move.category())) {
+            List<Nature> relevantFallbacks = DefensiveNaturePolicy.candidates(
+                    defender,
+                    defenderNature,
+                    getFallbackNatures(move.category()),
+                    "PHYSICAL".equals(move.category()),
+                    "SPECIAL".equals(move.category()));
+            for (Nature fallback : relevantFallbacks) {
                 if (fallback == defenderNature) continue;
                 result = searchSpread(
                         defender,

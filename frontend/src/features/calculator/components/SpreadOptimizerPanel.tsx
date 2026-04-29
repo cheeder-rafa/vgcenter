@@ -129,8 +129,10 @@ export function SpreadOptimizerPanel({ natures }: Props) {
       }
       const result = await optimizeDefense(request)
       setCandidates(result.candidates)
-    } catch {
-      setError('Optimization failed. Check species and move IDs.')
+    } catch (err) {
+      setError(
+        `Optimization failed. Check species and move IDs.${formatRequestError(err)}`,
+      )
     } finally {
       setLoading(false)
     }
@@ -169,8 +171,10 @@ export function SpreadOptimizerPanel({ natures }: Props) {
         criticalHit: false,
       })
       setMultiResult(result)
-    } catch {
-      setError('Multi-threat optimization failed. Check pinned threats.')
+    } catch (err) {
+      setError(
+        `Multi-threat optimization failed. Check pinned threats.${formatRequestError(err)}`,
+      )
     } finally {
       setLoading(false)
     }
@@ -604,4 +608,11 @@ export function SpreadOptimizerPanel({ natures }: Props) {
       )}
     </section>
   )
+}
+
+function formatRequestError(err: unknown): string {
+  if (!(err instanceof Error) || err.message.trim().length === 0) {
+    return ''
+  }
+  return ` ${err.message}`
 }

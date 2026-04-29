@@ -10,6 +10,7 @@ import com.vgcenter.damagecalc.domain.model.PokemonSpecies;
 import com.vgcenter.damagecalc.domain.model.Stats;
 import com.vgcenter.damagecalc.domain.model.Type;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
@@ -19,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 class OptimizeAgainstThreatsServiceTest {
 
-    private final PokedexRepository pokedex = _reg -> List.of(snorlax(), garchomp(), gengar());
+    private final PokedexRepository pokedex = _reg -> List.of(snorlax(), floetteEternal(), garchomp(), gengar());
     private final NatureRepository natures = _reg -> List.of(
             Nature.HARDY,
             Nature.BOLD,
@@ -88,6 +89,47 @@ class OptimizeAgainstThreatsServiceTest {
         assertThat(result.threats()).allMatch(t -> t.koChanceProbability() == 0.0);
     }
 
+    @Test
+    void expectedDamageSearchBoundsDamageEvaluationsToOneFullPass() {
+        AtomicInteger calls = new AtomicInteger();
+        CalculateDamageUseCase countingCalc = command -> {
+            calls.incrementAndGet();
+            return calc.calculate(command);
+        };
+        var service = new OptimizeAgainstThreatsService(pokedex, natures, moves, countingCalc);
+        List<OptimizeAgainstThreatCommand> fourThreats = List.of(
+                threat("garchomp", "JOLLY", "earthquake"),
+                threat("gengar", "MODEST", "shadow-ball"),
+                threat("garchomp", "JOLLY", "earthquake"),
+                threat("gengar", "MODEST", "shadow-ball"));
+
+        var result = service.optimize(command(OptimizeAgainstThreatsGoal.EXPECTED_DAMAGE_SUM, fourThreats));
+
+        assertThat(result.best()).isNotNull();
+        assertThat(calls.get()).isLessThanOrEqualTo(30_977 * 8 * fourThreats.size());
+    }
+
+    @Test
+    void filtersIrrelevantNatureSuggestionsForEverySpecialAttackingFastDefender() {
+        var result = newService()
+                .optimize(new OptimizeAgainstThreatsCommand(
+                        "M-A",
+                        "floette-eternal",
+                        "HARDY",
+                        null,
+                        null,
+                        threats(),
+                        OptimizeAgainstThreatsGoal.EXPECTED_DAMAGE_SUM,
+                        clearField(),
+                        noSide(),
+                        noSide(),
+                        false));
+
+        assertThat(result.candidates())
+                .extracting(DefenseSpreadCandidate::suggestedNatureId)
+                .doesNotContain("IMPISH", "RELAXED", "LAX", "CAREFUL", "SASSY");
+    }
+
     @Property(tries = 12)
     void expectedDamageSumRespectsSpCapAndDominatesSingleThreatOptimumOnAverage(
             @ForAll("threatPairs") List<OptimizeAgainstThreatCommand> threats,
@@ -129,8 +171,7 @@ class OptimizeAgainstThreatsServiceTest {
     }
 
     private OptimizeAgainstThreatsService newService() {
-        var single = new OptimizeDefensiveSpreadService(pokedex, natures, moves, calc);
-        return new OptimizeAgainstThreatsService(pokedex, natures, moves, calc, single);
+        return new OptimizeAgainstThreatsService(pokedex, natures, moves, calc);
     }
 
     private double averageSpreadAgainstThreats(
@@ -210,6 +251,16 @@ class OptimizeAgainstThreatsServiceTest {
                 new Stats(160, 110, 65, 65, 110, 30),
                 List.of("immunity", "thick-fat"),
                 List.of("body-slam"));
+    }
+
+    private static PokemonSpecies floetteEternal() {
+        return new PokemonSpecies(
+                "floette-eternal",
+                "Floette-Eternal",
+                List.of(Type.FAIRY),
+                new Stats(74, 65, 67, 125, 128, 92),
+                List.of("flower-veil"),
+                List.of("protect"));
     }
 
     private static PokemonSpecies garchomp() {

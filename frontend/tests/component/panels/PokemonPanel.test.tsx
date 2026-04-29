@@ -226,7 +226,8 @@ describe('PokemonPanel', () => {
     expect(state.types).toEqual(['FIRE', 'FLYING'])
     expect(state.grounded).toBe(false)
     expect(state.abilityId).toBe('blaze')
-    expect(state.currentHp).toBe(78)
+    expect(state.currentHp).toBe(153)
+    expect(screen.getByLabelText(/^current hp$/i)).toHaveValue(153)
 
     const abilitySelect = screen.getByLabelText(
       /^ability$/i,

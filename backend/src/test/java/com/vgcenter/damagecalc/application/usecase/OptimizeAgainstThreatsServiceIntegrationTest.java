@@ -65,6 +65,9 @@ class OptimizeAgainstThreatsServiceIntegrationTest {
             assertThat(result.best()).isNotNull();
             assertThat(result.candidates()).isNotEmpty();
             assertThat(result.candidates()).anyMatch(c -> "BOLD".equals(c.suggestedNatureId()) && c.totalSp() <= 56);
+            assertThat(result.candidates())
+                    .extracting(DefenseSpreadCandidate::suggestedNatureId)
+                    .doesNotContain("IMPISH", "RELAXED", "LAX", "CAREFUL", "SASSY");
             assertThat(result.candidates()).allMatch(c -> c.koChanceProbability() == 0.0);
         });
     }

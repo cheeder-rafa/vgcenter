@@ -90,14 +90,9 @@ public class ApplicationUseCaseConfiguration {
             PokedexRepository pokedexRepository,
             NatureRepository natureRepository,
             MoveRepository moveRepository,
-            CalculateDamageUseCase calculateDamageUseCase,
-            OptimizeDefensiveSpreadUseCase optimizeDefensiveSpreadUseCase) {
+            CalculateDamageUseCase calculateDamageUseCase) {
         return new OptimizeAgainstThreatsService(
-                pokedexRepository,
-                natureRepository,
-                moveRepository,
-                calculateDamageUseCase,
-                optimizeDefensiveSpreadUseCase);
+                pokedexRepository, natureRepository, moveRepository, calculateDamageUseCase);
     }
 
     @Bean
