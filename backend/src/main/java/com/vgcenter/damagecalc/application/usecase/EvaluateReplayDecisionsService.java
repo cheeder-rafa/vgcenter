@@ -17,18 +17,40 @@ import com.vgcenter.damagecalc.domain.replay.ReplayTurn;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public final class EvaluateReplayDecisionsService implements EvaluateReplayDecisionsUseCase {
 
     private static final int VGC_LEVEL = 50;
     private static final int MAX_ALTERNATIVES = 5;
     private static final Sp ZERO_SP = new Sp(0, 0, 0, 0, 0, 0);
+
+    // Normalized IDs (lowercase alphanum) for all Protect-family moves
+    private static final Set<String> PROTECT_MOVE_IDS = Set.of(
+            "protect",
+            "detect",
+            "spikyshield",
+            "burningbulwark",
+            "kingsshield",
+            "obstruct",
+            "silktrap",
+            "banefilbunker",
+            "banefulbunker",
+            "wideguard",
+            "quickguard");
+
+    // Faint-probability threshold above which the advisory fires
+    private static final double ADVISORY_FAINT_PROB_THRESHOLD = 0.8;
+    // Best-score ceiling below which the advisory fires (user can't win the trade)
+    private static final double ADVISORY_BEST_SCORE_CEILING = 0.0;
 
     private final PokedexRepository pokedexRepository;
     private final MoveRepository moveRepository;
@@ -102,7 +124,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         List<ResolvedAction> actualPlayedActions = actualActions(
                 turn.events(), userSideState, myActives, opponentActives, knownMoves, moveLookup, userIsP1);
 
-        // Precompute opponent impact once — it's constant across all enumerated user lines.
+        // Precompute opponent impact once — constant across all enumerated user lines.
         OpponentImpact opponentImpact =
                 computeOpponentImpact(regulation, actualOpponentActions, field, opponentSide, mySide, turnCache);
 
@@ -140,7 +162,8 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         double delta = round(bestScore - played.score());
         String verdict = verdict(delta);
         String narrative = narrative(played, ranked, delta);
-        return new TurnReview(turn.number(), played, ranked, delta, verdict, narrative);
+        String advisory = advisory(opponentImpact, bestScore, myActives);
+        return new TurnReview(turn.number(), played, ranked, delta, verdict, narrative, advisory);
     }
 
     private List<ReplayDecisionLine> enumerateLines(
@@ -212,6 +235,10 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         double taken = 0.0d;
         int faints = 0;
         double faintProbability = 0.0d;
+        Map<String, Double> takenBySlot = new HashMap<>();
+        Map<String, Double> faintProbBySlot = new HashMap<>();
+        Map<String, Integer> faintsBySlot = new HashMap<>();
+
         for (ResolvedAction action : opponentActions) {
             if (!action.canCalculate()) {
                 continue;
@@ -227,13 +254,25 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                     false,
                     1);
             CalculateDamageResult result = turnCache.computeIfAbsent(cmd, calculateDamageUseCase::calculate);
-            taken += expectedDamage(result);
+            double dmg = expectedDamage(result);
+            String slot = action.target().slotId();
+            taken += dmg;
+            takenBySlot.merge(slot, dmg, Double::sum);
+            double kp = result.koChance().probability();
+            faintProbability += kp;
+            faintProbBySlot.merge(slot, kp, Double::sum);
             if (isKo(result, action.target().command())) {
                 faints++;
+                faintsBySlot.merge(slot, 1, Integer::sum);
             }
-            faintProbability += result.koChance().probability();
         }
-        return new OpponentImpact(taken, faints, faintProbability);
+        return new OpponentImpact(
+                taken,
+                faints,
+                faintProbability,
+                Map.copyOf(takenBySlot),
+                Map.copyOf(faintProbBySlot),
+                Map.copyOf(faintsBySlot));
     }
 
     private ReplayDecisionLine scoreLine(
@@ -271,20 +310,42 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             koProbability += result.koChance().probability();
         }
 
+        // Adjust opponent impact for Protect actions: each protected slot blocks damage aimed at it.
+        double effectiveTaken = opponentImpact.taken();
+        double effectiveFaintProb = opponentImpact.faintProbability();
+        int effectiveFaints = opponentImpact.faints();
+        for (ResolvedAction action : myActions) {
+            if ("PROTECT".equals(action.kind())) {
+                String slot = action.attacker().slotId();
+                effectiveTaken -= opponentImpact.takenBySlot().getOrDefault(slot, 0.0);
+                effectiveFaintProb -= opponentImpact.faintProbBySlot().getOrDefault(slot, 0.0);
+                effectiveFaints -= opponentImpact.faintsBySlot().getOrDefault(slot, 0);
+            }
+        }
+        effectiveTaken = Math.max(0.0, effectiveTaken);
+        effectiveFaintProb = Math.max(0.0, effectiveFaintProb);
+        effectiveFaints = Math.max(0, effectiveFaints);
+
         double score = weights.damageDealtWeight() * dealt
-                - weights.damageTakenWeight() * opponentImpact.taken()
+                - weights.damageTakenWeight() * effectiveTaken
                 + weights.koBonus() * koProbability
-                - weights.faintPenalty() * opponentImpact.faintProbability();
+                - weights.faintPenalty() * effectiveFaintProb;
         return new ReplayDecisionLine(
                 myActions.stream().map(ResolvedAction::toChoice).toList(),
                 round(score),
                 round(dealt),
-                round(opponentImpact.taken()),
+                round(effectiveTaken),
                 kos,
-                opponentImpact.faints());
+                effectiveFaints);
     }
 
-    private record OpponentImpact(double taken, int faints, double faintProbability) {}
+    private record OpponentImpact(
+            double taken,
+            int faints,
+            double faintProbability,
+            Map<String, Double> takenBySlot,
+            Map<String, Double> faintProbBySlot,
+            Map<String, Integer> faintsBySlot) {}
 
     private List<ResolvedAction> actualActions(
             List<ReplayEvent> events,
@@ -294,10 +355,10 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             Map<String, List<MoveDefinition>> knownMoves,
             Map<String, MoveDefinition> moveLookup,
             boolean userSide) {
-        Map<String, ResolvedCombatant> attackersBySlot = attackers.stream()
-                .collect(java.util.stream.Collectors.toMap(ResolvedCombatant::slotId, value -> value));
-        Map<String, ResolvedCombatant> defendersBySlot = defenders.stream()
-                .collect(java.util.stream.Collectors.toMap(ResolvedCombatant::slotId, value -> value));
+        Map<String, ResolvedCombatant> attackersBySlot =
+                attackers.stream().collect(Collectors.toMap(ResolvedCombatant::slotId, value -> value));
+        Map<String, ResolvedCombatant> defendersBySlot =
+                defenders.stream().collect(Collectors.toMap(ResolvedCombatant::slotId, value -> value));
         List<ResolvedAction> actions = new ArrayList<>();
 
         for (ReplayEvent event : events) {
@@ -322,8 +383,16 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             }
             String targetSlot =
                     event.arguments().size() >= 3 ? slotId(event.arguments().get(2)) : null;
-            ResolvedCombatant target = targetSlot == null ? null : defendersBySlot.get(targetSlot);
-            actions.add(new ResolvedAction(attacker, move, target));
+            ResolvedCombatant target = null;
+            if (targetSlot != null) {
+                target = defendersBySlot.get(targetSlot);
+                if (target == null) {
+                    // Self-targeting (e.g., Protect) or ally-targeting
+                    target = attackersBySlot.get(targetSlot);
+                }
+            }
+            String kind = resolveKind(move);
+            actions.add(new ResolvedAction(attacker, move, target, kind));
         }
         return actions;
     }
@@ -332,16 +401,18 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             ResolvedCombatant attacker, List<ResolvedCombatant> defenders, List<MoveDefinition> moves) {
         List<ResolvedAction> actions = new ArrayList<>();
         for (MoveDefinition move : moves) {
-            if (move.basePower() > 0) {
+            if (isProtect(move)) {
+                actions.add(new ResolvedAction(attacker, move, attacker, "PROTECT"));
+            } else if (move.basePower() > 0) {
                 for (ResolvedCombatant defender : defenders) {
-                    actions.add(new ResolvedAction(attacker, move, defender));
+                    actions.add(new ResolvedAction(attacker, move, defender, "ATTACK"));
                 }
             } else {
-                actions.add(new ResolvedAction(attacker, move, attacker));
+                actions.add(new ResolvedAction(attacker, move, attacker, "STATUS"));
             }
         }
         if (actions.isEmpty()) {
-            actions.add(new ResolvedAction(attacker, null, null));
+            actions.add(new ResolvedAction(attacker, null, null, "ATTACK"));
         }
         return actions;
     }
@@ -532,7 +603,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         return side.activePokemon().stream()
                 .map(ReplayPokemonState::speciesName)
                 .limit(2)
-                .collect(java.util.stream.Collectors.joining(" + "));
+                .collect(Collectors.joining(" + "));
     }
 
     private boolean sameLine(ReplayDecisionLine left, ReplayDecisionLine right) {
@@ -541,8 +612,14 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
 
     private String fingerprint(ReplayDecisionLine line) {
         return line.choices().stream()
-                .map(choice -> choice.actorSlotId() + "|" + choice.moveName() + "|" + choice.targetSlotId())
-                .collect(java.util.stream.Collectors.joining("||"));
+                .map(choice -> choice.actorSlotId()
+                        + "|"
+                        + choice.moveName()
+                        + "|"
+                        + choice.targetSlotId()
+                        + "|"
+                        + choice.kind())
+                .collect(Collectors.joining("||"));
     }
 
     private String verdict(double delta) {
@@ -560,10 +637,43 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             return "Played line already matches the best decision score.";
         }
         ReplayDecisionLine best = ranked.getFirst();
+        boolean bestUsesProtect = best.choices().stream().anyMatch(c -> "PROTECT".equals(c.kind()));
         String moves = best.choices().stream()
-                .map(ReplayMoveChoice::moveName)
-                .collect(java.util.stream.Collectors.joining(" + "));
+                .map(c -> "PROTECT".equals(c.kind()) ? "Protect (" + c.actorSpeciesName() + ")" : c.moveName())
+                .collect(Collectors.joining(" + "));
+        if (bestUsesProtect) {
+            double shielded = played.expectedDamageTaken() - best.expectedDamageTaken();
+            if (shielded > 0.0) {
+                return "Protect + %s shields %.0f expected damage and gains %.1f decision score."
+                        .formatted(
+                                best.choices().stream()
+                                        .filter(c -> !"PROTECT".equals(c.kind()))
+                                        .map(ReplayMoveChoice::moveName)
+                                        .collect(Collectors.joining(" + ")),
+                                shielded,
+                                delta);
+            }
+        }
         return "Best alternative %s gains %.1f decision score.".formatted(moves, delta);
+    }
+
+    private String advisory(OpponentImpact opponentImpact, double bestScore, List<ResolvedCombatant> myActives) {
+        // Fire when faint pressure is high and even the best response line is a losing trade
+        if (opponentImpact.faintProbability() < ADVISORY_FAINT_PROB_THRESHOLD
+                || bestScore > ADVISORY_BEST_SCORE_CEILING) {
+            return null;
+        }
+        // Identify the threatened slot(s)
+        List<String> threatenedNames = myActives.stream()
+                .filter(c ->
+                        opponentImpact.faintProbBySlot().getOrDefault(c.slotId(), 0.0) >= ADVISORY_FAINT_PROB_THRESHOLD)
+                .map(ResolvedCombatant::speciesName)
+                .toList();
+        if (threatenedNames.isEmpty()) {
+            return "High faint pressure — consider whether bench covers this position.";
+        }
+        String targets = String.join(" and ", threatenedNames);
+        return "No winning response found for %s — consider whether bench covers this position.".formatted(targets);
     }
 
     private double expectedDamage(CalculateDamageResult result) {
@@ -575,6 +685,24 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
 
     private boolean isKo(CalculateDamageResult result, CombatantCommand defender) {
         return result.koChance().hits() == 1 || result.max() >= defender.currentHp();
+    }
+
+    private boolean isProtect(MoveDefinition move) {
+        return PROTECT_MOVE_IDS.contains(normalizeKey(move.id()))
+                || PROTECT_MOVE_IDS.contains(normalizeKey(move.name()));
+    }
+
+    private String resolveKind(MoveDefinition move) {
+        if (move == null) {
+            return "ATTACK";
+        }
+        if (isProtect(move)) {
+            return "PROTECT";
+        }
+        if (move.basePower() > 0) {
+            return "ATTACK";
+        }
+        return "STATUS";
     }
 
     private double round(double value) {
@@ -617,10 +745,11 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
 
     private record ResolvedCombatant(String slotId, String speciesName, CombatantCommand command) {}
 
-    private record ResolvedAction(ResolvedCombatant attacker, MoveDefinition move, ResolvedCombatant target) {
+    private record ResolvedAction(
+            ResolvedCombatant attacker, MoveDefinition move, ResolvedCombatant target, String kind) {
 
         private boolean canCalculate() {
-            return move != null && target != null && move.basePower() > 0;
+            return "ATTACK".equals(kind) && move != null && target != null && move.basePower() > 0;
         }
 
         private ReplayMoveChoice toChoice() {
@@ -629,7 +758,8 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                     attacker.speciesName(),
                     move == null ? "Unknown move" : move.name(),
                     target == null ? null : target.slotId(),
-                    target == null ? null : target.speciesName());
+                    target == null ? null : target.speciesName(),
+                    kind);
         }
     }
 }

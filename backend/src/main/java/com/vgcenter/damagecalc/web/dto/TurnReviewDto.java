@@ -8,4 +8,5 @@ public record TurnReviewDto(
         List<ReplayDecisionLineDto> rankedAlternatives,
         double delta,
         String verdict,
-        String narrative) {}
+        String narrative,
+        String advisory) {}

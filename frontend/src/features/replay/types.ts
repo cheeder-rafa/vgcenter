@@ -63,6 +63,7 @@ export type ReplayMoveChoice = {
   moveName: string
   targetSlotId: string | null
   targetSpeciesName: string | null
+  kind?: 'ATTACK' | 'PROTECT' | 'STATUS' | 'SWITCH' | string
 }
 
 export type ReplayDecisionLine = {
@@ -81,6 +82,7 @@ export type TurnReview = {
   delta: number
   verdict: 'OPTIMAL' | 'ACCEPTABLE' | 'SUBOPTIMAL' | string
   narrative: string
+  advisory?: string | null
 }
 
 export type ReplayGameReview = {

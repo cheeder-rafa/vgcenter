@@ -8,7 +8,8 @@ public record TurnReview(
         List<ReplayDecisionLine> rankedAlternatives,
         double delta,
         String verdict,
-        String narrative) {
+        String narrative,
+        String advisory) {
 
     public TurnReview {
         rankedAlternatives = List.copyOf(rankedAlternatives);

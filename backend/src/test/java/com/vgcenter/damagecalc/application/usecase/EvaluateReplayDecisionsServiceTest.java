@@ -91,6 +91,156 @@ class EvaluateReplayDecisionsServiceTest {
     }
 
     @Test
+    void protectDominatesAttackWhenFaintThreatIsHigh() {
+        // Alpha has Blast (80 BP) and Protect. Opponent's Gamma threatens a KO on Alpha.
+        // Protect should rank above attacking because it nullifies the faint pressure.
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("blast", "protect")),
+                        species("gamma", "Gamma", Type.WATER, List.of("hydro")))),
+                new StubMoveRepository(List.of(
+                        damagingMove("blast", "Blast", "FIRE", 80),
+                        statusMove("protect", "Protect"),
+                        damagingMove("hydro", "Hydro", "WATER", 110))),
+                new KoThreatCalculateDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1,
+                        boardState(),
+                        List.of(
+                                // Alpha attacks, but opponent KOs Alpha
+                                move("p1a: Alpha", "Blast", "p2a: Gamma"), move("p2a: Gamma", "Hydro", "p1a: Alpha")))),
+                Map.of("Alpha", List.of("Blast", "Protect"), "Gamma", List.of("Hydro")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        // Protect alternative should appear in ranked alternatives
+        boolean protectAlternativePresent = review.rankedAlternatives().stream()
+                .anyMatch(line -> line.choices().stream().anyMatch(c -> "PROTECT".equals(c.kind())));
+        assertThat(protectAlternativePresent).isTrue();
+        // Protect alternative must have lower expectedDamageTaken than the played line
+        review.rankedAlternatives().stream()
+                .filter(line -> line.choices().stream().anyMatch(c -> "PROTECT".equals(c.kind())))
+                .findFirst()
+                .ifPresent(protectLine -> assertThat(protectLine.expectedDamageTaken())
+                        .isLessThan(review.played().expectedDamageTaken()));
+    }
+
+    @Test
+    void protectDoesNotRankHigherThanGuaranteedKoAttack() {
+        // When Alpha can KO the opponent, attacking should outscore Protect.
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("blast", "protect")),
+                        species("gamma", "Gamma", Type.WATER, List.of("splash")))),
+                new StubMoveRepository(List.of(
+                        damagingMove("blast", "Blast", "FIRE", 80),
+                        statusMove("protect", "Protect"),
+                        statusMove("splash", "Splash"))),
+                new GuaranteedKoCalculateDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(1, boardState(), List.of(move("p1a: Alpha", "Blast", "p2a: Gamma")))),
+                Map.of("Alpha", List.of("Blast", "Protect"), "Gamma", List.of("Splash")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        // When attacking KOs, the played line is optimal — no alternative scores higher
+        assertThat(review.verdict()).isEqualTo("optimal");
+        assertThat(review.delta()).isLessThanOrEqualTo(0.01d);
+        // Protect alternative, if present, must score worse than the played KO line
+        review.rankedAlternatives().stream()
+                .filter(line -> line.choices().stream().anyMatch(c -> "PROTECT".equals(c.kind())))
+                .findFirst()
+                .ifPresent(protectLine -> assertThat(protectLine.score())
+                        .isLessThan(review.played().score()));
+    }
+
+    @Test
+    void advisoryFiresWhenFaintPressureIsHighAndBestLineIsLosing() {
+        // Opponent's Gamma and Delta both threaten to KO Alpha. Even best line loses.
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("splash")),
+                        species("beta", "Beta", Type.POISON, List.of("splash")),
+                        species("gamma", "Gamma", Type.WATER, List.of("hydro")),
+                        species("delta", "Delta", Type.DARK, List.of("crunch")))),
+                new StubMoveRepository(List.of(
+                        statusMove("splash", "Splash"),
+                        damagingMove("hydro", "Hydro", "WATER", 110),
+                        damagingMove("crunch", "Crunch", "DARK", 80))),
+                new KoThreatCalculateDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1,
+                        boardState(),
+                        List.of(
+                                move("p1a: Alpha", "Splash", "p1a: Alpha"),
+                                move("p1b: Beta", "Splash", "p1b: Beta"),
+                                move("p2a: Gamma", "Hydro", "p1a: Alpha"),
+                                move("p2b: Delta", "Crunch", "p1a: Alpha")))),
+                Map.of(
+                        "Alpha", List.of("Splash"),
+                        "Beta", List.of("Splash"),
+                        "Gamma", List.of("Hydro"),
+                        "Delta", List.of("Crunch")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        assertThat(review.advisory()).isNotNull();
+        assertThat(review.advisory()).contains("Alpha");
+    }
+
+    @Test
+    void advisoryDoesNotFireWhenUserHasWinningResponse() {
+        // Alpha can KO opponent; faint threat exists but the trade is winning.
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("blast")),
+                        species("gamma", "Gamma", Type.WATER, List.of("hydro")))),
+                new StubMoveRepository(List.of(
+                        damagingMove("blast", "Blast", "FIRE", 80), damagingMove("hydro", "Hydro", "WATER", 110))),
+                new GuaranteedKoCalculateDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1,
+                        singleActiveBoardState(),
+                        List.of(move("p1a: Alpha", "Blast", "p2a: Gamma"), move("p2a: Gamma", "Hydro", "p1a: Alpha")))),
+                Map.of("Alpha", List.of("Blast"), "Gamma", List.of("Hydro")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        assertThat(review.advisory()).isNull();
+    }
+
+    @Test
     void emitsBo3AdaptationFlagsForReferenceReplayPair() throws IOException {
         EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
                 new StubPokedexRepository(referenceSpecies()),
@@ -292,5 +442,47 @@ class EvaluateReplayDecisionsServiceTest {
 
     private static String key(String attacker, String move, String defender) {
         return attacker + "|" + move + "|" + defender;
+    }
+
+    // Returns damage=KO for any attacking move against any target (simulates guaranteed OHKO)
+    private static final class GuaranteedKoCalculateDamageUseCase implements CalculateDamageUseCase {
+
+        @Override
+        public CalculateDamageResult calculate(CalculateDamageCommand command) {
+            if (command.move().basePower() == 0) {
+                return new CalculateDamageResult(new int[] {0}, 0, 0, 0, 0, new KoChanceResult("never", 0.0d, 99));
+            }
+            int hp = command.defender().currentHp();
+            return new CalculateDamageResult(
+                    new int[] {hp}, hp, hp, hp, hp, new KoChanceResult("guaranteed OHKO", 1.0d, 1));
+        }
+    }
+
+    // Returns high damage (KO threat) only when opponent targets user, zero when user attacks
+    private static final class KoThreatCalculateDamageUseCase implements CalculateDamageUseCase {
+
+        @Override
+        public CalculateDamageResult calculate(CalculateDamageCommand command) {
+            if (command.move().basePower() == 0) {
+                return new CalculateDamageResult(new int[] {0}, 0, 0, 0, 0, new KoChanceResult("never", 0.0d, 99));
+            }
+            // p2 attacker types: WATER, DARK — always KO
+            String attackerType = command.attacker().types().getFirst();
+            if ("WATER".equals(attackerType) || "DARK".equals(attackerType)) {
+                int hp = command.defender().currentHp();
+                return new CalculateDamageResult(
+                        new int[] {hp}, hp, hp, hp, hp, new KoChanceResult("guaranteed OHKO", 1.0d, 1));
+            }
+            // p1 attacker: deal some damage but not a KO
+            return new CalculateDamageResult(new int[] {20}, 20, 20, 20, 20, new KoChanceResult("never", 0.0d, 99));
+        }
+    }
+
+    private static ReplayBoardState singleActiveBoardState() {
+        return new ReplayBoardState(
+                "none",
+                "none",
+                new ReplaySideState("Alice", false, false, false, false, List.of(pokemon("p1a", "Alpha", 100, 100))),
+                new ReplaySideState("Bob", false, false, false, false, List.of(pokemon("p2a", "Gamma", 100, 100))));
     }
 }

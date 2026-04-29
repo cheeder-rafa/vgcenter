@@ -88,7 +88,8 @@ public class ReplayWebMapper {
                         .toList(),
                 review.delta(),
                 review.verdict(),
-                review.narrative());
+                review.narrative(),
+                review.advisory());
     }
 
     private ReplayDecisionLineDto toDecisionLineDto(ReplayDecisionLine line) {
@@ -107,7 +108,8 @@ public class ReplayWebMapper {
                 choice.actorSpeciesName(),
                 choice.moveName(),
                 choice.targetSlotId(),
-                choice.targetSpeciesName());
+                choice.targetSpeciesName(),
+                choice.kind());
     }
 
     private ReplayTurnDto toTurnDto(ReplayTurn turn) {

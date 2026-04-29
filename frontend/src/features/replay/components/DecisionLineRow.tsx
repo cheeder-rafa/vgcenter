@@ -36,34 +36,61 @@ export function DecisionLineRow({
       ].join(' ')}
     >
       <div className="flex flex-wrap items-center gap-2">
-        {line.choices.map((choice, idx) => (
-          <Link
-            key={`${choice.actorSlotId}-${idx}`}
-            to={primaryChoice ? buildMatchupShareLink(choice, board) : '/calc'}
-            className="flex min-w-0 items-center gap-2 rounded-md border border-transparent px-1.5 py-1 transition hover:border-arena-cyan/40 hover:bg-arena-cyan/[0.06]"
-            aria-label={`Open ${choice.actorSpeciesName} → ${choice.moveName} in calculator`}
-          >
-            <SpriteBadge
-              speciesId={speciesNameToId(choice.actorSpeciesName)}
-              speciesName={choice.actorSpeciesName}
-              size="sm"
-              accent={isPlayed ? 'plasma' : 'cyan'}
-            />
-            <div className="flex min-w-0 flex-col leading-tight">
-              <span className="font-display text-arena-2xs uppercase tracking-[0.14em] text-white/60">
-                {choice.actorSpeciesName}
-              </span>
-              <span className="truncate font-body text-[0.78rem] font-medium text-white">
-                {choice.moveName}
-              </span>
-              {choice.targetSpeciesName ? (
-                <span className="truncate text-arena-2xs text-white/40">
-                  → {choice.targetSpeciesName}
+        {line.choices.map((choice, idx) => {
+          const isProtect = choice.kind === 'PROTECT'
+          return isProtect ? (
+            <div
+              key={`${choice.actorSlotId}-${idx}`}
+              className="flex min-w-0 items-center gap-2 rounded-md border border-arena-mint/20 bg-arena-mint/[0.06] px-1.5 py-1"
+              aria-label={`${choice.actorSpeciesName} uses Protect`}
+            >
+              <SpriteBadge
+                speciesId={speciesNameToId(choice.actorSpeciesName)}
+                speciesName={choice.actorSpeciesName}
+                size="sm"
+                accent={isPlayed ? 'plasma' : 'cyan'}
+              />
+              <div className="flex min-w-0 flex-col leading-tight">
+                <span className="font-display text-arena-2xs uppercase tracking-[0.14em] text-white/60">
+                  {choice.actorSpeciesName}
                 </span>
-              ) : null}
+                <span className="flex items-center gap-1 truncate font-body text-[0.78rem] font-medium text-arena-mint">
+                  <span aria-hidden className="text-[0.65rem]">
+                    ◈
+                  </span>
+                  {choice.moveName}
+                </span>
+              </div>
             </div>
-          </Link>
-        ))}
+          ) : (
+            <Link
+              key={`${choice.actorSlotId}-${idx}`}
+              to={primaryChoice ? buildMatchupShareLink(choice, board) : '/calc'}
+              className="flex min-w-0 items-center gap-2 rounded-md border border-transparent px-1.5 py-1 transition hover:border-arena-cyan/40 hover:bg-arena-cyan/[0.06]"
+              aria-label={`Open ${choice.actorSpeciesName} → ${choice.moveName} in calculator`}
+            >
+              <SpriteBadge
+                speciesId={speciesNameToId(choice.actorSpeciesName)}
+                speciesName={choice.actorSpeciesName}
+                size="sm"
+                accent={isPlayed ? 'plasma' : 'cyan'}
+              />
+              <div className="flex min-w-0 flex-col leading-tight">
+                <span className="font-display text-arena-2xs uppercase tracking-[0.14em] text-white/60">
+                  {choice.actorSpeciesName}
+                </span>
+                <span className="truncate font-body text-[0.78rem] font-medium text-white">
+                  {choice.moveName}
+                </span>
+                {choice.targetSpeciesName ? (
+                  <span className="truncate text-arena-2xs text-white/40">
+                    → {choice.targetSpeciesName}
+                  </span>
+                ) : null}
+              </div>
+            </Link>
+          )
+        })}
         <span
           className={[
             'ml-auto rounded-full px-2 py-0.5 font-display text-arena-2xs uppercase tracking-[0.14em]',
