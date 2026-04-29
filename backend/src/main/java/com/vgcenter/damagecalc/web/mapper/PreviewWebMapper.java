@@ -127,7 +127,9 @@ public class PreviewWebMapper {
                 dto.spread(),
                 dto.contact(),
                 dto.doublePowerWhenUserStatused(),
-                dto.ignoreBurnPenaltyWhenUserStatused());
+                dto.ignoreBurnPenaltyWhenUserStatused(),
+                dto.accuracy() == null ? 1.0d : dto.accuracy(),
+                Boolean.TRUE.equals(dto.alwaysCrit()));
     }
 
     private FieldCommand toFieldCommand(FieldRequestDto dto) {

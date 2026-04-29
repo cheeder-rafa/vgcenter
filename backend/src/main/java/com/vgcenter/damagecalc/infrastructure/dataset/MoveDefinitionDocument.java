@@ -9,4 +9,6 @@ public record MoveDefinitionDocument(
         boolean spread,
         boolean contact,
         boolean doublePowerWhenUserStatused,
-        boolean ignoreBurnPenaltyWhenUserStatused) {}
+        boolean ignoreBurnPenaltyWhenUserStatused,
+        Integer accuracy,
+        Boolean alwaysCrit) {}

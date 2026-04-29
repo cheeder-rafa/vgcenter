@@ -53,6 +53,7 @@ class DamageCalculationControllerTest {
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.rolls[0]").value(328))
                 .andExpect(jsonPath("$.max").value(388))
+                .andExpect(jsonPath("$.accuracy").value(1.0d))
                 .andExpect(jsonPath("$.koChance.description").value("guaranteed OHKO"))
                 .andExpect(jsonPath("$.koChance.probability").value(1.0d));
     }

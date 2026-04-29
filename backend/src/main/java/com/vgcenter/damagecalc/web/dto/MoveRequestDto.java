@@ -10,4 +10,6 @@ public record MoveRequestDto(
         boolean spread,
         boolean contact,
         boolean doublePowerWhenUserStatused,
-        boolean ignoreBurnPenaltyWhenUserStatused) {}
+        boolean ignoreBurnPenaltyWhenUserStatused,
+        Double accuracy,
+        Boolean alwaysCrit) {}

@@ -471,7 +471,9 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                 move.spread(),
                 move.contact(),
                 move.doublePowerWhenUserStatused(),
-                move.ignoreBurnPenaltyWhenUserStatused());
+                move.ignoreBurnPenaltyWhenUserStatused(),
+                move.accuracy() == null ? 1.0d : move.accuracy(),
+                Boolean.TRUE.equals(move.alwaysCrit()));
     }
 
     private Map<String, ResolvedSpecies> speciesLookup(String regulation) {

@@ -250,6 +250,70 @@ class CalculateDamageServiceTest {
         assertThat(result).isEqualTo(new KoChanceResult("guaranteed OHKO", 1.0d, 1));
     }
 
+    @Test
+    void computesAccuracyWeightedExpectedDamageWithBaseCritRate() {
+        MoveCommand move = new MoveCommand("FIRE", "SPECIAL", 90, false, false, false, false, 0.8d, false);
+        CalculateDamageCommand normalCommand = new CalculateDamageCommand(
+                "M-A",
+                attacker(),
+                defender(),
+                move,
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                false,
+                1);
+        CalculateDamageResult normal = service.calculate(normalCommand);
+        CalculateDamageResult forcedCrit = service.calculate(new CalculateDamageCommand(
+                normalCommand.regulation(),
+                normalCommand.attacker(),
+                normalCommand.defender(),
+                normalCommand.move(),
+                normalCommand.field(),
+                normalCommand.attackerSide(),
+                normalCommand.defenderSide(),
+                true,
+                normalCommand.targets()));
+
+        double normalExpected =
+                java.util.Arrays.stream(normal.rolls()).average().orElse(0.0d) * 0.8d;
+        double critExpected =
+                java.util.Arrays.stream(forcedCrit.rolls()).average().orElse(0.0d) * 0.8d;
+        double weightedExpected = (23.0d / 24.0d) * normalExpected + (1.0d / 24.0d) * critExpected;
+
+        assertThat(normal.accuracy()).isEqualTo(0.8d);
+        assertThat(normal.expectedDamageWithAccuracy()).isEqualTo(weightedExpected);
+        assertThat(normal.koProbabilityWithCrit()).isGreaterThanOrEqualTo(0.0d);
+    }
+
+    @Test
+    void alwaysCritMovesUseCriticalRollsWithoutManualCritFlag() {
+        CalculateDamageResult autoCrit = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attacker(),
+                defender(),
+                new MoveCommand("FIRE", "SPECIAL", 90, false, false, false, false, 0.9d, true),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                false,
+                1));
+        CalculateDamageResult forcedCrit = service.calculate(new CalculateDamageCommand(
+                "M-A",
+                attacker(),
+                defender(),
+                new MoveCommand("FIRE", "SPECIAL", 90, false, false, false, false, 0.9d, false),
+                new FieldCommand("CLEAR", "NONE", "NONE"),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                new SideConditionsCommand(false, false, false, false, false, false, false),
+                true,
+                1));
+
+        assertThat(autoCrit.rolls()).containsExactly(forcedCrit.rolls());
+        assertThat(autoCrit.expectedDamageWithAccuracy()).isEqualTo(forcedCrit.expectedDamageWithAccuracy());
+        assertThat(autoCrit.koProbabilityWithCrit()).isEqualTo(forcedCrit.koProbabilityWithCrit());
+    }
+
     private Combatant invokeToCombatant(CombatantCommand command) {
         try {
             java.lang.reflect.Method method =

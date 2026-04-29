@@ -71,7 +71,9 @@ public class DatasetWebMapper {
                         entry.spread(),
                         entry.contact(),
                         entry.doublePowerWhenUserStatused(),
-                        entry.ignoreBurnPenaltyWhenUserStatused()))
+                        entry.ignoreBurnPenaltyWhenUserStatused(),
+                        entry.accuracy() == null ? 1.0d : entry.accuracy(),
+                        Boolean.TRUE.equals(entry.alwaysCrit())))
                 .toList();
     }
 

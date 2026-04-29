@@ -79,7 +79,9 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
                 move.spread(),
                 move.contact(),
                 move.doublePowerWhenUserStatused(),
-                move.ignoreBurnPenaltyWhenUserStatused());
+                move.ignoreBurnPenaltyWhenUserStatused(),
+                move.accuracy() == null ? 1.0d : move.accuracy(),
+                Boolean.TRUE.equals(move.alwaysCrit()));
 
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             // Try the requested nature first; no suggestion needed.

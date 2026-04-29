@@ -22,6 +22,39 @@ public final class DamageFormula {
         return rolls;
     }
 
+    public double expectedDamage(int[] rolls, double accuracy) {
+        if (rolls.length == 0) {
+            return 0.0d;
+        }
+        long total = 0L;
+        for (int roll : rolls) {
+            total += roll;
+        }
+        return total / (double) rolls.length * normalizedAccuracy(accuracy);
+    }
+
+    public double koProbability(int[] rolls, double accuracy, int defenderHp) {
+        if (defenderHp <= 0 || rolls.length == 0) {
+            return 0.0d;
+        }
+        long ohkoRolls = 0L;
+        for (int roll : rolls) {
+            if (roll >= defenderHp) {
+                ohkoRolls++;
+            }
+        }
+        return normalizedAccuracy(accuracy) * (ohkoRolls / (double) rolls.length);
+    }
+
+    public double koProbabilityWithCrit(
+            int[] normalRolls, int[] criticalRolls, double accuracy, double criticalRate, int defenderHp) {
+        double normalizedCriticalRate = Math.max(0.0d, Math.min(1.0d, criticalRate));
+        double normalWeight = 1.0d - normalizedCriticalRate;
+        double normalKo = koProbability(normalRolls, accuracy, defenderHp);
+        double critKo = koProbability(criticalRolls, accuracy, defenderHp);
+        return normalWeight * normalKo + normalizedCriticalRate * critKo;
+    }
+
     long calculate(DamageContext context, int randomPercent) {
         long damage = baseDamage(context);
         damage = applyTargetsModifier(damage, context);
@@ -212,6 +245,10 @@ public final class DamageFormula {
             case SWARM -> context.move().type() == Type.BUG;
             default -> false;
         };
+    }
+
+    private double normalizedAccuracy(double accuracy) {
+        return Math.max(0.0d, Math.min(1.0d, accuracy));
     }
 
     private final class ProtectModifier implements Modifier {

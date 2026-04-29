@@ -79,7 +79,9 @@ class DatasetControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Heat Wave"))
                 .andExpect(jsonPath("$[0].type").value("FIRE"))
-                .andExpect(jsonPath("$[0].basePower").value(95));
+                .andExpect(jsonPath("$[0].basePower").value(95))
+                .andExpect(jsonPath("$[0].accuracy").value(1.0d))
+                .andExpect(jsonPath("$[0].alwaysCrit").value(false));
         mockMvc.perform(get("/api/v1/dataset/abilities").queryParam("regulation", "M-A"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value("blaze"));

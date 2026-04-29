@@ -69,6 +69,7 @@ class DamageApiEndToEndTest {
                 .andExpect(jsonPath("$.rolls[0]").value(328))
                 .andExpect(jsonPath("$.rolls[15]").value(388))
                 .andExpect(jsonPath("$.minPct").value(205.0d))
+                .andExpect(jsonPath("$.accuracy").value(1.0d))
                 .andExpect(jsonPath("$.koChance.description").value("guaranteed OHKO"));
 
         mockMvc.perform(get("/api/v1/dataset/pokedex").queryParam("regulation", "M-A"))
