@@ -125,7 +125,7 @@ class ReplayEvaluationControllerTest {
                                 1,
                                 new ReplayDecisionLine(
                                         List.of(new ReplayMoveChoice(
-                                                "p1a", "Venusaur", "Giga Drain", "p2a", "Dragonite")),
+                                                "p1a", "Venusaur", "Giga Drain", "p2a", "Dragonite", "ATTACK")),
                                         12.0d,
                                         20.0d,
                                         8.0d,
@@ -134,7 +134,8 @@ class ReplayEvaluationControllerTest {
                                 List.of(),
                                 0.0d,
                                 "optimal",
-                                "Played line already matches the best decision score.")))),
+                                "Played line already matches the best decision score.",
+                                null)))),
                 List.of("opponent re-led Aerodactyl + Floette-Eternal"));
     }
 

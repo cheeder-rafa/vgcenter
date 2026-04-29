@@ -104,6 +104,23 @@ export function TurnReviewCard({ review, turn }: Props) {
           {review.narrative}
         </p>
       ) : null}
+
+      {review.advisory ? (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-arena-ember/30 bg-arena-ember/[0.07] px-3 py-2"
+        >
+          <span
+            aria-hidden
+            className="mt-px shrink-0 font-display text-arena-2xs text-arena-ember"
+          >
+            ⚑
+          </span>
+          <p className="font-body text-[0.78rem] leading-relaxed text-arena-ember/90">
+            {review.advisory}
+          </p>
+        </div>
+      ) : null}
     </article>
   )
 }
