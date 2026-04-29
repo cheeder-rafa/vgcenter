@@ -8,7 +8,19 @@ public record OptimizeAgainstThreatCommand(
         SpCommand attackerSp,
         String attackerAbilityId,
         String attackerItemId,
-        String moveId) {
+        String moveId,
+        boolean attackerMegaActive,
+        String attackerMegaFormId) {
+
+    public OptimizeAgainstThreatCommand(
+            String attackerSpeciesId,
+            String attackerNatureId,
+            SpCommand attackerSp,
+            String attackerAbilityId,
+            String attackerItemId,
+            String moveId) {
+        this(attackerSpeciesId, attackerNatureId, attackerSp, attackerAbilityId, attackerItemId, moveId, false, null);
+    }
 
     public OptimizeAgainstThreatCommand {
         Objects.requireNonNull(attackerSpeciesId, "attackerSpeciesId must not be null");

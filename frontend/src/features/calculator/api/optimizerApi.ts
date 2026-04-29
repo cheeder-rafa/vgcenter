@@ -39,6 +39,8 @@ export type OptimizeAgainstThreatRequest = {
   attackerAbilityId: string | null
   attackerItemId: string | null
   moveId: string
+  attackerMegaActive: boolean
+  attackerMegaFormId: string | null
 }
 
 export type OptimizeAgainstThreatsRequest = {
@@ -48,6 +50,8 @@ export type OptimizeAgainstThreatsRequest = {
     natureId: string
     abilityId: string | null
     itemId: string | null
+    megaActive: boolean
+    megaFormId: string | null
   }
   threats: OptimizeAgainstThreatRequest[]
   goal: OptimizeAgainstThreatsGoal
@@ -86,6 +90,7 @@ export type OptimizeAgainstThreatResult = {
 
 export type OptimizeAgainstThreatsResponse = {
   best: DefenseSpreadCandidate | null
+  candidates: DefenseSpreadCandidate[]
   threats: OptimizeAgainstThreatResult[]
 }
 

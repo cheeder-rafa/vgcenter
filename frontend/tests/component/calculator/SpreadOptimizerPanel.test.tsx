@@ -69,6 +69,45 @@ const mockCandidateWithNature = {
   suggestedNatureId: 'BOLD',
 }
 
+const mockMultiCandidates = [
+  {
+    spHp: 20,
+    spDef: 20,
+    spSpd: 16,
+    totalSp: 56,
+    remainingSp: 10,
+    minDamagePct: 62.7,
+    maxDamagePct: 99.4,
+    koChanceProbability: 0.0,
+    koChanceDescription: 'survives all pinned threats',
+    suggestedNatureId: 'BOLD',
+  },
+  {
+    spHp: 22,
+    spDef: 18,
+    spSpd: 16,
+    totalSp: 56,
+    remainingSp: 10,
+    minDamagePct: 62.7,
+    maxDamagePct: 99.4,
+    koChanceProbability: 0.0,
+    koChanceDescription: 'survives all pinned threats',
+    suggestedNatureId: 'CALM',
+  },
+  {
+    spHp: 20,
+    spDef: 22,
+    spSpd: 16,
+    totalSp: 58,
+    remainingSp: 8,
+    minDamagePct: 60.0,
+    maxDamagePct: 98.8,
+    koChanceProbability: 0.0,
+    koChanceDescription: 'survives all pinned threats',
+    suggestedNatureId: 'BOLD',
+  },
+]
+
 function renderPanel() {
   return render(
     <MemoryRouter>
@@ -83,7 +122,8 @@ describe('SpreadOptimizerPanel', () => {
       candidates: [mockCandidate],
     })
     vi.mocked(optimizerApi.optimizeAgainstThreats).mockResolvedValue({
-      best: mockCandidate,
+      best: mockMultiCandidates[0],
+      candidates: mockMultiCandidates,
       threats: [
         {
           attackerSpeciesId: 'garchomp',
@@ -118,6 +158,12 @@ describe('SpreadOptimizerPanel', () => {
           specialDefense: 130,
           speed: 50,
         },
+        moves: [
+          { moveId: 'earthquake' },
+          { moveId: 'ice-punch' },
+          { moveId: null },
+          { moveId: null },
+        ],
       },
       attacker: {
         ...useCalculatorStore.getState().attacker,
@@ -311,25 +357,25 @@ describe('SpreadOptimizerPanel', () => {
     })
   })
 
-  it('pins the current attacker as a multi-threat target', async () => {
+  it('pins the current defender as a multi-threat target', async () => {
     const user = userEvent.setup()
     renderPanel()
 
     await user.click(screen.getByRole('tab', { name: /multi-threat/i }))
     await user.click(
-      screen.getByRole('button', { name: /add current attacker as threat/i }),
+      screen.getByRole('button', { name: /pin side b as threat/i }),
     )
 
     expect(usePinnedThreatsStore.getState().threats).toHaveLength(1)
-    expect(screen.getByText(/garchomp/i)).toBeInTheDocument()
+    expect(screen.getByText(/snorlax/i)).toBeInTheDocument()
   })
 
   it('submits pinned threats and renders per-threat damage table', async () => {
     const user = userEvent.setup()
     usePinnedThreatsStore.getState().pin({
-      id: 'garchomp-earthquake',
-      label: 'Garchomp',
-      build: { ...useCalculatorStore.getState().attacker },
+      id: 'snorlax-earthquake',
+      label: 'Snorlax',
+      build: { ...useCalculatorStore.getState().defender },
       moveId: 'earthquake',
     })
     renderPanel()
@@ -341,9 +387,12 @@ describe('SpreadOptimizerPanel', () => {
       expect(optimizerApi.optimizeAgainstThreats).toHaveBeenCalledWith(
         expect.objectContaining({
           goal: 'EXPECTED_DAMAGE_SUM',
+          defender: expect.objectContaining({
+            speciesId: 'garchomp',
+          }),
           threats: [
             expect.objectContaining({
-              attackerSpeciesId: 'garchomp',
+              attackerSpeciesId: 'snorlax',
               moveId: 'earthquake',
             }),
           ],
@@ -352,5 +401,26 @@ describe('SpreadOptimizerPanel', () => {
     })
     expect(screen.getByText(/per-threat damage/i)).toBeInTheDocument()
     expect(screen.getByText(/53\.0%/i)).toBeInTheDocument()
+  })
+
+  it('renders multi-threat spread distribution, nature, and alternatives', async () => {
+    const user = userEvent.setup()
+    usePinnedThreatsStore.getState().pin({
+      id: 'snorlax-earthquake',
+      label: 'Snorlax',
+      build: { ...useCalculatorStore.getState().defender },
+      moveId: 'earthquake',
+    })
+    renderPanel()
+
+    await user.click(screen.getByRole('tab', { name: /multi-threat/i }))
+    await user.click(screen.getByRole('button', { name: /optimize threats/i }))
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/^bold$/i).length).toBeGreaterThan(0)
+      expect(screen.getByText(/20 hp \/ 20\+ def \/ 16 spd/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/56 sp/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByRole('button', { name: /apply/i })).toHaveLength(3)
+    })
   })
 })

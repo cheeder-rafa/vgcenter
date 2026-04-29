@@ -73,7 +73,7 @@ The current calculator flow is species-first and fully reactive:
 - Manually changing a species resets the build for that side back to a fresh default set of item, nature, SP spread, moves, and derived stats for the newly selected Pokemon.
 - Damage updates automatically for all four move slots as species, moves, stats, abilities, items, status, or field inputs change. There is no manual "Calculate Damage" button.
 - Each move shows the full damage range, HP percentages, KO odds, lethal or safe roll counts, and the 16-roll spread at the same time without a separate heatmap panel.
-- The Spread Optimizer supports both a single-attacker survival target and a Multi-threat tab. Pin up to 4 current attackers, adjust their move/item/ability snapshots, then optimize one defender spread for lowest expected damage, lowest worst-case KO chance, or survival against all pinned threats.
+- The Spread Optimizer supports both a single-attacker survival target and a Multi-threat tab. In Multi-threat mode, pin up to 4 threats from Side B, then optimize Side A against those pinned threats for lowest expected damage, lowest worst-case KO chance, or survival against all threats. Results list up to 3 suggested spreads with nature + SP distribution, ordered by the most efficient SP usage.
 - Each side exposes a `Current HP` input so full-HP and low-HP interactions such as Multiscale and Blaze/Torrent-style thresholds are represented in the live calculation.
 - Copied or expanded damage text uses `Mega <species>` for Mega forms, and when relevant attack or defense stages are active it adds the matching SP context to the readout.
 - Weather, terrain, and room effects are optional. Leaving all field modifiers inactive is a valid battle state and still produces damage results.

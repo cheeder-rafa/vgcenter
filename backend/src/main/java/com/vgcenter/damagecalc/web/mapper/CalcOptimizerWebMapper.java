@@ -60,6 +60,8 @@ public class CalcOptimizerWebMapper {
                 dto.defender().natureId(),
                 dto.defender().abilityId(),
                 dto.defender().itemId(),
+                dto.defender().megaActive(),
+                dto.defender().megaFormId(),
                 dto.threats().stream().map(this::toThreatCommand).toList(),
                 OptimizeAgainstThreatsGoal.valueOf(dto.goal()),
                 toFieldCommand(dto.field()),
@@ -71,6 +73,7 @@ public class CalcOptimizerWebMapper {
     public OptimizeAgainstThreatsResponseDto toResponse(OptimizeAgainstThreatsResult result) {
         return new OptimizeAgainstThreatsResponseDto(
                 result.best() == null ? null : toCandidateDto(result.best()),
+                result.candidates().stream().map(this::toCandidateDto).toList(),
                 result.threats().stream().map(this::toThreatResultDto).toList());
     }
 
@@ -81,7 +84,9 @@ public class CalcOptimizerWebMapper {
                 toSpCommand(dto.attackerSp()),
                 dto.attackerAbilityId(),
                 dto.attackerItemId(),
-                dto.moveId());
+                dto.moveId(),
+                dto.attackerMegaActive(),
+                dto.attackerMegaFormId());
     }
 
     private OptimizeAgainstThreatResultDto toThreatResultDto(OptimizeAgainstThreatResult result) {

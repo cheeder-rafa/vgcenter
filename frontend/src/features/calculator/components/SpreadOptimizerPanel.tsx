@@ -57,6 +57,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
   const attackerSide = useCalculatorStore((s) => s.attackerSide)
   const defenderSide = useCalculatorStore((s) => s.defenderSide)
   const setDefender = useCalculatorStore((s) => s.setDefender)
+  const setAttacker = useCalculatorStore((s) => s.setAttacker)
 
   const moveCatalog = useCalculatorStore((s) => s.moveCatalog)
   const threats = usePinnedThreatsStore(
@@ -92,10 +93,10 @@ export function SpreadOptimizerPanel({ natures }: Props) {
   const canOptimize =
     effectiveMoveId.length > 0 && !!defender.speciesId && !!attacker.speciesId
   const firstThreatMoveId =
-    attacker.moves.find((move) => move.moveId !== null)?.moveId ?? null
+    defender.moves.find((move) => move.moveId !== null)?.moveId ?? null
   const canPinThreat =
-    !!attacker.speciesId && !!firstThreatMoveId && threats.length < 4
-  const canOptimizeThreats = !!defender.speciesId && threats.length > 0
+    !!defender.speciesId && !!firstThreatMoveId && threats.length < 4
+  const canOptimizeThreats = !!attacker.speciesId && threats.length > 0
 
   const hasNatureSuggestion =
     (candidates !== null &&
@@ -144,10 +145,12 @@ export function SpreadOptimizerPanel({ natures }: Props) {
       const result = await optimizeAgainstThreats({
         regulation: 'M-A',
         defender: {
-          speciesId: defender.speciesId!,
-          natureId: defender.natureId.toUpperCase(),
-          abilityId: defender.abilityId,
-          itemId: defender.itemId,
+          speciesId: attacker.speciesId!,
+          natureId: attacker.natureId.toUpperCase(),
+          abilityId: attacker.abilityId,
+          itemId: attacker.itemId,
+          megaActive: attacker.megaActive,
+          megaFormId: attacker.megaFormId,
         },
         threats: threats.map((threat) => ({
           attackerSpeciesId: threat.build.speciesId!,
@@ -156,11 +159,13 @@ export function SpreadOptimizerPanel({ natures }: Props) {
           attackerAbilityId: threat.build.abilityId,
           attackerItemId: threat.build.itemId,
           moveId: threat.moveId,
+          attackerMegaActive: threat.build.megaActive,
+          attackerMegaFormId: threat.build.megaFormId,
         })),
         goal: multiGoal,
         field: field ?? DEFAULT_FIELD,
-        attackerSide: attackerSide ?? NO_SIDE,
-        defenderSide: defenderSide ?? NO_SIDE,
+        attackerSide: defenderSide ?? NO_SIDE,
+        defenderSide: attackerSide ?? NO_SIDE,
         criticalHit: false,
       })
       setMultiResult(result)
@@ -172,21 +177,21 @@ export function SpreadOptimizerPanel({ natures }: Props) {
   }
 
   function handlePinThreat() {
-    if (!canPinThreat || !firstThreatMoveId || !attacker.speciesId) return
+    if (!canPinThreat || !firstThreatMoveId || !defender.speciesId) return
     pinThreat({
-      id: `${attacker.speciesId}-${firstThreatMoveId}-${Date.now()}`,
-      label: attacker.speciesId,
+      id: `${defender.speciesId}-${firstThreatMoveId}-${Date.now()}`,
+      label: defender.speciesId,
       build: {
-        ...attacker,
-        sp: { ...attacker.sp },
-        stages: { ...attacker.stages },
-        moves: attacker.moves.map((move) => ({
+        ...defender,
+        sp: { ...defender.sp },
+        stages: { ...defender.stages },
+        moves: defender.moves.map((move) => ({
           ...move,
-        })) as typeof attacker.moves,
-        baseStats: attacker.baseStats ? { ...attacker.baseStats } : null,
-        finalStats: attacker.finalStats ? { ...attacker.finalStats } : null,
-        types: attacker.types
-          ? ([...attacker.types] as typeof attacker.types)
+        })) as typeof defender.moves,
+        baseStats: defender.baseStats ? { ...defender.baseStats } : null,
+        finalStats: defender.finalStats ? { ...defender.finalStats } : null,
+        types: defender.types
+          ? ([...defender.types] as typeof defender.types)
           : null,
       },
       moveId: firstThreatMoveId,
@@ -194,7 +199,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
     setTab('multi')
   }
 
-  function handleApply(c: DefenseSpreadCandidate) {
+  function applyCandidateToDefender(c: DefenseSpreadCandidate) {
     const nextSp = { ...defender.sp, hp: c.spHp, def: c.spDef, spd: c.spSpd }
     const natureId = c.suggestedNatureId
       ? c.suggestedNatureId.toLowerCase()
@@ -209,6 +214,41 @@ export function SpreadOptimizerPanel({ natures }: Props) {
       ...(c.suggestedNatureId ? { natureId } : {}),
       finalStats,
     })
+  }
+
+  function applyCandidateToAttacker(c: DefenseSpreadCandidate) {
+    const nextSp = { ...attacker.sp, hp: c.spHp, def: c.spDef, spd: c.spSpd }
+    const natureId = c.suggestedNatureId
+      ? c.suggestedNatureId.toLowerCase()
+      : attacker.natureId
+    const natureObj = natures.find((n) => n.id === natureId) ?? null
+    const finalStats =
+      attacker.baseStats !== null
+        ? computeBattleStats(attacker.baseStats, nextSp, natureObj)
+        : null
+    setAttacker({
+      sp: nextSp,
+      ...(c.suggestedNatureId ? { natureId } : {}),
+      finalStats,
+    })
+  }
+
+  function formatNatureName(natureId: string | null): string {
+    if (natureId === null) return '—'
+    const key = natureId.toLowerCase()
+    const found = natures.find((nature) => nature.id === key)
+    return found?.name ?? key.charAt(0).toUpperCase() + key.slice(1)
+  }
+
+  function formatDistribution(
+    candidate: DefenseSpreadCandidate,
+    natureId: string,
+  ): string {
+    const nature = natures.find((entry) => entry.id === natureId)
+    const boosted = nature?.increasedStat ?? null
+    const defense = `${candidate.spDef}${boosted === 'DEFENSE' ? '+' : ''} Def`
+    const specialDefense = `${candidate.spSpd}${boosted === 'SPECIAL_DEFENSE' ? '+' : ''} SpD`
+    return `${candidate.spHp} HP / ${defense} / ${specialDefense}`
   }
 
   return (
@@ -299,7 +339,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
               disabled={!canPinThreat}
               className="arena-chip cursor-pointer text-arena-cyan transition hover:bg-arena-cyan/10 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
             >
-              + Add current attacker as threat
+              + Pin Side B as threat
             </button>
             <select
               value={multiGoal}
@@ -332,7 +372,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
           </div>
           {threats.length === 0 ? (
             <p className="text-xs text-white/40">
-              Pin attackers to optimize one defender spread against a threat
+              Pin Side B threats to optimize one Side A spread against a threat
               list.
             </p>
           ) : (
@@ -469,7 +509,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
                       aria-label={
                         c.suggestedNatureId ? 'Apply with nature' : 'Apply'
                       }
-                      onClick={() => handleApply(c)}
+                      onClick={() => applyCandidateToDefender(c)}
                       className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
                     >
                       {c.suggestedNatureId ? 'Apply + Nature' : 'Apply'}
@@ -491,24 +531,45 @@ export function SpreadOptimizerPanel({ natures }: Props) {
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-xs">
               <tbody>
-                <tr className="border-b border-white/5 text-white/75">
-                  <td className="py-1 pr-4 text-arena-cyan">
-                    {multiResult.best.totalSp} SP
-                  </td>
-                  <td className="py-1 pr-4">
-                    {multiResult.best.minDamagePct.toFixed(1)}–
-                    {multiResult.best.maxDamagePct.toFixed(1)}%
-                  </td>
-                  <td className="py-1">
-                    <button
-                      type="button"
-                      onClick={() => handleApply(multiResult.best!)}
-                      className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+                {multiResult.candidates.slice(0, 3).map((candidate, index) => {
+                  const natureId = (
+                    candidate.suggestedNatureId ?? attacker.natureId
+                  ).toLowerCase()
+                  return (
+                    <tr
+                      key={`${candidate.spHp}-${candidate.spDef}-${candidate.spSpd}-${candidate.suggestedNatureId ?? 'none'}`}
+                      className="border-b border-white/5 text-white/75"
                     >
-                      Apply
-                    </button>
-                  </td>
-                </tr>
+                      <td className="py-1 pr-4 text-arena-plasma">
+                        {formatNatureName(
+                          candidate.suggestedNatureId ?? attacker.natureId,
+                        )}
+                      </td>
+                      <td className="py-1 pr-4">
+                        {formatDistribution(candidate, natureId)}
+                      </td>
+                      <td className="py-1 pr-4 text-arena-cyan">
+                        {candidate.totalSp} SP
+                      </td>
+                      <td className="py-1 pr-4 text-white/50">
+                        {candidate.remainingSp} left
+                      </td>
+                      <td className="py-1 pr-4 text-white/45">
+                        {candidate.minDamagePct.toFixed(1)}–
+                        {candidate.maxDamagePct.toFixed(1)}%
+                      </td>
+                      <td className="py-1">
+                        <button
+                          type="button"
+                          onClick={() => applyCandidateToAttacker(candidate)}
+                          className="arena-chip cursor-pointer text-arena-plasma transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+                        >
+                          {index === 0 ? 'Apply (Recommended)' : 'Apply'}
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
