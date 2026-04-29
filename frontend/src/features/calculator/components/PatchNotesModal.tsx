@@ -41,85 +41,46 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
           <h3 className="arena-label mb-3 text-arena-plasma">What's New</h3>
           <ul className="space-y-2 text-sm text-white/75">
             <li>
-              <strong className="text-white/90">Speed Tier Sheet.</strong> New{' '}
-              <em>/speed</em> page shows the full Regulation M-A roster sorted
-              by final speed. Toggle tailwind, trick room, paralysis, choice
-              scarf, and stat stages. Your team Pokémon are highlighted. A "top
-              meta" filter narrows the list to the 29 most competitively
-              relevant species in the roster.
+              <strong className="text-white/90">Tuesday, April 28, 2026.</strong>{' '}
+              Replay Autopsy fixes shipped on <em>/replay</em>: parser edge
+              cases (including weather/status handling) are corrected, player
+              selector behavior is more reliable, and evaluation flow is more
+              stable.
             </li>
             <li>
-              <strong className="text-white/90">
-                Damage evidence in Lead Lab.
-              </strong>{' '}
-              The Lead Lab drilldown now shows a damage evidence table —
-              attacker, defender, move, min–max%, and KO label for every
-              relevant turn-1 interaction.
+              <strong className="text-white/90">Monday, April 27, 2026.</strong>{' '}
+              Replay Autopsy backend is live end-to-end: import a Showdown
+              replay and evaluate decision quality turn by turn.
             </li>
             <li>
-              <strong className="text-white/90">
-                Field controls in Preview Coach.
-              </strong>{' '}
-              Weather, terrain, room, tailwind, and screens are now selectable
-              above the Lead Lab matrix. Both Lead Lab and Team Plan evaluations
-              use the shared field state.
+              <strong className="text-white/90">Friday, April 25, 2026.</strong>{' '}
+              Multi-threat spread optimization launched in <em>/calc</em>. You
+              can pin threats and optimize one spread using expected damage,
+              worst-case KO chance, or survive-all goals.
             </li>
             <li>
-              <strong className="text-white/90">
-                Open in Calculator bridge.
-              </strong>{' '}
-              Each Lead Lab drilldown has a "Calc →" button that pre-loads the
-              matchup (attacker, defender, field) into the damage calculator.
+              <strong className="text-white/90">Thursday, April 24, 2026.</strong>{' '}
+              Preview Coach updates: field controls are shared across Lead Lab
+              and Team Plan, damage evidence appears in drilldowns, and "Open in
+              Calculator" now carries matchup + field context directly to{' '}
+              <em>/calc</em>.
             </li>
             <li>
-              <strong className="text-white/90">Faster recommendations.</strong>{' '}
-              "Get recommendations" is now ~25× faster. The engine pre-computes
-              all attacker–defender pairs in parallel using virtual threads
-              instead of recomputing the same matchup data hundreds of times.
+              <strong className="text-white/90">Wednesday, April 23, 2026.</strong>{' '}
+              Team plans are clearer: smarter support/mega weighting, better
+              "Handles well" detection, clearer win-condition placement, and
+              cleaner read-difficulty copy.
             </li>
             <li>
-              <strong className="text-white/90">Clearer error messages.</strong>{' '}
-              When a recommendation fails you now see a specific title, detail,
-              and hint — including a friendly message if the server is
-              cold-starting or the request times out after 60 s.
+              <strong className="text-white/90">Tuesday, April 22, 2026.</strong>{' '}
+              Performance pass: recommendation generation and replay evaluation
+              were optimized to reduce wait time and smooth large analyses.
             </li>
             <li>
-              <strong className="text-white/90">Smarter team plans.</strong>{' '}
-              Recommendations now prioritise your Mega Evolution and reward
-              Pokémon with support moves (Tailwind, screens, redirection, Fake
-              Out, etc.) — teams that enable your win condition score higher.
-            </li>
-            <li>
-              <strong className="text-white/90">
-                Better "Handles well" lists.
-              </strong>{' '}
-              Each plan card now shows the opponent leads your lead pair
-              genuinely threatens — matchups where you also take serious damage
-              back are no longer counted as handled.
-            </li>
-            <li>
-              <strong className="text-white/90">Win condition clarity.</strong>{' '}
-              The plan cards now tell you whether your chosen win condition is
-              leading (exposed early), in the back (set up to close), or left on
-              the bench by this plan.
-            </li>
-            <li>
-              <strong className="text-white/90">Read difficulty</strong>{' '}
-              (formerly "Prediction burden") now shows a brief explanation of
-              what the rating means so it's clear at a glance.
-            </li>
-            <li>
-              Plan cards are now the same height in every row, with the "Use
-              this plan" button always anchored to the bottom.
-            </li>
-            <li>
-              <strong className="text-white/90">Preview Coach is live.</strong>{' '}
-              Lead Lab, team-plan recommendations, and BO3 adaptation notes all
-              in one place.
-            </li>
-            <li>
-              Damage results show the full 16-roll spread, min–max range, HP
-              percentage, and KO chance simultaneously — no toggling.
+              <strong className="text-white/90">Monday, April 21, 2026.</strong>{' '}
+              Speed Tier Sheet and Preview Coach are live, plus damage results
+              now show full roll detail (16 rolls, min/max %, and KO odds)
+              without extra toggles.
             </li>
           </ul>
         </section>
