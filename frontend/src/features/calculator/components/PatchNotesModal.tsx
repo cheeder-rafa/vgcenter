@@ -56,7 +56,7 @@ export function PatchNotesModal({ isOpen, onClose }: Props) {
               <strong className="text-white/90">Friday, April 25, 2026.</strong>{' '}
               Multi-threat spread optimization launched in <em>/calc</em>. You
               can pin threats and optimize one spread using expected damage,
-              worst-case KO chance, or survive-all goals.
+              lowest OHKO probability, or survive-all goals.
             </li>
             <li>
               <strong className="text-white/90">Thursday, April 24, 2026.</strong>{' '}

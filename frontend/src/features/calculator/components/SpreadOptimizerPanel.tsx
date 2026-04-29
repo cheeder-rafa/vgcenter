@@ -28,7 +28,7 @@ const GOAL_LABELS: Record<Goal, string> = {
 
 const MULTI_GOAL_LABELS: Record<OptimizeAgainstThreatsGoal, string> = {
   EXPECTED_DAMAGE_SUM: 'Lowest expected damage',
-  WORST_CASE_KO: 'Lowest worst-case KO',
+  WORST_CASE_KO: 'Lowest OHKO probability',
   SURVIVE_ALL: 'Survive all threats',
 }
 
@@ -497,7 +497,7 @@ export function SpreadOptimizerPanel({ natures }: Props) {
                   <td className="py-1 pr-4">{c.minDamagePct.toFixed(1)}%</td>
                   <td className="py-1 pr-4">{c.maxDamagePct.toFixed(1)}%</td>
                   <td className="py-1 pr-4 text-white/50">
-                    {(c.koChanceProbability * 100).toFixed(1)}%
+                    {(c.ohkoProbability * 100).toFixed(1)}%
                   </td>
                   {hasNatureSuggestion && (
                     <td className="py-1 pr-4 text-arena-plasma">

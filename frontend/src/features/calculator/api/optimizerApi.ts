@@ -69,7 +69,8 @@ export type DefenseSpreadCandidate = {
   remainingSp: number
   minDamagePct: number
   maxDamagePct: number
-  koChanceProbability: number
+  ohkoProbability: number
+  nearKoMargin: number
   koChanceDescription: string
   suggestedNatureId: string | null
 }
@@ -84,7 +85,8 @@ export type OptimizeAgainstThreatResult = {
   minDamagePct: number
   maxDamagePct: number
   expectedDamagePct: number
-  koChanceProbability: number
+  ohkoProbability: number
+  nearKoMargin: number
   koChanceDescription: string
 }
 

@@ -10,6 +10,5 @@ public record DefenseSpreadCandidateDto(
         double maxDamagePct,
         double ohkoProbability,
         double nearKoMargin,
-        @Deprecated double koChanceProbability,
         String koChanceDescription,
         String suggestedNatureId) {}

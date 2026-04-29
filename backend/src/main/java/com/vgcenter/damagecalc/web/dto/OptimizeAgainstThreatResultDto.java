@@ -8,5 +8,4 @@ public record OptimizeAgainstThreatResultDto(
         double expectedDamagePct,
         double ohkoProbability,
         double nearKoMargin,
-        @Deprecated double koChanceProbability,
         String koChanceDescription) {}

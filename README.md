@@ -4,7 +4,7 @@ VGCenter is a hub of tools for competitive Pokemon VGC players. Sub-project 1 is
 
 ## Status
 
-The v1 calculator is at milestone M10:
+The calculator stack is live with Scoring Systems Hardening (v1.3):
 
 - `backend/` serves the Regulation M-A API for damage calculation, dataset lookup, Showdown/Pokepaste imports, replay timeline parsing, and replay decision evaluation.
 - `frontend/` is a React calculator UI with live API-backed results and importer modals.
@@ -73,7 +73,7 @@ The current calculator flow is species-first and fully reactive:
 - Manually changing a species resets the build for that side back to a fresh default set of item, nature, SP spread, moves, and derived stats for the newly selected Pokemon.
 - Damage updates automatically for all four move slots as species, moves, stats, abilities, items, status, or field inputs change. There is no manual "Calculate Damage" button.
 - Each move shows the full damage range, HP percentages, KO odds, lethal or safe roll counts, and the 16-roll spread at the same time without a separate heatmap panel.
-- The Spread Optimizer supports both a single-attacker survival target and a Multi-threat tab. In Multi-threat mode, pin up to 4 threats from Side B, then optimize Side A against those pinned threats for lowest expected damage, lowest worst-case KO chance, or survival against all threats. Results list up to 3 suggested spreads with nature + SP distribution, ordered by the most efficient SP usage. Optimizer nature suggestions avoid lowering the relevant defensive stat, avoid lowering Speed on non-slow Pokemon, and avoid lowering the Pokemon's stronger attacking stat.
+- The Spread Optimizer supports both a single-attacker survival target and a Multi-threat tab. In Multi-threat mode, pin up to 4 threats from Side B, then optimize Side A against those pinned threats for lowest expected damage, lowest OHKO probability, or survival against all threats. Results list up to 3 suggested spreads with nature + SP distribution, ordered by the most efficient SP usage and exposing near-KO margin (`nearKoMargin`) for tie-breaking clarity. Optimizer nature suggestions avoid lowering the relevant defensive stat, avoid lowering Speed on non-slow Pokemon, and avoid lowering the Pokemon's stronger attacking stat.
 - Each side exposes a `Current HP` input so full-HP and low-HP interactions such as Multiscale and Blaze/Torrent-style thresholds are represented in the live calculation. Newly selected Pokemon start at their final HP stat, not their base HP.
 - Copied or expanded damage text uses `Mega <species>` for Mega forms, and when relevant attack or defense stages are active it adds the matching SP context to the readout.
 - Weather, terrain, and room effects are optional. Leaving all field modifiers inactive is a valid battle state and still produces damage results.
@@ -85,7 +85,7 @@ The current calculator flow is species-first and fully reactive:
 
 Preview Coach lives at `/preview` and replaces the rejected Gameplan Lab experiment. Lead Lab compares two saved player leads into all 15 opposing lead pairs from the opponent rail. It uses backend calculator damage evidence only; it does not simulate turn order or multi-turn play.
 
-Lead Lab reports KO pressure, 2HKO pressure, double-up pressure, incoming danger, speed comparison, must-react labels, and turn-1 notes for each opponent pair.
+Lead Lab reports KO pressure, 2HKO pressure, double-up pressure, incoming danger, speed comparison (including tied checks), must-react labels, and turn-1 notes for each opponent pair.
 
 Planned Preview Coach phases:
 

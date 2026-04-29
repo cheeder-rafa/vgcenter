@@ -98,7 +98,6 @@ public class CalcOptimizerWebMapper {
                 result.expectedDamagePct(),
                 result.ohkoProbability(),
                 result.nearKoMargin(),
-                result.ohkoProbability(),
                 result.koChanceDescription());
     }
 
@@ -113,7 +112,6 @@ public class CalcOptimizerWebMapper {
                 c.maxDamagePct(),
                 c.ohkoProbability(),
                 c.nearKoMargin(),
-                c.ohkoProbability(),
                 c.koChanceDescription(),
                 c.suggestedNatureId());
     }

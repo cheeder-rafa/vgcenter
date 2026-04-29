@@ -1,147 +1,162 @@
-# Scoring Systems — Audit
+# Scoring Systems — Audit (v1.3 closure)
 
-Auditoria dos três sistemas documentados em [`scoring-systems.md`](./scoring-systems.md): Preview Coach, Replay Autopsy e Multi-Threat Optimizer. Cada item lista localização (`file:line`), problema observado e fix proposto.
+Arquivo de auditoria histórico para Preview Coach, Replay Autopsy e Multi-Threat Optimizer.
 
-## Premissas validadas no código
+Status atual:
+- Todos os itens C/M/B foram resolvidos em v1.3.
+- Este arquivo foi mantido para rastreabilidade e links de fechamento.
 
-- `KoChanceResult` é record `(probability, hits)`; `hits` = mínimo de golpes para KO.
-- `CalculateDamageService` / `DamageFormula.rolls()` **não considera accuracy** em momento algum (gera 16 valores 85–100% sem fator de acerto).
-- `criticalHit` é hardcoded `false` em `EvaluateReplayDecisionsService.scoreLine` (~L303) e `OptimizeAgainstThreatsService.scoreThreats` (~L259); não há ponderação probabilística pelo 1/24.
-- `koChanceProbability` em `OptimizeAgainstThreatResult` recebe o valor de `ohkoProbability(rolls, hp)` — é a probabilidade OHKO, **não** a probabilidade do n-HKO indicado por `KoChance.hits`.
-- `RecommendPlansServiceTest` cobre comportamento (Mega muda ranking, support bonus muda ranking) mas **não** os valores numéricos dos pesos.
+Merges v1.3:
+- M14a: `e6c7a15` (`feat(calc): M14a accuracy and crit in damage core (#100)`)
+- M14b: `12cfefd` (`fix(replay): M14b replay correctness (C1,C2,M4,M6,B3,B4) (#101)`)
+- M14c: `88c8355` (`fix(optimizer): M14c modelling updates (M1,M7,B1) (#102)`)
+- M14d: `b487eda` (`fix(preview): M14d modelling updates (M3,M5,B2,B5) (#103)`)
 
----
-
-## Falhas críticas (correctness)
-
-### C1. Wide Guard / Quick Guard atribuídos como Protect single-slot
-
-**Onde:** `EvaluateReplayDecisionsService.java` L37–48 e L317–324.
-
-`wideguard` / `quickguard` estão em `PROTECT_MOVE_IDS`, mas o ajuste só desconta `opponentImpact.takenBySlot().get(slot)` do *próprio slot do usuário do Wide Guard*. Quando o adversário usa Rock Slide / Earthquake / Heat Wave, Wide Guard salva os DOIS slots aliados — mas o score só credita um. Quick Guard idem para priority moves.
-
-**Fix:** quando o move é Wide Guard, subtrair de `effectiveTaken` o dano de **todos** os spread moves do oponente, em todos os slots aliados; quando é Quick Guard, subtrair dano apenas de moves com prioridade > 0. Exige carregar `move.spread` e/ou prioridade dentro de `OpponentImpact`.
-
-### C2. Status moves nunca podem ser a melhor alternativa no replay
-
-**Onde:** `EvaluateReplayDecisionsService.java` L411 (`kind = "STATUS"`), L751 (`canCalculate` exige `ATTACK`), L291–311 (`scoreLine` só soma quando `canCalculate`).
-
-Tailwind, Trick Room, Helping Hand, Follow Me, Rage Powder, Light Screen, Fake Tears, Charm — todos contribuem zero ao score. O "melhor turno" calculado pelo sistema é **sempre** uma combinação de ataques. Em VGC, turn-1 Tailwind é regularmente a jogada ótima e o autopsy nunca vai sugerir.
-
-**Fix:** modelar valor de status moves. Caminho mínimo: tabela de bônus fixo por move-id (Tailwind: +20, Trick Room: +20, Helping Hand: bonus proporcional ao dano do parceiro, Follow Me/Rage Powder: dano redirecionado, etc.). Caminho ideal: simulação multi-turno. O caminho mínimo já cobre 80% dos casos reais.
-
-Nota: Fake Out tem `basePower > 0` então é tratado como `ATTACK` — mas seu valor real é o flinch que cancela a ação inimiga, não o dano. Subestimado no score atual.
-
-### C3. Accuracy ignorada nos três sistemas
-
-**Onde:** `CalculateDamageService` / `DamageFormula.rolls()`.
-
-Stone Edge (80%), Hydro Pump (80%), Focus Blast (70%), Hurricane (70%), Inferno (50%), Sleep Powder (75%) são tratados como 100% precisos. Consequências:
-
-- **Preview Coach** "Your OHKOs" conta um Hydro Pump 80% como KO garantido.
-- **Replay Autopsy** pode marcar Focus Blast como `optimal` quando Aura Sphere 90% era a escolha matematicamente melhor.
-- **Optimizer** rotula spread como "guaranteed OHKO'd" por um Stone Edge que erra 1 em 5.
-
-**Fix:** multiplicar `expectedDamage` por accuracy efetiva (acc × evasion stage); em `koChance.probability` aplicar `accuracy × p_ko_given_hit`. Implementar no nível de `CalculateDamageService` — uma única mudança beneficia os três sistemas.
+Referências de comportamento pós-fix:
+- [`scoring-systems.md`](./scoring-systems.md)
+- [`scoring-systems-technical.md`](./scoring-systems-technical.md)
 
 ---
 
-## Problemas médios (modelagem)
+## Premissas pré-fix (histórico)
 
-### M1. `worstKoChance` é só OHKO probabilístico, mas tratado como "perigo de KO"
+- ~~`CalculateDamageService` / `DamageFormula.rolls()` não considera accuracy.~~  
+  Resolvido em v1.3 M14a (`e6c7a15`).
 
-**Onde:** `OptimizeAgainstThreatsService.java` L181–184, L269.
+- ~~`criticalHit=false` hardcoded no replay/optimizer sem ponderação probabilística.~~  
+  Resolvido em v1.3 M14a + M14b (`e6c7a15`, `12cfefd`).
 
-O nome sugere "chance de ser nocauteado por essa ameaça" mas o valor é apenas `count(roll >= hp) / 16`. Um spread que toma 95% no max-roll é tratado como `worstKoChance = 0.0` ("guaranteed survival") quando crit (1/24), multi-hit ou um próximo turno derrubam sem dificuldade.
+- ~~`koChanceProbability` era naming ambíguo no optimizer.~~  
+  Resolvido em v1.3 M14c + M14e (`88c8355`, cleanup M14e).
 
-**Fix:** renomear o campo para `ohkoProbability` na resposta e expor `nearKoMargin` (quão perto do KO o pior roll chega). Em `SURVIVE_ALL`, considerar margem residual ≥ 5% HP como filtro para "sobrevivência robusta".
-
-### M2. Crit ignorado em probabilidade
-
-**Onde:** `CalculateDamageService` (flag `criticalHit` boolean).
-
-Com base crit rate 1/24 (~4.2%), spreads marcados como "guaranteed survival" perdem para crit em ~4% das vezes. Pior em moves com crit boost (Frost Breath, Storm Throw = sempre crit) ou usuários com Super Luck / Focus Energy / Scope Lens.
-
-**Fix:** computar `expected = (23/24) × normalDamage + (1/24) × critDamage` na agregação, ou expor `koProbabilityWithCrit` separado. Para moves always-crit, usar 100% crit weight.
-
-### M3. Preview "best move" escolhe pelo `maxPct`, não pelo dano esperado
-
-**Onde:** `EvaluateLeadsService.java` L107–112.
-
-Um move com min 30% / max 95% bate um move com min 70% / max 80% — mesmo o segundo sendo mais consistente e tendo expected damage maior. As métricas downstream (`koPressure`, `doubleUpPressure`) então contam OHKOs frágeis como reais.
-
-**Fix:** trocar critério para média dos rolls × accuracy. Adicionalmente, calcular `koPressure` e `twoHitKoPressure` por probabilidade (e.g. ≥50% chance de KO conta) em vez de "min hits ≤ N" — `koChance.hits` é o número de golpes para KO no pior caso, não no caso esperado.
-
-### M4. `koProbability` somado pode exceder 1.0 e infla o bonus em replay
-
-**Onde:** `EvaluateReplayDecisionsService.java` L289, L310.
-
-`koProbability += result.koChance().probability()` para cada ação. Em doubles, 2 ações com 70% KO prob cada → `koProbability = 1.4` → bonus = `30.0 × 1.4 = 42`. O peso `koBonus = 30.0` foi calibrado para representar 1 KO, não 1.4 KOs.
-
-**Fix:** clamp `min(koProbability, kos_avaliados)` ou `koBonus × (1 - prod(1 - p_i))` (probabilidade de pelo menos um KO).
-
-### M5. Speed comparison sempre favorece o usuário em empate
-
-**Onde:** `EvaluateLeadsService.java` L199–204 (`>= opponent`).
-
-Speed ties em VGC são 50/50 reais. Iron Hands 95 base contra outro Iron Hands 95 base é tratado como "user faster" garantido. Skews `speedComparison` upward and `mustReactLabels` downward.
-
-**Fix:** distinguir três casos (faster, slower, tied); reportar tied como métrica separada ou contar como 0.5.
-
-### M6. Verdict thresholds não são normalizados
-
-**Onde:** `EvaluateReplayDecisionsService.java` L625–633.
-
-Delta 25.0 vale tanto para "best=120, played=95" (perda relativa pequena) quanto para "best=27, played=2" (perda relativa imensa). Turnos late-game com pouco HP em jogo geram scores baixos absolutos onde 25 pontos é catastrófico.
-
-**Fix:** normalizar pelo melhor possível (`delta / max(|best|, 1)`) ou pela faixa de scores enumerados no turno (`delta / (bestScore - worstScore)`).
-
-### M7. SURVIVE_ALL para no primeiro tier com sobrevivente
-
-**Onde:** `OptimizeAgainstThreatsService.java` L121–136.
-
-Se tier 12 tem 1 spread sobrevivente com expected damage 90%, o loop para. Tier 14 poderia ter um sobrevivente com expected damage 60% — não é considerado. É defensável (minimize SP) mas a doc atual sugere "melhor sobrevivente."
-
-**Fix opcional:** continuar até `tier_atual + 4` para permitir spreads marginalmente mais caros mas com dano esperado significativamente menor. Documentar o tradeoff explicitamente.
+- ~~Pesos numéricos de `RecommendPlansService` não tinham teste dedicado.~~  
+  Resolvido em v1.3 M14d (`b487eda`).
 
 ---
 
-## Polish / cleanup
+## Falhas críticas (C)
 
-- **B1.** `OptimizeAgainstThreatsService.java` L281–296: tiebreaker tem `s.candidate().totalSp()` E `spHp + spDef + spSpd` — são o mesmo número. Linha redundante.
-- **B2.** `RecommendPlansService.java` weights (`4, 1, -3, +5, +2, -6, +3, +2, +1`) não têm teste numérico. Adicionar `RecommendPlansScoreWeightsTest` que assert valores conhecidos para cenários sintéticos previne regressão.
-- **B3.** `EvaluateReplayDecisionsService` não modela switches. "Should I have switched?" é uma das perguntas mais frequentes em replay review e nunca é proposta como alternativa.
-- **B4.** Recoil (Brave Bird, Wood Hammer, Flare Blitz) não tem ajuste; usar Wood Hammer 100% sempre vence Wood Hammer + Protect na próxima por não considerar HP perdido próprio.
-- **B5.** Preview score não penaliza time mono-categoria (só físicos OU só especiais), vulnerável a Intimidate/burn ou Calm Mind.
+### ~~C1. Wide Guard / Quick Guard atribuídos como Protect single-slot~~
+
+Status: **resolvido em v1.3** (M14b, commit `12cfefd`).
+
+Fechamento:
+- Replay aplica bloqueio por tipo de hit (spread/prioridade) em todos os slots relevantes.
+- Referência técnica: `EvaluateReplayDecisionsService.scoreLine` (guard blocking logic).
+
+### ~~C2. Status moves nunca podem ser a melhor alternativa no replay~~
+
+Status: **resolvido em v1.3** (M14b, commit `12cfefd`).
+
+Fechamento:
+- `STATUS_MOVE_VALUES` adicionada e integrada ao score.
+- Switch/guard/status não ficam mais com valor estrutural zero.
+
+### ~~C3. Accuracy ignorada nos três sistemas~~
+
+Status: **resolvido em v1.3** (M14a, commit `e6c7a15`).
+
+Fechamento:
+- core de dano passa a considerar accuracy em expected e KO probability.
+- sistemas consumidores herdam via `CalculateDamageUseCase`.
 
 ---
 
-## Recomendação de prioridade
+## Problemas médios (M)
 
-Para um sprint focado, sugestão de ordem:
+### ~~M1. `worstKoChance` era só OHKO probabilístico com naming ambíguo~~
 
-1. **C3 (accuracy)** — uma mudança em `CalculateDamageService` propaga benefícios para os três sistemas.
-2. **C1 (Wide Guard)** — bug claro, fácil de testar com replay fixture.
-3. **C2 (status moves no replay)** — caminho mínimo (lookup table de bonus por move-id) é viável em ~1 dia e fecha o gap mais visível do autopsy.
-4. **M3 (Preview best move = expected, não max)** — mudança pequena, alto impacto em qualidade de recomendação.
-5. **M4 (clamp `koProbability`)** — ajuste de uma linha, calibração imediata.
+Status: **resolvido em v1.3** (M14c, commit `88c8355`; cleanup final em M14e).
 
-Demais itens ficam como follow-ups.
+Fechamento:
+- naming canônico: `ohkoProbability`.
+- novo campo: `nearKoMargin`.
 
-## Arquivos críticos
+### ~~M2. Crit ignorado em probabilidade~~
 
-- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/CalculateDamageService.java` — accuracy/crit (C3, M2)
-- `backend/src/main/java/com/vgcenter/damagecalc/domain/.../DamageFormula.java` — formula central
-- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/EvaluateReplayDecisionsService.java` — C1, C2, M4, M6, B3
-- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/EvaluateLeadsService.java` — M3, M5
-- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/OptimizeAgainstThreatsService.java` — M1, M7, B1
-- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/RecommendPlansService.java` — B2, B5
-- `backend/src/main/java/com/vgcenter/damagecalc/application/usecase/ReplayScoringWeights.java` — recalibração após M4
+Status: **resolvido em v1.3** (M14a, commit `e6c7a15`).
 
-## Verificação ao implementar
+Fechamento:
+- composição `normal/crit` com peso `(23/24, 1/24)` no caso padrão.
+- always-crit forçado para taxa de 100%.
 
-- `./mvnw verify` deve continuar verde após cada mudança.
-- **C3:** property test em `DamageFormulaPropertiesTest` garantindo `expected ≤ baseExpected` para qualquer accuracy < 100%.
-- **C1:** replay fixture com Wide Guard (criar uma se não existir) + snapshot test em `EvaluateReplayDecisionsServiceTest` para o turno em questão.
-- **C2:** snapshot test em `EvaluateReplayDecisionsServiceTest` mostrando Tailwind aparecendo como melhor alternativa em um turno onde o usuário atacou e o cálculo confirma que setup era melhor.
-- **M3:** golden test em `EvaluateLeadsServiceTest` com move alta-variância vs move consistente, asserting que o consistente é escolhido.
+### ~~M3. Preview escolhia best move por `maxPct` em vez de dano esperado~~
+
+Status: **resolvido em v1.3** (M14d, commit `b487eda`).
+
+Fechamento:
+- best move usa `mean(rolls) * accuracy`.
+- `koPressure`/`twoHitKoPressure` passam a usar limiar probabilístico.
+
+### ~~M4. `koProbability` somado podia exceder 1.0 no replay~~
+
+Status: **resolvido em v1.3** (M14b, commit `12cfefd`).
+
+Fechamento:
+- probabilidade agregada por união: `1 - Π(1-p_i)`.
+
+### ~~M5. Speed comparison favorecia usuário em empate~~
+
+Status: **resolvido em v1.3** (M14d, commit `b487eda`).
+
+Fechamento:
+- speed comparison separa `faster`, `slower`, `tied`.
+
+### ~~M6. Verdict thresholds não eram normalizados~~
+
+Status: **resolvido em v1.3** (M14b, commit `12cfefd`).
+
+Fechamento:
+- veredicto por delta relativo (`delta / max(|best|, 1)`).
+
+### ~~M7. `SURVIVE_ALL` parava no primeiro tier sobrevivente~~
+
+Status: **resolvido em v1.3** (M14c, commit `88c8355`).
+
+Fechamento:
+- lookahead de +4 tiers após primeiro sobrevivente.
+
+---
+
+## Polish / cleanup (B)
+
+### ~~B1. Tiebreaker redundante no optimizer~~
+
+Status: **resolvido em v1.3** (M14c, commit `88c8355`).
+
+### ~~B2. Pesos do RecommendPlans sem teste numérico dedicado~~
+
+Status: **resolvido em v1.3** (M14d, commit `b487eda`).
+
+Fechamento:
+- `RecommendPlansScoreWeightsTest` adiciona asserts numéricos explícitos.
+
+### ~~B3. Replay não modelava switches~~
+
+Status: **resolvido em v1.3** (M14b, commit `12cfefd`).
+
+Fechamento:
+- switch candidato com custo de oportunidade.
+
+### ~~B4. Recoil não era descontado do usuário~~
+
+Status: **resolvido em v1.3** (M14b, commit `12cfefd`).
+
+Fechamento:
+- recoil entra em `effectiveTaken` e no risco de faint próprio.
+
+### ~~B5. Preview não penalizava bring mono-categoria~~
+
+Status: **resolvido em v1.3** (M14d, commit `b487eda`).
+
+Fechamento:
+- penalidade `-4` com 3/4 físico-only ou special-only.
+
+---
+
+## Resumo final
+
+- ~~Backlog de correções pendentes~~ → **fechado em v1.3**.
+- Itens não removidos deste arquivo foram mantidos apenas como trilha histórica.
+- Qualquer ajuste adicional deve ser registrado como novo ID e novo milestone, sem reabrir os IDs C/M/B acima.
+
