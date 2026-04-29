@@ -216,6 +216,7 @@ type CalculatorState = {
   setAttackerSide: (patch: Partial<SideConditions>) => void
   setDefenderSide: (patch: Partial<SideConditions>) => void
   setTargets: (targets: number) => void
+  resetFieldModifiers: () => void
   setMoveSlot: (
     side: CalculatorSide,
     index: number,
@@ -276,6 +277,13 @@ export const useCalculatorStore = create<CalculatorState>()(
     setDefenderSide: (patch) =>
       set((state) => ({ defenderSide: { ...state.defenderSide, ...patch } })),
     setTargets: (targets) => set({ targets }),
+    resetFieldModifiers: () =>
+      set({
+        field: { ...defaultField },
+        attackerSide: { ...defaultSide },
+        defenderSide: { ...defaultSide },
+        targets: 1,
+      }),
     setMoveSlot: (side, index, moveId) =>
       set((state) => {
         const moves = cloneMoveSlots(state[side].moves)

@@ -17,6 +17,12 @@ const SIZE_CLASSES: Record<NonNullable<Props['size']>, string> = {
   lg: 'h-28 w-28',
 }
 
+const IMAGE_SIZE: Record<NonNullable<Props['size']>, number> = {
+  sm: 56,
+  md: 80,
+  lg: 112,
+}
+
 export function SpriteBadge(props: Props) {
   // Re-mount inner sprite when speciesId changes so local fallback state resets.
   const key = `${props.speciesId ?? '__empty__'}:${props.megaActive ? 'mega' : 'base'}:${props.megaFormId ?? '__none__'}`
@@ -51,6 +57,8 @@ function SpriteBadgeInner({
       <img
         src={src}
         alt={altLabel}
+        width={IMAGE_SIZE[size]}
+        height={IMAGE_SIZE[size]}
         className="h-full w-full object-contain p-1.5"
         loading="lazy"
         onError={() => {
