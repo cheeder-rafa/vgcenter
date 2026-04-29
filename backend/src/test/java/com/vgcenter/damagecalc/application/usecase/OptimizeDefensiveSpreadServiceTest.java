@@ -225,7 +225,7 @@ class OptimizeDefensiveSpreadServiceTest {
 
         assertThat(result.candidates()).isNotEmpty();
         // All returned candidates must have zero KO chance
-        assertThat(result.candidates()).allMatch(c -> c.koChanceProbability() == 0.0);
+        assertThat(result.candidates()).allMatch(c -> c.ohkoProbability() == 0.0);
     }
 
     @Test

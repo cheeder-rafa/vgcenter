@@ -68,7 +68,7 @@ class OptimizeAgainstThreatsServiceIntegrationTest {
             assertThat(result.candidates())
                     .extracting(DefenseSpreadCandidate::suggestedNatureId)
                     .doesNotContain("IMPISH", "RELAXED", "LAX", "CAREFUL", "SASSY");
-            assertThat(result.candidates()).allMatch(c -> c.koChanceProbability() == 0.0);
+            assertThat(result.candidates()).allMatch(c -> c.ohkoProbability() == 0.0);
         });
     }
 

@@ -6,5 +6,6 @@ public record OptimizeAgainstThreatResult(
         double minDamagePct,
         double maxDamagePct,
         double expectedDamagePct,
-        double koChanceProbability,
+        double ohkoProbability,
+        double nearKoMargin,
         String koChanceDescription) {}
