@@ -6,8 +6,8 @@
   "turns" : [ {
     "number" : 1,
     "boardStateAtStart" : {
-      "weather" : "none",
-      "terrain" : "none",
+      "weather" : "NONE",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -121,8 +121,8 @@
   }, {
     "number" : 2,
     "boardStateAtStart" : {
-      "weather" : "none",
-      "terrain" : "none",
+      "weather" : "NONE",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -174,7 +174,7 @@
           "speciesName" : "Kingambit",
           "hpCurrent" : 94,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -248,8 +248,8 @@
   }, {
     "number" : 3,
     "boardStateAtStart" : {
-      "weather" : "none",
-      "terrain" : "none",
+      "weather" : "NONE",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -301,7 +301,7 @@
           "speciesName" : "Kingambit",
           "hpCurrent" : 21,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -317,7 +317,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 90,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -375,8 +375,8 @@
   }, {
     "number" : 4,
     "boardStateAtStart" : {
-      "weather" : "none",
-      "terrain" : "none",
+      "weather" : "NONE",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -444,7 +444,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 84,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -502,8 +502,8 @@
   }, {
     "number" : 5,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
-      "terrain" : "none",
+      "weather" : "SAND",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -571,7 +571,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 79,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -649,8 +649,8 @@
   }, {
     "number" : 6,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
-      "terrain" : "none",
+      "weather" : "SAND",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -718,7 +718,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 67,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -788,8 +788,8 @@
   }, {
     "number" : 7,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
-      "terrain" : "none",
+      "weather" : "SAND",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -857,7 +857,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 42,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -939,8 +939,8 @@
   }, {
     "number" : 8,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
-      "terrain" : "none",
+      "weather" : "SAND",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -1008,7 +1008,7 @@
           "speciesName" : "Dragonite",
           "hpCurrent" : 26,
           "hpMax" : 100,
-          "status" : "brn",
+          "status" : "BURN",
           "fainted" : false,
           "boosts" : {
             "attack" : 0,
@@ -1106,8 +1106,8 @@
   }, {
     "number" : 9,
     "boardStateAtStart" : {
-      "weather" : "Snowscape",
-      "terrain" : "none",
+      "weather" : "SNOW",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -1241,8 +1241,8 @@
   }, {
     "number" : 10,
     "boardStateAtStart" : {
-      "weather" : "Sandstorm",
-      "terrain" : "none",
+      "weather" : "SAND",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "slippybingus",
         "tailwind" : false,
@@ -1345,5 +1345,6 @@
       "arguments" : [ "slippybingus" ],
       "raw" : "|win|slippybingus"
     } ]
-  } ]
+  } ],
+  "revealedMovesBySpecies" : { }
 }

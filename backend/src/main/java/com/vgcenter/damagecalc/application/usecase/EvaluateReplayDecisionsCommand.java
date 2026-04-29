@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.Objects;
 
 public record EvaluateReplayDecisionsCommand(
-        String regulation, List<ReplayTimeline> timelines, ReplayScoringWeights objective) {
+        String regulation,
+        List<ReplayTimeline> timelines,
+        ReplayScoringWeights objective,
+        /** "P1" or "P2" — which side the user played. Defaults to "P1". */
+        String userPlayer) {
 
     public EvaluateReplayDecisionsCommand {
         Objects.requireNonNull(regulation, "regulation must not be null");
@@ -14,5 +18,9 @@ public record EvaluateReplayDecisionsCommand(
             throw new IllegalArgumentException("Replay evaluate request must provide timeline or timelines");
         }
         objective = Objects.requireNonNullElseGet(objective, ReplayScoringWeights::defaults);
+        userPlayer = (userPlayer == null || userPlayer.isBlank()) ? "P1" : userPlayer.toUpperCase();
+        if (!"P1".equals(userPlayer) && !"P2".equals(userPlayer)) {
+            throw new IllegalArgumentException("userPlayer must be P1 or P2, got: " + userPlayer);
+        }
     }
 }

@@ -54,6 +54,7 @@ export type ReplayTimeline = {
   winner: string | null
   tie: boolean
   turns: ReplayTurn[]
+  revealedMovesBySpecies: Record<string, string[]>
 }
 
 export type ReplayMoveChoice = {
@@ -107,6 +108,7 @@ export type ReplayEvaluateRequest = {
   timeline?: ReplayTimeline
   timelines?: ReplayTimeline[]
   objective?: ReplayScoringWeights
+  userPlayer?: 'P1' | 'P2'
 }
 
 export type ReplayInputMode = 'single' | 'bo3'

@@ -8,6 +8,7 @@ import com.vgcenter.damagecalc.application.port.ReplaySource;
 import com.vgcenter.damagecalc.domain.replay.ReplayTimeline;
 import com.vgcenter.damagecalc.domain.replay.ReplayTurn;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ParseReplayServiceTest {
@@ -64,7 +65,8 @@ class ParseReplayServiceTest {
                 "Bob",
                 null,
                 false,
-                List.of(new ReplayTurn(1, ReplayTimelineFixtures.boardState(), List.of())));
+                List.of(new ReplayTurn(1, ReplayTimelineFixtures.boardState(), List.of())),
+                Map.of());
 
         private String lastProtocolLog;
 

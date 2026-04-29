@@ -17,6 +17,7 @@ import com.vgcenter.damagecalc.domain.replay.ReplayTurn;
 import com.vgcenter.damagecalc.web.error.ApiExceptionHandler;
 import com.vgcenter.damagecalc.web.mapper.ReplayWebMapper;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -85,7 +86,8 @@ class ReplayControllerTest {
                         1,
                         com.vgcenter.damagecalc.application.usecase.ReplayTimelineFixtures.boardState(),
                         List.of(new com.vgcenter.damagecalc.domain.replay.ReplayEvent(
-                                "move", List.of("p1a: Venusaur", "Giga Drain", "p2a: Dragonite"), "|move|...")))));
+                                "move", List.of("p1a: Venusaur", "Giga Drain", "p2a: Dragonite"), "|move|...")))),
+                Map.of());
     }
 
     private static final class StubParseReplayUseCase implements ParseReplayUseCase {

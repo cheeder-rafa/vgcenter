@@ -1,5 +1,6 @@
 import { AdaptationFlags } from '../features/replay/components/AdaptationFlags'
 import { GameSection } from '../features/replay/components/GameSection'
+import { PlayerSelector } from '../features/replay/components/PlayerSelector'
 import { ReplayInputPanel } from '../features/replay/components/ReplayInputPanel'
 import { useReplayStore } from '../features/replay/store/useReplayStore'
 
@@ -11,13 +12,28 @@ export function ReplayPage() {
   const errorMessage = useReplayStore((s) => s.errorMessage)
   const timelines = useReplayStore((s) => s.timelines)
   const evaluation = useReplayStore((s) => s.evaluation)
+  const userPlayer = useReplayStore((s) => s.userPlayer)
   const setRawInput = useReplayStore((s) => s.setRawInput)
+  const setUserPlayer = useReplayStore((s) => s.setUserPlayer)
   const analyze = useReplayStore((s) => s.analyze)
   const reset = useReplayStore((s) => s.reset)
 
   const games = evaluation?.games ?? []
   const adaptationFlags = evaluation?.adaptationFlags ?? []
   const showGameHeaders = mode === 'bo3' && games.length > 1
+
+  // Use first timeline's side names for the selector labels
+  const firstTimeline = timelines[0]
+  const sideAName = firstTimeline?.sideAName ?? 'Player 1'
+  const sideBName = firstTimeline?.sideBName ?? 'Player 2'
+
+  const hasTimelines = timelines.length > 0
+  const isLoading = status === 'parsing' || status === 'evaluating'
+
+  const loadingLabel =
+    status === 'parsing'
+      ? 'Fetching and reconstructing turns…'
+      : 'Scoring alternatives…'
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -46,12 +62,22 @@ export function ReplayPage() {
         onReset={reset}
       />
 
-      {status === 'loading' ? (
+      {hasTimelines ? (
+        <PlayerSelector
+          sideAName={sideAName}
+          sideBName={sideBName}
+          value={userPlayer}
+          disabled={isLoading}
+          onChange={setUserPlayer}
+        />
+      ) : null}
+
+      {isLoading ? (
         <div
           data-testid="replay-loading"
           className="rounded-2xl border border-arena-violet/20 bg-arena-night/40 p-6 text-center font-display text-arena-2xs uppercase tracking-[0.18em] text-white/55"
         >
-          Reconstructing turns and scoring alternatives…
+          {loadingLabel}
         </div>
       ) : null}
 

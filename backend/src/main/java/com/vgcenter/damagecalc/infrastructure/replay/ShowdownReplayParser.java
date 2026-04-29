@@ -10,6 +10,7 @@ import com.vgcenter.damagecalc.domain.replay.ReplayTimeline;
 import com.vgcenter.damagecalc.domain.replay.ReplayTurn;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,7 +79,12 @@ public class ShowdownReplayParser implements ReplayParser {
         }
 
         return new ReplayTimeline(
-                battleState.sideA.playerName, battleState.sideB.playerName, battleState.winner, battleState.tie, turns);
+                battleState.sideA.playerName,
+                battleState.sideB.playerName,
+                battleState.winner,
+                battleState.tie,
+                turns,
+                Collections.unmodifiableMap(battleState.revealedMovesBySpecies));
     }
 
     private static void applyBattleState(MutableBattleState battleState, String eventType, String[] parts) {
@@ -92,13 +98,14 @@ public class ShowdownReplayParser implements ReplayParser {
             }
             case "detailschange" -> battleState.active(parts[2]).speciesName = parseSpeciesName(parts[3]);
             case "-damage", "-heal" -> applyCondition(battleState.active(parts[2]), parts[3]);
-            case "-status" -> battleState.active(parts[2]).status = parts[3];
+            case "-status" ->
+                battleState.active(parts[2]).status = ShowdownStatusMapper.toStatusConditionToken(parts[3]);
             case "-curestatus" -> battleState.active(parts[2]).status = null;
             case "-boost" -> battleState.active(parts[2]).adjustBoost(parts[3], parseAmount(parts[4]));
             case "-unboost" -> battleState.active(parts[2]).adjustBoost(parts[3], -parseAmount(parts[4]));
-            case "-weather" -> battleState.weather = parts[2];
-            case "-fieldstart" -> battleState.terrain = normalizeField(parts[2]);
-            case "-fieldend" -> battleState.terrain = "none";
+            case "-weather" -> battleState.weather = ShowdownWeatherMapper.toWeatherToken(parts[2]);
+            case "-fieldstart" -> battleState.terrain = ShowdownTerrainMapper.toTerrainToken(normalizeField(parts[2]));
+            case "-fieldend" -> battleState.terrain = "NONE";
             case "-sidestart" -> battleState.sideFromToken(parts[2]).applySideCondition(parts[3], true);
             case "-sideend" -> battleState.sideFromToken(parts[2]).applySideCondition(parts[3], false);
             case "faint" -> {
@@ -106,9 +113,32 @@ public class ShowdownReplayParser implements ReplayParser {
                 pokemon.hpCurrent = 0;
                 pokemon.fainted = true;
             }
+            case "showteam" -> parseShowteam(battleState, parts);
             case "win" -> battleState.winner = parts[2];
             case "tie" -> battleState.tie = true;
             default -> {}
+        }
+    }
+
+    private static void parseShowteam(MutableBattleState battleState, String[] parts) {
+        if (parts.length < 4) {
+            return;
+        }
+        // Rejoin the team data (everything after |showteam|p1|) then split by ] to get per-Pokémon entries.
+        String teamData = String.join("|", Arrays.asList(parts).subList(3, parts.length));
+        for (String entry : teamData.split("\\]")) {
+            try {
+                String[] fields = entry.split("\\|", -1);
+                // fields[0]=Species, fields[2]=Item, fields[3]=Ability, fields[4]=Move1,Move2,Move3,Move4
+                if (fields.length < 5 || fields[0].isBlank() || fields[4].isBlank()) {
+                    continue;
+                }
+                String speciesName = parseSpeciesName(fields[0]);
+                List<String> moves = Arrays.asList(fields[4].split(","));
+                battleState.revealedMovesBySpecies.put(speciesName, moves);
+            } catch (Exception ignored) {
+                // Malformed entry — skip silently
+            }
         }
     }
 
@@ -144,7 +174,7 @@ public class ShowdownReplayParser implements ReplayParser {
                 pokemon.hpCurrent = 0;
                 pokemon.fainted = true;
             } else if (!token.startsWith("[")) {
-                pokemon.status = token;
+                pokemon.status = ShowdownStatusMapper.toStatusConditionToken(token);
             }
         }
     }
@@ -153,10 +183,11 @@ public class ShowdownReplayParser implements ReplayParser {
 
         private final MutableSideState sideA = new MutableSideState();
         private final MutableSideState sideB = new MutableSideState();
-        private String weather = "none";
-        private String terrain = "none";
+        private String weather = "NONE";
+        private String terrain = "NONE";
         private String winner;
         private boolean tie;
+        private final Map<String, List<String>> revealedMovesBySpecies = new LinkedHashMap<>();
 
         private MutableSideState side(String sideId) {
             return "p1".equals(sideId) ? sideA : sideB;

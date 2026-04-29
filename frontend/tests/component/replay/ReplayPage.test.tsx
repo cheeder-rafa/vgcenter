@@ -46,6 +46,7 @@ const sampleTimeline = (turnNumbers: number[]): ReplayTimeline => ({
   sideBName: 'B',
   winner: 'A',
   tie: false,
+  revealedMovesBySpecies: {},
   turns: turnNumbers.map((number) => ({
     number,
     boardStateAtStart: {

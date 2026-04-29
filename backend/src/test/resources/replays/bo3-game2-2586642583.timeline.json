@@ -6,8 +6,8 @@
   "turns" : [ {
     "number" : 1,
     "boardStateAtStart" : {
-      "weather" : "none",
-      "terrain" : "none",
+      "weather" : "NONE",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -109,8 +109,8 @@
   }, {
     "number" : 2,
     "boardStateAtStart" : {
-      "weather" : "none",
-      "terrain" : "none",
+      "weather" : "NONE",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -240,8 +240,8 @@
   }, {
     "number" : 3,
     "boardStateAtStart" : {
-      "weather" : "RainDance",
-      "terrain" : "none",
+      "weather" : "RAIN",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -363,8 +363,8 @@
   }, {
     "number" : 4,
     "boardStateAtStart" : {
-      "weather" : "RainDance",
-      "terrain" : "none",
+      "weather" : "RAIN",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -470,8 +470,8 @@
   }, {
     "number" : 5,
     "boardStateAtStart" : {
-      "weather" : "RainDance",
-      "terrain" : "none",
+      "weather" : "RAIN",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -589,8 +589,8 @@
   }, {
     "number" : 6,
     "boardStateAtStart" : {
-      "weather" : "SunnyDay",
-      "terrain" : "none",
+      "weather" : "SUN",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -708,8 +708,8 @@
   }, {
     "number" : 7,
     "boardStateAtStart" : {
-      "weather" : "SunnyDay",
-      "terrain" : "none",
+      "weather" : "SUN",
+      "terrain" : "NONE",
       "sideA" : {
         "playerName" : "n00syz",
         "tailwind" : false,
@@ -828,5 +828,17 @@
       "arguments" : [ "vianova" ],
       "raw" : "|win|vianova"
     } ]
-  } ]
+  } ],
+  "revealedMovesBySpecies" : {
+    "Greninja" : [ "Protect", "Extrasensory", "IceBeam", "WeatherBall" ],
+    "Pelipper" : [ "Protect", "Tailwind", "Hurricane", "WeatherBall" ],
+    "Archaludon" : [ "Protect", "ElectroShot", "FlashCannon", "DragonPulse" ],
+    "Incineroar" : [ "FlareBlitz", "ThroatChop", "PartingShot", "FakeOut" ],
+    "Sneasler" : [ "CloseCombat", "DireClaw", "FakeOut", "Protect" ],
+    "Tsareena" : [ "Protect", "Uturn", "TripleAxel", "TropKick" ],
+    "Aerodactyl" : [ "RockSlide", "DualWingbeat", "Tailwind", "Protect" ],
+    "Floette-Eternal" : [ "Moonblast", "DazzlingGleam", "CalmMind", "Protect" ],
+    "Charizard" : [ "HeatWave", "WeatherBall", "SolarBeam", "Protect" ],
+    "Kingambit" : [ "KowtowCleave", "SuckerPunch", "LowKick", "Protect" ]
+  }
 }
