@@ -11,8 +11,11 @@ import type {
   StatusCondition,
 } from '../types/api'
 import { computeBattleStats } from '../lib/computeBattleStats'
+import { applyMetaSet } from '../lib/applyMetaSet'
+import { META_SETS } from '../data/metaSets'
 import { MoveSummaryStrip } from './MoveSummaryStrip'
 import { MoveSlotRow } from './MoveSlotRow'
+import { MetaSetButton } from './MetaSetButton'
 import { SpeciesSelect } from './SpeciesSelect'
 import { SpriteBadge } from './SpriteBadge'
 import { StatTable } from './StatTable'
@@ -398,6 +401,14 @@ export function PokemonPanel({
                 moves: spread.moves,
               })
             }}
+          />
+        )}
+
+        {combatant.speciesId !== null && (
+          <MetaSetButton
+            metaSet={META_SETS[combatant.speciesId] ?? null}
+            accent={accent}
+            onApply={(set) => setCombatant(applyMetaSet(set))}
           />
         )}
 
