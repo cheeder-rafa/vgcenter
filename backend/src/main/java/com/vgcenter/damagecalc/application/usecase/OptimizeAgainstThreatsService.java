@@ -21,6 +21,7 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
     private static final int MAX_SP = 32;
     private static final int MAX_TOTAL_SP = 66;
     private static final int MAX_RESULTS = 3;
+    private static final int SURVIVE_ALL_LOOKAHEAD_TIERS = 4;
     private static final List<Nature> FALLBACK_NATURES =
             List.of(Nature.BOLD, Nature.IMPISH, Nature.RELAXED, Nature.LAX, Nature.CALM, Nature.CAREFUL, Nature.SASSY);
     private static final List<SpreadTriple> LEGAL_SPREADS = legalSpreads();
@@ -74,7 +75,7 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
 
         List<ScoredSpread> eligible = allScored.stream()
                 .filter(scored ->
-                        command.goal() != OptimizeAgainstThreatsGoal.SURVIVE_ALL || scored.worstKoChance() == 0.0)
+                        command.goal() != OptimizeAgainstThreatsGoal.SURVIVE_ALL || scored.ohkoProbability() == 0.0)
                 .sorted(comparatorForGoal(command.goal()))
                 .toList();
         if (eligible.isEmpty()) {
@@ -126,11 +127,18 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
             List<PreparedThreat> threats,
             List<Nature> natures) {
         List<ScoredSpread> scored = new ArrayList<>();
+        Integer firstSurvivorTier = null;
         for (int tier = 0; tier <= MAX_TOTAL_SP; tier++) {
             List<ScoredSpread> tierScores = scoreTier(defenderProfile, command, threats, natures, tier);
             scored.addAll(tierScores);
-            boolean tierHasSurvivor = tierScores.stream().anyMatch(candidate -> candidate.worstKoChance() == 0.0);
-            if (tierHasSurvivor) {
+            if (firstSurvivorTier == null) {
+                boolean tierHasSurvivor = tierScores.stream().anyMatch(candidate -> candidate.ohkoProbability() == 0.0);
+                if (tierHasSurvivor) {
+                    firstSurvivorTier = tier;
+                }
+            }
+            if (firstSurvivorTier != null
+                    && tier >= Math.min(MAX_TOTAL_SP, firstSurvivorTier + SURVIVE_ALL_LOOKAHEAD_TIERS)) {
                 break;
             }
         }
@@ -180,13 +188,18 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
         Stats defenderStats = defenderProfile.baseStats().toBattleStats(defenderSp, defenderNature, VGC_LEVEL);
         List<OptimizeAgainstThreatResult> threatResults =
                 scoreThreats(defenderProfile.types(), defenderStats, command, threats);
-        double worstKo = threatResults.stream()
-                .mapToDouble(OptimizeAgainstThreatResult::koChanceProbability)
+        double ohkoProbability = threatResults.stream()
+                .mapToDouble(OptimizeAgainstThreatResult::ohkoProbability)
                 .max()
                 .orElse(1.0);
         double expectedSum = threatResults.stream()
                 .mapToDouble(OptimizeAgainstThreatResult::expectedDamagePct)
                 .sum();
+        double maxDamagePct = threatResults.stream()
+                .mapToDouble(OptimizeAgainstThreatResult::maxDamagePct)
+                .max()
+                .orElse(0);
+        double nearKoMargin = 100.0 - maxDamagePct;
         int total = spHp + spDef + spSpd;
         DefenseSpreadCandidate candidate = new DefenseSpreadCandidate(
                 spHp,
@@ -198,14 +211,12 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                         .mapToDouble(OptimizeAgainstThreatResult::minDamagePct)
                         .min()
                         .orElse(0),
-                threatResults.stream()
-                        .mapToDouble(OptimizeAgainstThreatResult::maxDamagePct)
-                        .max()
-                        .orElse(0),
-                worstKo,
-                goalDescription(command.goal(), worstKo, expectedSum),
+                maxDamagePct,
+                ohkoProbability,
+                nearKoMargin,
+                goalDescription(command.goal(), ohkoProbability, expectedSum),
                 defenderNature.name().equalsIgnoreCase(command.defenderNatureId()) ? null : defenderNature.name());
-        return new ScoredSpread(candidate, threatResults, worstKo, expectedSum);
+        return new ScoredSpread(candidate, threatResults, ohkoProbability, expectedSum);
     }
 
     private ScoredSpread scoreCandidate(
@@ -262,6 +273,7 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                     1));
             double expected = average(damage.rolls()) * 100.0 / defenderStats.hp();
             double ohkoProbability = ohkoProbability(damage.rolls(), defenderStats.hp());
+            double nearKoMargin = 100.0 - damage.maxPct();
             results.add(new OptimizeAgainstThreatResult(
                     threat.command().attackerSpeciesId(),
                     threat.command().moveId(),
@@ -269,6 +281,7 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                     damage.maxPct(),
                     expected,
                     ohkoProbability,
+                    nearKoMargin,
                     ohkoDescription(ohkoProbability)));
         }
         return results;
@@ -277,25 +290,19 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
     private Comparator<ScoredSpread> comparatorForGoal(OptimizeAgainstThreatsGoal goal) {
         return switch (goal) {
             case WORST_CASE_KO ->
-                Comparator.comparingDouble(ScoredSpread::worstKoChance)
+                Comparator.comparingDouble(ScoredSpread::ohkoProbability)
                         .thenComparingDouble(ScoredSpread::expectedDamageSum)
-                        .thenComparingInt(s -> s.candidate().totalSp())
-                        .thenComparingInt(s -> s.candidate().spHp()
-                                + s.candidate().spDef()
-                                + s.candidate().spSpd());
+                        .thenComparingInt(s -> s.candidate().totalSp());
             case EXPECTED_DAMAGE_SUM ->
                 Comparator.comparingDouble(ScoredSpread::expectedDamageSum)
-                        .thenComparingDouble(ScoredSpread::worstKoChance)
-                        .thenComparingInt(s -> s.candidate().totalSp())
-                        .thenComparingInt(s -> s.candidate().spHp()
-                                + s.candidate().spDef()
-                                + s.candidate().spSpd());
+                        .thenComparingDouble(ScoredSpread::ohkoProbability)
+                        .thenComparingInt(s -> s.candidate().totalSp());
             case SURVIVE_ALL ->
-                Comparator.<ScoredSpread>comparingInt(s -> s.candidate().totalSp())
-                        .thenComparingDouble(ScoredSpread::expectedDamageSum)
-                        .thenComparingInt(s -> s.candidate().spHp()
-                                + s.candidate().spDef()
-                                + s.candidate().spSpd());
+                Comparator.comparingDouble(ScoredSpread::expectedDamageSum)
+                        .thenComparing(Comparator.comparingDouble(
+                                        (ScoredSpread s) -> s.candidate().nearKoMargin())
+                                .reversed())
+                        .thenComparingInt(s -> s.candidate().totalSp());
         };
     }
 
@@ -309,11 +316,11 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                 defenderSpecies, requested, FALLBACK_NATURES, physicalPressure, specialPressure);
     }
 
-    private static String goalDescription(OptimizeAgainstThreatsGoal goal, double worstKo, double expectedSum) {
+    private static String goalDescription(OptimizeAgainstThreatsGoal goal, double ohkoProbability, double expectedSum) {
         return switch (goal) {
-            case WORST_CASE_KO -> "Worst KO " + String.format(Locale.ROOT, "%.1f%%", worstKo * 100.0);
+            case WORST_CASE_KO -> "Worst OHKO " + String.format(Locale.ROOT, "%.1f%%", ohkoProbability * 100.0);
             case EXPECTED_DAMAGE_SUM -> "Expected damage sum " + String.format(Locale.ROOT, "%.1f%%", expectedSum);
-            case SURVIVE_ALL -> worstKo == 0.0 ? "survives all pinned threats" : "no full survival spread";
+            case SURVIVE_ALL -> ohkoProbability == 0.0 ? "survives all pinned threats" : "no full survival spread";
         };
     }
 
@@ -413,7 +420,7 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
     private record ScoredSpread(
             DefenseSpreadCandidate candidate,
             List<OptimizeAgainstThreatResult> threatResults,
-            double worstKoChance,
+            double ohkoProbability,
             double expectedDamageSum) {}
 
     private static List<SpreadTriple> legalSpreads() {

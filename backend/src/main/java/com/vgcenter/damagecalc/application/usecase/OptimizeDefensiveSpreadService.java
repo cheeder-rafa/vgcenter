@@ -186,6 +186,7 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
                                                 1));
 
                                 if (meetsGoal(result, command.goal())) {
+                                    double nearKoMargin = 100.0 - result.maxPct();
                                     tierPassing.add(new DefenseSpreadCandidate(
                                             fHp,
                                             fDef,
@@ -195,6 +196,7 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
                                             result.minPct(),
                                             result.maxPct(),
                                             result.koChance().probability(),
+                                            nearKoMargin,
                                             result.koChance().description(),
                                             suggestedNatureId));
                                 }
@@ -207,7 +209,7 @@ public final class OptimizeDefensiveSpreadService implements OptimizeDefensiveSp
 
             if (!tierPassing.isEmpty()) {
                 return tierPassing.stream()
-                        .sorted(Comparator.comparingDouble(DefenseSpreadCandidate::koChanceProbability)
+                        .sorted(Comparator.comparingDouble(DefenseSpreadCandidate::ohkoProbability)
                                 .thenComparingInt(DefenseSpreadCandidate::totalSp)
                                 .thenComparing((a, b) -> Integer.compare(b.spHp(), a.spHp())))
                         .limit(MAX_RESULTS)

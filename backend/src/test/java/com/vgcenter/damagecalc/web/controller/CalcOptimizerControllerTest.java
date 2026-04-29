@@ -47,7 +47,7 @@ class CalcOptimizerControllerTest {
     @Test
     void returnsOptimizedCandidatesForValidRequest() throws Exception {
         optimizeUseCase.nextResult = new OptimizeDefenseResult(
-                List.of(new DefenseSpreadCandidate(4, 0, 0, 4, 28, 82.5, 95.0, 0.0, "guaranteed survival", null)));
+                List.of(new DefenseSpreadCandidate(4, 0, 0, 4, 28, 82.5, 95.0, 0.0, 5.0, "guaranteed survival", null)));
 
         mockMvc.perform(post("/api/v1/calc/optimize-defense")
                         .contentType(APPLICATION_JSON)
@@ -56,6 +56,8 @@ class CalcOptimizerControllerTest {
                 .andExpect(jsonPath("$.candidates[0].spHp").value(4))
                 .andExpect(jsonPath("$.candidates[0].totalSp").value(4))
                 .andExpect(jsonPath("$.candidates[0].remainingSp").value(28))
+                .andExpect(jsonPath("$.candidates[0].ohkoProbability").value(0.0))
+                .andExpect(jsonPath("$.candidates[0].nearKoMargin").value(5.0))
                 .andExpect(jsonPath("$.candidates[0].koChanceDescription").value("guaranteed survival"));
     }
 
@@ -91,13 +93,15 @@ class CalcOptimizerControllerTest {
     @Test
     void returnsMultiThreatBestCandidateAndThreatBreakdown() throws Exception {
         DefenseSpreadCandidate best =
-                new DefenseSpreadCandidate(20, 18, 14, 52, 14, 42.0, 88.0, 0.0, "optimized", null);
+                new DefenseSpreadCandidate(20, 18, 14, 52, 14, 42.0, 88.0, 0.0, 12.0, "optimized", null);
         optimizeAgainstThreatsUseCase.nextResult = new OptimizeAgainstThreatsResult(
                 best,
                 List.of(best),
                 List.of(
-                        new OptimizeAgainstThreatResult("garchomp", "earthquake", 42.0, 62.0, 52.5, 0.0, "survival"),
-                        new OptimizeAgainstThreatResult("gengar", "shadow-ball", 54.0, 88.0, 72.5, 0.0, "survival")));
+                        new OptimizeAgainstThreatResult(
+                                "garchomp", "earthquake", 42.0, 62.0, 52.5, 0.0, 38.0, "survival"),
+                        new OptimizeAgainstThreatResult(
+                                "gengar", "shadow-ball", 54.0, 88.0, 72.5, 0.0, 12.0, "survival")));
 
         mockMvc.perform(post("/api/v1/calc/optimize-against-threats")
                         .contentType(APPLICATION_JSON)
@@ -106,8 +110,12 @@ class CalcOptimizerControllerTest {
                 .andExpect(jsonPath("$.best.spHp").value(20))
                 .andExpect(jsonPath("$.candidates[0].spHp").value(20))
                 .andExpect(jsonPath("$.best.totalSp").value(52))
+                .andExpect(jsonPath("$.best.ohkoProbability").value(0.0))
+                .andExpect(jsonPath("$.best.nearKoMargin").value(12.0))
                 .andExpect(jsonPath("$.threats[0].attackerSpeciesId").value("garchomp"))
                 .andExpect(jsonPath("$.threats[1].moveId").value("shadow-ball"))
+                .andExpect(jsonPath("$.threats[1].ohkoProbability").value(0.0))
+                .andExpect(jsonPath("$.threats[1].nearKoMargin").value(12.0))
                 .andExpect(jsonPath("$.threats[1].expectedDamagePct").value(72.5));
     }
 

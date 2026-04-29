@@ -86,7 +86,34 @@ class OptimizeAgainstThreatsServiceTest {
 
         assertThat(result.best()).isNotNull();
         assertThat(result.candidates()).isNotEmpty();
-        assertThat(result.threats()).allMatch(t -> t.koChanceProbability() == 0.0);
+        assertThat(result.threats()).allMatch(t -> t.ohkoProbability() == 0.0);
+    }
+
+    @Test
+    void surviveAllLooksAheadFourTiersAndCanPreferHigherTierForLowerExpectedDamage() {
+        CalculateDamageUseCase flatDamage = command -> {
+            int hp = command.defender().stats().hp();
+            int[] rolls = rolls(100, 100);
+            return new CalculateDamageResult(
+                    rolls, 100, 100, 100.0 / hp, 100.0 / hp, new KoChanceResult("guaranteed survival", 0.0, 0));
+        };
+        var service = new OptimizeAgainstThreatsService(pokedex, natures, moves, flatDamage);
+
+        var result = service.optimize(command(OptimizeAgainstThreatsGoal.SURVIVE_ALL, threats()));
+
+        assertThat(result.best()).isNotNull();
+        assertThat(result.best().totalSp()).isEqualTo(4);
+        assertThat(result.best().spHp()).isEqualTo(4);
+    }
+
+    @Test
+    void candidateAndThreatExposeNearKoMargin() {
+        var result = newService().optimize(command(OptimizeAgainstThreatsGoal.EXPECTED_DAMAGE_SUM, threats()));
+
+        assertThat(result.best()).isNotNull();
+        assertThat(result.best().nearKoMargin()).isEqualTo(100.0 - result.best().maxDamagePct());
+        assertThat(result.threats())
+                .allSatisfy(threat -> assertThat(threat.nearKoMargin()).isEqualTo(100.0 - threat.maxDamagePct()));
     }
 
     @Test
