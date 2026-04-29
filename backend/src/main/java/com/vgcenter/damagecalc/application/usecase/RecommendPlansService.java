@@ -132,8 +132,47 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
             }
         }
         base += Math.min(supportBonus, 6);
+        if (monoCategoryBringPenalty(bring, myTeam)) {
+            base -= 4;
+        }
 
         return base;
+    }
+
+    private static boolean monoCategoryBringPenalty(List<Integer> bring, List<PreviewPokemonCommand> team) {
+        int physicalOnly = 0;
+        int specialOnly = 0;
+        for (int idx : bring) {
+            AttackCategory category = attackCategory(team.get(idx));
+            if (category == AttackCategory.PHYSICAL_ONLY) {
+                physicalOnly++;
+            } else if (category == AttackCategory.SPECIAL_ONLY) {
+                specialOnly++;
+            }
+        }
+        return physicalOnly >= 3 || specialOnly >= 3;
+    }
+
+    private static AttackCategory attackCategory(PreviewPokemonCommand pokemon) {
+        boolean hasPhysical = false;
+        boolean hasSpecial = false;
+        for (MoveCommand move : pokemon.moves()) {
+            if (move.basePower() <= 0) {
+                continue;
+            }
+            if ("PHYSICAL".equals(move.category())) {
+                hasPhysical = true;
+            } else if ("SPECIAL".equals(move.category())) {
+                hasSpecial = true;
+            }
+        }
+        if (hasPhysical && !hasSpecial) {
+            return AttackCategory.PHYSICAL_ONLY;
+        }
+        if (hasSpecial && !hasPhysical) {
+            return AttackCategory.SPECIAL_ONLY;
+        }
+        return AttackCategory.MIXED_OR_NONE;
     }
 
     private static int findMegaIndex(List<PreviewPokemonCommand> team) {
@@ -334,4 +373,10 @@ public final class RecommendPlansService implements RecommendPlansUseCase {
 
     private record PlanCandidate(
             List<Integer> bring, List<Integer> leadWithinBring, int score, EvaluateLeadsResult eval) {}
+
+    private enum AttackCategory {
+        PHYSICAL_ONLY,
+        SPECIAL_ONLY,
+        MIXED_OR_NONE
+    }
 }

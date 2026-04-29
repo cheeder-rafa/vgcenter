@@ -107,7 +107,7 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
         return attacker.moves().stream()
                 .filter(move -> move.basePower() > 0)
                 .map(move -> evaluateMove(regulation, attacker, defender, move, field, selectedAttacking))
-                .max(Comparator.comparingDouble(hit -> hit.result().maxPct()))
+                .max(Comparator.comparingDouble(EvaluateLeadsService::expectedDamageWithAccuracy))
                 .orElse(null);
     }
 
@@ -136,10 +136,10 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
             List<PreviewPokemonCommand> opponentLeads,
             List<HitEvidence> outgoing,
             List<HitEvidence> incoming) {
-        int koCount = countByHits(outgoing, 1);
-        int twoHitCount = countByHits(outgoing, 2);
-        int incomingKoCount = countByHits(incoming, 1);
-        int incomingTwoHitCount = countByHits(incoming, 2);
+        int koCount = countLikelyKos(outgoing, 1);
+        int twoHitCount = countLikelyKos(outgoing, 2);
+        int incomingKoCount = countLikelyKos(incoming, 1);
+        int incomingTwoHitCount = countLikelyKos(incoming, 2);
         int doubleUpCount = countDoubleUps(outgoing, opponentLeads);
 
         SpeedScore speedScore = compareSpeed(selectedLeads, opponentLeads);
@@ -170,9 +170,10 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                 incomingEvidence);
     }
 
-    private int countByHits(List<HitEvidence> evidence, int maxHits) {
+    private int countLikelyKos(List<HitEvidence> evidence, int maxHits) {
         return (int) evidence.stream()
-                .filter(hit -> hit.result().koChance().hits() <= maxHits)
+                .filter(hit -> hit.result().koChance().hits() <= maxHits
+                        && hit.result().koChance().probability() >= 0.5d)
                 .count();
     }
 
@@ -194,17 +195,21 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
             List<PreviewPokemonCommand> selectedLeads, List<PreviewPokemonCommand> opponentLeads) {
         int selectedFaster = 0;
         int opponentFaster = 0;
+        int ties = 0;
         for (PreviewPokemonCommand selected : selectedLeads) {
             for (PreviewPokemonCommand opponent : opponentLeads) {
-                if (selected.combatant().stats().speed()
-                        >= opponent.combatant().stats().speed()) {
+                int selectedSpeed = selected.combatant().stats().speed();
+                int opponentSpeed = opponent.combatant().stats().speed();
+                if (selectedSpeed > opponentSpeed) {
                     selectedFaster++;
-                } else {
+                } else if (selectedSpeed < opponentSpeed) {
                     opponentFaster++;
+                } else {
+                    ties++;
                 }
             }
         }
-        return new SpeedScore(selectedFaster, opponentFaster);
+        return new SpeedScore(selectedFaster, opponentFaster, ties);
     }
 
     private List<String> mustReactLabels(
@@ -234,7 +239,7 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
     private List<String> annotations(List<HitEvidence> outgoing, List<HitEvidence> incoming, SpeedScore speedScore) {
         List<String> annotations = new ArrayList<>();
         outgoing.stream()
-                .max(Comparator.comparingDouble(hit -> hit.result().maxPct()))
+                .max(Comparator.comparingDouble(EvaluateLeadsService::expectedDamageWithAccuracy))
                 .ifPresent(hit -> annotations.add("%s threatens %s for %.1f-%.1f%%"
                         .formatted(
                                 hit.attacker().displayName(),
@@ -242,7 +247,7 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                                 hit.result().minPct(),
                                 hit.result().maxPct())));
         incoming.stream()
-                .max(Comparator.comparingDouble(hit -> hit.result().maxPct()))
+                .max(Comparator.comparingDouble(EvaluateLeadsService::expectedDamageWithAccuracy))
                 .ifPresent(hit -> annotations.add("%s returns %.1f-%.1f%% into %s"
                         .formatted(
                                 hit.attacker().displayName(),
@@ -253,7 +258,21 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
                 speedScore.selectedFasterCount() >= speedScore.opponentFasterCount()
                         ? "Your leads move first in most checks."
                         : "Opponent leads move first in most checks.");
+        annotations.add("Speed checks: faster: %d, slower: %d, tied: %d"
+                .formatted(speedScore.selectedFasterCount(), speedScore.opponentFasterCount(), speedScore.tiedCount()));
         return annotations;
+    }
+
+    private static double expectedDamageWithAccuracy(HitEvidence hit) {
+        return average(hit.result().rolls()) * hit.move().accuracy();
+    }
+
+    private static double average(int[] rolls) {
+        int total = 0;
+        for (int roll : rolls) {
+            total += roll;
+        }
+        return total / (double) rolls.length;
     }
 
     private HitEvidenceSummary toSummary(HitEvidence hit, boolean selectedAttacking) {
@@ -276,5 +295,5 @@ public final class EvaluateLeadsService implements EvaluateLeadsUseCase {
         return "low";
     }
 
-    private record SpeedScore(int selectedFasterCount, int opponentFasterCount) {}
+    private record SpeedScore(int selectedFasterCount, int opponentFasterCount, int tiedCount) {}
 }

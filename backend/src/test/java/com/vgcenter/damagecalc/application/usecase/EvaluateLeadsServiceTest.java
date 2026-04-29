@@ -60,6 +60,89 @@ class EvaluateLeadsServiceTest {
         assertThat(result.matchups().getFirst().mustReactLabels()).anyMatch(label -> label.contains("move first"));
     }
 
+    @Test
+    void picksBestEvidenceByExpectedDamageWeightedByAccuracy() {
+        CalculateDamageUseCase scoringUseCase = command -> {
+            if ("FAIRY".equals(command.move().type())) {
+                return new CalculateDamageResult(
+                        new int[] {10, 10, 10, 10, 10, 10, 10, 10, 90, 90, 90, 90, 90, 90, 90, 90},
+                        10,
+                        90,
+                        10,
+                        90,
+                        new KoChanceResult("possible KO", 0.5, 1));
+            }
+            return new CalculateDamageResult(
+                    new int[] {52, 52, 52, 52, 52, 52, 52, 52, 68, 68, 68, 68, 68, 68, 68, 68},
+                    52,
+                    68,
+                    52,
+                    68,
+                    new KoChanceResult("possible KO", 0.5, 1));
+        };
+        EvaluateLeadsService localService = new EvaluateLeadsService(scoringUseCase);
+        PreviewPokemonCommand selected = new PreviewPokemonCommand(
+                "picker",
+                "picker",
+                combatant(120),
+                List.of(
+                        new MoveCommand("FAIRY", "SPECIAL", 95, false, false, false, false, 0.5d, false),
+                        new MoveCommand("FIRE", "SPECIAL", 95, false, false, false, false, 1.0d, false)),
+                false,
+                0,
+                List.of());
+        PreviewPokemonCommand opponent = pokemon("target", 100);
+
+        DamageMatrix matrix = localService.buildMatrix("M-A", List.of(selected), List.of(opponent), field());
+
+        assertThat(matrix.bestOutgoing()[0][0]).isNotNull();
+        assertThat(matrix.bestOutgoing()[0][0].move().type()).isEqualTo("FIRE");
+    }
+
+    @Test
+    void koPressureCountsOnlyLikelyKos() {
+        PreviewPokemonCommand selectedA = pokemon("selected-a", 120);
+        PreviewPokemonCommand selectedB = pokemon("selected-b", 110);
+        PreviewPokemonCommand oppA = pokemon("opp-a", 100);
+        PreviewPokemonCommand oppB = pokemon("opp-b", 90);
+
+        HitEvidence likelyKo = hitEvidence(selectedA, oppA, 70, 100, 0.6);
+        HitEvidence unlikelyKo = hitEvidence(selectedA, oppB, 70, 100, 0.4);
+        HitEvidence neutralA = hitEvidence(selectedB, oppA, 20, 30, 0.1);
+        HitEvidence neutralB = hitEvidence(selectedB, oppB, 20, 30, 0.1);
+
+        DamageMatrix matrix = new DamageMatrix(
+                new HitEvidence[][] {{likelyKo, unlikelyKo}, {neutralA, neutralB}},
+                new HitEvidence[][] {{neutralA, neutralB}, {neutralA, neutralB}});
+
+        EvaluateLeadsResult result = service.evaluateFromMatrix(
+                List.of(selectedA, selectedB), new int[] {0, 1}, List.of(oppA, oppB), matrix);
+
+        assertThat(result.matchups()).hasSize(1);
+        assertThat(result.matchups().getFirst().koPressure().value()).isEqualTo(1.0);
+    }
+
+    @Test
+    void speedAnnotationsReportFasterSlowerAndTiedCounts() {
+        PreviewPokemonCommand selectedA = pokemon("selected-a", 120);
+        PreviewPokemonCommand selectedB = pokemon("selected-b", 100);
+        PreviewPokemonCommand oppA = pokemon("opp-a", 110);
+        PreviewPokemonCommand oppB = pokemon("opp-b", 100);
+
+        HitEvidence neutral = hitEvidence(selectedA, oppA, 20, 30, 0.1);
+        DamageMatrix matrix = new DamageMatrix(
+                new HitEvidence[][] {{neutral, neutral}, {neutral, neutral}},
+                new HitEvidence[][] {{neutral, neutral}, {neutral, neutral}});
+
+        EvaluateLeadsResult result = service.evaluateFromMatrix(
+                List.of(selectedA, selectedB), new int[] {0, 1}, List.of(oppA, oppB), matrix);
+
+        assertThat(result.matchups().getFirst().turnOneAnnotations())
+                .anyMatch(annotation -> annotation.contains("faster: 2")
+                        && annotation.contains("slower: 1")
+                        && annotation.contains("tied: 1"));
+    }
+
     private static List<PreviewPokemonCommand> opponentTeam() {
         return List.of(
                 pokemon("opponent-1", 130),
@@ -98,6 +181,16 @@ class EvaluateLeadsServiceTest {
         return new MoveCommand(type, category, power, false, false, false, false);
     }
 
+    private static HitEvidence hitEvidence(
+            PreviewPokemonCommand attacker, PreviewPokemonCommand defender, int min, int max, double koProbability) {
+        return new HitEvidence(
+                attacker,
+                defender,
+                move("NORMAL", "SPECIAL", 80),
+                new CalculateDamageResult(
+                        rolls(min, max), min, max, min, max, new KoChanceResult("possible KO", koProbability, 1)));
+    }
+
     private static PreviewFieldCommand field() {
         return new PreviewFieldCommand(
                 new FieldCommand("CLEAR", "NONE", "NONE"),
@@ -113,12 +206,15 @@ class EvaluateLeadsServiceTest {
 
     private static CalculateDamageResult result(int min, int max, String koDescription, int hits, double probability) {
         return new CalculateDamageResult(
-                new int[] {min, min, min, min, min, min, min, min, max, max, max, max, max, max, max, max},
-                min,
-                max,
-                min,
-                max,
-                new KoChanceResult(koDescription, probability, hits));
+                rolls(min, max), min, max, min, max, new KoChanceResult(koDescription, probability, hits));
+    }
+
+    private static int[] rolls(int min, int max) {
+        int[] output = new int[16];
+        for (int i = 0; i < 16; i++) {
+            output[i] = i < 8 ? min : max;
+        }
+        return output;
     }
 
     private static final class RecordingDamageUseCase implements CalculateDamageUseCase {
