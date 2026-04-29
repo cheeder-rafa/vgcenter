@@ -1,9 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { LeadLab } from '../../../src/features/preview/components/LeadLab'
+import { usePreviewModeStore } from '../../../src/features/preview/store/usePreviewModeStore'
 import type { LeadEvaluationResult } from '../../../src/features/preview/types'
 
 const DEFAULT_FIELD = {
@@ -31,6 +32,10 @@ const DEFAULT_FIELD = {
 } as const
 
 describe('LeadLab', () => {
+  beforeEach(() => {
+    usePreviewModeStore.setState({ mode: 'expert' })
+  })
+
   it('renders compact matrix and drilldown labels', async () => {
     const user = userEvent.setup()
     const result: LeadEvaluationResult = {
@@ -76,6 +81,83 @@ describe('LeadLab', () => {
     expect(
       screen.getByText(/moonblast threatens opponent 1/i),
     ).toBeInTheDocument()
+  })
+
+  it('renders the matrix summary verdict above the grid', () => {
+    const result: LeadEvaluationResult = {
+      matchups: [
+        matchup(['opponent-1', 'opponent-2'], ['Opponent 1', 'Opponent 2']),
+      ],
+      matrixSummary: {
+        headline: 'Flutter Mane + Incineroar favored in 9/15 matchups.',
+        subline: 'Best line: Opponent 1 + Opponent 2.',
+        callout: null,
+      },
+    }
+
+    render(
+      <MemoryRouter>
+        <LeadLab
+          selectedLeadIds={['flutter-mane', 'incineroar']}
+          onSelectedLeadIdsChange={vi.fn()}
+          mine={[
+            option('flutter-mane', 'Flutter Mane'),
+            option('incineroar', 'Incineroar'),
+          ]}
+          opponentCount={6}
+          result={result}
+          status="success"
+          onEvaluate={vi.fn()}
+          field={DEFAULT_FIELD}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText(/favored in 9\/15/i)).toBeInTheDocument()
+    expect(screen.getByText(/best line:/i)).toBeInTheDocument()
+  })
+
+  it('hides per-cell metric pills in beginner mode and shows them after toggle', async () => {
+    const user = userEvent.setup()
+    usePreviewModeStore.setState({ mode: 'beginner' })
+    const cell = matchup(
+      ['opponent-1', 'opponent-2'],
+      ['Opponent 1', 'Opponent 2'],
+    )
+    cell.summary = 'Clean focus KO on Opponent 1.'
+    const result: LeadEvaluationResult = {
+      matchups: [cell],
+      matrixSummary: null,
+    }
+
+    render(
+      <MemoryRouter>
+        <LeadLab
+          selectedLeadIds={['flutter-mane', 'incineroar']}
+          onSelectedLeadIdsChange={vi.fn()}
+          mine={[
+            option('flutter-mane', 'Flutter Mane'),
+            option('incineroar', 'Incineroar'),
+          ]}
+          opponentCount={6}
+          result={result}
+          status="success"
+          onEvaluate={vi.fn()}
+          field={DEFAULT_FIELD}
+        />
+      </MemoryRouter>,
+    )
+
+    const matrixCell = screen.getByRole('button', {
+      name: /opponent 1 \+ opponent 2/i,
+    })
+    expect(matrixCell).toHaveTextContent(/clean focus ko/i)
+    // Drilldown still has labels; assert the matrix cell itself has none.
+    expect(matrixCell.querySelectorAll('p')).toHaveLength(2)
+
+    await user.click(screen.getByRole('button', { name: /show numbers/i }))
+    // After reveal, the matrix cell renders its 4 metric pills.
+    expect(matrixCell.querySelectorAll('p').length).toBeGreaterThan(2)
   })
 })
 
