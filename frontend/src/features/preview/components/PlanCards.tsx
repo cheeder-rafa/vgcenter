@@ -1,3 +1,6 @@
+import { useState } from 'react'
+
+import { usePreviewModeStore } from '../store/usePreviewModeStore'
 import type { PlanRecommendation, RecommendPlansResult } from '../types'
 
 type PlanCardsProps = {
@@ -101,22 +104,43 @@ function PlanCard({
   winConditionIndex: number | null
   onPromote: (plan: PlanRecommendation) => void
 }) {
+  const mode = usePreviewModeStore((s) => s.mode)
+  const beginner = mode === 'beginner'
+  const [showWhy, setShowWhy] = useState(false)
+  const showRationale = !beginner || showWhy
+
   return (
     <article className="arena-panel flex h-full w-full flex-col p-4">
       <div className="relative z-10 flex flex-1 flex-col gap-3">
-        <PlanSummary summary={plan.summary} />
+        <PlanVerdict plan={plan} />
 
         <WinConditionRow
           role={plan.winConditionRole}
           winConditionIndex={winConditionIndex}
         />
 
-        <ReadDifficulty burden={plan.predictionBurden} />
+        {beginner ? (
+          <button
+            type="button"
+            aria-expanded={showWhy}
+            className="self-start font-mono text-[0.66rem] uppercase tracking-[0.18em] text-arena-cyan/80 hover:text-arena-cyan"
+            onClick={() => setShowWhy((v) => !v)}
+          >
+            {showWhy ? 'Hide why' : 'Why this plan ▸'}
+          </button>
+        ) : null}
 
-        <ModesSection covered={plan.modesCovered} atRisk={plan.modesAtRisk} />
-
-        {plan.leftOutRationale.length > 0 ? (
-          <LeftOutSection rationale={plan.leftOutRationale} />
+        {showRationale ? (
+          <>
+            <ReadDifficulty burden={plan.predictionBurden} />
+            <ModesSection
+              covered={plan.modesCovered}
+              atRisk={plan.modesAtRisk}
+            />
+            {plan.leftOutRationale.length > 0 ? (
+              <LeftOutSection rationale={plan.leftOutRationale} />
+            ) : null}
+          </>
         ) : null}
 
         <button
@@ -131,11 +155,22 @@ function PlanCard({
   )
 }
 
-function PlanSummary({ summary }: { summary: string }) {
+function PlanVerdict({ plan }: { plan: PlanRecommendation }) {
+  const verdict = plan.verdict
   return (
-    <p className="break-words text-sm font-semibold leading-6 text-white">
-      {summary}
-    </p>
+    <div className="grid gap-1">
+      <p className="break-words text-base font-semibold leading-6 text-white">
+        {verdict?.headline ?? plan.summary}
+      </p>
+      {verdict?.subline ? (
+        <p className="text-sm leading-6 text-white/72">{verdict.subline}</p>
+      ) : null}
+      {verdict?.callout ? (
+        <p className="mt-0.5 text-xs font-medium text-arena-sun">
+          ⚠ {verdict.callout}
+        </p>
+      ) : null}
+    </div>
   )
 }
 

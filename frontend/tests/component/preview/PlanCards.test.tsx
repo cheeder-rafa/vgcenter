@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { PlanCards } from '../../../src/features/preview/components/PlanCards'
+import { usePreviewModeStore } from '../../../src/features/preview/store/usePreviewModeStore'
 import type {
   PlanRecommendation,
   RecommendPlansResult,
@@ -44,6 +45,10 @@ const myTeamNames = [
 ]
 
 describe('PlanCards', () => {
+  beforeEach(() => {
+    usePreviewModeStore.setState({ mode: 'expert' })
+  })
+
   it('renders a card for each plan', () => {
     const result: RecommendPlansResult = { plans: [plan1, plan2] }
 
@@ -60,7 +65,7 @@ describe('PlanCards', () => {
     expect(screen.getAllByRole('article')).toHaveLength(2)
   })
 
-  it('shows the summary text on each card', () => {
+  it('shows the verdict headline on each card', () => {
     const result: RecommendPlansResult = { plans: [plan1] }
 
     render(
@@ -76,6 +81,32 @@ describe('PlanCards', () => {
     expect(
       screen.getByText(/lead flutter mane \+ incineroar/i),
     ).toBeInTheDocument()
+  })
+
+  it('hides rationale lists in beginner mode until "Why this plan" is clicked', async () => {
+    const user = userEvent.setup()
+    usePreviewModeStore.setState({ mode: 'beginner' })
+    const result: RecommendPlansResult = { plans: [plan1] }
+
+    render(
+      <PlanCards
+        result={result}
+        myTeamNames={myTeamNames}
+        onPromote={vi.fn()}
+        winConditionIndex={null}
+        onWinConditionChange={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByText(/read difficulty/i)).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/opponent a \+ opponent b/i),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /why this plan/i }))
+
+    expect(screen.getByText(/read difficulty/i)).toBeInTheDocument()
+    expect(screen.getByText(/opponent a \+ opponent b/i)).toBeInTheDocument()
   })
 
   it('shows read difficulty label', () => {
