@@ -35,6 +35,14 @@ public enum Nature {
         this.decreasedStat = decreasedStat;
     }
 
+    public Stat increasedStat() {
+        return increasedStat;
+    }
+
+    public Stat decreasedStat() {
+        return decreasedStat;
+    }
+
     public int applyTo(Stat stat, int baseValue) {
         if (stat == Stat.HP) {
             return baseValue;

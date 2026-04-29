@@ -176,6 +176,11 @@ export function PokemonPanel({
     const [primary, secondary] = entry.types
     const nextAbilityId = entry.abilityIds[0] ?? null
     const nextTypes: [string, string | null] = [primary, secondary ?? null]
+    const nextFinalStats = computeBattleStats(
+      entry.baseStats,
+      DEFAULT_SPREAD,
+      null,
+    )
     setCombatant({
       speciesId: entry.id,
       natureId: 'serious',
@@ -188,10 +193,10 @@ export function PokemonPanel({
       status: 'NONE',
       moves: EMPTY_MOVE_SLOTS,
       baseStats: entry.baseStats,
-      finalStats: computeBattleStats(entry.baseStats, DEFAULT_SPREAD, null),
+      finalStats: nextFinalStats,
       types: nextTypes,
       grounded: isGrounded(nextTypes, nextAbilityId),
-      currentHp: entry.baseStats.hp,
+      currentHp: nextFinalStats.hp,
     })
   }
 
@@ -211,6 +216,11 @@ export function PokemonPanel({
     const nextBaseStats = next ? megaForm.baseStats : speciesEntry.baseStats
     const currentNature =
       natures.find((n) => n.id === combatant.natureId) ?? null
+    const nextFinalStats = computeBattleStats(
+      nextBaseStats,
+      combatant.sp,
+      currentNature,
+    )
     setCombatant({
       megaActive: next,
       megaFormId: next ? megaForm.id : combatant.megaFormId,
@@ -219,13 +229,14 @@ export function PokemonPanel({
         ? (MEGA_STONE_MAP[megaForm.id] ?? combatant.itemId)
         : combatant.itemId,
       baseStats: nextBaseStats,
-      finalStats: computeBattleStats(
-        nextBaseStats,
-        combatant.sp,
-        currentNature,
-      ),
+      finalStats: nextFinalStats,
       types: nextTypes,
       grounded: isGrounded(nextTypes, nextAbilityId),
+      currentHp: resolveNextCurrentHp(
+        combatant.currentHp,
+        maxHp,
+        nextFinalStats.hp,
+      ),
     })
   }
 
@@ -243,19 +254,25 @@ export function PokemonPanel({
     const nextTypes: [string, string | null] = [primary, secondary ?? null]
     const currentNature =
       natures.find((n) => n.id === combatant.natureId) ?? null
+    const nextFinalStats = computeBattleStats(
+      megaForm.baseStats,
+      combatant.sp,
+      currentNature,
+    )
     setCombatant({
       megaFormId: nextMegaFormId,
       megaActive: true,
       itemId: MEGA_STONE_MAP[nextMegaFormId] ?? combatant.itemId,
       abilityId: megaForm.abilityId,
       baseStats: megaForm.baseStats,
-      finalStats: computeBattleStats(
-        megaForm.baseStats,
-        combatant.sp,
-        currentNature,
-      ),
+      finalStats: nextFinalStats,
       types: nextTypes,
       grounded: isGrounded(nextTypes, megaForm.abilityId),
+      currentHp: resolveNextCurrentHp(
+        combatant.currentHp,
+        maxHp,
+        nextFinalStats.hp,
+      ),
     })
   }
 
@@ -473,6 +490,14 @@ export function PokemonPanel({
                 setCombatant({
                   natureId: nextNatureId,
                   finalStats: nextFinalStats,
+                  currentHp:
+                    nextFinalStats === null
+                      ? combatant.currentHp
+                      : resolveNextCurrentHp(
+                          combatant.currentHp,
+                          maxHp,
+                          nextFinalStats.hp,
+                        ),
                 })
               }}
             >
@@ -558,7 +583,18 @@ export function PokemonPanel({
               combatant.baseStats !== null
                 ? computeBattleStats(combatant.baseStats, nextSp, currentNature)
                 : null
-            setCombatant({ sp: nextSp, finalStats: nextFinalStats })
+            setCombatant({
+              sp: nextSp,
+              finalStats: nextFinalStats,
+              currentHp:
+                nextFinalStats === null
+                  ? combatant.currentHp
+                  : resolveNextCurrentHp(
+                      combatant.currentHp,
+                      maxHp,
+                      nextFinalStats.hp,
+                    ),
+            })
           }}
           onStageChange={(patch) => setCombatant({ stages: patch })}
         />
@@ -611,6 +647,14 @@ function clampCurrentHp(value: number, maxHp: number): number {
     return maxHp
   }
   return Math.max(1, Math.min(Math.trunc(value), maxHp))
+}
+
+function resolveNextCurrentHp(
+  currentHp: number,
+  currentMaxHp: number,
+  nextMaxHp: number,
+): number {
+  return currentHp >= currentMaxHp ? nextMaxHp : Math.min(currentHp, nextMaxHp)
 }
 
 function formatNatureLabel(nature: NatureResponse): string {
