@@ -45,7 +45,11 @@ public class DamageCalculationWebMapper {
                         request.move().spread(),
                         request.move().contact(),
                         request.move().doublePowerWhenUserStatused(),
-                        request.move().ignoreBurnPenaltyWhenUserStatused()),
+                        request.move().ignoreBurnPenaltyWhenUserStatused(),
+                        request.move().accuracy() == null
+                                ? 1.0d
+                                : request.move().accuracy(),
+                        Boolean.TRUE.equals(request.move().alwaysCrit())),
                 new FieldCommand(
                         request.field().weather(),
                         request.field().terrain(),
@@ -78,6 +82,9 @@ public class DamageCalculationWebMapper {
                 result.max(),
                 result.minPct(),
                 result.maxPct(),
+                result.accuracy(),
+                result.expectedDamageWithAccuracy(),
+                result.koProbabilityWithCrit(),
                 new com.vgcenter.damagecalc.web.dto.KoChanceDto(
                         koChance.description(), koChance.probability(), koChance.hits()));
     }

@@ -272,7 +272,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 90
   },
   {
     "id": "leech-seed",
@@ -437,7 +438,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 75
   },
   {
     "id": "sleep-talk",
@@ -668,7 +670,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 95
   },
   {
     "id": "ancient-power",
@@ -866,7 +869,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 85
   },
   {
     "id": "fire-fang",
@@ -965,7 +969,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 70
   },
   {
     "id": "focus-punch",
@@ -998,7 +1003,8 @@
     "spread": true,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 90
   },
   {
     "id": "hurricane",
@@ -1009,7 +1015,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 70
   },
   {
     "id": "inferno",
@@ -1064,7 +1071,8 @@
     "spread": true,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 90
   },
   {
     "id": "rock-tomb",
@@ -1240,7 +1248,8 @@
     "spread": true,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 70
   },
   {
     "id": "body-press",
@@ -1372,7 +1381,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 80
   },
   {
     "id": "ice-beam",
@@ -2054,7 +2064,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 80
   },
   {
     "id": "ice-fang",
@@ -2395,7 +2406,8 @@
     "spread": false,
     "contact": true,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 90
   },
   {
     "id": "reflect",
@@ -3363,7 +3375,8 @@
     "spread": false,
     "contact": true,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 95
   },
   {
     "id": "low-kick",
@@ -3429,7 +3442,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "accuracy": 80
   },
   {
     "id": "storm-throw",
@@ -3440,7 +3454,8 @@
     "spread": false,
     "contact": true,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "alwaysCrit": true
   },
   {
     "id": "superpower",
@@ -4529,7 +4544,8 @@
     "spread": false,
     "contact": false,
     "doublePowerWhenUserStatused": false,
-    "ignoreBurnPenaltyWhenUserStatused": false
+    "ignoreBurnPenaltyWhenUserStatused": false,
+    "alwaysCrit": true
   },
   {
     "id": "ice-hammer",

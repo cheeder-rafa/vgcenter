@@ -22,10 +22,13 @@ import java.util.Map;
 
 public final class CalculateDamageService implements CalculateDamageUseCase {
 
+    private static final double BASE_CRITICAL_RATE = 1.0d / 24.0d;
+
     private final DamageFormula damageFormula = new DamageFormula();
 
     @Override
     public CalculateDamageResult calculate(CalculateDamageCommand command) {
+        boolean forcedCriticalHit = command.criticalHit() || command.move().alwaysCrit();
         DamageContext context = new DamageContext(
                 toCombatant(command.attacker()),
                 toCombatant(command.defender()),
@@ -33,14 +36,40 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 toField(command.field()),
                 toSideConditions(command.attackerSide()),
                 toSideConditions(command.defenderSide()),
-                command.criticalHit(),
+                forcedCriticalHit,
                 command.targets());
-        int[] rolls = damageFormula.rolls(context);
+        int[] normalRolls = damageFormula.rolls(context);
+        int[] critRolls = forcedCriticalHit
+                ? normalRolls
+                : damageFormula.rolls(new DamageContext(
+                        context.attacker(),
+                        context.defender(),
+                        context.move(),
+                        context.field(),
+                        context.attackerSide(),
+                        context.defenderSide(),
+                        true,
+                        context.targets()));
+        int[] rolls = normalRolls;
         int min = rolls[0];
         int max = rolls[rolls.length - 1];
         int defenderHp = context.defender().stats().hp();
+        double accuracy = command.move().accuracy();
+        // TODO(M14b): include crit-stage/item/ability interactions (Super Luck, Focus Energy, Scope Lens).
+        double critRate = forcedCriticalHit ? 1.0d : BASE_CRITICAL_RATE;
+        double expectedWithAccuracy = weightedExpectedDamage(normalRolls, critRolls, accuracy, critRate);
+        double koProbabilityWithCrit =
+                damageFormula.koProbabilityWithCrit(normalRolls, critRolls, accuracy, critRate, defenderHp);
         return new CalculateDamageResult(
-                rolls, min, max, min * 100.0d / defenderHp, max * 100.0d / defenderHp, toKoChance(context, rolls));
+                rolls,
+                min,
+                max,
+                min * 100.0d / defenderHp,
+                max * 100.0d / defenderHp,
+                toKoChance(context, rolls),
+                accuracy,
+                expectedWithAccuracy,
+                koProbabilityWithCrit);
     }
 
     private Combatant toCombatant(CombatantCommand command) {
@@ -75,6 +104,14 @@ public final class CalculateDamageService implements CalculateDamageUseCase {
                 command.contact(),
                 command.doublePowerWhenUserStatused(),
                 command.ignoreBurnPenaltyWhenUserStatused());
+    }
+
+    private double weightedExpectedDamage(int[] normalRolls, int[] critRolls, double accuracy, double critRate) {
+        double normalizedCritRate = Math.max(0.0d, Math.min(1.0d, critRate));
+        double normalWeight = 1.0d - normalizedCritRate;
+        double normalExpected = damageFormula.expectedDamage(normalRolls, accuracy);
+        double critExpected = damageFormula.expectedDamage(critRolls, accuracy);
+        return normalWeight * normalExpected + normalizedCritRate * critExpected;
     }
 
     private Field toField(FieldCommand command) {

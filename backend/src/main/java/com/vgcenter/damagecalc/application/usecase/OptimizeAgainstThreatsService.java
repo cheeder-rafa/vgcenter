@@ -113,7 +113,9 @@ public final class OptimizeAgainstThreatsService implements OptimizeAgainstThrea
                 move.spread(),
                 move.contact(),
                 move.doublePowerWhenUserStatused(),
-                move.ignoreBurnPenaltyWhenUserStatused());
+                move.ignoreBurnPenaltyWhenUserStatused(),
+                move.accuracy() == null ? 1.0d : move.accuracy(),
+                Boolean.TRUE.equals(move.alwaysCrit()));
         return new PreparedThreat(
                 threat, toStatsCommand(attackerProfile.stats()), attackerProfile.types(), moveCommand);
     }

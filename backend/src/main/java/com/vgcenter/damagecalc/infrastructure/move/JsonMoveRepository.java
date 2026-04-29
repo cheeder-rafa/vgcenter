@@ -4,10 +4,13 @@ import com.vgcenter.damagecalc.application.port.MoveRepository;
 import com.vgcenter.damagecalc.application.usecase.MoveDefinition;
 import com.vgcenter.damagecalc.application.usecase.NamedDatasetEntry;
 import com.vgcenter.damagecalc.infrastructure.dataset.DatasetDocumentLoader;
+import java.util.Set;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JsonMoveRepository implements MoveRepository {
+
+    private static final Set<String> ALWAYS_CRIT_MOVE_IDS = Set.of("frost-breath", "storm-throw");
 
     private final DatasetDocumentLoader datasetDocumentLoader;
 
@@ -34,7 +37,9 @@ public class JsonMoveRepository implements MoveRepository {
                         entry.spread(),
                         entry.contact(),
                         entry.doublePowerWhenUserStatused(),
-                        entry.ignoreBurnPenaltyWhenUserStatused()))
+                        entry.ignoreBurnPenaltyWhenUserStatused(),
+                        entry.accuracy() == null ? null : entry.accuracy() / 100.0d,
+                        entry.alwaysCrit() != null ? entry.alwaysCrit() : ALWAYS_CRIT_MOVE_IDS.contains(entry.id())))
                 .toList();
     }
 }

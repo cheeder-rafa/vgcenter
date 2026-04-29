@@ -9,4 +9,6 @@ public record MoveDefinitionDto(
         boolean spread,
         boolean contact,
         boolean doublePowerWhenUserStatused,
-        boolean ignoreBurnPenaltyWhenUserStatused) {}
+        boolean ignoreBurnPenaltyWhenUserStatused,
+        double accuracy,
+        boolean alwaysCrit) {}
