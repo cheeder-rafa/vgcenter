@@ -259,6 +259,203 @@ class EvaluateReplayDecisionsServiceTest {
                 .anySatisfy(flag -> assertThat(flag).contains("user changed win condition"));
     }
 
+    @Test
+    void wideGuardCreditsBothAlliesAgainstSpreadMove() {
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("wide-guard", "blast")),
+                        species("beta", "Beta", Type.GRASS, List.of("leaf")),
+                        species("gamma", "Gamma", Type.ROCK, List.of("rock-slide")))),
+                new StubMoveRepository(List.of(
+                        statusMove("wide-guard", "Wide Guard"),
+                        damagingMove("blast", "Blast", "FIRE", 80),
+                        damagingMove("leaf", "Leaf", "GRASS", 30),
+                        spreadMove("rock-slide", "Rock Slide", "ROCK", 75))),
+                new SpreadPressureDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1,
+                        boardState(),
+                        List.of(
+                                move("p1a: Alpha", "Blast", "p2a: Gamma"),
+                                move("p1b: Beta", "Leaf", "p2a: Gamma"),
+                                move("p2a: Gamma", "Rock Slide", "p1a: Alpha")))),
+                Map.of(
+                        "Alpha", List.of("Wide Guard", "Blast"),
+                        "Beta", List.of("Leaf"),
+                        "Gamma", List.of("Rock Slide")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        ReplayDecisionLine wideGuardLine = review.rankedAlternatives().stream()
+                .filter(line -> line.choices().stream().anyMatch(c -> "WIDE_GUARD".equals(c.kind())))
+                .findFirst()
+                .orElseThrow();
+        assertThat(wideGuardLine.expectedDamageTaken()).isEqualTo(0.0d);
+    }
+
+    @Test
+    void statusMoveCanBeBestAlternative() {
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("tailwind", "splash")),
+                        species("gamma", "Gamma", Type.WATER, List.of("splash")))),
+                new StubMoveRepository(
+                        List.of(statusMove("tailwind", "Tailwind"), damagingMove("splash", "Splash", "NORMAL", 10))),
+                new ConstantDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1, singleActiveBoardState(), List.of(move("p1a: Alpha", "Splash", "p2a: Gamma")))),
+                Map.of("Alpha", List.of("Tailwind", "Splash"), "Gamma", List.of("Splash")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        assertThat(review.rankedAlternatives()).isNotEmpty();
+        assertThat(review.rankedAlternatives().getFirst().choices())
+                .extracting(ReplayMoveChoice::moveName)
+                .contains("Tailwind");
+    }
+
+    @Test
+    void verdictUsesRelativeDeltaThresholds() {
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("strong", "weak")),
+                        species("gamma", "Gamma", Type.WATER, List.of("splash")))),
+                new StubMoveRepository(List.of(
+                        damagingMove("strong", "Strong", "FIRE", 120),
+                        damagingMove("weak", "Weak", "FIRE", 95),
+                        statusMove("splash", "Splash"))),
+                new PowerAsDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(1, singleActiveBoardState(), List.of(move("p1a: Alpha", "Weak", "p2a: Gamma")))),
+                Map.of("Alpha", List.of("Strong", "Weak"), "Gamma", List.of("Splash")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        assertThat(review.delta()).isEqualTo(25.0d);
+        assertThat(review.verdict()).isEqualTo("acceptable");
+    }
+
+    @Test
+    void switchIsCandidateActionWithOpportunityCost() {
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("blast")),
+                        species("gamma", "Gamma", Type.WATER, List.of("splash")))),
+                new StubMoveRepository(
+                        List.of(damagingMove("blast", "Blast", "FIRE", 80), statusMove("splash", "Splash"))),
+                new ConstantDamageUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1, singleActiveBoardState(), List.of(move("p1a: Alpha", "Blast", "p2a: Gamma")))),
+                Map.of("Alpha", List.of("Blast"), "Gamma", List.of("Splash")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        ReplayDecisionLine switchLine = review.rankedAlternatives().stream()
+                .filter(line -> line.choices().stream().anyMatch(c -> "SWITCH".equals(c.kind())))
+                .findFirst()
+                .orElseThrow();
+        assertThat(switchLine.score()).isEqualTo(-5.0d);
+    }
+
+    @Test
+    void recoilIsDeductedFromUserScore() {
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("brave-bird", "safe-hit")),
+                        species("gamma", "Gamma", Type.WATER, List.of("splash")))),
+                new StubMoveRepository(List.of(
+                        damagingMove("brave-bird", "Brave Bird", "FLYING", 90),
+                        damagingMove("safe-hit", "Safe Hit", "FLYING", 90),
+                        statusMove("splash", "Splash"))),
+                new FixedDamageUseCase(90));
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1, singleActiveBoardState(), List.of(move("p1a: Alpha", "Brave Bird", "p2a: Gamma")))),
+                Map.of("Alpha", List.of("Brave Bird", "Safe Hit"), "Gamma", List.of("Splash")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        ReplayDecisionLine safeLine = review.rankedAlternatives().stream()
+                .filter(line -> line.choices().stream().anyMatch(c -> "Safe Hit".equals(c.moveName())))
+                .findFirst()
+                .orElseThrow();
+        assertThat(safeLine.score()).isGreaterThan(review.played().score());
+    }
+
+    @Test
+    void koProbabilityBonusUsesClampedUnion() {
+        EvaluateReplayDecisionsService service = new EvaluateReplayDecisionsService(
+                new StubPokedexRepository(List.of(
+                        species("alpha", "Alpha", Type.FIRE, List.of("blast")),
+                        species("beta", "Beta", Type.POISON, List.of("jab")),
+                        species("gamma", "Gamma", Type.WATER, List.of("splash")),
+                        species("delta", "Delta", Type.DARK, List.of("splash")))),
+                new StubMoveRepository(List.of(
+                        damagingMove("blast", "Blast", "FIRE", 80),
+                        damagingMove("jab", "Jab", "POISON", 80),
+                        statusMove("splash", "Splash"))),
+                new AlwaysKoChanceUseCase());
+
+        ReplayTimeline timeline = new ReplayTimeline(
+                "Alice",
+                "Bob",
+                null,
+                false,
+                List.of(new ReplayTurn(
+                        1,
+                        boardState(),
+                        List.of(move("p1a: Alpha", "Blast", "p2a: Gamma"), move("p1b: Beta", "Jab", "p2b: Delta")))),
+                Map.of(
+                        "Alpha", List.of("Blast"),
+                        "Beta", List.of("Jab"),
+                        "Gamma", List.of("Splash"),
+                        "Delta", List.of("Splash")));
+
+        EvaluateReplayDecisionsResult result =
+                service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
+
+        TurnReview review = result.games().getFirst().turnReviews().getFirst();
+        assertThat(review.played().score()).isEqualTo(30.0d);
+    }
+
     private static ReplayBoardState boardState() {
         return new ReplayBoardState(
                 "none",
@@ -295,6 +492,10 @@ class EvaluateReplayDecisionsServiceTest {
 
     private static MoveDefinition damagingMove(String id, String name, String type, int basePower) {
         return new MoveDefinition(id, name, type, "SPECIAL", basePower, false, false, false, false);
+    }
+
+    private static MoveDefinition spreadMove(String id, String name, String type, int basePower) {
+        return new MoveDefinition(id, name, type, "PHYSICAL", basePower, true, false, false, false);
     }
 
     private static MoveDefinition statusMove(String id, String name) {
@@ -437,6 +638,66 @@ class EvaluateReplayDecisionsServiceTest {
                     damage,
                     new KoChanceResult(
                             damage >= command.defender().currentHp() ? "guaranteed OHKO" : "never", 0.0d, 99));
+        }
+    }
+
+    private static final class FixedDamageUseCase implements CalculateDamageUseCase {
+
+        private final int damage;
+
+        private FixedDamageUseCase(int damage) {
+            this.damage = damage;
+        }
+
+        @Override
+        public CalculateDamageResult calculate(CalculateDamageCommand command) {
+            int dealt = command.move().basePower() > 0 ? damage : 0;
+            return new CalculateDamageResult(
+                    new int[] {dealt},
+                    dealt,
+                    dealt,
+                    dealt,
+                    dealt,
+                    new KoChanceResult(
+                            dealt >= command.defender().currentHp() ? "guaranteed OHKO" : "never", 0.0d, 99));
+        }
+    }
+
+    private static final class PowerAsDamageUseCase implements CalculateDamageUseCase {
+
+        @Override
+        public CalculateDamageResult calculate(CalculateDamageCommand command) {
+            int dealt = command.move().basePower() > 0 ? command.move().basePower() : 0;
+            return new CalculateDamageResult(
+                    new int[] {dealt},
+                    dealt,
+                    dealt,
+                    dealt,
+                    dealt,
+                    new KoChanceResult(
+                            dealt >= command.defender().currentHp() ? "guaranteed OHKO" : "never", 0.0d, 99));
+        }
+    }
+
+    private static final class SpreadPressureDamageUseCase implements CalculateDamageUseCase {
+
+        @Override
+        public CalculateDamageResult calculate(CalculateDamageCommand command) {
+            if ("ROCK".equals(command.move().type())) {
+                return new CalculateDamageResult(new int[] {40}, 40, 40, 40, 40, new KoChanceResult("never", 0.0d, 99));
+            }
+            return new CalculateDamageResult(new int[] {20}, 20, 20, 20, 20, new KoChanceResult("never", 0.0d, 99));
+        }
+    }
+
+    private static final class AlwaysKoChanceUseCase implements CalculateDamageUseCase {
+
+        @Override
+        public CalculateDamageResult calculate(CalculateDamageCommand command) {
+            if (command.move().basePower() == 0) {
+                return new CalculateDamageResult(new int[] {0}, 0, 0, 0, 0, new KoChanceResult("never", 0.0d, 99));
+            }
+            return new CalculateDamageResult(new int[] {0}, 0, 0, 0, 0, new KoChanceResult("guaranteed OHKO", 1.0d, 1));
         }
     }
 

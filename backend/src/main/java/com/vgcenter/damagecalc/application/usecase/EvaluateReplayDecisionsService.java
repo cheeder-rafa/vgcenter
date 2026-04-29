@@ -33,7 +33,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
     private static final int MAX_ALTERNATIVES = 5;
     private static final Sp ZERO_SP = new Sp(0, 0, 0, 0, 0, 0);
 
-    // Normalized IDs (lowercase alphanum) for all Protect-family moves
+    // Normalized IDs (lowercase alphanum) for slot-protect moves
     private static final Set<String> PROTECT_MOVE_IDS = Set.of(
             "protect",
             "detect",
@@ -43,9 +43,39 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             "obstruct",
             "silktrap",
             "banefilbunker",
-            "banefulbunker",
-            "wideguard",
-            "quickguard");
+            "banefulbunker");
+    private static final Set<String> WIDE_GUARD_MOVE_IDS = Set.of("wideguard");
+    private static final Set<String> QUICK_GUARD_MOVE_IDS = Set.of("quickguard");
+    private static final Set<String> PRIORITY_MOVE_IDS = Set.of(
+            "fakeout",
+            "aquajet",
+            "bulletpunch",
+            "extremespeed",
+            "firstimpression",
+            "grassyglide",
+            "iceshard",
+            "machpunch",
+            "quickattack",
+            "shadowsneak",
+            "suckerpunch",
+            "vacuumwave");
+    private static final Set<String> RECOIL_MOVE_IDS = Set.of(
+            "bravebird", "doubleedge", "flareblitz", "headsmash", "takeDown".toLowerCase(), "volttackle", "woodhammer");
+    private static final double SWITCH_OPPORTUNITY_COST = -5.0d;
+    private static final double RECOIL_FRACTION = 1.0d / 3.0d;
+    private static final double VERDICT_ACCEPTABLE_RELATIVE_DELTA = 0.25d;
+    private static final Map<String, Double> STATUS_MOVE_VALUES = Map.ofEntries(
+            Map.entry("tailwind", 20.0d),
+            Map.entry("trickroom", 20.0d),
+            Map.entry("helpinghand", 12.0d),
+            Map.entry("followme", 16.0d),
+            Map.entry("ragepowder", 16.0d),
+            Map.entry("reflect", 10.0d),
+            Map.entry("lightscreen", 10.0d),
+            Map.entry("auroraveil", 12.0d),
+            Map.entry("wideguard", 12.0d),
+            Map.entry("quickguard", 10.0d));
+    private static final Map<String, Double> ATTACK_UTILITY_VALUES = Map.of("fakeout", 8.0d);
 
     // Faint-probability threshold above which the advisory fires
     private static final double ADVISORY_FAINT_PROB_THRESHOLD = 0.8;
@@ -125,8 +155,8 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                 turn.events(), userSideState, myActives, opponentActives, knownMoves, moveLookup, userIsP1);
 
         // Precompute opponent impact once — constant across all enumerated user lines.
-        OpponentImpact opponentImpact =
-                computeOpponentImpact(regulation, actualOpponentActions, field, opponentSide, mySide, turnCache);
+        OpponentImpact opponentImpact = computeOpponentImpact(
+                regulation, actualOpponentActions, myActives, field, opponentSide, mySide, turnCache);
 
         ReplayDecisionLine played = scoreLine(
                 regulation, actualPlayedActions, opponentImpact, field, mySide, opponentSide, weights, turnCache);
@@ -160,7 +190,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                 ? played.score()
                 : Math.max(played.score(), ranked.getFirst().score());
         double delta = round(bestScore - played.score());
-        String verdict = verdict(delta);
+        String verdict = verdict(delta, bestScore);
         String narrative = narrative(played, ranked, delta);
         String advisory = advisory(opponentImpact, bestScore, myActives);
         return new TurnReview(turn.number(), played, ranked, delta, verdict, narrative, advisory);
@@ -228,51 +258,60 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
     private OpponentImpact computeOpponentImpact(
             String regulation,
             List<ResolvedAction> opponentActions,
+            List<ResolvedCombatant> myActives,
             FieldCommand field,
             SideConditionsCommand opponentSide,
             SideConditionsCommand mySide,
             Map<CalculateDamageCommand, CalculateDamageResult> turnCache) {
         double taken = 0.0d;
         int faints = 0;
-        double faintProbability = 0.0d;
+        List<Double> faintProbabilities = new ArrayList<>();
         Map<String, Double> takenBySlot = new HashMap<>();
         Map<String, Double> faintProbBySlot = new HashMap<>();
         Map<String, Integer> faintsBySlot = new HashMap<>();
+        List<OpponentHit> hits = new ArrayList<>();
 
         for (ResolvedAction action : opponentActions) {
             if (!action.canCalculate()) {
                 continue;
             }
-            CalculateDamageCommand cmd = new CalculateDamageCommand(
-                    regulation,
-                    action.attacker().command(),
-                    action.target().command(),
-                    toMoveCommand(action.move()),
-                    field,
-                    opponentSide,
-                    mySide,
-                    false,
-                    1);
-            CalculateDamageResult result = turnCache.computeIfAbsent(cmd, calculateDamageUseCase::calculate);
-            double dmg = expectedDamage(result);
-            String slot = action.target().slotId();
-            taken += dmg;
-            takenBySlot.merge(slot, dmg, Double::sum);
-            double kp = result.koChance().probability();
-            faintProbability += kp;
-            faintProbBySlot.merge(slot, kp, Double::sum);
-            if (isKo(result, action.target().command())) {
-                faints++;
-                faintsBySlot.merge(slot, 1, Integer::sum);
+            if (action.move().spread()) {
+                for (ResolvedCombatant target : myActives) {
+                    OpponentHit hit =
+                            calculateOpponentHit(regulation, action, target, field, opponentSide, mySide, turnCache);
+                    taken += hit.damage();
+                    takenBySlot.merge(target.slotId(), hit.damage(), Double::sum);
+                    faintProbabilities.add(hit.koProbability());
+                    faintProbBySlot.merge(target.slotId(), hit.koProbability(), Double::sum);
+                    if (hit.ko()) {
+                        faints++;
+                        faintsBySlot.merge(target.slotId(), 1, Integer::sum);
+                    }
+                    hits.add(hit);
+                }
+                continue;
             }
+            OpponentHit hit =
+                    calculateOpponentHit(regulation, action, action.target(), field, opponentSide, mySide, turnCache);
+            taken += hit.damage();
+            takenBySlot.merge(action.target().slotId(), hit.damage(), Double::sum);
+            faintProbabilities.add(hit.koProbability());
+            faintProbBySlot.merge(action.target().slotId(), hit.koProbability(), Double::sum);
+            if (hit.ko()) {
+                faints++;
+                faintsBySlot.merge(action.target().slotId(), 1, Integer::sum);
+            }
+            hits.add(hit);
         }
+        double faintProbability = clampProbability(unionProbability(faintProbabilities));
         return new OpponentImpact(
                 taken,
                 faints,
                 faintProbability,
                 Map.copyOf(takenBySlot),
                 Map.copyOf(faintProbBySlot),
-                Map.copyOf(faintsBySlot));
+                Map.copyOf(faintsBySlot),
+                List.copyOf(hits));
     }
 
     private ReplayDecisionLine scoreLine(
@@ -286,9 +325,17 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             Map<CalculateDamageCommand, CalculateDamageResult> turnCache) {
         double dealt = 0.0d;
         int kos = 0;
-        double koProbability = 0.0d;
+        List<Double> koProbabilities = new ArrayList<>();
+        double utilityBonus = 0.0d;
+        double recoilTaken = 0.0d;
+        int recoilFaints = 0;
+        double recoilFaintProbability = 0.0d;
 
         for (ResolvedAction action : myActions) {
+            utilityBonus += utilityValue(action);
+            if ("SWITCH".equals(action.kind())) {
+                utilityBonus += SWITCH_OPPORTUNITY_COST;
+            }
             if (!action.canCalculate()) {
                 continue;
             }
@@ -307,29 +354,67 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             if (isKo(result, action.target().command())) {
                 kos++;
             }
-            koProbability += result.koChance().probability();
-        }
-
-        // Adjust opponent impact for Protect actions: each protected slot blocks damage aimed at it.
-        double effectiveTaken = opponentImpact.taken();
-        double effectiveFaintProb = opponentImpact.faintProbability();
-        int effectiveFaints = opponentImpact.faints();
-        for (ResolvedAction action : myActions) {
-            if ("PROTECT".equals(action.kind())) {
-                String slot = action.attacker().slotId();
-                effectiveTaken -= opponentImpact.takenBySlot().getOrDefault(slot, 0.0);
-                effectiveFaintProb -= opponentImpact.faintProbBySlot().getOrDefault(slot, 0.0);
-                effectiveFaints -= opponentImpact.faintsBySlot().getOrDefault(slot, 0);
+            koProbabilities.add(result.koChance().probability());
+            if (isRecoilMove(action)) {
+                double recoil = dealtForAction(result) * RECOIL_FRACTION;
+                recoilTaken += recoil;
+                if (recoil >= action.attacker().command().currentHp()) {
+                    recoilFaints++;
+                    recoilFaintProbability = 1.0d;
+                }
             }
         }
-        effectiveTaken = Math.max(0.0, effectiveTaken);
-        effectiveFaintProb = Math.max(0.0, effectiveFaintProb);
-        effectiveFaints = Math.max(0, effectiveFaints);
+        double koProbability = clampProbability(unionProbability(koProbabilities));
+
+        Set<Integer> blockedHitIndexes = new LinkedHashSet<>();
+        for (ResolvedAction action : myActions) {
+            if ("PROTECT".equals(action.kind())) {
+                for (int index = 0; index < opponentImpact.hits().size(); index++) {
+                    OpponentHit hit = opponentImpact.hits().get(index);
+                    if (action.attacker().slotId().equals(hit.targetSlotId())) {
+                        blockedHitIndexes.add(index);
+                    }
+                }
+            }
+            if ("WIDE_GUARD".equals(action.kind())) {
+                for (int index = 0; index < opponentImpact.hits().size(); index++) {
+                    if (opponentImpact.hits().get(index).spreadMove()) {
+                        blockedHitIndexes.add(index);
+                    }
+                }
+            }
+            if ("QUICK_GUARD".equals(action.kind())) {
+                for (int index = 0; index < opponentImpact.hits().size(); index++) {
+                    if (opponentImpact.hits().get(index).priorityMove()) {
+                        blockedHitIndexes.add(index);
+                    }
+                }
+            }
+        }
+        double effectiveTaken = 0.0d;
+        int effectiveFaints = 0;
+        List<Double> remainingFaintProbabilities = new ArrayList<>();
+        for (int index = 0; index < opponentImpact.hits().size(); index++) {
+            if (blockedHitIndexes.contains(index)) {
+                continue;
+            }
+            OpponentHit hit = opponentImpact.hits().get(index);
+            effectiveTaken += hit.damage();
+            remainingFaintProbabilities.add(hit.koProbability());
+            if (hit.ko()) {
+                effectiveFaints++;
+            }
+        }
+        effectiveTaken += recoilTaken;
+        effectiveFaints += recoilFaints;
+        double effectiveFaintProb =
+                clampProbability(unionProbability(remainingFaintProbabilities) + recoilFaintProbability);
 
         double score = weights.damageDealtWeight() * dealt
                 - weights.damageTakenWeight() * effectiveTaken
                 + weights.koBonus() * koProbability
-                - weights.faintPenalty() * effectiveFaintProb;
+                - weights.faintPenalty() * effectiveFaintProb
+                + utilityBonus;
         return new ReplayDecisionLine(
                 myActions.stream().map(ResolvedAction::toChoice).toList(),
                 round(score),
@@ -345,7 +430,16 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             double faintProbability,
             Map<String, Double> takenBySlot,
             Map<String, Double> faintProbBySlot,
-            Map<String, Integer> faintsBySlot) {}
+            Map<String, Integer> faintsBySlot,
+            List<OpponentHit> hits) {}
+
+    private record OpponentHit(
+            String targetSlotId,
+            double damage,
+            double koProbability,
+            boolean ko,
+            boolean spreadMove,
+            boolean priorityMove) {}
 
     private List<ResolvedAction> actualActions(
             List<ReplayEvent> events,
@@ -403,6 +497,10 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         for (MoveDefinition move : moves) {
             if (isProtect(move)) {
                 actions.add(new ResolvedAction(attacker, move, attacker, "PROTECT"));
+            } else if (isWideGuard(move)) {
+                actions.add(new ResolvedAction(attacker, move, attacker, "WIDE_GUARD"));
+            } else if (isQuickGuard(move)) {
+                actions.add(new ResolvedAction(attacker, move, attacker, "QUICK_GUARD"));
             } else if (move.basePower() > 0) {
                 for (ResolvedCombatant defender : defenders) {
                     actions.add(new ResolvedAction(attacker, move, defender, "ATTACK"));
@@ -411,6 +509,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                 actions.add(new ResolvedAction(attacker, move, attacker, "STATUS"));
             }
         }
+        actions.add(new ResolvedAction(attacker, null, null, "SWITCH"));
         if (actions.isEmpty()) {
             actions.add(new ResolvedAction(attacker, null, null, "ATTACK"));
         }
@@ -624,11 +723,12 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                 .collect(Collectors.joining("||"));
     }
 
-    private String verdict(double delta) {
-        if (delta <= 0.01d) {
+    private String verdict(double delta, double bestScore) {
+        double normalizedDelta = delta / Math.max(Math.abs(bestScore), 1.0d);
+        if (normalizedDelta <= 0.01d) {
             return "optimal";
         }
-        if (delta <= 25.0d) {
+        if (normalizedDelta <= VERDICT_ACCEPTABLE_RELATIVE_DELTA) {
             return "acceptable";
         }
         return "suboptimal";
@@ -694,6 +794,16 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
                 || PROTECT_MOVE_IDS.contains(normalizeKey(move.name()));
     }
 
+    private boolean isWideGuard(MoveDefinition move) {
+        return WIDE_GUARD_MOVE_IDS.contains(normalizeKey(move.id()))
+                || WIDE_GUARD_MOVE_IDS.contains(normalizeKey(move.name()));
+    }
+
+    private boolean isQuickGuard(MoveDefinition move) {
+        return QUICK_GUARD_MOVE_IDS.contains(normalizeKey(move.id()))
+                || QUICK_GUARD_MOVE_IDS.contains(normalizeKey(move.name()));
+    }
+
     private String resolveKind(MoveDefinition move) {
         if (move == null) {
             return "ATTACK";
@@ -701,10 +811,91 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         if (isProtect(move)) {
             return "PROTECT";
         }
+        if (isWideGuard(move)) {
+            return "WIDE_GUARD";
+        }
+        if (isQuickGuard(move)) {
+            return "QUICK_GUARD";
+        }
         if (move.basePower() > 0) {
             return "ATTACK";
         }
         return "STATUS";
+    }
+
+    private OpponentHit calculateOpponentHit(
+            String regulation,
+            ResolvedAction action,
+            ResolvedCombatant target,
+            FieldCommand field,
+            SideConditionsCommand opponentSide,
+            SideConditionsCommand mySide,
+            Map<CalculateDamageCommand, CalculateDamageResult> turnCache) {
+        CalculateDamageCommand cmd = new CalculateDamageCommand(
+                regulation,
+                action.attacker().command(),
+                target.command(),
+                toMoveCommand(action.move()),
+                field,
+                opponentSide,
+                mySide,
+                false,
+                1);
+        CalculateDamageResult result = turnCache.computeIfAbsent(cmd, calculateDamageUseCase::calculate);
+        return new OpponentHit(
+                target.slotId(),
+                expectedDamage(result),
+                clampProbability(result.koChance().probability()),
+                isKo(result, target.command()),
+                action.move().spread(),
+                isPriorityMove(action.move()));
+    }
+
+    private boolean isPriorityMove(MoveDefinition move) {
+        return PRIORITY_MOVE_IDS.contains(normalizeKey(move.id()))
+                || PRIORITY_MOVE_IDS.contains(normalizeKey(move.name()));
+    }
+
+    private double utilityValue(ResolvedAction action) {
+        if (action.move() == null) {
+            return 0.0d;
+        }
+        String moveId = normalizeKey(action.move().id());
+        if ("STATUS".equals(action.kind())
+                || "PROTECT".equals(action.kind())
+                || "WIDE_GUARD".equals(action.kind())
+                || "QUICK_GUARD".equals(action.kind())) {
+            return STATUS_MOVE_VALUES.getOrDefault(moveId, 0.0d);
+        }
+        if ("ATTACK".equals(action.kind())) {
+            return ATTACK_UTILITY_VALUES.getOrDefault(moveId, 0.0d);
+        }
+        return 0.0d;
+    }
+
+    private boolean isRecoilMove(ResolvedAction action) {
+        if (action.move() == null) {
+            return false;
+        }
+        return RECOIL_MOVE_IDS.contains(normalizeKey(action.move().id()))
+                || RECOIL_MOVE_IDS.contains(normalizeKey(action.move().name()));
+    }
+
+    private double dealtForAction(CalculateDamageResult result) {
+        return expectedDamage(result);
+    }
+
+    private double unionProbability(List<Double> probabilities) {
+        double surviveProbability = 1.0d;
+        for (double probability : probabilities) {
+            double p = clampProbability(probability);
+            surviveProbability *= (1.0d - p);
+        }
+        return 1.0d - surviveProbability;
+    }
+
+    private double clampProbability(double value) {
+        return Math.max(0.0d, Math.min(1.0d, value));
     }
 
     private double round(double value) {
@@ -755,6 +946,9 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         }
 
         private ReplayMoveChoice toChoice() {
+            if ("SWITCH".equals(kind)) {
+                return new ReplayMoveChoice(attacker.slotId(), attacker.speciesName(), "Switch", null, null, kind);
+            }
             return new ReplayMoveChoice(
                     attacker.slotId(),
                     attacker.speciesName(),
