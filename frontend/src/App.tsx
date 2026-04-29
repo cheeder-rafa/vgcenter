@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/shell/AppShell'
 import { useSpeedTierStore } from './features/speed/store/useSpeedTierStore'
 import { CalculatorPage } from './pages/CalculatorPage'
+import { MatchupPage } from './pages/MatchupPage'
 import { PreviewPage } from './pages/PreviewPage'
 import { ReplayPage } from './pages/ReplayPage'
 import { SpeedTierPage } from './pages/SpeedTierPage'
@@ -34,6 +35,7 @@ function App() {
         <Route path="/preview" element={<PreviewPage />} />
         <Route path="/speed" element={<SpeedTierPage />} />
         <Route path="/replay" element={<ReplayPage />} />
+        <Route path="/matchup" element={<MatchupPage />} />
       </Route>
     </Routes>
   )
