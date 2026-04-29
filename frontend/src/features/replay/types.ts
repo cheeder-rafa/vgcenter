@@ -54,6 +54,7 @@ export type ReplayTimeline = {
   winner: string | null
   tie: boolean
   turns: ReplayTurn[]
+  revealedMovesBySpecies: Record<string, string[]>
 }
 
 export type ReplayMoveChoice = {

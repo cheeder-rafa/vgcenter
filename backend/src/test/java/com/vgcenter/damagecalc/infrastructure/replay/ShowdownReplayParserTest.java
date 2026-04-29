@@ -47,6 +47,26 @@ class ShowdownReplayParserTest {
     }
 
     @Test
+    void populatesRevealedMovesetsFromShowteamInBo3() throws IOException {
+        ReplayTimeline timeline =
+                parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("bo3-game1-2586638266.log")));
+
+        assertThat(timeline.revealedMovesBySpecies()).containsKey("Greninja").containsKey("Aerodactyl");
+        assertThat(timeline.revealedMovesBySpecies().get("Greninja"))
+                .containsExactly("Protect", "Extrasensory", "IceBeam", "WeatherBall");
+        assertThat(timeline.revealedMovesBySpecies().get("Aerodactyl"))
+                .containsExactly("RockSlide", "DualWingbeat", "Tailwind", "Protect");
+    }
+
+    @Test
+    void revealedMovesetsEmptyForSingleGame() throws IOException {
+        ReplayTimeline timeline =
+                parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("single-regma-2593988469.log")));
+
+        assertThat(timeline.revealedMovesBySpecies()).isEmpty();
+    }
+
+    @Test
     void keepsDamageAndFaintEventsInBattleOrder() throws IOException {
         ReplayTimeline timeline =
                 parser.parse(Files.readString(REPLAY_FIXTURE_DIR.resolve("single-regma-2593988469.log")));

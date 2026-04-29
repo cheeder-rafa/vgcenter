@@ -31,6 +31,7 @@ import com.vgcenter.damagecalc.web.dto.ReplayTimelineDto;
 import com.vgcenter.damagecalc.web.dto.ReplayTurnDto;
 import com.vgcenter.damagecalc.web.dto.TurnReviewDto;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -62,7 +63,8 @@ public class ReplayWebMapper {
                 timeline.sideBName(),
                 timeline.winner(),
                 timeline.tie(),
-                timeline.turns().stream().map(this::toTurnDto).toList());
+                timeline.turns().stream().map(this::toTurnDto).toList(),
+                timeline.revealedMovesBySpecies());
     }
 
     public ReplayEvaluateResponseDto toResponse(EvaluateReplayDecisionsResult result) {
@@ -165,7 +167,8 @@ public class ReplayWebMapper {
                 timeline.sideBName(),
                 timeline.winner(),
                 timeline.tie(),
-                timeline.turns().stream().map(this::toTurn).toList());
+                timeline.turns().stream().map(this::toTurn).toList(),
+                timeline.revealedMovesBySpecies() != null ? timeline.revealedMovesBySpecies() : Map.of());
     }
 
     private ReplayTurn toTurn(ReplayTurnDto turn) {

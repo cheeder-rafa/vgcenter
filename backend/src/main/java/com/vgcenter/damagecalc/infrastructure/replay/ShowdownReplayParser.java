@@ -10,6 +10,7 @@ import com.vgcenter.damagecalc.domain.replay.ReplayTimeline;
 import com.vgcenter.damagecalc.domain.replay.ReplayTurn;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -78,7 +79,12 @@ public class ShowdownReplayParser implements ReplayParser {
         }
 
         return new ReplayTimeline(
-                battleState.sideA.playerName, battleState.sideB.playerName, battleState.winner, battleState.tie, turns);
+                battleState.sideA.playerName,
+                battleState.sideB.playerName,
+                battleState.winner,
+                battleState.tie,
+                turns,
+                Collections.unmodifiableMap(battleState.revealedMovesBySpecies));
     }
 
     private static void applyBattleState(MutableBattleState battleState, String eventType, String[] parts) {
@@ -107,9 +113,32 @@ public class ShowdownReplayParser implements ReplayParser {
                 pokemon.hpCurrent = 0;
                 pokemon.fainted = true;
             }
+            case "showteam" -> parseShowteam(battleState, parts);
             case "win" -> battleState.winner = parts[2];
             case "tie" -> battleState.tie = true;
             default -> {}
+        }
+    }
+
+    private static void parseShowteam(MutableBattleState battleState, String[] parts) {
+        if (parts.length < 4) {
+            return;
+        }
+        // Rejoin the team data (everything after |showteam|p1|) then split by ] to get per-Pokémon entries.
+        String teamData = String.join("|", Arrays.asList(parts).subList(3, parts.length));
+        for (String entry : teamData.split("\\]")) {
+            try {
+                String[] fields = entry.split("\\|", -1);
+                // fields[0]=Species, fields[2]=Item, fields[3]=Ability, fields[4]=Move1,Move2,Move3,Move4
+                if (fields.length < 5 || fields[0].isBlank() || fields[4].isBlank()) {
+                    continue;
+                }
+                String speciesName = parseSpeciesName(fields[0]);
+                List<String> moves = Arrays.asList(fields[4].split(","));
+                battleState.revealedMovesBySpecies.put(speciesName, moves);
+            } catch (Exception ignored) {
+                // Malformed entry — skip silently
+            }
         }
     }
 
@@ -158,6 +187,7 @@ public class ShowdownReplayParser implements ReplayParser {
         private String terrain = "NONE";
         private String winner;
         private boolean tie;
+        private final Map<String, List<String>> revealedMovesBySpecies = new LinkedHashMap<>();
 
         private MutableSideState side(String sideId) {
             return "p1".equals(sideId) ? sideA : sideB;

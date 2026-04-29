@@ -1345,5 +1345,6 @@
       "arguments" : [ "slippybingus" ],
       "raw" : "|win|slippybingus"
     } ]
-  } ]
+  } ],
+  "revealedMovesBySpecies" : { }
 }

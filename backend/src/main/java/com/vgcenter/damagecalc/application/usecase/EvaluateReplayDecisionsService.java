@@ -49,16 +49,15 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         Map<String, MoveDefinition> moveLookup = moveLookup(command.regulation());
 
         boolean userIsP1 = !"P2".equals(command.userPlayer());
+        Map<String, List<MoveDefinition>> knownMoves = knownMovesForCommand(command, moveLookup);
         List<ReplayGameReview> games = new ArrayList<>();
         for (int index = 0; index < command.timelines().size(); index++) {
             ReplayTimeline timeline = command.timelines().get(index);
-            Map<String, List<MoveDefinition>> observedMoves =
-                    observedMovesForTimeline(timeline, speciesLookup, moveLookup);
             List<TurnReview> reviews = timeline.turns().parallelStream()
                     .map(turn -> reviewTurn(
                             command.regulation(),
                             turn,
-                            observedMoves,
+                            knownMoves,
                             speciesLookup,
                             moveLookup,
                             command.objective(),
@@ -72,7 +71,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
     private TurnReview reviewTurn(
             String regulation,
             ReplayTurn turn,
-            Map<String, List<MoveDefinition>> observedMoves,
+            Map<String, List<MoveDefinition>> knownMoves,
             Map<String, ResolvedSpecies> speciesLookup,
             Map<String, MoveDefinition> moveLookup,
             ReplayScoringWeights weights,
@@ -99,9 +98,9 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         Map<CalculateDamageCommand, CalculateDamageResult> turnCache = new ConcurrentHashMap<>();
 
         List<ResolvedAction> actualOpponentActions = actualActions(
-                turn.events(), opponentSideState, opponentActives, myActives, observedMoves, moveLookup, !userIsP1);
+                turn.events(), opponentSideState, opponentActives, myActives, knownMoves, moveLookup, !userIsP1);
         List<ResolvedAction> actualPlayedActions = actualActions(
-                turn.events(), userSideState, myActives, opponentActives, observedMoves, moveLookup, userIsP1);
+                turn.events(), userSideState, myActives, opponentActives, knownMoves, moveLookup, userIsP1);
 
         // Precompute opponent impact once — it's constant across all enumerated user lines.
         OpponentImpact opponentImpact =
@@ -113,7 +112,9 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         List<List<ResolvedAction>> choicesByActor = new ArrayList<>();
         for (ResolvedCombatant attacker : myActives) {
             choicesByActor.add(candidateActions(
-                    attacker, opponentActives, observedMoves.getOrDefault(attacker.slotId(), List.of())));
+                    attacker,
+                    opponentActives,
+                    knownMoves.getOrDefault(normalizeKey(attacker.speciesName()), List.of())));
         }
 
         List<ReplayDecisionLine> ranked =
@@ -290,7 +291,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             ReplaySideState actingSide,
             List<ResolvedCombatant> attackers,
             List<ResolvedCombatant> defenders,
-            Map<String, List<MoveDefinition>> observedMoves,
+            Map<String, List<MoveDefinition>> knownMoves,
             Map<String, MoveDefinition> moveLookup,
             boolean userSide) {
         Map<String, ResolvedCombatant> attackersBySlot = attackers.stream()
@@ -314,7 +315,7 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
             String moveName = event.arguments().get(1);
             MoveDefinition move = moveLookup.get(normalizeKey(moveName));
             if (move == null) {
-                move = observedMoves.getOrDefault(actorSlot, List.of()).stream()
+                move = knownMoves.getOrDefault(normalizeKey(attacker.speciesName()), List.of()).stream()
                         .filter(candidate -> candidate.name().equalsIgnoreCase(moveName))
                         .findFirst()
                         .orElse(null);
@@ -429,58 +430,63 @@ public final class EvaluateReplayDecisionsService implements EvaluateReplayDecis
         return lookup;
     }
 
-    private Map<String, List<MoveDefinition>> observedMovesForTimeline(
-            ReplayTimeline timeline,
-            Map<String, ResolvedSpecies> speciesLookup,
-            Map<String, MoveDefinition> moveLookup) {
-        Map<String, LinkedHashSet<MoveDefinition>> movesBySlot = new LinkedHashMap<>();
+    private Map<String, List<MoveDefinition>> knownMovesForCommand(
+            EvaluateReplayDecisionsCommand command, Map<String, MoveDefinition> moveLookup) {
+        Map<String, LinkedHashSet<MoveDefinition>> movesBySpecies = new LinkedHashMap<>();
 
-        for (ReplayTurn turn : timeline.turns()) {
-            for (ReplayPokemonState pokemon : turn.boardStateAtStart().sideA().activePokemon()) {
-                registerSpeciesMoves(movesBySlot, pokemon.slotId(), pokemon.speciesName(), speciesLookup, moveLookup);
-            }
-            for (ReplayPokemonState pokemon : turn.boardStateAtStart().sideB().activePokemon()) {
-                registerSpeciesMoves(movesBySlot, pokemon.slotId(), pokemon.speciesName(), speciesLookup, moveLookup);
-            }
-            for (ReplayEvent event : turn.events()) {
-                if (!"move".equals(event.type()) || event.arguments().size() < 2) {
-                    continue;
+        // Source 1: |showteam| revealed full movesets (BO3 only)
+        for (ReplayTimeline timeline : command.timelines()) {
+            for (Map.Entry<String, List<String>> entry :
+                    timeline.revealedMovesBySpecies().entrySet()) {
+                String speciesKey = normalizeKey(entry.getKey());
+                LinkedHashSet<MoveDefinition> moves =
+                        movesBySpecies.computeIfAbsent(speciesKey, ignored -> new LinkedHashSet<>());
+                for (String moveName : entry.getValue()) {
+                    MoveDefinition move = moveLookup.get(normalizeKey(moveName));
+                    if (move != null) {
+                        moves.add(move);
+                    }
                 }
-                String slotId = slotId(event.arguments().getFirst());
-                MoveDefinition move =
-                        moveLookup.get(normalizeKey(event.arguments().get(1)));
-                if (slotId != null && move != null) {
-                    movesBySlot
-                            .computeIfAbsent(slotId, ignored -> new LinkedHashSet<>())
-                            .add(move);
+            }
+        }
+
+        // Source 2: moves observed in |move| events (both BO1 and BO3)
+        for (ReplayTimeline timeline : command.timelines()) {
+            for (ReplayTurn turn : timeline.turns()) {
+                Map<String, String> slotToSpecies = new LinkedHashMap<>();
+                for (ReplayPokemonState pokemon :
+                        turn.boardStateAtStart().sideA().activePokemon()) {
+                    slotToSpecies.put(pokemon.slotId(), normalizeKey(pokemon.speciesName()));
+                }
+                for (ReplayPokemonState pokemon :
+                        turn.boardStateAtStart().sideB().activePokemon()) {
+                    slotToSpecies.put(pokemon.slotId(), normalizeKey(pokemon.speciesName()));
+                }
+                for (ReplayEvent event : turn.events()) {
+                    if (!"move".equals(event.type()) || event.arguments().size() < 2) {
+                        continue;
+                    }
+                    String slot = slotId(event.arguments().getFirst());
+                    String speciesKey = slotToSpecies.get(slot);
+                    if (speciesKey == null) {
+                        continue;
+                    }
+                    MoveDefinition move =
+                            moveLookup.get(normalizeKey(event.arguments().get(1)));
+                    if (move != null) {
+                        movesBySpecies
+                                .computeIfAbsent(speciesKey, ignored -> new LinkedHashSet<>())
+                                .add(move);
+                    }
                 }
             }
         }
 
         Map<String, List<MoveDefinition>> result = new LinkedHashMap<>();
-        for (Map.Entry<String, LinkedHashSet<MoveDefinition>> entry : movesBySlot.entrySet()) {
+        for (Map.Entry<String, LinkedHashSet<MoveDefinition>> entry : movesBySpecies.entrySet()) {
             result.put(entry.getKey(), List.copyOf(entry.getValue()));
         }
         return result;
-    }
-
-    private void registerSpeciesMoves(
-            Map<String, LinkedHashSet<MoveDefinition>> movesBySlot,
-            String slotId,
-            String speciesName,
-            Map<String, ResolvedSpecies> speciesLookup,
-            Map<String, MoveDefinition> moveLookup) {
-        ResolvedSpecies species = speciesLookup.get(normalizeKey(speciesName));
-        if (species == null) {
-            return;
-        }
-        LinkedHashSet<MoveDefinition> moves = movesBySlot.computeIfAbsent(slotId, ignored -> new LinkedHashSet<>());
-        for (String moveId : species.species().moveIds()) {
-            MoveDefinition move = moveLookup.get(normalizeKey(moveId));
-            if (move != null && move.basePower() > 0) {
-                moves.add(move);
-            }
-        }
     }
 
     private List<String> adaptationFlags(List<ReplayTimeline> timelines, boolean userIsP1) {

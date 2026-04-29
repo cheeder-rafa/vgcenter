@@ -58,7 +58,12 @@ class EvaluateReplayDecisionsServiceTest {
                                 move("p1a: Alpha", "Slam", "p2a: Gamma"),
                                 move("p1b: Beta", "Guard", "p1b: Beta"),
                                 move("p2a: Gamma", "Poke", "p1a: Alpha"),
-                                move("p2b: Delta", "Counter", "p1b: Beta")))));
+                                move("p2b: Delta", "Counter", "p1b: Beta")))),
+                Map.of(
+                        "Alpha", List.of("Slam", "Blast"),
+                        "Beta", List.of("Jab", "Guard"),
+                        "Gamma", List.of("Poke"),
+                        "Delta", List.of("Counter")));
 
         EvaluateReplayDecisionsResult result =
                 service.evaluate(new EvaluateReplayDecisionsCommand("M-A", List.of(timeline), DEFAULT_WEIGHTS, "P1"));
@@ -152,7 +157,8 @@ class EvaluateReplayDecisionsServiceTest {
                 timeline.sideBName(),
                 timeline.winner(),
                 timeline.tie(),
-                List.of(timeline.turns().getFirst()));
+                List.of(timeline.turns().getFirst()),
+                timeline.revealedMovesBySpecies());
     }
 
     private static ReplayTimeline loadTimeline(String filename) throws IOException {

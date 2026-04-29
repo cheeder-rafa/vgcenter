@@ -9,6 +9,8 @@ type Props = {
 
 export function GameSection({ game, timeline, showHeader }: Props) {
   const turnsByNumber = new Map(timeline?.turns.map((t) => [t.number, t]) ?? [])
+  const hasRevealedMoves =
+    timeline != null && Object.keys(timeline.revealedMovesBySpecies).length > 0
   return (
     <section className="flex flex-col gap-3">
       {showHeader ? (
@@ -22,6 +24,12 @@ export function GameSection({ game, timeline, showHeader }: Props) {
             </span>
           ) : null}
         </header>
+      ) : null}
+      {!hasRevealedMoves ? (
+        <p className="rounded-lg border border-arena-violet/15 bg-arena-night/40 px-3 py-2 font-display text-arena-2xs uppercase tracking-[0.14em] text-white/40">
+          Single-game replay — alternatives limited to moves observed in this game. Full movesets
+          aren't revealed without team preview.
+        </p>
       ) : null}
       <div className="flex flex-col gap-3">
         {game.turnReviews.map((review) => (
