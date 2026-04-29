@@ -349,21 +349,21 @@ function SourceCredits() {
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/10 pt-3 font-body text-xs leading-5 text-white/50">
       <span>Sources credited:</span>
       <a
-        href={META_SOURCES.limitless.url}
+        href={META_SOURCES.limitless.sourceUrl}
         target="_blank"
         rel="noreferrer"
         className="text-arena-cyan underline-offset-4 transition hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
       >
-        {META_SOURCES.limitless.name}
+        {META_SOURCES.limitless.sourceName}
       </a>
       <span aria-hidden="true">·</span>
       <a
-        href={META_SOURCES.pikalytics.url}
+        href={META_SOURCES.pikalytics.sourceUrl}
         target="_blank"
         rel="noreferrer"
         className="text-arena-cyan underline-offset-4 transition hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
       >
-        {META_SOURCES.pikalytics.name}
+        {META_SOURCES.pikalytics.sourceName}
       </a>
     </div>
   )
