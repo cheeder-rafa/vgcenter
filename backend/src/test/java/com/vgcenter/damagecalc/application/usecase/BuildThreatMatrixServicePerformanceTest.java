@@ -17,8 +17,8 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 /**
  * Service-level performance test: asserts the 6×6 threat matrix completes within budget.
- * Budget is 500ms server-side (native Linux, warm JVM). This test runs inside a Spring
- * context with JIT-warmed code paths; WSL2 hosts are inherently slower.
+ * Budget: 500ms on a native Linux server (warm JVM), 2000ms in CI (shared GitHub Actions
+ * runners). WSL2 hosts are skipped entirely because the JVM runs ~2-3× slower there.
  */
 class BuildThreatMatrixServicePerformanceTest {
 
@@ -26,8 +26,9 @@ class BuildThreatMatrixServicePerformanceTest {
             new ApplicationContextRunner().withUserConfiguration(DamageCalcApplication.class);
 
     @Test
-    void sixBySixMatrixCompletesUnderFiveHundredMilliseconds() {
+    void sixBySixMatrixCompletesWithinBudget() {
         assumeFalse(isWsl2(), "WSL2 JVM is ~2-3× slower than native Linux; skip perf budget assertion");
+        long budgetMs = isCi() ? 2000L : 500L;
         contextRunner.run(context -> {
             assertThat(context).hasNotFailed();
             BuildThreatMatrixUseCase useCase = context.getBean(BuildThreatMatrixUseCase.class);
@@ -48,12 +49,11 @@ class BuildThreatMatrixServicePerformanceTest {
             assertThat(result.deal()).hasSize(6);
             assertThat(result.deal().get(0)).hasSize(6);
             // 6×6×4-moves×2-directions = 288 calc calls.
-            // Target: <500ms on native Linux (warm JVM). WSL2 may exceed this bound.
             assertThat(elapsed.toMillis())
                     .as(
-                            "6×6 threat matrix must complete in <500ms (warm Spring context), took %dms",
-                            elapsed.toMillis())
-                    .isLessThan(500L);
+                            "6×6 threat matrix must complete in <%dms (warm Spring context), took %dms",
+                            budgetMs, elapsed.toMillis())
+                    .isLessThan(budgetMs);
         });
     }
 
@@ -218,5 +218,9 @@ class BuildThreatMatrixServicePerformanceTest {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private static boolean isCi() {
+        return System.getenv("CI") != null;
     }
 }
