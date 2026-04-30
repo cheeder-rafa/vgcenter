@@ -111,5 +111,16 @@ describe('analyzePrep', () => {
     expect(
       report.practicePrompts.some((prompt) => prompt.href === '/calc'),
     ).toBe(true)
+    expect(report.counterfinder.spreads.length).toBeGreaterThan(0)
+    expect(report.counterfinder.techMoves.length).toBeGreaterThan(0)
+    expect(report.counterfinder.replacements.length).toBeGreaterThan(0)
+    expect(report.counterfinder.spreads[0]?.reason.length).toBeGreaterThan(8)
+    expect(report.counterfinder.spreads[0]?.evidence.href).toContain('/calc?s=')
+    expect(report.counterfinder.techMoves[0]?.evidence.sourceName).toMatch(
+      /pikalytics/i,
+    )
+    expect(report.counterfinder.replacements[0]?.evidence.sourceName).toMatch(
+      /pikalytics/i,
+    )
   })
 })

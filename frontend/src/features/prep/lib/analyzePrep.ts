@@ -1,4 +1,8 @@
 import type { SavedPokemon } from '../../../store/useTeamsStore'
+import {
+  buildCounterfinder,
+  type CounterfinderReport,
+} from './buildCounterfinder'
 
 type Rail = [
   SavedPokemon | null,
@@ -40,6 +44,7 @@ export type PrepReport = {
   typeTags: string[]
   threats: PrepThreat[]
   practicePrompts: PracticePrompt[]
+  counterfinder: CounterfinderReport
 }
 
 export function analyzePrep({
@@ -82,6 +87,10 @@ export function analyzePrep({
       opponentTeam,
       fastestMine,
       fastestOpponent,
+      threats,
+    }),
+    counterfinder: buildCounterfinder({
+      mine: myTeam,
       threats,
     }),
   }

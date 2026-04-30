@@ -127,8 +127,17 @@ describe('TeamPrepPage', () => {
     expect(usePrepNotebookStore.getState().opponentNotes).toContain(
       'Dragonite lead',
     )
-    expect(screen.getByText(/Sneasler/i)).toBeInTheDocument()
-    expect(screen.getByText(/51.30%/i)).toBeInTheDocument()
+    expect(screen.getAllByText(/Sneasler/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/51.30%/i).length).toBeGreaterThan(0)
     expect(screen.getByText(/2 top picks/i)).toBeInTheDocument()
+    expect(screen.getByText(/Defensive spread suggestions/i)).toBeInTheDocument()
+    expect(screen.getByText(/Tech move suggestions/i)).toBeInTheDocument()
+    expect(screen.getByText(/Replacement candidates/i)).toBeInTheDocument()
+    expect(
+      screen.getAllByRole('link', { name: /open calc evidence/i }).length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole('link', { name: /open source/i }).length,
+    ).toBeGreaterThan(0)
   })
 })
