@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import type { CalculatorSide } from '../store/useCalculatorStore'
 import type { SavedPokemon } from '../../../store/useTeamsStore'
+import { FALLBACK_SRC, resolveSpriteId } from './spriteBadgeSources'
 
 type Props = {
   index: number
@@ -11,13 +12,12 @@ type Props = {
   onRemove: () => void
 }
 
-const FALLBACK_SRC = '/sprites/_unknown.png'
-
 function resolveSpriteSrc(spriteId: string | null) {
-  if (spriteId === null || spriteId.trim() === '') {
+  const resolvedSpriteId = resolveSpriteId(spriteId)
+  if (resolvedSpriteId === null) {
     return FALLBACK_SRC
   }
-  return `/sprites/${spriteId}.png`
+  return `/sprites/${resolvedSpriteId}.png`
 }
 
 export function SavedPokemonCard({

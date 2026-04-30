@@ -167,6 +167,8 @@ function DetailPanel({
     moveCategory,
     attackerSp: attackingCombatant.sp,
     defenderSp: defendingCombatant.sp,
+    attackerNatureId: attackingCombatant.natureId,
+    defenderNatureId: defendingCombatant.natureId,
     attackerStages: attackingCombatant.stages,
     defenderStages: defendingCombatant.stages,
     result,

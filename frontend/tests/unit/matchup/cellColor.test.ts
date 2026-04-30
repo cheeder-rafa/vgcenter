@@ -28,9 +28,15 @@ describe('cellColorClass', () => {
     expect(cls).toContain('ko')
   })
 
+  it('returns ohko class for damage >= 100%', () => {
+    const cls = cellColorClass(100, 120)
+    expect(cls).toContain('ohko')
+  })
+
   it('uses maxPct for threshold classification', () => {
     // maxPct drives the color bucket
     expect(cellColorClass(10, 76)).toContain('ko')
     expect(cellColorClass(10, 49)).toContain('mid')
+    expect(cellColorClass(10, 100)).toContain('ohko')
   })
 })

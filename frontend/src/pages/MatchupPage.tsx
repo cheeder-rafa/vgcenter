@@ -46,8 +46,9 @@ export function MatchupPage() {
               Threat Matrix
             </h1>
             <p className="mt-3 max-w-[70ch] font-body text-sm leading-6 text-white/68">
-              Paste two Showdown exports to see a 6x6 damage heatmap. Click any
-              cell to open that matchup in the calculator.
+              Paste two team inputs as Showdown export text or Pokepaste URLs to
+              see a 6x6 damage heatmap. Click any cell to open that matchup in
+              the calculator.
             </p>
           </div>
           <div className="rounded-sm border border-white/10 bg-white/[0.04] p-4">

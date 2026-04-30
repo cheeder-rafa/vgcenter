@@ -38,6 +38,21 @@ export function MatrixCell({ cell, attacker, defender, regulation, field, sideA,
     ? cell.bestMoveId.replace(/-/g, ' ')
     : '—'
 
+  const compactKoLabel = (() => {
+    if (cell.koChance.probability <= 0) {
+      return null
+    }
+    if (cell.koChance.hits === 1) {
+      return cell.koChance.probability >= 1
+        ? 'OHKO'
+        : `${(cell.koChance.probability * 100).toFixed(0)}% OHKO`
+    }
+    if (cell.koChance.probability >= 1) {
+      return `${cell.koChance.hits}HKO`
+    }
+    return `${(cell.koChance.probability * 100).toFixed(0)}% KO`
+  })()
+
   return (
     <div
       className="relative"
@@ -61,11 +76,9 @@ export function MatrixCell({ cell, attacker, defender, regulation, field, sideA,
           {cell.minPct.toFixed(0)}–{cell.maxPct.toFixed(0)}
           <span className="font-body text-[0.55rem] opacity-70">%</span>
         </div>
-        {cell.koChance.probability > 0 && (
+        {compactKoLabel !== null && (
           <div className="font-body text-[0.55rem] uppercase tracking-wide opacity-80">
-            {cell.koChance.probability >= 1
-              ? 'OHKO'
-              : `${(cell.koChance.probability * 100).toFixed(0)}% KO`}
+            {compactKoLabel}
           </div>
         )}
       </Link>

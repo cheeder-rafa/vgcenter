@@ -74,6 +74,58 @@ describe('ThreatMatrix', () => {
   it('shows take direction cells when toggled', () => {
     renderMatrix('take')
     expect(screen.getByText(/surf/i)).toBeInTheDocument()
+    expect(screen.getByText('Garchomp')).toBeInTheDocument()
+    expect(screen.getByText('Milotic')).toBeInTheDocument()
+  })
+
+  it('does not label guaranteed multi-hit ko as OHKO', () => {
+    const twoHitMatrix: ThreatMatrixResponse = {
+      deal: [
+        [
+          {
+            bestMoveId: 'dragon-claw',
+            minPct: 21,
+            maxPct: 24,
+            rolls: Array(16).fill(42),
+            koChance: { description: 'guaranteed 2HKO', probability: 1, hits: 2 },
+          },
+        ],
+      ],
+      take: [[makeCell('surf', 45, 55)]],
+    }
+    render(
+      <MemoryRouter>
+        <ThreatMatrix
+          matrix={twoHitMatrix}
+          labelsA={labelsA}
+          labelsB={labelsB}
+          direction="deal"
+          onDirectionChange={vi.fn()}
+          regulation="M-A"
+          field={{ weather: 'CLEAR', terrain: 'NONE', room: 'NONE' }}
+          sideA={{
+            reflect: false,
+            lightScreen: false,
+            auroraVeil: false,
+            friendGuard: false,
+            helpingHand: false,
+            tailwind: false,
+            protect: false,
+          }}
+          sideB={{
+            reflect: false,
+            lightScreen: false,
+            auroraVeil: false,
+            friendGuard: false,
+            helpingHand: false,
+            tailwind: false,
+            protect: false,
+          }}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('2HKO')).toBeInTheDocument()
   })
 
   it('calls onDirectionChange when toggle button is clicked', async () => {

@@ -16,6 +16,8 @@ type ReadoutContext = {
   moveCategory?: MoveCategory | null
   attackerSp?: Spread | null
   defenderSp?: Spread | null
+  attackerNatureId?: string | null
+  defenderNatureId?: string | null
   attackerStages?: StatStages | null
   defenderStages?: StatStages | null
 }
@@ -40,6 +42,8 @@ export function formatReadoutText({
   moveCategory,
   attackerSp,
   defenderSp,
+  attackerNatureId,
+  defenderNatureId,
   attackerStages,
   defenderStages,
 }: ReadoutContext): string {
@@ -54,6 +58,8 @@ export function formatReadoutText({
     moveCategory,
     attackerSp,
     defenderSp,
+    attackerNatureId,
+    defenderNatureId,
     attackerStages,
     defenderStages,
   })
@@ -71,6 +77,8 @@ export function formatSummaryText({
   moveCategory,
   attackerSp,
   defenderSp,
+  attackerNatureId,
+  defenderNatureId,
   attackerStages,
   defenderStages,
 }: ReadoutContext): string {
@@ -86,12 +94,26 @@ export function formatSummaryText({
     defenderStages,
   )
   const attackerLead = includeStatContext
-    ? formatAttackerLead(moveCategory, attackerSp, attackerStages, attacker)
+    ? formatAttackerLead(moveCategory, attackerSp, attackerNatureId, attacker)
     : attacker
   const defenderLead = includeStatContext
-    ? formatDefenderLead(moveCategory, defenderSp, defenderStages, defender)
+    ? formatDefenderLead(moveCategory, defenderSp, defenderNatureId, defender)
     : defender
-  return `${attackerLead} ${move} vs. ${defenderLead}${defenderSuffix}: ${result.min}-${result.max} (${percentRange}) -- ${koChanceText}`
+  const attackerStageNote = includeStatContext
+    ? formatStageNote(
+        relevantStage(attackerStages, moveCategory ?? 'STATUS', 'attacker'),
+        moveCategory === 'SPECIAL' ? 'SpA' : 'Atk',
+      )
+    : null
+  const defenderStageNote = includeStatContext
+    ? formatStageNote(
+        relevantStage(defenderStages, moveCategory ?? 'STATUS', 'defender'),
+        moveCategory === 'SPECIAL' ? 'SpD' : 'Def',
+      )
+    : null
+  const attackerSegment = joinSegments(attackerLead, attackerStageNote)
+  const defenderSegment = joinSegments(defenderLead, defenderStageNote)
+  return `${attackerSegment} ${move} vs. ${defenderSegment}${defenderSuffix}: ${result.min}-${result.max} (${percentRange}) -- ${koChanceText}`
 }
 
 export function formatRollsText(result: DamageResult): string {
@@ -146,6 +168,7 @@ function shouldIncludeStatContext(
   }
 
   return (
+    category === 'PHYSICAL' || category === 'SPECIAL' ||
     relevantStage(attackerStages, category, 'attacker') !== 0 ||
     relevantStage(defenderStages, category, 'defender') !== 0
   )
@@ -154,21 +177,19 @@ function shouldIncludeStatContext(
 function formatAttackerLead(
   category: MoveCategory | null | undefined,
   spread: Spread | null | undefined,
-  stages: StatStages | null | undefined,
+  natureId: string | null | undefined,
   name: string,
 ): string {
   const resolvedSpread = spread ?? EMPTY_SPREAD
   if (category === 'SPECIAL') {
     return joinSegments(
-      formatStageValue(relevantStage(stages, category, 'attacker')),
-      `${resolvedSpread.spa} SpA`,
+      `${resolvedSpread.spa}${natureModifier(natureId, 'spa')} SpA`,
       name,
     )
   }
 
   return joinSegments(
-    formatStageValue(relevantStage(stages, 'PHYSICAL', 'attacker')),
-    `${resolvedSpread.atk} Atk`,
+    `${resolvedSpread.atk}${natureModifier(natureId, 'atk')} Atk`,
     name,
   )
 }
@@ -176,7 +197,7 @@ function formatAttackerLead(
 function formatDefenderLead(
   category: MoveCategory | null | undefined,
   spread: Spread | null | undefined,
-  stages: StatStages | null | undefined,
+  natureId: string | null | undefined,
   name: string,
 ): string {
   const resolvedSpread = spread ?? EMPTY_SPREAD
@@ -185,14 +206,7 @@ function formatDefenderLead(
     category === 'SPECIAL' ? resolvedSpread.spd : resolvedSpread.def
 
   return joinSegments(
-    formatStageValue(
-      relevantStage(
-        stages,
-        category === 'SPECIAL' ? 'SPECIAL' : 'PHYSICAL',
-        'defender',
-      ),
-    ),
-    `${resolvedSpread.hp} HP / ${defenseValue} ${defenseLabel}`,
+    `${resolvedSpread.hp} HP / ${defenseValue}${natureModifier(natureId, category === 'SPECIAL' ? 'spd' : 'def')} ${defenseLabel}`,
     name,
   )
 }
@@ -213,11 +227,41 @@ function relevantStage(
   return category === 'SPECIAL' ? stages.spd : stages.def
 }
 
-function formatStageValue(stage: number): string | null {
+function formatStageNote(stage: number, statLabel: 'Atk' | 'Def' | 'SpA' | 'SpD'): string | null {
   if (stage === 0) {
     return null
   }
-  return `${stage > 0 ? '+' : ''}${stage}`
+  return `(${stage > 0 ? '+' : ''}${stage} ${statLabel})`
+}
+
+function natureModifier(
+  natureId: string | null | undefined,
+  stat: 'atk' | 'def' | 'spa' | 'spd',
+): string {
+  switch ((natureId ?? '').toLowerCase()) {
+    case 'adamant':
+    case 'lonely':
+    case 'brave':
+    case 'naughty':
+      return stat === 'atk' ? '+' : stat === 'spa' ? '-' : ''
+    case 'bold':
+    case 'impish':
+    case 'lax':
+    case 'relaxed':
+      return stat === 'def' ? '+' : stat === 'atk' ? '-' : ''
+    case 'modest':
+    case 'mild':
+    case 'rash':
+    case 'quiet':
+      return stat === 'spa' ? '+' : stat === 'atk' ? '-' : ''
+    case 'calm':
+    case 'careful':
+    case 'gentle':
+    case 'sassy':
+      return stat === 'spd' ? '+' : stat === 'atk' ? '-' : ''
+    default:
+      return ''
+  }
 }
 
 function joinSegments(...parts: Array<string | null | undefined>) {

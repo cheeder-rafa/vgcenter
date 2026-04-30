@@ -154,11 +154,13 @@ describe('formatSummaryText', () => {
         moveCategory: 'PHYSICAL',
         attackerSp: { ...zeroSpread, atk: 32 },
         defenderSp: zeroSpread,
+        attackerNatureId: 'adamant',
+        defenderNatureId: 'serious',
         attackerStages: { ...zeroStages, atk: 1 },
         defenderStages: { ...zeroStages, def: -1 },
       }),
     ).toBe(
-      '+1 32 Atk Sneasler Close Combat vs. -1 0 HP / 0 Def Absol: 702-818 (501.4 - 584.2%) -- guaranteed OHKO',
+      '32+ Atk Sneasler (+1 Atk) Close Combat vs. 0 HP / 0 Def Absol (-1 Def): 702-818 (501.4 - 584.2%) -- guaranteed OHKO',
     )
   })
 
@@ -172,29 +174,44 @@ describe('formatSummaryText', () => {
         moveCategory: 'SPECIAL',
         attackerSp: { ...zeroSpread, spa: 24 },
         defenderSp: { ...zeroSpread, hp: 12, spd: 20 },
+        attackerNatureId: 'modest',
+        defenderNatureId: 'calm',
         attackerStages: { ...zeroStages, spa: 2 },
         defenderStages: { ...zeroStages, spd: 1 },
       }),
     ).toContain(
-      '+2 24 SpA Flutter Mane Moonblast vs. +1 12 HP / 20 SpD Goodra:',
+      '24+ SpA Flutter Mane (+2 SpA) Moonblast vs. 12 HP / 20+ SpD Goodra (+1 SpD):',
     )
   })
 
-  it('keeps the terse summary when no relevant modifiers are active', () => {
+  it('includes SP and nature context even when stages are neutral', () => {
     expect(
       formatSummaryText({
         attackerName: 'Sneasler',
-        defenderName: 'Absol',
+        defenderName: 'Tyranitar',
         moveName: 'Close Combat',
-        result,
+        result: {
+          rolls: [340, 344, 348, 352, 356, 360, 364, 368, 372, 376, 380, 384, 388, 392, 400, 408],
+          min: 340,
+          max: 408,
+          minPct: 165.0,
+          maxPct: 198.1,
+          koChance: {
+            description: 'guaranteed OHKO',
+            probability: 1,
+            hits: 1,
+          },
+        },
         moveCategory: 'PHYSICAL',
-        attackerSp: { ...zeroSpread, atk: 32 },
-        defenderSp: zeroSpread,
+        attackerSp: { ...zeroSpread, atk: 1 },
+        defenderSp: { ...zeroSpread, hp: 31, def: 1 },
+        attackerNatureId: 'adamant',
+        defenderNatureId: 'serious',
         attackerStages: zeroStages,
         defenderStages: zeroStages,
       }),
     ).toBe(
-      'Sneasler Close Combat vs. Absol: 108-126 (64.6 - 75.4%) -- guaranteed 2HKO',
+      '1+ Atk Sneasler Close Combat vs. 31 HP / 1 Def Tyranitar: 340-408 (165.0 - 198.1%) -- guaranteed OHKO',
     )
   })
 })

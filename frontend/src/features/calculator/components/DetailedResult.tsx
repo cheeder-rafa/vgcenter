@@ -75,6 +75,8 @@ export function DetailedResult({
             moveCategory: move?.category ?? null,
             attackerSp: attackingCombatant.sp,
             defenderSp: defendingCombatant.sp,
+            attackerNatureId: attackingCombatant.natureId,
+            defenderNatureId: defendingCombatant.natureId,
             attackerStages: attackingCombatant.stages,
             defenderStages: defendingCombatant.stages,
             result,
@@ -89,6 +91,8 @@ export function DetailedResult({
       move?.category,
       attackingCombatant.sp,
       defendingCombatant.sp,
+      attackingCombatant.natureId,
+      defendingCombatant.natureId,
       attackingCombatant.stages,
       defendingCombatant.stages,
       result,
@@ -178,6 +182,8 @@ export function DetailedResult({
             moveCategory={move?.category ?? null}
             attackerSp={attackingCombatant.sp}
             defenderSp={defendingCombatant.sp}
+            attackerNatureId={attackingCombatant.natureId}
+            defenderNatureId={defendingCombatant.natureId}
             attackerStages={attackingCombatant.stages}
             defenderStages={defendingCombatant.stages}
             result={result}
@@ -222,6 +228,8 @@ function LiveBlock({
   moveCategory,
   attackerSp,
   defenderSp,
+  attackerNatureId,
+  defenderNatureId,
   attackerStages,
   defenderStages,
   result,
@@ -240,6 +248,8 @@ function LiveBlock({
     | null
   attackerSp: ReturnType<typeof useCalculatorStore.getState>['attacker']['sp']
   defenderSp: ReturnType<typeof useCalculatorStore.getState>['defender']['sp']
+  attackerNatureId: ReturnType<typeof useCalculatorStore.getState>['attacker']['natureId']
+  defenderNatureId: ReturnType<typeof useCalculatorStore.getState>['defender']['natureId']
   attackerStages: ReturnType<
     typeof useCalculatorStore.getState
   >['attacker']['stages']
@@ -260,6 +270,8 @@ function LiveBlock({
     moveCategory,
     attackerSp,
     defenderSp,
+    attackerNatureId,
+    defenderNatureId,
     attackerStages,
     defenderStages,
     result,

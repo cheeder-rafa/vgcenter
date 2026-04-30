@@ -241,6 +241,8 @@ export function CalculatorPage() {
         megaActive: attacker.megaActive,
         megaFormId: attacker.megaFormId,
         types: (attacker.types ?? []).flatMap((t) => (t !== null ? [t] : [])),
+        sp: attacker.sp,
+        natureId: attacker.natureId,
       },
       defender: {
         name: defenderName,
@@ -248,6 +250,8 @@ export function CalculatorPage() {
         megaActive: defender.megaActive,
         megaFormId: defender.megaFormId,
         types: (defender.types ?? []).flatMap((t) => (t !== null ? [t] : [])),
+        sp: defender.sp,
+        natureId: defender.natureId,
       },
       attackerMoves: attackerMoveEntries,
       defenderMoves: defenderMoveEntries,

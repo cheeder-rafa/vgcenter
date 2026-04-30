@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 
+import { resolveSpriteId } from '../features/calculator/components/spriteBadgeSources'
 import { useSpeedTiers } from '../features/speed/hooks/useSpeedTiers'
 import { META_TOP_IDS } from '../features/speed/data/meta-top'
 import type { SpeedTierModifiers, SpeedTierRow } from '../features/speed/types'
@@ -354,9 +355,13 @@ function SpeedGroup({
 }
 
 function MiniSprite({ speciesId, name }: { speciesId: string; name: string }) {
+  const spriteId = resolveSpriteId(speciesId)
+  if (spriteId === null) {
+    return null
+  }
   return (
     <img
-      src={`/sprites/${speciesId}.png`}
+      src={`/sprites/${spriteId}.png`}
       alt={name}
       width={28}
       height={28}

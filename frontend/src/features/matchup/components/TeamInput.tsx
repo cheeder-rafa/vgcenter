@@ -15,10 +15,10 @@ export function TeamInput({ label, value, onChange, onImport, imported, loading,
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Paste Showdown export here…"
+        placeholder="Paste Showdown export or Pokepaste URL here…"
         rows={6}
         className="arena-input w-full resize-none font-mono text-xs"
-        aria-label={`${label} team Showdown export`}
+        aria-label={`${label} team Showdown export or Pokepaste URL`}
       />
       <div className="flex items-center gap-3">
         <button
