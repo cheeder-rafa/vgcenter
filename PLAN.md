@@ -915,6 +915,91 @@ stop after the script + fallback asset + docs are in place. Commit.
 
 After all four prompts: open the PR targeting `develop`, run `docker compose up --build`, and walk through the Phase F smoke checklist.
 
+## Corrections Addendum — Threat Matrix, readout, forms, and PNG polish
+
+This follow-on rollout closes the remaining correctness and presentation gaps discovered after the first Corrections Pass. Scope stays on `develop`. Do not change the damage core or the Regulation M-A dataset contents beyond importer alias acceptance and sprite coverage.
+
+### Scope
+
+- **Threat Matrix**
+  - Fix incorrect KO legends so `OHKO` only appears for actual one-hit lethal cells.
+  - Add a dedicated OHKO color bucket (`>= 100%`) plus a subtle highlight treatment so lethal cells stand out.
+  - Fix `damage I take` so rows still show your team, columns still show the opponent, and click-through opens the correct attacker/defender pair in `/calc`.
+  - Let each matrix input accept either a Showdown paste or a Pokepaste URL; auto-detect client-side and keep backend import endpoints explicit.
+- **Calculator**
+  - Update copied/readout summary text to always show the relevant SP spread for damaging moves.
+  - Include Showdown-style nature markers in the relevant attacking/defending stats (`1+ Atk`, `20+ SpD`, etc.).
+  - Include any non-zero relevant stage changes in the summary text as explicit modifiers.
+- **Alternate forms**
+  - Accept canonical root aliases during import for forms users type without the exact dataset suffix.
+  - Cover the reported cases (`Aegislash`, `Maushold-Four`) plus any other audited Regulation M-A forms that currently fail import or image lookup.
+  - Centralize sprite asset resolution so calculator, saved teams, speed tiers, and other consumers share the same alias/fallback logic.
+- **Export PNG**
+  - Use the open space near the move damage columns to render compact SP spread summaries for both combatants.
+
+### Implementation and verification
+
+1. Branch from `develop` as `feature/corrections-addendum-plan` for docs, then `feature/corrections-addendum` for implementation. Both PRs target `develop`.
+2. TDD first for matrix legend buckets, take-mode labels/click-through, input auto-detect, summary formatting, alternate-form alias resolution, and PNG spread rendering.
+3. Frontend skill chain for UI-facing commits:
+   `impeccable -> vercel-react-best-practices -> vercel-composition-patterns -> web-design-guidelines -> polish`
+4. Verification before the implementation commit/PR:
+   - Backend: `./mvnw spotless:apply && ./mvnw verify`
+   - Frontend: `pnpm --dir frontend lint && pnpm --dir frontend typecheck && pnpm --dir frontend test && pnpm --dir frontend build`
+5. Manual spot checks:
+   - one non-lethal low-damage cell no longer says `OHKO`
+   - one lethal cell uses the dedicated OHKO treatment
+   - one `damage I take` matrix keeps the correct team labels and click-through matchup
+   - one Showdown paste import and one Pokepaste URL import both work in Threat Matrix
+   - one calculator readout shows SP context, nature marker, and any non-zero stage modifiers
+   - one PNG export shows SP summaries in the previously blank space
+
+### Ready-to-paste rollout prompt
+
+```text
+Read AGENTS.md, CLAUDE.md, and PLAN.md. Ignore current branch. Base all work on develop.
+
+Phase 0 — docs PR:
+1. git checkout develop && git pull --ff-only && git checkout -b feature/corrections-addendum-plan
+2. Add a Corrections Addendum section to PLAN.md plus matching active-work guidance in AGENTS.md and CLAUDE.md. Keep AGENTS.md and CLAUDE.md byte-identical.
+3. Include scope for Threat Matrix fixes, calculator readout formatting, alternate-form import/sprite coverage, and PNG polish.
+4. Include verification commands, frontend skill chain, and a stop-after-PR rule targeting develop.
+5. Verify:
+   cmp AGENTS.md CLAUDE.md
+   rg "Corrections Addendum" PLAN.md AGENTS.md CLAUDE.md
+6. Commit: docs(plan): add corrections addendum rollout
+7. git push -u origin feature/corrections-addendum-plan
+8. Open a PR targeting develop using the repo template. Stop.
+
+After the docs PR merges, start implementation:
+1. git checkout develop && git pull --ff-only && git checkout -b feature/corrections-addendum
+2. TDD first for:
+   - Threat Matrix legend/color bucket tests
+   - Threat Matrix take-mode labels and /calc click-through tests
+   - Threat Matrix import auto-detect tests
+   - formatReadoutText summary formatting tests
+   - ShowdownTextParser alternate-form alias tests
+   - sprite alias/fallback tests
+   - PNG export spread rendering tests
+3. Implement:
+   - matrix KO legend fix + dedicated OHKO bucket/highlight
+   - matrix take-mode row/column/click-through correctness
+   - Showdown-or-Pokepaste auto-detect for Threat Matrix inputs
+   - SP + nature + stage-aware calculator summary text
+   - alternate-form import aliases and shared sprite resolution, including Aegislash and Maushold
+   - PNG SP summaries in the unused space
+4. Run frontend skills in order:
+   impeccable -> vercel-react-best-practices -> vercel-composition-patterns -> web-design-guidelines -> polish
+5. Verify:
+   ./mvnw spotless:apply
+   ./mvnw verify
+   pnpm --dir frontend lint
+   pnpm --dir frontend typecheck
+   pnpm --dir frontend test
+   pnpm --dir frontend build
+6. Commit with Conventional Commits, push, open a PR targeting develop, and stop. Do not self-merge.
+```
+
 ---
 
 ## Sub-project 2 — Preview Coach
