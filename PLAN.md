@@ -1412,9 +1412,9 @@ Use github:yeet to publish the branch and open a PR targeting develop. Do not me
 
 ### Context
 
-VGCenter has moved beyond a single damage calculator into a competitive prep workspace. The current Session 0 branch adds `/prep`, a Team Prep page that connects saved teams, threat watchlists, local notes, practice prompts, and a credited Meta Feed. The remaining v1.4 work turns that static workspace into a data-backed product loop: import teams, compare against the current meta, patch weaknesses, review replays, drill decisions, and return with less setup friction.
+VGCenter has moved beyond a single damage calculator into a competitive prep workspace. The current Session 0 branch adds `/prep`, a Team Prep page that connects saved teams, threat watchlists, local notes, prep checks, and a credited Meta Feed. The remaining v1.4 work turns that static workspace into a data-backed product loop: import teams, compare against the current meta, patch weaknesses, review replays, and return with less setup friction.
 
-This sub-project is intentionally split into **8 sessions**. Each session is its own branch from `develop`, its own PR targeting `develop`, and must stop after the PR is opened. Do not mix sessions in one branch except **Session 0**, which intentionally includes the already-implemented Team Prep feature plus this roadmap documentation in one commit.
+This sub-project is intentionally split into **7 sessions**. Each session is its own branch from `develop`, its own PR targeting `develop`, and must stop after the PR is opened. Do not mix sessions in one branch except **Session 0**, which intentionally includes the already-implemented Team Prep feature plus this roadmap documentation in one commit.
 
 ### Source-crediting policy
 
@@ -1440,7 +1440,7 @@ Current branch: `feature/vgcenter-product-enhancements`.
 
 Scope:
 
-- Ship `/prep` Team Prep workspace with readiness summary, speed posture, type tags, practice prompts, threat ranking, persistent watchlist, local notebook, and credited Meta Feed.
+- Ship `/prep` Team Prep workspace with readiness summary, speed posture, type tags, prep checks, threat ranking, persistent watchlist, local notebook, and credited Meta Feed.
 - Ship calculator FieldPanel active modifier summary and Reset Field action.
 - Update `PLAN.md`, `AGENTS.md`, and `CLAUDE.md` with this v1.4 roadmap.
 - Keep `AGENTS.md` and `CLAUDE.md` byte-identical.
@@ -1547,25 +1547,7 @@ Acceptance:
 - Saved findings include replay source/turn reference.
 - Team Prep remains useful without any saved replay findings.
 
-#### Session 6 — Practice Mode
-
-Goal: create repeat-use drills from the user's own prep board.
-
-Implementation:
-
-- Add `/practice` route.
-- Generate drills from saved teams, watched threats, meta threats, and replay findings.
-- Initial drill types: `Does this survive?`, `Which move has best KO odds?`, `Which lead is safest?`.
-- Each answer includes calculator-backed explanation.
-- Store practice history locally only.
-
-Acceptance:
-
-- Tests cover drill generation and answer explanation.
-- Practice works with partial team data and gives a useful empty state.
-- No server persistence required.
-
-#### Session 7 — Onboarding and UX polish
+#### Session 6 — Onboarding and UX polish
 
 Goal: make the app easier to adopt and faster to use repeatedly.
 
@@ -1709,24 +1691,7 @@ Run full applicable verification. Conventional Commit. Push and open PR targetin
 #### Session 6 prompt
 
 ```text
-Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 6: Practice Mode.
-
-Branch from develop:
-  git checkout develop && git pull --ff-only && git checkout -b feature/practice-mode
-
-TDD first. Add /practice:
-- Generate drills from saved teams, watched threats, meta threats, and replay findings.
-- Drill types: Does this survive? Which move has best KO odds? Which lead is safest?
-- Show calculator-backed answer explanations.
-- Store local practice history only.
-
-Run frontend verification. Conventional Commit. Push and open PR targeting develop. Stop.
-```
-
-#### Session 7 prompt
-
-```text
-Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 7: Onboarding and UX polish.
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 6: Onboarding and UX polish.
 
 Branch from develop:
   git checkout develop && git pull --ff-only && git checkout -b feature/onboarding-ux-polish

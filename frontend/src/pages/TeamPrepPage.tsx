@@ -69,8 +69,9 @@ export function TeamPrepPage() {
               Team Prep
             </h1>
             <p className="mt-3 max-w-[70ch] font-body text-sm leading-6 text-white/68">
-              Connect saved teams, matchup checks, replay notes, and practice
-              prompts into one scouting board before a ladder session or event.
+              Connect saved teams, matchup checks, replay notes, and next-step
+              prep checks into one scouting board before a ladder session or
+              event.
             </p>
           </div>
           <div className="rounded-sm border border-white/10 bg-white/[0.04] p-4">
@@ -161,7 +162,7 @@ export function TeamPrepPage() {
                 />
               </div>
 
-              <PracticeQueue prompts={report.practicePrompts} />
+              <PrepCheckQueue prompts={report.prepChecks} />
             </div>
           </article>
 
@@ -540,17 +541,17 @@ function SignalCard({
   )
 }
 
-function PracticeQueue({
+function PrepCheckQueue({
   prompts,
 }: {
-  prompts: ReturnType<typeof analyzePrep>['practicePrompts']
+  prompts: ReturnType<typeof analyzePrep>['prepChecks']
 }) {
   return (
     <div className="grid gap-3">
       <div>
-        <p className="arena-label text-arena-sun">Practice queue</p>
+        <p className="arena-label text-arena-sun">Prep queue</p>
         <h3 className="mt-1 font-display text-xl font-black text-white">
-          Drills for this prep board
+          Next checks for this board
         </h3>
       </div>
       <div className="grid gap-3 md:grid-cols-2">

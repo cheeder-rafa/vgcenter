@@ -25,7 +25,7 @@ export type PrepThreat = {
   watched: boolean
 }
 
-export type PracticePrompt = {
+export type PrepCheck = {
   title: string
   detail: string
   href: string
@@ -43,7 +43,7 @@ export type PrepReport = {
   averageSpeedOpponent: number | null
   typeTags: string[]
   threats: PrepThreat[]
-  practicePrompts: PracticePrompt[]
+  prepChecks: PrepCheck[]
   counterfinder: CounterfinderReport
 }
 
@@ -82,7 +82,7 @@ export function analyzePrep({
     averageSpeedOpponent: averageSpeed(opponentTeam),
     typeTags,
     threats,
-    practicePrompts: buildPracticePrompts({
+    prepChecks: buildPrepChecks({
       myTeam,
       opponentTeam,
       fastestMine,
@@ -118,10 +118,10 @@ function getNextAction(
     return 'Run Preview Coach, mark the threats you respect, then review one replay pattern.'
   }
   if (myCount === 0) {
-    return 'Import your team from Calc so this workspace can rank threats and build drills.'
+    return 'Import your team from Calc so this workspace can rank threats and guide next checks.'
   }
   if (opponentCount === 0) {
-    return 'Import or save the opposing team to unlock threat ranking and practice prompts.'
+    return 'Import or save the opposing team to unlock threat ranking and prep checks.'
   }
   return 'Fill the missing team slots or continue with a partial scouting profile.'
 }
@@ -166,7 +166,7 @@ function toThreat(pokemon: SavedPokemon, watched: Set<string>): PrepThreat {
   }
 }
 
-function buildPracticePrompts({
+function buildPrepChecks({
   myTeam,
   opponentTeam,
   fastestMine,
@@ -178,7 +178,7 @@ function buildPracticePrompts({
   fastestMine: SavedPokemon | null
   fastestOpponent: SavedPokemon | null
   threats: PrepThreat[]
-}): PracticePrompt[] {
+}): PrepCheck[] {
   if (myTeam.length === 0 || opponentTeam.length === 0) {
     return [
       {
@@ -192,7 +192,7 @@ function buildPracticePrompts({
   }
 
   const topThreat = threats[0]
-  const prompts: PracticePrompt[] = []
+  const prompts: PrepCheck[] = []
 
   if (topThreat !== undefined) {
     prompts.push({

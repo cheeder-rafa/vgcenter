@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { ThreatMatrix } from '../../../src/features/matchup/components/ThreatMatrix'
 import type { ThreatMatrixResponse } from '../../../src/features/matchup/types'
+import { MatchupPage } from '../../../src/pages/MatchupPage'
 
 function makeCell(bestMoveId: string, minPct: number, maxPct: number) {
   return {
@@ -117,5 +118,15 @@ describe('ThreatMatrix', () => {
     const links = screen.getAllByRole('link')
     expect(links.length).toBeGreaterThanOrEqual(1)
     expect(links[0]).toHaveAttribute('href', expect.stringContaining('/calc'))
+  })
+
+  it('renders the matchup page on the shared arena background', () => {
+    render(
+      <MemoryRouter>
+        <MatchupPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByTestId('matchup-shell')).toHaveClass('bg-arena-gradient')
   })
 })
