@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/calc', label: 'Calculator', isNew: false },
   { to: '/prep', label: 'Team Prep', isNew: true },
   { to: '/preview', label: 'Preview Coach', isNew: false },
+  { to: '/practice', label: 'Practice Mode', isNew: true },
   { to: '/matchup', label: 'Threat Matrix', isNew: true },
   { to: '/speed', label: 'Speed Tiers', isNew: false },
   { to: '/replay', label: 'Replay Autopsy', isNew: false },

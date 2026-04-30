@@ -41,6 +41,18 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
+  it('renders Practice Mode at /practice', () => {
+    render(
+      <MemoryRouter initialEntries={['/practice']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: /practice mode/i }),
+    ).toBeInTheDocument()
+  })
+
   it('redirects / to /calc', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
