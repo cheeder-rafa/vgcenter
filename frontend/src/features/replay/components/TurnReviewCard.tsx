@@ -1,9 +1,17 @@
+import type { ReplayPrepFindingType } from '../../prep/store/usePrepNotebookStore'
 import type { ReplayTurn, TurnReview } from '../types'
 import { DecisionLineRow } from './DecisionLineRow'
 
 type Props = {
   review: TurnReview
   turn: ReplayTurn | undefined
+  onSaveFinding: (payload: {
+    type: ReplayPrepFindingType
+    title: string
+    note: string
+    turnNumber: number
+  }) => void
+  findingType: ReplayPrepFindingType
 }
 
 const VERDICT_STYLES: Record<
@@ -27,7 +35,7 @@ const VERDICT_STYLES: Record<
   },
 }
 
-export function TurnReviewCard({ review, turn }: Props) {
+export function TurnReviewCard({ review, turn, onSaveFinding, findingType }: Props) {
   const verdict = VERDICT_STYLES[review.verdict] ?? VERDICT_STYLES.ACCEPTABLE
   const top3 = review.rankedAlternatives.slice(0, 3)
   const allScores = [review.played.score, ...top3.map((line) => line.score)]
@@ -121,6 +129,35 @@ export function TurnReviewCard({ review, turn }: Props) {
           </p>
         </div>
       ) : null}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          className="rounded-full border border-arena-cyan/40 bg-arena-cyan/[0.08] px-3 py-1.5 font-display text-[0.64rem] uppercase tracking-[0.14em] text-arena-cyan transition hover:text-white"
+          onClick={() =>
+            onSaveFinding({
+              type: findingType,
+              title: `${findingLabel(findingType)} on turn ${review.turnNumber}`,
+              note: review.narrative || review.advisory || 'Replay finding saved from autopsy.',
+              turnNumber: review.turnNumber,
+            })
+          }
+        >
+          Save to Team Prep
+        </button>
+      </div>
     </article>
   )
+}
+
+function findingLabel(type: ReplayPrepFindingType): string {
+  switch (type) {
+    case 'turning-point':
+      return 'Turning point'
+    case 'missed-ko':
+      return 'Missed KO'
+    case 'risky-line':
+      return 'Risky line'
+    default:
+      return 'Adaptation note'
+  }
 }

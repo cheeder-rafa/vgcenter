@@ -7,13 +7,34 @@ type PrepNotebookState = {
   opponentNotes: string
   gamePlanNotes: string
   watchedThreatIds: string[]
+  replayFindings: ReplayPrepFinding[]
   setEventName: (value: string) => void
   setOpponentName: (value: string) => void
   setOpponentNotes: (value: string) => void
   setGamePlanNotes: (value: string) => void
   toggleWatchedThreat: (id: string) => void
+  addReplayFinding: (finding: ReplayPrepFindingInput) => void
   reset: () => void
 }
+
+export type ReplayPrepFindingType =
+  | 'turning-point'
+  | 'missed-ko'
+  | 'risky-line'
+  | 'adaptation-note'
+
+export type ReplayPrepFinding = {
+  id: string
+  type: ReplayPrepFindingType
+  title: string
+  note: string
+  source: string
+  gameNumber: number
+  turnNumber: number
+  createdAt: string
+}
+
+export type ReplayPrepFindingInput = Omit<ReplayPrepFinding, 'id' | 'createdAt'>
 
 function createInitialState() {
   return {
@@ -22,6 +43,7 @@ function createInitialState() {
     opponentNotes: '',
     gamePlanNotes: '',
     watchedThreatIds: [],
+    replayFindings: [],
   }
 }
 
@@ -39,6 +61,17 @@ export const usePrepNotebookStore = create<PrepNotebookState>()(
             ? state.watchedThreatIds.filter((candidate) => candidate !== id)
             : [...state.watchedThreatIds, id],
         })),
+      addReplayFinding: (finding) =>
+        set((state) => ({
+          replayFindings: [
+            {
+              ...finding,
+              id: `${finding.type}-${finding.gameNumber}-${finding.turnNumber}-${Date.now()}`,
+              createdAt: new Date().toISOString(),
+            },
+            ...state.replayFindings,
+          ],
+        })),
       reset: () => set(createInitialState()),
     }),
     {
@@ -50,6 +83,7 @@ export const usePrepNotebookStore = create<PrepNotebookState>()(
         opponentNotes: state.opponentNotes,
         gamePlanNotes: state.gamePlanNotes,
         watchedThreatIds: state.watchedThreatIds,
+        replayFindings: state.replayFindings,
       }),
       storage: createJSONStorage(() => localStorage),
     },

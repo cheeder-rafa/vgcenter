@@ -36,6 +36,7 @@ export function TeamPrepPage() {
   const watchedThreatIds = usePrepNotebookStore(
     (state) => state.watchedThreatIds,
   )
+  const replayFindings = usePrepNotebookStore((state) => state.replayFindings)
   const setEventName = usePrepNotebookStore((state) => state.setEventName)
   const setOpponentName = usePrepNotebookStore((state) => state.setOpponentName)
   const setOpponentNotes = usePrepNotebookStore(
@@ -178,6 +179,7 @@ export function TeamPrepPage() {
 
         <MetaPulse mine={mine} opponent={opponent} />
         <CounterfinderPanel report={report.counterfinder} />
+        <ReplayFindingsPanel findings={replayFindings} />
 
         <section className="arena-panel arena-panel--plasma p-4">
           <div className="relative z-10">
@@ -756,4 +758,73 @@ function formatSpeedPosture(
   if (mineAverage > opponentAverage + 10) return 'Naturally faster'
   if (opponentAverage > mineAverage + 10) return 'Speed pressure'
   return 'Speed parity'
+}
+
+function ReplayFindingsPanel({
+  findings,
+}: {
+  findings: ReturnType<typeof usePrepNotebookStore.getState>['replayFindings']
+}) {
+  return (
+    <section className="arena-panel arena-panel--violet p-4">
+      <div className="relative z-10">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="arena-label text-arena-violet">Replay findings</p>
+            <h2 className="mt-1 font-display text-2xl font-black text-white">
+              Saved autopsy notes
+            </h2>
+          </div>
+        </div>
+        {findings.length === 0 ? (
+          <p className="mt-3 rounded-sm border border-white/10 bg-white/[0.03] px-4 py-3 font-body text-sm leading-6 text-white/58">
+            No saved replay findings yet. Use Replay Autopsy and click Save to Team Prep on key turns.
+          </p>
+        ) : (
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            {findings.map((finding) => (
+              <article
+                key={finding.id}
+                className="rounded-sm border border-white/10 bg-white/[0.03] p-4"
+              >
+                <p className="arena-label text-arena-violet">
+                  {replayFindingTypeLabel(finding.type)}
+                </p>
+                <h3 className="mt-1 font-display text-base font-bold text-white">
+                  {finding.title}
+                </h3>
+                <p className="mt-2 font-body text-sm leading-6 text-white/62">
+                  {finding.note}
+                </p>
+                <p className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.15em] text-white/42">
+                  Game {finding.gameNumber} · Turn {finding.turnNumber}
+                </p>
+                <a
+                  href={finding.source}
+                  target={finding.source.startsWith('http') ? '_blank' : undefined}
+                  rel={finding.source.startsWith('http') ? 'noreferrer' : undefined}
+                  className="mt-3 inline-flex font-display text-[0.66rem] font-bold uppercase tracking-[0.18em] text-arena-cyan transition hover:text-white"
+                >
+                  Open replay source
+                </a>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function replayFindingTypeLabel(type: string): string {
+  switch (type) {
+    case 'turning-point':
+      return 'Turning point'
+    case 'missed-ko':
+      return 'Missed KO'
+    case 'risky-line':
+      return 'Risky line'
+    default:
+      return 'Adaptation note'
+  }
 }

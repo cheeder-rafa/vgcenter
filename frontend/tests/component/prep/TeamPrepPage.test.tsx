@@ -140,4 +140,32 @@ describe('TeamPrepPage', () => {
       screen.getAllByRole('link', { name: /open source/i }).length,
     ).toBeGreaterThan(0)
   })
+
+  it('renders persisted replay finding cards grouped by type', () => {
+    usePrepNotebookStore.getState().addReplayFinding({
+      type: 'turning-point',
+      title: 'Turn swung after Tailwind',
+      note: 'Player lost speed control and board flipped.',
+      source: 'https://replay.pokemonshowdown.com/x-1',
+      gameNumber: 1,
+      turnNumber: 3,
+    })
+    usePrepNotebookStore.getState().addReplayFinding({
+      type: 'adaptation-note',
+      title: 'Opponent adapted in game 2',
+      note: 'Changed lead to deny Fake Out value.',
+      source: 'https://replay.pokemonshowdown.com/x-2',
+      gameNumber: 2,
+      turnNumber: 1,
+    })
+
+    renderPage()
+
+    expect(screen.getByText(/Replay findings/i)).toBeInTheDocument()
+    expect(screen.getByText(/turning point/i)).toBeInTheDocument()
+    expect(screen.getByText(/adaptation note/i)).toBeInTheDocument()
+    expect(
+      screen.getAllByRole('link', { name: /open replay source/i }).length,
+    ).toBeGreaterThan(1)
+  })
 })
