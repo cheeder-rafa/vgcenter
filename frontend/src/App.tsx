@@ -6,6 +6,7 @@ import { useSpeedTierStore } from './features/speed/store/useSpeedTierStore'
 import { CalculatorPage } from './pages/CalculatorPage'
 import { MatchupPage } from './pages/MatchupPage'
 import { PreviewPage } from './pages/PreviewPage'
+import { PracticePage } from './pages/PracticePage'
 import { ReplayPage } from './pages/ReplayPage'
 import { SpeedTierPage } from './pages/SpeedTierPage'
 import { TeamPrepPage } from './pages/TeamPrepPage'
@@ -33,6 +34,7 @@ function App() {
         <Route path="/calc" element={<CalculatorPage />} />
         <Route path="/prep" element={<TeamPrepPage />} />
         <Route path="/preview" element={<PreviewPage />} />
+        <Route path="/practice" element={<PracticePage />} />
         <Route path="/speed" element={<SpeedTierPage />} />
         <Route path="/replay" element={<ReplayPage />} />
         <Route path="/matchup" element={<MatchupPage />} />

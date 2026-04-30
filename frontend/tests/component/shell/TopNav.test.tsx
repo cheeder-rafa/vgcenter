@@ -18,6 +18,7 @@ function renderTopNavAt(initialPath: string) {
                 <Routes>
                   <Route path="/calc" element={<div>Calculator</div>} />
                   <Route path="/preview" element={<div>Preview Coach</div>} />
+                  <Route path="/practice" element={<div>Practice Mode</div>} />
                 </Routes>
               </main>
             </>
@@ -41,6 +42,9 @@ describe('TopNav', () => {
     expect(screen.getByRole('link', { name: /team prep/i })).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: /preview coach/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /practice mode/i }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: /speed tiers/i }),
