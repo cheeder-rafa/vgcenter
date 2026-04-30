@@ -177,6 +177,7 @@ export function TeamPrepPage() {
         </section>
 
         <MetaPulse mine={mine} opponent={opponent} />
+        <CounterfinderPanel report={report.counterfinder} />
 
         <section className="arena-panel arena-panel--plasma p-4">
           <div className="relative z-10">
@@ -215,6 +216,101 @@ export function TeamPrepPage() {
         </section>
       </div>
     </main>
+  )
+}
+
+function CounterfinderPanel({
+  report,
+}: {
+  report: ReturnType<typeof analyzePrep>['counterfinder']
+}) {
+  return (
+    <section className="arena-panel arena-panel--cyan p-4">
+      <div className="relative z-10 grid gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="arena-label text-arena-cyan">Counterfinder</p>
+            <h2 className="mt-1 font-display text-2xl font-black text-white">
+              Patch my team
+            </h2>
+          </div>
+          <p className="max-w-[58ch] font-body text-sm leading-6 text-white/58">
+            Recommendations combine watched threats, saved teams, and meta usage
+            with direct calc evidence and source credit.
+          </p>
+        </div>
+        <div className="grid gap-4 xl:grid-cols-3">
+          <RecommendationColumn
+            title="Defensive spread suggestions"
+            recommendations={report.spreads}
+          />
+          <RecommendationColumn
+            title="Tech move suggestions"
+            recommendations={report.techMoves}
+          />
+          <RecommendationColumn
+            title="Replacement candidates"
+            recommendations={report.replacements}
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function RecommendationColumn({
+  title,
+  recommendations,
+}: {
+  title: string
+  recommendations: ReturnType<typeof analyzePrep>['counterfinder']['spreads']
+}) {
+  return (
+    <article className="rounded-sm border border-white/10 bg-arena-void/45 p-4">
+      <h3 className="font-display text-lg font-black text-white">{title}</h3>
+      <div className="mt-3 grid gap-3">
+        {recommendations.length === 0 ? (
+          <p className="font-body text-sm leading-6 text-white/58">
+            Add saved teams and mark threats to unlock this section.
+          </p>
+        ) : (
+          recommendations.map((recommendation) => (
+            <article
+              key={recommendation.id}
+              className="rounded-sm border border-white/10 bg-white/[0.03] p-3"
+            >
+              <h4 className="font-display text-sm font-bold text-white">
+                {recommendation.title}
+              </h4>
+              <p className="mt-2 font-body text-xs leading-5 text-white/62">
+                {recommendation.reason}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <a
+                  href={recommendation.evidence.href}
+                  target={
+                    recommendation.evidence.href.startsWith('/calc')
+                      ? undefined
+                      : '_blank'
+                  }
+                  rel={
+                    recommendation.evidence.href.startsWith('/calc')
+                      ? undefined
+                      : 'noreferrer'
+                  }
+                  className="font-display text-[0.66rem] font-bold uppercase tracking-[0.18em] text-arena-cyan transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-arena-cyan"
+                >
+                  {recommendation.evidence.label}
+                </a>
+                <span className="font-body text-[0.68rem] text-white/45">
+                  {recommendation.evidence.sourceName}
+                </span>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    </article>
   )
 }
 
