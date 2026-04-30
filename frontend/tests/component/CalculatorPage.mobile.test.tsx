@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -45,6 +46,10 @@ function renderCalcMobile() {
 
 describe('CalculatorPage — mobile layout (≤375px)', () => {
   beforeEach(() => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 375,
+    })
     useCalculatorStore.getState().reset()
     Object.values(mocks).forEach((fn) => fn.mockReset?.())
     mocks.fetchPokedex.mockResolvedValue([])
@@ -77,5 +82,22 @@ describe('CalculatorPage — mobile layout (≤375px)', () => {
     renderCalcMobile()
     const mainGrid = screen.getByTestId('calculator-main-grid')
     expect(mainGrid.className).toContain('grid-cols-1')
+  })
+
+  it('defaults to single-matchup mode on mobile and can switch to full board', async () => {
+    const user = userEvent.setup()
+    renderCalcMobile()
+
+    expect(screen.getByRole('button', { name: /single matchup/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+
+    await user.click(screen.getByRole('button', { name: /full board/i }))
+
+    expect(screen.getByRole('button', { name: /full board/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
   })
 })

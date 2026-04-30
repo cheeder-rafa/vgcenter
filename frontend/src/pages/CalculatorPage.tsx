@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   fetchAbilities,
@@ -68,6 +68,11 @@ export function CalculatorPage() {
 
   const [focusedSide, setFocusedSide] = useState<CalculatorSide>('attacker')
   const [focusedMoveIndex, setFocusedMoveIndex] = useState(0)
+  const [mobileLayout, setMobileLayout] = useState<'single' | 'full'>(() =>
+    window.innerWidth <= 767 ? 'single' : 'full',
+  )
+  const attackerPanelRef = useRef<HTMLDivElement | null>(null)
+  const defenderPanelRef = useRef<HTMLDivElement | null>(null)
 
   useBuildStatsSync('attacker', pokedex)
   useBuildStatsSync('defender', pokedex)
@@ -214,7 +219,7 @@ export function CalculatorPage() {
     [pokedex, abilities, items, moves, natures],
   )
 
-  function handleExportDiscord() {
+  const handleExportDiscord = useCallback(() => {
     const text = formatDiscordReport({
       attackerName,
       defenderName,
@@ -226,7 +231,7 @@ export function CalculatorPage() {
       () =>
         useToastStore.getState().push('Could not copy — clipboard unavailable'),
     )
-  }
+  }, [attackerMoveEntries, attackerName, defenderMoveEntries, defenderName])
 
   function handleExportPng() {
     const input: ExportImageInput = {
@@ -251,6 +256,73 @@ export function CalculatorPage() {
     void exportResultImage(input)
   }
 
+  function swapSides() {
+    useCalculatorStore.setState((state) => ({
+      attacker: state.defender,
+      defender: state.attacker,
+      attackerSide: state.defenderSide,
+      defenderSide: state.attackerSide,
+      results: {
+        attackerMoves: state.results.defenderMoves,
+        defenderMoves: state.results.attackerMoves,
+      },
+    }))
+    setFocusedSide((current) => (current === 'attacker' ? 'defender' : 'attacker'))
+  }
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth > 767) {
+        setMobileLayout('full')
+      }
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  useEffect(() => {
+    function shouldIgnore(target: EventTarget | null) {
+      return (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      )
+    }
+
+    function focusSpeciesFor(side: CalculatorSide) {
+      const root = side === 'attacker' ? attackerPanelRef.current : defenderPanelRef.current
+      const input = root?.querySelector<HTMLInputElement>('input[role="combobox"]')
+      input?.focus()
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (shouldIgnore(event.target)) return
+      if (event.key === '/') {
+        event.preventDefault()
+        focusSpeciesFor(focusedSide)
+        return
+      }
+      if (event.key.toLowerCase() === 'x') {
+        event.preventDefault()
+        swapSides()
+        return
+      }
+      if (event.key.toLowerCase() === 'r') {
+        event.preventDefault()
+        useCalculatorStore.getState().resetFieldModifiers()
+        return
+      }
+      if (event.key.toLowerCase() === 'c') {
+        event.preventDefault()
+        handleExportDiscord()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [focusedSide, handleExportDiscord])
+
   return (
     <main className="relative isolate min-h-[calc(100vh-4rem)] overflow-hidden bg-arena-gradient text-white">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-[0.05] [background-size:48px_48px]" />
@@ -271,6 +343,31 @@ export function CalculatorPage() {
           onExportDiscord={handleExportDiscord}
           onExportPng={handleExportPng}
         />
+        <div className="flex flex-wrap items-center gap-2 md:hidden">
+          <button
+            type="button"
+            aria-pressed={mobileLayout === 'single'}
+            onClick={() => setMobileLayout('single')}
+            className={`arena-chip ${mobileLayout === 'single' ? 'text-arena-cyan' : 'text-white/60'}`}
+          >
+            Single Matchup
+          </button>
+          <button
+            type="button"
+            aria-pressed={mobileLayout === 'full'}
+            onClick={() => setMobileLayout('full')}
+            className={`arena-chip ${mobileLayout === 'full' ? 'text-arena-cyan' : 'text-white/60'}`}
+          >
+            Full Board
+          </button>
+          <button
+            type="button"
+            onClick={swapSides}
+            className="arena-chip text-arena-plasma"
+          >
+            Swap Sides
+          </button>
+        </div>
 
         <div className="flex items-center gap-3">
           <MatchupPinStrip
@@ -303,7 +400,9 @@ export function CalculatorPage() {
           className="grid grid-cols-1 gap-3 xl:grid-cols-[90px_minmax(0,1.1fr)_minmax(240px,0.7fr)_minmax(0,1.1fr)_90px]"
           data-testid="calculator-main-grid"
         >
-          <div className="order-2 xl:order-none">
+          <div
+            className={`order-2 xl:order-none ${mobileLayout === 'single' && focusedSide !== 'attacker' ? 'hidden md:block' : ''}`}
+          >
             <SavedPokemonRail
               side="attacker"
               currentBuild={attacker}
@@ -312,7 +411,10 @@ export function CalculatorPage() {
               onLoadBuild={handleLoadSavedPokemon}
             />
           </div>
-          <div className="order-1 xl:order-none">
+          <div
+            ref={attackerPanelRef}
+            className={`order-1 xl:order-none ${mobileLayout === 'single' && focusedSide !== 'attacker' ? 'hidden md:block' : ''}`}
+          >
             <PokemonPanel
               side="attacker"
               {...datasets}
@@ -322,14 +424,17 @@ export function CalculatorPage() {
               onActivateSide={setFocusedSide}
             />
           </div>
-          <div className="order-3 xl:order-none">
+          <div className={`order-3 xl:order-none ${mobileLayout === 'single' ? 'hidden md:block' : ''}`}>
             <FieldPanel
               focusedSide={focusedSide}
               attackerName={attackerName}
               defenderName={defenderName}
             />
           </div>
-          <div className="order-4 xl:order-none">
+          <div
+            ref={defenderPanelRef}
+            className={`order-4 xl:order-none ${mobileLayout === 'single' && focusedSide !== 'defender' ? 'hidden md:block' : ''}`}
+          >
             <PokemonPanel
               side="defender"
               {...datasets}
@@ -339,7 +444,7 @@ export function CalculatorPage() {
               onActivateSide={setFocusedSide}
             />
           </div>
-          <div className="order-5 xl:order-none">
+          <div className={`order-5 xl:order-none ${mobileLayout === 'single' && focusedSide !== 'defender' ? 'hidden md:block' : ''}`}>
             <SavedPokemonRail
               side="defender"
               currentBuild={defender}

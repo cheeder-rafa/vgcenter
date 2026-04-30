@@ -81,6 +81,9 @@ The current calculator flow is species-first and fully reactive:
 - Side-based field controls include Tailwind for each combatant so the speed order ribbon reflects common doubles speed manipulation.
 - Direct item and ability damage interactions now include type-boosting held items, resist berries, Levitate-style immunities, Mold Breaker bypasses, and direct defensive modifiers such as Thick Fat, Heatproof, Dry Skin, and Water Bubble.
 - Level is locked to 50. The UI shows `Base -> SP -> Final` so the final stat build stays traceable while the backend remains the source of truth for stat calculation.
+- First-run sessions show a flow card with direct links for `Import Pokepaste -> Team Prep -> Preview Coach -> Calculator`; users can dismiss it once complete.
+- Mobile defaults to a single-matchup calculator mode with quick `Single Matchup` / `Full Board` toggles plus a `Swap Sides` action.
+- Keyboard shortcuts on `/calc`: `/` focuses species search on active side, `x` swaps sides, `r` resets field modifiers, and `c` copies the Discord report.
 
 ## Preview Coach
 
