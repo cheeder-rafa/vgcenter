@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom'
+import { FirstRunFlowCard } from './FirstRunFlowCard'
 import { TopNav } from './TopNav'
 
 export function AppShell() {
@@ -8,6 +9,7 @@ export function AppShell() {
       <div className="min-w-0 pt-16">
         <Outlet />
       </div>
+      <FirstRunFlowCard />
     </div>
   )
 }

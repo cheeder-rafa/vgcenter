@@ -1,9 +1,14 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { beforeEach } from 'vitest'
 
 import App from '../../src/App'
 
 describe('App', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
   it('renders the VGCenter damage calculator shell at /calc', () => {
     render(
       <MemoryRouter initialEntries={['/calc']}>
@@ -63,5 +68,36 @@ describe('App', () => {
     expect(
       screen.getByRole('heading', { name: /vgcenter damage calculator/i }),
     ).toBeInTheDocument()
+  })
+
+  it('shows first-run onboarding checklist with prep flow links', () => {
+    render(
+      <MemoryRouter initialEntries={['/calc']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('heading', { name: /first-run flow/i }),
+    ).toBeInTheDocument()
+    const card = screen.getByRole('heading', { name: /first-run flow/i }).closest('aside')
+    expect(card).not.toBeNull()
+    const cardScope = within(card as HTMLElement)
+    expect(cardScope.getByRole('link', { name: /import pokepaste/i })).toHaveAttribute(
+      'href',
+      '/calc',
+    )
+    expect(cardScope.getByRole('link', { name: /team prep/i })).toHaveAttribute(
+      'href',
+      '/prep',
+    )
+    expect(cardScope.getByRole('link', { name: /preview coach/i })).toHaveAttribute(
+      'href',
+      '/preview',
+    )
+    expect(cardScope.getByRole('link', { name: /^calculator$/i })).toHaveAttribute(
+      'href',
+      '/calc',
+    )
   })
 })
