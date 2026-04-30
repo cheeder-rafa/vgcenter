@@ -8,7 +8,7 @@ The calculator stack is live with Scoring Systems Hardening (v1.3):
 
 - `backend/` serves the Regulation M-A API for damage calculation, dataset lookup, Showdown/Pokepaste imports, replay timeline parsing, and replay decision evaluation.
 - `frontend/` is a React calculator UI with live API-backed results and importer modals.
-- `/prep` is the Team Prep workspace that connects saved teams, threat watchlists, notes, and practice prompts.
+- `/prep` is the Team Prep workspace that connects saved teams, threat watchlists, notes, and prep checks.
 - `/preview` is the Preview Coach shell for the next VGC team-preview workflow.
 - Dockerfiles exist for both applications, and root `docker-compose.yml` runs the full stack.
 - GitHub Actions verify backend, frontend, and a `main`-targeted Docker smoke check.

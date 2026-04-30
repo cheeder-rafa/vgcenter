@@ -216,7 +216,7 @@ When M14a is merged, ask the user before continuing; then repeat for M14b → M1
 
 ## Active work — v1.4 Product Intelligence & Retention Suite
 
-Source of truth: `PLAN.md` under `## Sub-project 5 — Product Intelligence & Retention Suite (v1.4)`. This work turns the calculator/prep surface into a repeat-use workflow: credited meta data, meta-aware defaults, team-vs-team matrix, counterfinder, replay findings, practice drills, and onboarding polish.
+Source of truth: `PLAN.md` under `## Sub-project 5 — Product Intelligence & Retention Suite (v1.4)`. This work turns the calculator/prep surface into a repeat-use workflow: credited meta data, meta-aware defaults, team-vs-team matrix, counterfinder, replay findings, and onboarding polish.
 
 **Session 0 — Publish Team Prep + roadmap** (`feature/vgcenter-product-enhancements`) — includes `/prep` Team Prep, credited Meta Feed, FieldPanel active modifier summary + Reset Field, README updates, and this roadmap documentation. Commit everything together with `feat(prep): add team prep workspace and roadmap docs`; push and open a PR targeting `develop`; stop.
 
@@ -230,9 +230,7 @@ Source of truth: `PLAN.md` under `## Sub-project 5 — Product Intelligence & Re
 
 **Session 5 — Replay findings into Team Prep** (`feature/replay-prep-findings`) — Replay Autopsy `Save to Team Prep`; persisted finding cards for turning points, missed KOs, risky lines, and adaptation notes.
 
-**Session 6 — Practice Mode** (`feature/practice-mode`) — `/practice` route with drills generated from saved teams, watched threats, meta threats, and replay findings. Initial drill types: survival check, best KO move, safest lead. Answers must include calculator-backed explanations.
-
-**Session 7 — Onboarding and UX polish** (`feature/onboarding-ux-polish`) — first-run import → Team Prep → Preview Coach → Calc flow, mobile single-matchup mode, keyboard shortcuts, final accessibility/design polish.
+**Session 6 — Onboarding and UX polish** (`feature/onboarding-ux-polish`) — first-run import → Team Prep → Preview Coach → Calc flow, mobile single-matchup mode, keyboard shortcuts, final accessibility/design polish.
 
 **Rules for all v1.4 sessions:**
 - Branch from `develop`. Target `develop`. Never push directly to `develop` or `main`.
@@ -370,24 +368,7 @@ Run full applicable verification. Conventional Commit. Push and open PR targetin
 ### Session 6 kickoff prompt
 
 ```
-Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 6: Practice Mode.
-
-Branch from develop:
-  git checkout develop && git pull --ff-only && git checkout -b feature/practice-mode
-
-TDD first. Add /practice:
-- Generate drills from saved teams, watched threats, meta threats, and replay findings.
-- Drill types: Does this survive? Which move has best KO odds? Which lead is safest?
-- Show calculator-backed answer explanations.
-- Store local practice history only.
-
-Run frontend verification. Conventional Commit. Push and open PR targeting develop. Stop.
-```
-
-### Session 7 kickoff prompt
-
-```
-Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 7: Onboarding and UX polish.
+Read AGENTS.md, CLAUDE.md, and PLAN.md Sub-project 5. Execute Session 6: Onboarding and UX polish.
 
 Branch from develop:
   git checkout develop && git pull --ff-only && git checkout -b feature/onboarding-ux-polish

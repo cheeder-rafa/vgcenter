@@ -54,7 +54,7 @@ describe('analyzePrep', () => {
 
     expect(report.readinessLevel).toBe('empty')
     expect(report.nextAction).toMatch(/import your team/i)
-    expect(report.practicePrompts.length).toBeGreaterThan(0)
+    expect(report.prepChecks.length).toBeGreaterThan(0)
   })
 
   it('summarizes saved teams and ranks opponent threats', () => {
@@ -109,7 +109,7 @@ describe('analyzePrep', () => {
       'POISON',
     ])
     expect(
-      report.practicePrompts.some((prompt) => prompt.href === '/calc'),
+      report.prepChecks.some((prompt) => prompt.href === '/calc'),
     ).toBe(true)
     expect(report.counterfinder.spreads.length).toBeGreaterThan(0)
     expect(report.counterfinder.techMoves.length).toBeGreaterThan(0)

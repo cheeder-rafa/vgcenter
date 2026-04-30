@@ -118,6 +118,7 @@ function renderPage() {
 describe('ReplayPage', () => {
   it('renders the input area and headline', () => {
     renderPage()
+    expect(screen.getByTestId('replay-shell')).toHaveClass('bg-arena-gradient')
     expect(
       screen.getByRole('heading', { name: /decision review/i }),
     ).toBeInTheDocument()
