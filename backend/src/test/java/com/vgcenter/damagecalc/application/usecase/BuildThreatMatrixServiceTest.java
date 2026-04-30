@@ -59,6 +59,27 @@ class BuildThreatMatrixServiceTest {
     }
 
     @Test
+    void takeMatrixAppliesDefenderSideConditionsToTeamASlot() {
+        List<ThreatPokemonCommand> teamA = List.of(normalDefender());
+        List<ThreatPokemonCommand> teamB = List.of(physicalAttacker());
+
+        BuildThreatMatrixResult withoutReflect =
+                service.build(new BuildThreatMatrixCommand("M-A", teamA, teamB, CLEAR_FIELD, NO_SIDE, NO_SIDE));
+        BuildThreatMatrixResult withReflectOnTeamA = service.build(new BuildThreatMatrixCommand(
+                "M-A",
+                teamA,
+                teamB,
+                CLEAR_FIELD,
+                new SideConditionsCommand(true, false, false, false, false, false, false),
+                NO_SIDE));
+
+        double maxPctWithoutReflect = withoutReflect.take().get(0).get(0).maxPct();
+        double maxPctWithReflect = withReflectOnTeamA.take().get(0).get(0).maxPct();
+
+        assertThat(maxPctWithReflect).isLessThan(maxPctWithoutReflect);
+    }
+
+    @Test
     void statusMovesWithZeroBasePowerProduceZeroDamageAndAreSkipped() {
         List<ThreatPokemonCommand> teamA = List.of(statusMoveOnly());
         List<ThreatPokemonCommand> teamB = List.of(grassDefender());
@@ -163,6 +184,36 @@ class BuildThreatMatrixServiceTest {
                 Map.of(),
                 true,
                 140);
+        return new ThreatPokemonCommand(combatant, List.of());
+    }
+
+    private static ThreatPokemonCommand physicalAttacker() {
+        CombatantCommand combatant = new CombatantCommand(
+                50,
+                new StatsCommand(170, 150, 90, 70, 80, 90),
+                List.of("NORMAL"),
+                "none",
+                "none",
+                "NONE",
+                Map.of(),
+                true,
+                170);
+        List<ResolvedMoveCommand> moves = List.of(new ResolvedMoveCommand(
+                "body-slam", new MoveCommand("NORMAL", "PHYSICAL", 100, false, true, false, false)));
+        return new ThreatPokemonCommand(combatant, moves);
+    }
+
+    private static ThreatPokemonCommand normalDefender() {
+        CombatantCommand combatant = new CombatantCommand(
+                50,
+                new StatsCommand(200, 70, 120, 70, 120, 60),
+                List.of("NORMAL"),
+                "none",
+                "none",
+                "NONE",
+                Map.of(),
+                true,
+                200);
         return new ThreatPokemonCommand(combatant, List.of());
     }
 }

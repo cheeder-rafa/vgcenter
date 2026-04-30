@@ -25,6 +25,17 @@ describe('SpriteBadge', () => {
     ])
   })
 
+  it('normalizes known alternate-form aliases for sprite lookup', () => {
+    expect(resolveSpriteSources('aegislash', false)).toEqual([
+      '/sprites/aegislash-shield.png',
+      '/sprites/_unknown.png',
+    ])
+    expect(resolveSpriteSources('maushold-four', false)).toEqual([
+      '/sprites/maushold.png',
+      '/sprites/_unknown.png',
+    ])
+  })
+
   it('falls back from mega art to base art and then to the unknown sprite', () => {
     render(
       <SpriteBadge

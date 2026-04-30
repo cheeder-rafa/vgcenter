@@ -9,6 +9,15 @@ export type ExportImageInput = {
     megaActive: boolean
     megaFormId: string | null
     types: string[]
+    sp: {
+      hp: number
+      atk: number
+      def: number
+      spa: number
+      spd: number
+      spe: number
+    }
+    natureId: string
   }
   defender: {
     name: string | null
@@ -16,6 +25,15 @@ export type ExportImageInput = {
     megaActive: boolean
     megaFormId: string | null
     types: string[]
+    sp: {
+      hp: number
+      atk: number
+      def: number
+      spa: number
+      spd: number
+      spe: number
+    }
+    natureId: string
   }
   attackerMoves: MoveEntry[]
   defenderMoves: MoveEntry[]
@@ -217,6 +235,36 @@ function drawMoveRow(
   ctx.textAlign = 'right'
   ctx.textBaseline = 'bottom'
   ctx.fillText(entry.result.koChance.description, x + colW - 8, top + rowH - 6)
+}
+
+function natureMarker(
+  natureId: string,
+  stat: 'atk' | 'def' | 'spa' | 'spd',
+): string {
+  const key = natureId.toLowerCase()
+  if (['adamant', 'lonely', 'brave', 'naughty'].includes(key)) {
+    return stat === 'atk' ? '+' : stat === 'spa' ? '-' : ''
+  }
+  if (['bold', 'impish', 'lax', 'relaxed'].includes(key)) {
+    return stat === 'def' ? '+' : stat === 'atk' ? '-' : ''
+  }
+  if (['modest', 'mild', 'rash', 'quiet'].includes(key)) {
+    return stat === 'spa' ? '+' : stat === 'atk' ? '-' : ''
+  }
+  if (['calm', 'careful', 'gentle', 'sassy'].includes(key)) {
+    return stat === 'spd' ? '+' : stat === 'atk' ? '-' : ''
+  }
+  return ''
+}
+
+function renderSpreadSummary(
+  side: ExportImageInput['attacker'],
+  role: 'attacker' | 'defender',
+): string {
+  if (role === 'attacker') {
+    return `${side.sp.atk}${natureMarker(side.natureId, 'atk')} Atk / ${side.sp.spa}${natureMarker(side.natureId, 'spa')} SpA`
+  }
+  return `${side.sp.hp} HP / ${side.sp.def}${natureMarker(side.natureId, 'def')} Def / ${side.sp.spd}${natureMarker(side.natureId, 'spd')} SpD`
 }
 
 function drawSpriteGlow(
@@ -487,6 +535,30 @@ export async function exportResultImage(
   input.defenderMoves.slice(0, 4).forEach((entry, i) => {
     drawMoveRow(ctx, entry, i, RIGHT_COL_X, rowsTop, COL_W, ARENA_CYAN)
   })
+
+  const spreadY = rowsTop + 4 * (38 + 4) + 12
+  setFont(ctx, 9, '700', 'display')
+  ctx.textAlign = 'left'
+  ctx.fillStyle = ARENA_PLASMA + 'cc'
+  ctx.fillText('SPREAD', LEFT_COL_X, spreadY)
+  setFont(ctx, 10, 'normal', 'mono')
+  ctx.fillStyle = 'rgba(255,255,255,0.72)'
+  ctx.fillText(
+    renderSpreadSummary(input.attacker, 'attacker'),
+    LEFT_COL_X + 50,
+    spreadY,
+  )
+
+  setFont(ctx, 9, '700', 'display')
+  ctx.fillStyle = ARENA_CYAN + 'cc'
+  ctx.fillText('SPREAD', RIGHT_COL_X, spreadY)
+  setFont(ctx, 10, 'normal', 'mono')
+  ctx.fillStyle = 'rgba(255,255,255,0.72)'
+  ctx.fillText(
+    renderSpreadSummary(input.defender, 'defender'),
+    RIGHT_COL_X + 50,
+    spreadY,
+  )
 
   // ── Footer ───────────────────────────────────────────────────────────────────
   const footerY = H - FOOTER_H

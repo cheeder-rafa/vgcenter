@@ -99,7 +99,28 @@ class ShowdownTextParserTest {
                     List.of(Type.DRAGON, Type.FLYING),
                     new Stats(91, 134, 95, 100, 100, 80),
                     List.of("inner-focus", "multiscale"),
-                    List.of("dragon-claw", "tailwind", "low-kick", "extreme-speed")));
+                    List.of("dragon-claw", "tailwind", "low-kick", "extreme-speed")),
+            new PokemonSpecies(
+                    "aegislash-shield",
+                    "Aegislash (Shield Forme)",
+                    List.of(Type.GHOST, Type.STEEL),
+                    new Stats(60, 50, 140, 50, 140, 60),
+                    List.of("stance-change"),
+                    List.of("shadow-ball", "protect")),
+            new PokemonSpecies(
+                    "aegislash-blade",
+                    "Aegislash (Blade Forme)",
+                    List.of(Type.GHOST, Type.STEEL),
+                    new Stats(60, 140, 50, 140, 50, 60),
+                    List.of("stance-change"),
+                    List.of("shadow-ball", "protect")),
+            new PokemonSpecies(
+                    "maushold",
+                    "Maushold",
+                    List.of(Type.NORMAL),
+                    new Stats(74, 75, 70, 65, 75, 111),
+                    List.of("friend-guard"),
+                    List.of("protect")));
 
     private final MoveRepository moveRepository = regulationId -> List.of(
             new NamedDatasetEntry("heat-wave", "Heat Wave"),
@@ -138,7 +159,9 @@ class ShowdownTextParserTest {
             new NamedDatasetEntry("adaptability", "Adaptability"),
             new NamedDatasetEntry("cursed-body", "Cursed Body"),
             new NamedDatasetEntry("competitive", "Competitive"),
-            new NamedDatasetEntry("multiscale", "Multiscale"));
+            new NamedDatasetEntry("multiscale", "Multiscale"),
+            new NamedDatasetEntry("stance-change", "Stance Change"),
+            new NamedDatasetEntry("friend-guard", "Friend Guard"));
 
     private final ItemRepository itemRepository = regulationId -> List.of(
             new NamedDatasetEntry("charizardite-y", "Charizardite Y"),
@@ -237,6 +260,22 @@ class ShowdownTextParserTest {
         assertThat(pokemon.speciesId()).isEqualTo("indeedee-female");
         assertThat(pokemon.speciesName()).isEqualTo("Indeedee-Female");
         assertThat(pokemon.gender()).isEqualTo("F");
+    }
+
+    @Test
+    void resolvesAegislashBaseNameToShieldForm() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Aegislash\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("aegislash-shield");
+    }
+
+    @Test
+    void resolvesMausholdFamilyOfFourAliasToBaseEntry() {
+        ImportedPokemonView pokemon =
+                parser.parse("M-A", "Maushold-Four\n- Protect").getFirst();
+
+        assertThat(pokemon.speciesId()).isEqualTo("maushold");
     }
 
     @Test

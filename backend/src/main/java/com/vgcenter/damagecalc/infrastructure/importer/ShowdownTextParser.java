@@ -30,6 +30,10 @@ import org.springframework.stereotype.Component;
 public class ShowdownTextParser implements TeamParser {
     private static final Pattern DANGLING_METADATA_HEADER =
             Pattern.compile("^(Ability|Level|EVs|IVs|Tera Type|Shiny|Happiness|[A-Za-z]+ Nature|-\\s).*$");
+    private static final Map<String, String> SPECIES_ALIAS = Map.ofEntries(
+            Map.entry("aegislash", "aegislashshield"),
+            Map.entry("mausholdfour", "maushold"),
+            Map.entry("mausholdfamilyoffour", "maushold"));
 
     private final PokedexRepository pokedexRepository;
     private final MoveRepository moveRepository;
@@ -256,7 +260,9 @@ public class ShowdownTextParser implements TeamParser {
     }
 
     private PokemonSpecies resolveSpecies(Map<String, PokemonSpecies> speciesByKey, String rawSpeciesName) {
-        PokemonSpecies species = speciesByKey.get(normalizeKey(rawSpeciesName));
+        String normalizedKey = normalizeKey(rawSpeciesName);
+        String resolvedKey = SPECIES_ALIAS.getOrDefault(normalizedKey, normalizedKey);
+        PokemonSpecies species = speciesByKey.get(resolvedKey);
         if (species == null) {
             throw new IllegalArgumentException("Unknown species: " + rawSpeciesName);
         }

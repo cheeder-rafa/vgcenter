@@ -32,7 +32,7 @@ public final class BuildThreatMatrixService implements BuildThreatMatrixUseCase 
             for (int j = 0; j < bSize; j++) {
                 ThreatPokemonCommand pokemonB = command.teamB().get(j);
                 dealRow.add(bestCell(command, pokemonA, pokemonB));
-                takeRow.add(bestCell(command, pokemonB, pokemonA));
+                takeRow.add(bestCellSwappedSides(command, pokemonB, pokemonA));
             }
             deal.add(List.copyOf(dealRow));
             take.add(List.copyOf(takeRow));
@@ -72,5 +72,17 @@ public final class BuildThreatMatrixService implements BuildThreatMatrixUseCase 
                 })
                 .max(Comparator.comparingDouble(MatrixCellResult::maxPct))
                 .orElseThrow();
+    }
+
+    private MatrixCellResult bestCellSwappedSides(
+            BuildThreatMatrixCommand command, ThreatPokemonCommand attacker, ThreatPokemonCommand defender) {
+        BuildThreatMatrixCommand swappedSides = new BuildThreatMatrixCommand(
+                command.regulation(),
+                command.teamA(),
+                command.teamB(),
+                command.field(),
+                command.sideB(),
+                command.sideA());
+        return bestCell(swappedSides, attacker, defender);
     }
 }

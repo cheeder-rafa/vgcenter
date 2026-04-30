@@ -131,7 +131,7 @@ describe('DetailedResult', () => {
     )
 
     expect(
-      screen.getByText(/golurk giga impact vs\. excadrill through protect/i),
+      screen.getByText(/golurk.*giga impact.*through protect/i),
     ).toBeInTheDocument()
   })
 

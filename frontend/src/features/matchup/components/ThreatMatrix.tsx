@@ -97,20 +97,22 @@ export function ThreatMatrix({
           </thead>
           <tbody>
             {grid.map((row, i) => {
-              const attackerBuild =
-                direction === 'deal'
-                  ? (buildsA?.[i] ?? EMPTY_BUILD)
-                  : (buildsB?.[i] ?? EMPTY_BUILD)
               return (
                 <tr key={labelsA[i] ?? i}>
                   <td className="pr-2 font-body text-[0.65rem] font-medium uppercase tracking-wider text-white/50">
-                    {direction === 'deal' ? labelsA[i] : labelsB[i]}
+                    {labelsA[i]}
                   </td>
                   {row.map((cell, j) => {
+                    const attackerBuild =
+                      direction === 'deal'
+                        ? (buildsA?.[i] ?? EMPTY_BUILD)
+                        : (buildsB?.[j] ?? EMPTY_BUILD)
                     const defenderBuild =
                       direction === 'deal'
                         ? (buildsB?.[j] ?? EMPTY_BUILD)
-                        : (buildsA?.[j] ?? EMPTY_BUILD)
+                        : (buildsA?.[i] ?? EMPTY_BUILD)
+                    const attackerSide = direction === 'deal' ? sideA : sideB
+                    const defenderSide = direction === 'deal' ? sideB : sideA
                     return (
                       <td key={j}>
                         <MatrixCell
@@ -119,8 +121,8 @@ export function ThreatMatrix({
                           defender={defenderBuild}
                           regulation={regulation}
                           field={field}
-                          sideA={sideA}
-                          sideB={sideB}
+                          sideA={attackerSide}
+                          sideB={defenderSide}
                         />
                       </td>
                     )
@@ -141,9 +143,10 @@ export function ThreatMatrix({
           [
             ['dim', '0%'],
             ['low', '<25%'],
-            ['mid', '25–50%'],
-            ['high', '50–75%'],
-            ['ko', '75%+'],
+            ['mid', '25–49%'],
+            ['high', '50–74%'],
+            ['ko', '75–99%'],
+            ['ohko', '100%+'],
           ] as const
         ).map(([key, label]) => (
           <span key={key} className="flex items-center gap-1.5">
@@ -157,7 +160,9 @@ export function ThreatMatrix({
                       ? 'bg-arena-plasma/15'
                       : key === 'high'
                         ? 'bg-arena-plasma/30'
-                        : 'bg-arena-plasma/50'
+                        : key === 'ko'
+                          ? 'bg-arena-plasma/50'
+                          : 'bg-arena-ember/65 ring-1 ring-arena-ember/60'
               }`}
             />
             <span className="font-body text-[0.6rem] text-white/40">{label}</span>

@@ -1,4 +1,5 @@
 import { requestJson } from '../../../lib/api-client'
+import { resolveSpriteId } from '../components/spriteBadgeSources'
 import type {
   BuildStatsRequest,
   BuildStatsResponse,
@@ -22,7 +23,7 @@ export function fetchPokedex(regulation: Regulation): Promise<PokedexEntry[]> {
   ).then((entries) =>
     entries.map((entry) => ({
       ...entry,
-      imageUrl: `/sprites/${entry.id}.png`,
+      imageUrl: `/sprites/${resolveSpriteId(entry.id) ?? entry.id}.png`,
     })),
   )
 }

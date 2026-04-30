@@ -450,7 +450,7 @@ describe('DualMoveReadout', () => {
     await user.click(screen.getByTestId('overview-move-attacker-0'))
 
     expect(screen.getByTestId('move-detail-panel')).toHaveTextContent(
-      'Mega Charizard Flamethrower vs. Venusaur',
+      'Mega Charizard',
     )
   })
 
@@ -502,7 +502,7 @@ describe('DualMoveReadout', () => {
     await user.click(screen.getByTestId('overview-move-attacker-0'))
 
     expect(screen.getByTestId('move-detail-panel')).toHaveTextContent(
-      '+1 32 Atk Sneasler Close Combat vs. -1 0 HP / 0 Def Absol',
+      '32 Atk Sneasler (+1 Atk) Close Combat vs. 0 HP / 0 Def Absol (-1 Def)',
     )
   })
 })

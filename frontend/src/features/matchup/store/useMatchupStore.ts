@@ -10,7 +10,8 @@ import type {
   SideConditions,
 } from '../../calculator/types/api'
 import { toCombatantBuild } from '../../importer/importedTeamMapping'
-import { importShowdown } from '../../calculator/api/importApi'
+import { importPokepaste, importShowdown } from '../../calculator/api/importApi'
+import { validatePokepasteUrl } from '../../importer/validatePokepasteUrl'
 import { buildThreatMatrix } from '../api/matchupApi'
 import { toThreatPokemonInput } from '../lib/buildInputs'
 import type { MatrixDirection, ThreatMatrixResponse } from '../types'
@@ -63,6 +64,22 @@ type MatchupState = {
 let cachedMoves: MoveDefinition[] | null = null
 let cachedPokedex: PokedexEntry[] | null = null
 
+function looksLikeUrl(text: string): boolean {
+  return /^https?:\/\//i.test(text.trim())
+}
+
+async function importFromRawInput(raw: string) {
+  const normalized = raw.trim()
+  const urlError = validatePokepasteUrl(normalized)
+  if (urlError === null) {
+    return importPokepaste(normalized)
+  }
+  if (looksLikeUrl(normalized) && normalized.toLowerCase().includes('pokepast.es')) {
+    throw new Error(urlError)
+  }
+  return importShowdown(raw)
+}
+
 async function getDataset(): Promise<{
   moveMap: Map<string, MoveDefinition>
   pokedexMap: Map<string, PokedexEntry>
@@ -104,7 +121,7 @@ export const useMatchupStore = create<MatchupState>((set, get) => ({
     if (!rawA.trim()) return
     set({ status: 'importing-a', errorMessage: null })
     try {
-      const { team } = await importShowdown(rawA)
+      const { team } = await importFromRawInput(rawA)
       set({
         teamA: team,
         labelsA: team.map((p) => p.speciesName),
@@ -120,7 +137,7 @@ export const useMatchupStore = create<MatchupState>((set, get) => ({
     if (!rawB.trim()) return
     set({ status: 'importing-b', errorMessage: null })
     try {
-      const { team } = await importShowdown(rawB)
+      const { team } = await importFromRawInput(rawB)
       set({
         teamB: team,
         labelsB: team.map((p) => p.speciesName),
