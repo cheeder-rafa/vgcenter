@@ -1,3 +1,5 @@
+import type { ReplayPrepFindingType } from '../../prep/store/usePrepNotebookStore'
+import { classifyReplayFinding } from '../lib/classifyReplayFinding'
 import type { ReplayGameReview, ReplayTimeline } from '../types'
 import { TurnReviewCard } from './TurnReviewCard'
 
@@ -5,9 +7,16 @@ type Props = {
   game: ReplayGameReview
   timeline: ReplayTimeline | undefined
   showHeader: boolean
+  onSaveFinding: (payload: {
+    type: ReplayPrepFindingType
+    title: string
+    note: string
+    turnNumber: number
+    gameNumber: number
+  }) => void
 }
 
-export function GameSection({ game, timeline, showHeader }: Props) {
+export function GameSection({ game, timeline, showHeader, onSaveFinding }: Props) {
   const turnsByNumber = new Map(timeline?.turns.map((t) => [t.number, t]) ?? [])
   const hasRevealedMoves =
     timeline != null && Object.keys(timeline.revealedMovesBySpecies).length > 0
@@ -37,6 +46,10 @@ export function GameSection({ game, timeline, showHeader }: Props) {
             key={review.turnNumber}
             review={review}
             turn={turnsByNumber.get(review.turnNumber)}
+            findingType={classifyReplayFinding(review)}
+            onSaveFinding={(payload) =>
+              onSaveFinding({ ...payload, gameNumber: game.gameNumber })
+            }
           />
         ))}
       </div>

@@ -14,6 +14,7 @@ vi.mock('../../../src/features/replay/api/replayApi', () => ({
 }))
 
 import { ReplayPage } from '../../../src/pages/ReplayPage'
+import { usePrepNotebookStore } from '../../../src/features/prep/store/usePrepNotebookStore'
 import { useReplayStore } from '../../../src/features/replay/store/useReplayStore'
 import type {
   ReplayDecisionLine,
@@ -97,10 +98,13 @@ beforeEach(() => {
   mocks.parseReplay.mockReset()
   mocks.evaluateReplay.mockReset()
   useReplayStore.getState().reset()
+  usePrepNotebookStore.getState().reset()
+  usePrepNotebookStore.persist.clearStorage()
 })
 
 afterEach(() => {
   useReplayStore.getState().reset()
+  usePrepNotebookStore.getState().reset()
 })
 
 function renderPage() {
@@ -213,5 +217,61 @@ describe('ReplayPage', () => {
     expect(screen.getByText(/Game 1/)).toBeInTheDocument()
     expect(screen.getByText(/Game 2/)).toBeInTheDocument()
     expect(mocks.parseReplay).toHaveBeenCalledTimes(2)
+  })
+
+  it('saves a replay finding to Team Prep with source and turn reference', async () => {
+    const timeline = sampleTimeline([1])
+    mocks.parseReplay.mockResolvedValueOnce(timeline)
+    const evaluation: ReplayEvaluateResponse = {
+      games: [
+        {
+          gameNumber: 1,
+          winner: 'A',
+          turnReviews: [
+            {
+              turnNumber: 1,
+              played: line({
+                expectedKos: 0,
+                expectedFaints: 1,
+              }),
+              rankedAlternatives: [
+                line({
+                  score: 13,
+                  expectedKos: 1,
+                  expectedFaints: 0,
+                }),
+              ],
+              delta: 4,
+              verdict: 'SUBOPTIMAL',
+              narrative: 'KO line available but not selected.',
+            },
+          ],
+        },
+      ],
+      adaptationFlags: [],
+    }
+    mocks.evaluateReplay.mockResolvedValueOnce(evaluation)
+
+    const user = userEvent.setup()
+    renderPage()
+    const url =
+      'https://replay.pokemonshowdown.com/gen9championsvgc2026regma-2593988469-x'
+    await user.type(screen.getByLabelText(/replay url/i), url)
+    await user.click(screen.getByRole('button', { name: /run autopsy/i }))
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /save to team prep/i })).toBeInTheDocument(),
+    )
+    await user.click(screen.getByRole('button', { name: /save to team prep/i }))
+
+    const saved = usePrepNotebookStore.getState().replayFindings
+    expect(saved).toHaveLength(1)
+    expect(saved[0]).toEqual(
+      expect.objectContaining({
+        source: url,
+        gameNumber: 1,
+        turnNumber: 1,
+      }),
+    )
   })
 })

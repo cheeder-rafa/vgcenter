@@ -3,6 +3,7 @@ import { GameSection } from '../features/replay/components/GameSection'
 import { PlayerSelector } from '../features/replay/components/PlayerSelector'
 import { ReplayInputPanel } from '../features/replay/components/ReplayInputPanel'
 import { useReplayStore } from '../features/replay/store/useReplayStore'
+import { usePrepNotebookStore } from '../features/prep/store/usePrepNotebookStore'
 
 export function ReplayPage() {
   const rawInput = useReplayStore((s) => s.rawInput)
@@ -17,6 +18,7 @@ export function ReplayPage() {
   const setUserPlayer = useReplayStore((s) => s.setUserPlayer)
   const analyze = useReplayStore((s) => s.analyze)
   const reset = useReplayStore((s) => s.reset)
+  const addReplayFinding = usePrepNotebookStore((s) => s.addReplayFinding)
 
   const games = evaluation?.games ?? []
   const adaptationFlags = evaluation?.adaptationFlags ?? []
@@ -41,6 +43,10 @@ export function ReplayPage() {
     status === 'parsing'
       ? 'Fetching and reconstructing turns…'
       : 'Scoring alternatives…'
+  const replaySources = rawInput
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pb-16 pt-6 sm:px-6 lg:px-8">
@@ -101,6 +107,15 @@ export function ReplayPage() {
               game={game}
               timeline={timelines[idx]}
               showHeader={showGameHeaders}
+              onSaveFinding={(finding) =>
+                addReplayFinding({
+                  ...finding,
+                  source:
+                    replaySources[game.gameNumber - 1] ??
+                    replaySources[0] ??
+                    'Replay log input',
+                })
+              }
             />
           ))}
           {games.length === 0 ? (
