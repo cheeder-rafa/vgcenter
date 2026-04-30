@@ -917,6 +917,51 @@ After all four prompts: open the PR targeting `develop`, run `docker compose up 
 
 ---
 
+## Corrections Addendum — Thread Matrix, readout, import, sprite, and PNG polish
+
+This follow-on branch closes the remaining UX and formatting gaps surfaced after the first Corrections Pass. Keep scope on `develop`; do not change the damage core or the Regulation M-A dataset beyond aliasing and artwork lookup. The goal is tighter output, not new battle logic.
+
+### Scope
+
+- **Threat Matrix**
+  - Fix legend text so `OHKO` only appears when the cell can actually reach `>= 100%`.
+  - Add a dedicated OHKO color bucket and a subtle highlight treatment so lethal cells stand out without looking noisy.
+  - Fix `damage I Take` axis labeling so rows and columns still describe the two teams correctly.
+  - Let the matrix input accept either a Showdown paste or a Pokepaste URL; auto-detect the format instead of forcing two separate entry points.
+- **Calculator**
+  - Format the summary text with explicit SP context for the relevant attacking and defending stats.
+  - Include non-zero stage prefixes in the summary so boosts and drops are visible in copied text.
+- **Alternate forms**
+  - Normalize canonical aliases for alternate-form species during import and sprite lookup.
+  - Cover the reported cases (`Maushold`, `Aegislash`) plus the common form roots users type without the suffix they expect the roster to need.
+- **Export PNG**
+  - Use the leftover blank area beneath each move list to render compact attacker/defender SP spread summaries.
+
+### Implementation order
+
+1. Add failing tests first for matrix legend/color buckets, take-mode labels, input auto-detect, summary formatting, sprite alias resolution, and PNG layout.
+2. Implement the importer and alias normalization paths first so both matrix and calculator flows share the same resolution logic.
+3. Update matrix cell styling, readout formatting, and PNG composition to consume the new data.
+4. Re-run backend and frontend verification, then hand-check representative examples for one lethal cell, one `damage I Take` view, one Showdown paste import, one Pokepaste import, and one PNG export.
+
+### Verification
+
+- Backend: `./mvnw spotless:apply && ./mvnw verify`
+- Frontend: `pnpm lint && pnpm typecheck && pnpm test`
+- Manual spot checks:
+  - one OHKO cell uses the dedicated color treatment
+  - one `damage I Take` matrix shows the correct team labels
+  - one Showdown paste import and one Pokepaste URL import both work
+  - one calculator readout shows SP context plus any non-zero stages
+  - one PNG export shows compact SP summaries in the previously blank space
+
+### Assumptions
+
+- Keep matrix import permissive on the client; backend import endpoints stay explicit.
+- Prefer existing sprite filenames and dataset entries. Add aliases and fallback handling only where the dataset already supports the form or the sprite asset already exists.
+
+---
+
 ## Sub-project 2 — Preview Coach
 
 VGCenter's next tool replaces the rejected `/gameplan` experiment. The old Gameplan Lab route, backend package, frontend slice, and tests are deprecated and should be deleted in Phase A. The new public route is `/preview`.
