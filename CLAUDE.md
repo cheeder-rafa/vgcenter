@@ -151,6 +151,82 @@ A milestone is done only when all of these hold:
 - **Discord + PNG export**: `share/exportDiscord.ts`, `share/exportImage.ts`, header buttons — done (#75, #77).
 - **Mobile / tablet responsive pass**: 375px–767px viewports across calculator, speed tiers, preview — done (#76).
 
+## Active work — Corrections Addendum
+
+This follow-on work lands the remaining fixes and polish discovered after the original Corrections Pass. Keep scope on `develop`. Land docs first, then implementation. Do not mix this with other milestone/session work.
+
+**Docs PR first** (`feature/corrections-addendum-plan`)
+
+- Branch from `develop`. Target `develop`.
+- Update `PLAN.md`, `AGENTS.md`, and `CLAUDE.md` together so the rollout is documented before implementation starts.
+- Keep `AGENTS.md` and `CLAUDE.md` byte-identical.
+- Commit: `docs(plan): add corrections addendum rollout`
+- Push, open the PR targeting `develop`, then stop. Do not start implementation until the docs PR is merged.
+
+**Implementation PR second** (`feature/corrections-addendum`)
+
+- Branch from `develop` after the docs PR merges. Target `develop`.
+- Scope:
+  - Threat Matrix KO legend/color correctness, including a dedicated OHKO bucket and subtle highlight treatment.
+  - Threat Matrix `damage I take` row/column labels and `/calc` click-through correctness.
+  - Threat Matrix inputs accept either a Showdown paste or a Pokepaste URL via frontend auto-detect.
+  - Calculator summary/readout text shows relevant SP spread, Showdown-style nature markers, and any relevant non-zero stage changes.
+  - Alternate-form import + image support covers the reported `Aegislash` and `Maushold-Four` cases plus any other audited Regulation M-A aliases that currently fail import or sprite lookup.
+  - PNG export uses the remaining blank space for compact SP spread summaries.
+- TDD first. New public behavior needs tests before implementation.
+- Frontend skill chain for UI-facing commits:
+  `impeccable → vercel-react-best-practices → vercel-composition-patterns → web-design-guidelines → polish`
+- Verification before commit/PR:
+  - Backend: `./mvnw spotless:apply && ./mvnw verify`
+  - Frontend: `pnpm --dir frontend lint && pnpm --dir frontend typecheck && pnpm --dir frontend test && pnpm --dir frontend build`
+- Push, open the PR targeting `develop`, then stop. Do not self-merge.
+
+### Corrections Addendum kickoff prompt
+
+```
+Read AGENTS.md, CLAUDE.md, and PLAN.md. Ignore current branch. Base all work on develop.
+
+Phase 0 — docs PR:
+1. git checkout develop && git pull --ff-only && git checkout -b feature/corrections-addendum-plan
+2. Add a Corrections Addendum section to PLAN.md plus matching active-work guidance in AGENTS.md and CLAUDE.md. Keep AGENTS.md and CLAUDE.md byte-identical.
+3. Include scope for Threat Matrix fixes, calculator readout formatting, alternate-form import/sprite coverage, and PNG polish.
+4. Include verification commands, frontend skill chain, and a stop-after-PR rule targeting develop.
+5. Verify:
+   cmp AGENTS.md CLAUDE.md
+   rg "Corrections Addendum" PLAN.md AGENTS.md CLAUDE.md
+6. Commit: docs(plan): add corrections addendum rollout
+7. git push -u origin feature/corrections-addendum-plan
+8. Open a PR targeting develop using the repo template. Stop.
+
+After the docs PR merges, start implementation:
+1. git checkout develop && git pull --ff-only && git checkout -b feature/corrections-addendum
+2. TDD first for:
+   - Threat Matrix legend/color bucket tests
+   - Threat Matrix take-mode labels and /calc click-through tests
+   - Threat Matrix import auto-detect tests
+   - formatReadoutText summary formatting tests
+   - ShowdownTextParser alternate-form alias tests
+   - sprite alias/fallback tests
+   - PNG export spread rendering tests
+3. Implement:
+   - matrix KO legend fix + dedicated OHKO bucket/highlight
+   - matrix take-mode row/column/click-through correctness
+   - Showdown-or-Pokepaste auto-detect for Threat Matrix inputs
+   - SP + nature + stage-aware calculator summary text
+   - alternate-form import aliases and shared sprite resolution, including Aegislash and Maushold
+   - PNG SP summaries in the unused space
+4. Run frontend skills in order:
+   impeccable -> vercel-react-best-practices -> vercel-composition-patterns -> web-design-guidelines -> polish
+5. Verify:
+   ./mvnw spotless:apply
+   ./mvnw verify
+   pnpm --dir frontend lint
+   pnpm --dir frontend typecheck
+   pnpm --dir frontend test
+   pnpm --dir frontend build
+6. Commit with Conventional Commits, push, open a PR targeting develop, and stop. Do not self-merge.
+```
+
 ## Active work — v1.2 Meta Intelligence Suite (3 milestones)
 
 Three new milestones close the gap vs Pikalytics / vgcmulticalc / Labmaus / frontier-delta by turning the calculator's per-matchup output into team-level and game-level insight. Each gets its own feature branch off `develop` and its own PR. Do not mix them in a single branch. Long-form spec lives in `PLAN.md` under `## Sub-project 3 — Meta Intelligence Suite (v1.2)`.
